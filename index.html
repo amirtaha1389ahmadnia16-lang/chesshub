@@ -1,0 +1,859 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>ChessHub | خانه - پازل روزانه</title>
+    <!-- Font Awesome 6 -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <!-- فونت وزیر -->
+    <link
+      href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css"
+      rel="stylesheet"
+    />
+    <!-- chess.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Vazir", Tahoma, sans-serif;
+        background: linear-gradient(135deg, #f5f7fc 0%, #eef2f5 100%);
+        direction: rtl;
+        padding: 20px;
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      /* ========== HEADER با منوی کشویی ========== */
+      .site-header {
+        background: rgba(255, 255, 255, 0.96);
+        backdrop-filter: blur(10px);
+        border-radius: 32px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+        margin-bottom: 30px;
+        padding: 0 20px;
+        border: 1px solid rgba(44, 125, 160, 0.2);
+      }
+
+      .header-flex {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        padding: 12px 0;
+      }
+
+      .logo h1 {
+        background: linear-gradient(135deg, #2c7da0, #1f6392);
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+        font-size: 1.8rem;
+      }
+
+      .tagline {
+        font-size: 0.7rem;
+        color: #5f7f9e;
+        display: block;
+      }
+
+      /* منوی اصلی */
+      .main-nav {
+        flex: 1;
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .nav-list {
+        display: flex;
+        list-style: none;
+        gap: 0.5rem;
+        align-items: center;
+      }
+
+      .nav-list li a {
+        text-decoration: none;
+        color: #2c3e4e;
+        font-weight: 500;
+        padding: 0.6rem 1rem;
+        border-radius: 40px;
+        transition: all 0.2s;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        white-space: nowrap;
+      }
+
+      .nav-list li a:hover {
+        background: #e6edf4;
+        color: #1b6b8f;
+      }
+
+      /* کشویی */
+      .dropdown {
+        position: relative;
+      }
+
+      .dropdown-toggle i {
+        font-size: 0.7rem;
+        transition: transform 0.2s;
+      }
+
+      .dropdown:hover .dropdown-toggle i {
+        transform: rotate(180deg);
+      }
+
+      .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: white;
+        min-width: 180px;
+        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
+        border-radius: 20px;
+        padding: 0.5rem 0;
+        list-style: none;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.2s ease;
+        z-index: 100;
+        border: 1px solid #e2e8f0;
+      }
+
+      .dropdown:hover .dropdown-menu {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(5px);
+      }
+
+      .dropdown-menu li a {
+        display: block;
+        padding: 0.6rem 1.2rem;
+        white-space: nowrap;
+        border-radius: 0;
+      }
+
+      .dropdown-menu li a:hover {
+        background: #f1f5f9;
+        padding-right: 1.5rem;
+      }
+
+      /* دکمه همبرگر (موبایل) */
+      .menu-toggle {
+        display: none;
+        background: none;
+        border: none;
+        font-size: 1.8rem;
+        cursor: pointer;
+        color: #2c7da0;
+      }
+
+      /* ========== گرید اصلی ========== */
+      .home-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.2fr;
+        gap: 30px;
+      }
+
+      @media (max-width: 900px) {
+        .home-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* کارت پازل */
+      .puzzle-card {
+        background: white;
+        border-radius: 32px;
+        padding: 25px;
+        text-align: center;
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+        transition: transform 0.2s;
+      }
+
+      .puzzle-card:hover {
+        transform: translateY(-3px);
+      }
+
+      .puzzle-card h2 {
+        color: #2c7da0;
+        margin-bottom: 5px;
+      }
+
+      #chessboard {
+        display: grid;
+        grid-template-columns: repeat(8, 1fr);
+        aspect-ratio: 1 / 1;
+        max-width: 500px;
+        margin: 20px auto;
+        border: 2px solid #cbd5e1;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        transition: opacity 0.3s;
+      }
+
+      .board-locked {
+        opacity: 0.6;
+        pointer-events: none;
+      }
+
+      .square {
+        aspect-ratio: 1 / 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.1s;
+      }
+
+      .square.light {
+        background-color: #f0d9b5;
+      }
+
+      .square.dark {
+        background-color: #b58863;
+      }
+
+      .square.selected {
+        background-color: #b7d968;
+        box-shadow: inset 0 0 0 2px #2c7da0;
+      }
+
+      .piece-img {
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+
+      .btn {
+        background: #eef2f5;
+        border: none;
+        padding: 8px 20px;
+        margin: 8px;
+        border-radius: 40px;
+        font-family: "Vazir";
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+
+      .btn-hint {
+        background: #fef3c7;
+        color: #b45309;
+      }
+
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .btn:hover:not(:disabled) {
+        transform: scale(0.96);
+        background: #e2e8f0;
+      }
+
+      .message {
+        margin-top: 15px;
+        padding: 10px;
+        border-radius: 60px;
+        font-size: 0.9rem;
+        animation: fadeIn 0.3s;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-5px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .success {
+        background: #d1fae5;
+        color: #065f46;
+      }
+      .error {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .hint {
+        background: #fff3c9;
+        color: #a16200;
+      }
+      .info {
+        background: #dbeafe;
+        color: #1e40af;
+      }
+      .lock {
+        background: #fef3c7;
+        color: #92400e;
+      }
+
+      /* بخش معرفی امکانات */
+      .features {
+        background: white;
+        border-radius: 32px;
+        padding: 25px;
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.05);
+      }
+
+      .features h3 {
+        margin-bottom: 20px;
+        color: #2c7da0;
+        border-right: 4px solid #2c7da0;
+        padding-right: 12px;
+      }
+
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 18px;
+      }
+
+      .feature {
+        background: #f8fafc;
+        border-radius: 24px;
+        padding: 15px;
+        text-align: center;
+        transition: all 0.2s;
+      }
+
+      .feature:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05);
+      }
+
+      .feature i {
+        font-size: 2rem;
+        color: #2c7da0;
+        margin-bottom: 8px;
+      }
+
+      .feature h4 {
+        font-size: 1rem;
+        margin: 8px 0;
+      }
+
+      .feature a {
+        text-decoration: none;
+        color: #2c7da0;
+        font-size: 0.8rem;
+        font-weight: bold;
+      }
+
+      footer {
+        background: white;
+        border-radius: 28px;
+        text-align: center;
+        padding: 15px;
+        margin-top: 40px;
+        color: #4a627a;
+        font-size: 0.8rem;
+      }
+
+      /* ریسپانسیو برای موبایل */
+      @media (max-width: 768px) {
+        body {
+          padding: 10px;
+        }
+        .menu-toggle {
+          display: block;
+        }
+        .main-nav {
+          display: none;
+          width: 100%;
+          order: 3;
+          margin-top: 1rem;
+        }
+        .main-nav.show {
+          display: block;
+        }
+        .nav-list {
+          flex-direction: column;
+          width: 100%;
+          gap: 0;
+        }
+        .nav-list li {
+          width: 100%;
+        }
+        .nav-list li a {
+          justify-content: center;
+        }
+        .dropdown {
+          position: static;
+        }
+        .dropdown-menu {
+          position: static;
+          box-shadow: none;
+          background: #f8fafc;
+          width: 100%;
+          opacity: 1;
+          visibility: visible;
+          display: none;
+          margin-top: 0;
+          border-radius: 12px;
+        }
+        .dropdown-menu.show-mobile {
+          display: block;
+        }
+        .dropdown .dropdown-toggle i {
+          float: left;
+          margin-top: 5px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header class="site-header">
+        <div class="header-flex">
+          <div class="logo">
+            <h1>♟️ ChessHub</h1>
+            <div class="tagline">جایی که شطرنجت پیشرفت میکنه!</div>
+          </div>
+          <button class="menu-toggle" id="menuToggle" aria-label="منو">
+            <i class="fas fa-bars"></i>
+          </button>
+          <nav class="main-nav" id="mainNav">
+            <ul class="nav-list">
+              <li><a href="index.html">خانه</a></li>
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle"
+                  >🧩 پازل <i class="fas fa-chevron-down"></i
+                ></a>
+                <ul class="dropdown-menu">
+                  <li><a href="puzzle-rush.html">پازل عجله‌ای</a></li>
+                </ul>
+              </li>
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle"
+                  >📚 آموزش <i class="fas fa-chevron-down"></i
+                ></a>
+                <ul class="dropdown-menu">
+                  <li><a href="lessons.html">دروس</a></li>
+                  <li><a href="openings.html">گشایش‌ها</a></li>
+                  <li><a href="endgames.html">خاتمه‌ها</a></li>
+                </ul>
+              </li>
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle"
+                  >⚙️ ابزارها <i class="fas fa-chevron-down"></i
+                ></a>
+                <ul class="dropdown-menu">
+                  <li><a href="analysis.html">آنالیز</a></li>
+                  <li><a href="practice.html">تمرین</a></li>
+                </ul>
+              </li>
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle"
+                  >🗄️ بانک اطلاعات <i class="fas fa-chevron-down"></i
+                ></a>
+                <ul class="dropdown-menu">
+                  <li><a href="games-database.html">پایگاه بازی‌ها</a></li>
+                  <li><a href="downloads.html">دانلود PGN</a></li>
+                </ul>
+              </li>
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle"
+                  >📖 کتاب‌ها <i class="fas fa-chevron-down"></i
+                ></a>
+                <ul class="dropdown-menu">
+                  <li><a href="book-translate.html">ترجمه کتاب</a></li>
+                  <li><a href="books.html">کتاب‌ها</a></li>
+                </ul>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </header>
+
+      <div class="home-grid">
+        <!-- پازل روزانه -->
+        <div class="puzzle-card">
+          <h2><i class="fas fa-puzzle-piece"></i> مسئله روز</h2>
+          <p>بهترین حرکت را پیدا کنید</p>
+          <div id="chessboard"></div>
+          <div>
+            <button id="resetBtn" class="btn">
+              <i class="fas fa-undo-alt"></i> از نو
+            </button>
+            <button id="hintBtn" class="btn btn-hint">
+              <i class="fas fa-lightbulb"></i> راهنمایی
+            </button>
+          </div>
+          <div id="message" class="message"></div>
+        </div>
+
+        <!-- معرفی امکانات -->
+        <div class="features">
+          <h3><i class="fas fa-star-of-life"></i> امکانات ChessHub</h3>
+          <div class="features-grid">
+            <div class="feature">
+              <i class="fas fa-book-open"></i>
+              <h4>دروس آموزشی</h4>
+              <a href="lessons.html">مشاهده</a>
+            </div>
+            <div class="feature">
+              <i class="fas fa-chart-line"></i>
+              <h4>آنالیز</h4>
+              <a href="analysis.html">شروع</a>
+            </div>
+            <div class="feature">
+              <i class="fas fa-database"></i>
+              <h4>پایگاه بازی‌ها</h4>
+              <a href="games-database.html">جستجو</a>
+            </div>
+            <div class="feature">
+              <i class="fas fa-download"></i>
+              <h4>دانلود PGN</h4>
+              <a href="downloads.html">دریافت</a>
+            </div>
+            <div class="feature">
+              <i class="fas fa-language"></i>
+              <h4>ترجمه کتاب</h4>
+              <a href="book-translate.html">کتاب‌ها</a>
+            </div>
+            <div class="feature">
+              <i class="fas fa-chess-board"></i>
+              <h4>تمرین و گشایش</h4>
+              <a href="practice.html">تمرین</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer>© ۱۴۰۵ - ChessHub | جایی که شطرنجت پیشرفت میکنه!</footer>
+    </div>
+
+    <script>
+      // ============================================================
+      // 🔧 تنظیمات پازل روزانه - هر روز این قسمت را تغییر دهید 🔧
+      // ============================================================
+      const puzzleConfig = {
+        fen: "5R2/6p1/4p2p/R3N3/5P1k/1rn1K3/6rP/8 w - - 0 1",
+        moves: [
+          { white: "Nf3+", black: "Kg4" },
+          { white: "Rg5+", black: "hxg5" },
+          { white: "Ne5+", black: "Kh5" },
+          { white: "Rh8#", black: null },
+        ],
+      };
+      // ============================================================
+
+      let game = new Chess(puzzleConfig.fen);
+      let selectedSquare = null;
+      let currentMoveIndex = 0;
+      let puzzleFinished = false;
+      let autoMoveTimeout = null;
+
+      // متغیرهای مربوط به قفل شدن بعد از خطا
+      let wrongAttempts = 0; // تعداد تلاش‌های اشتباه پشت سر هم (در حالت فعلی)
+      let isLocked = false; // آیا تخته قفل است؟
+      let lockTimer = null; // تایمر 30 ثانیه
+
+      const boardDiv = document.getElementById("chessboard");
+      const msgDiv = document.getElementById("message");
+      const resetBtn = document.getElementById("resetBtn");
+      const hintBtn = document.getElementById("hintBtn");
+
+      function showMessage(text, type) {
+        msgDiv.textContent = text;
+        msgDiv.className = `message ${type}`;
+        setTimeout(() => {
+          if (msgDiv.textContent === text) msgDiv.className = "message";
+        }, 3000);
+      }
+
+      // قفل کردن تخته و دکمه راهنمایی
+      function lockBoard() {
+        if (isLocked) return;
+        isLocked = true;
+        boardDiv.classList.add("board-locked");
+        hintBtn.disabled = true;
+        showMessage("⏳ اول فکر کن بعد حرکت کن! ۳۰ ثانیه صبر کن...", "lock");
+        lockTimer = setTimeout(() => {
+          // بعد از 30 ثانیه، تخته آزاد می‌شود و شمارنده خطاها صفر می‌شود (سه فرصت جدید)
+          isLocked = false;
+          boardDiv.classList.remove("board-locked");
+          hintBtn.disabled = false;
+          wrongAttempts = 0; // شروع دوباره با سه فرصت
+          showMessage(
+            "✅ زمان به پایان رسید. دوباره می‌توانی حرکت کنی (سه فرصت جدید).",
+            "success",
+          );
+          lockTimer = null;
+        }, 30000);
+      }
+
+      // آزاد کردن قفل در صورت نیاز (مثلاً وقتی ریست می‌شود یا پازل حل می‌شود)
+      function unlockBoard() {
+        if (lockTimer) {
+          clearTimeout(lockTimer);
+          lockTimer = null;
+        }
+        isLocked = false;
+        boardDiv.classList.remove("board-locked");
+        hintBtn.disabled = false;
+      }
+
+      // ریست کامل پازل و وضعیت خطاها
+      function resetPuzzle() {
+        if (autoMoveTimeout) clearTimeout(autoMoveTimeout);
+        unlockBoard(); // آزاد کردن قفل و لغو تایمر
+        game = new Chess(puzzleConfig.fen);
+        selectedSquare = null;
+        currentMoveIndex = 0;
+        puzzleFinished = false;
+        wrongAttempts = 0; // ریست شمارنده خطاها
+        renderBoard();
+        msgDiv.textContent = "";
+      }
+
+      // رندر تخته (با جهت درست)
+      function renderBoard() {
+        const board = game.board();
+        boardDiv.innerHTML = "";
+        boardDiv.style.display = "grid";
+        boardDiv.style.gridTemplateColumns = "repeat(8, 1fr)";
+
+        for (let i = 7; i >= 0; i--) {
+          for (let j = 0; j < 8; j++) {
+            const piece = board[i][j];
+            const isLight = (i + j) % 2 === 0;
+            const squareDiv = document.createElement("div");
+            squareDiv.className = `square ${isLight ? "light" : "dark"}`;
+            const file = String.fromCharCode(97 + j);
+            const rank = 8 - i;
+            const squareName = file + rank;
+            squareDiv.dataset.square = squareName;
+
+            if (piece) {
+              const pieceType = piece.type.toUpperCase();
+              const colorCode = piece.color === "w" ? "w" : "b";
+              let pieceCode = "";
+              switch (pieceType) {
+                case "K":
+                  pieceCode = "K";
+                  break;
+                case "Q":
+                  pieceCode = "Q";
+                  break;
+                case "R":
+                  pieceCode = "R";
+                  break;
+                case "B":
+                  pieceCode = "B";
+                  break;
+                case "N":
+                  pieceCode = "N";
+                  break;
+                case "P":
+                  pieceCode = "P";
+                  break;
+              }
+              const img = document.createElement("img");
+              img.src = `pieces/merida/${colorCode}${pieceCode}.svg`;
+              img.classList.add("piece-img");
+              squareDiv.appendChild(img);
+            }
+
+            squareDiv.addEventListener("click", () =>
+              onSquareClick(squareName),
+            );
+            boardDiv.appendChild(squareDiv);
+          }
+        }
+
+        if (selectedSquare) {
+          const selectedEl = document.querySelector(
+            `.square[data-square="${selectedSquare}"]`,
+          );
+          if (selectedEl) selectedEl.classList.add("selected");
+        }
+      }
+
+      // حرکت خودکار سیاه
+      function autoBlackMove() {
+        if (puzzleFinished) return;
+        if (game.turn() !== "b") return;
+        if (currentMoveIndex >= puzzleConfig.moves.length) return;
+
+        const moveObj = puzzleConfig.moves[currentMoveIndex];
+        if (!moveObj.black) return;
+
+        const blackMoveSAN = moveObj.black;
+        try {
+          const move = game.move(blackMoveSAN, { sloppy: true });
+          if (move) {
+            renderBoard();
+            currentMoveIndex++;
+            if (game.game_over() && game.in_checkmate()) {
+              showMessage("🎉 مات! پازل با موفقیت حل شد.", "success");
+              puzzleFinished = true;
+            }
+          } else {
+            console.error("حرکت خودکار سیاه نامعتبر:", blackMoveSAN);
+            showMessage("خطا در دنباله پازل. دکمه از نو را بزنید.", "error");
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      // کلیک کاربر روی خانه
+      function onSquareClick(square) {
+        if (puzzleFinished) {
+          showMessage("پازل تمام شده، از نو را بزنید.", "info");
+          return;
+        }
+        if (isLocked) {
+          showMessage("صبر کن! فعلاً نمی‌توانی حرکت کنی.", "info");
+          return;
+        }
+        if (game.turn() !== "w") {
+          showMessage("در حال حرکت سیاه... لطفاً کمی صبر کنید.", "info");
+          return;
+        }
+
+        if (!selectedSquare) {
+          const piece = game.get(square);
+          if (piece && piece.color === "w") {
+            selectedSquare = square;
+            renderBoard();
+          } else {
+            showMessage("مهره سفید خود را انتخاب کنید.", "error");
+          }
+          return;
+        }
+
+        const move = { from: selectedSquare, to: square, promotion: "q" };
+        try {
+          const result = game.move(move);
+          if (result) {
+            selectedSquare = null;
+            renderBoard();
+
+            if (currentMoveIndex < puzzleConfig.moves.length) {
+              const expectedWhite = puzzleConfig.moves[currentMoveIndex].white;
+              if (result.san === expectedWhite) {
+                // حرکت صحیح
+                showMessage(`✅ حرکت صحیح: ${result.san}`, "success");
+                wrongAttempts = 0; // هر حرکت درست، شمارنده خطاها را صفر کن
+                if (game.game_over() && game.in_checkmate()) {
+                  showMessage("🎉 مات! پازل حل شد.", "success");
+                  puzzleFinished = true;
+                  return;
+                }
+                if (autoMoveTimeout) clearTimeout(autoMoveTimeout);
+                autoMoveTimeout = setTimeout(() => {
+                  autoBlackMove();
+                  autoMoveTimeout = null;
+                }, 300);
+              } else {
+                // حرکت اشتباه: بدون افشای جواب
+                wrongAttempts++;
+                if (wrongAttempts >= 3) {
+                  // قفل کردن تخته برای 30 ثانیه
+                  lockBoard();
+                  // همچنین حرکت اشتباه را به حالت اولیه برگردان (با undo)
+                  game.undo();
+                  renderBoard();
+                  selectedSquare = null;
+                  // پیام قبلاً در lockBoard نمایش داده شده
+                } else {
+                  // فقط پیام خطا بده بدون ذکر حرکت صحیح
+                  showMessage(`❌ حرکت اشتباه (${wrongAttempts}/3)`, "error");
+                  game.undo();
+                  renderBoard();
+                  selectedSquare = null;
+                }
+              }
+            } else {
+              showMessage("پازل کامل شده، ریست کنید.", "error");
+              game.undo();
+              renderBoard();
+            }
+          } else {
+            showMessage("حرکت غیرمجاز", "error");
+            selectedSquare = null;
+            renderBoard();
+          }
+        } catch (e) {
+          showMessage("خطا در حرکت", "error");
+          selectedSquare = null;
+          renderBoard();
+        }
+      }
+
+      // راهنمایی (در زمان قفل شدن غیرفعال است)
+      function showHint() {
+        if (puzzleFinished) {
+          showMessage("پازل حل شده، ریست کنید.", "info");
+          return;
+        }
+        if (isLocked) {
+          showMessage("الان نمی‌توانی راهنمایی بگیری، کمی صبر کن.", "info");
+          return;
+        }
+        if (game.turn() !== "w") {
+          showMessage("لطفاً صبر کنید نوبت شماست.", "info");
+          return;
+        }
+        if (currentMoveIndex < puzzleConfig.moves.length) {
+          const expected = puzzleConfig.moves[currentMoveIndex].white;
+          showMessage(`💡 حرکت بعدی باید: ${expected}`, "hint");
+        } else {
+          showMessage("پازل کامل شد!", "success");
+        }
+      }
+
+      resetBtn.addEventListener("click", resetPuzzle);
+      hintBtn.addEventListener("click", showHint);
+
+      // منوی همبرگر
+      const menuToggle = document.getElementById("menuToggle");
+      const mainNav = document.getElementById("mainNav");
+      if (menuToggle) {
+        menuToggle.addEventListener("click", () => {
+          mainNav.classList.toggle("show");
+        });
+      }
+      // مدیریت زیرمنوها در موبایل
+      if (window.innerWidth <= 768) {
+        const dropdowns = document.querySelectorAll(".dropdown");
+        dropdowns.forEach((drop) => {
+          const toggle = drop.querySelector(".dropdown-toggle");
+          const menu = drop.querySelector(".dropdown-menu");
+          if (toggle && menu) {
+            toggle.addEventListener("click", (e) => {
+              e.preventDefault();
+              menu.classList.toggle("show-mobile");
+            });
+          }
+        });
+      }
+
+      resetPuzzle();
+    </script>
+  </body>
+</html>
