@@ -1,38 +1,48 @@
-// منوی همبرگر
-const menuToggle = document.getElementById("menuToggle");
-const mainNav = document.getElementById("mainNav");
+// منوی همبرگر (برای تمام صفحات)
+document.addEventListener("DOMContentLoaded", function () {
+  const menuToggle = document.getElementById("menuToggle");
+  const mainNav = document.getElementById("mainNav");
 
-if (menuToggle) {
-  menuToggle.addEventListener("click", () => {
-    mainNav.classList.toggle("show");
-  });
-}
+  if (menuToggle && mainNav) {
+    menuToggle.addEventListener("click", function () {
+      mainNav.classList.toggle("show");
+    });
+  }
 
-// مدیریت زیرمنوها در موبایل (کلیک روی دسته برای باز/بستن)
-const dropdowns = document.querySelectorAll(".dropdown");
-if (window.innerWidth <= 768) {
-  dropdowns.forEach((drop) => {
-    const toggle = drop.querySelector(".dropdown-toggle");
-    const menu = drop.querySelector(".dropdown-menu");
-    toggle.addEventListener("click", (e) => {
-      e.preventDefault();
-      // بستن بقیه زیرمنوها
-      dropdowns.forEach((d) => {
-        if (d !== drop) {
-          d.querySelector(".dropdown-menu")?.classList.remove("show-mobile");
+  // مدیریت زیرمنوها در موبایل (کلیک روی دسته برای باز/بستن)
+  function initMobileDropdowns() {
+    if (window.innerWidth <= 768) {
+      const dropdowns = document.querySelectorAll(".dropdown");
+      dropdowns.forEach((drop) => {
+        const toggle = drop.querySelector(".dropdown-toggle");
+        const menu = drop.querySelector(".dropdown-menu");
+        if (toggle && menu) {
+          // حذف رویداد قبلی برای جلوگیری از دوبار绑定
+          toggle.removeEventListener("click", toggle._clickHandler);
+          const handler = (e) => {
+            e.preventDefault();
+            // بستن بقیه زیرمنوها
+            dropdowns.forEach((d) => {
+              if (d !== drop) {
+                const otherMenu = d.querySelector(".dropdown-menu");
+                if (otherMenu) otherMenu.classList.remove("show-mobile");
+              }
+            });
+            menu.classList.toggle("show-mobile");
+          };
+          toggle._clickHandler = handler;
+          toggle.addEventListener("click", handler);
         }
       });
-      menu.classList.toggle("show-mobile");
-    });
-  });
-}
-
-// برای وقتی که اندازه صفحه عوض می‌شود (از موبایل به دسکتاپ)
-window.addEventListener("resize", () => {
-  if (window.innerWidth > 768) {
-    dropdowns.forEach((drop) => {
-      drop.querySelector(".dropdown-menu")?.classList.remove("show-mobile");
-    });
-    if (mainNav) mainNav.classList.remove("show");
+    } else {
+      // در حالت دسکتاپ، اطمینان از بسته بودن منوهای موبایل
+      document.querySelectorAll(".dropdown-menu").forEach((menu) => {
+        menu.classList.remove("show-mobile");
+      });
+    }
   }
+
+  // اجرای اولیه و هنگام تغییر اندازه صفحه
+  initMobileDropdowns();
+  window.addEventListener("resize", initMobileDropdowns);
 });
