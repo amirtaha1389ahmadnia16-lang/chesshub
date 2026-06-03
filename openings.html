@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
-    <title>ChessHub | دانشنامه گشایش‌های شطرنج</title>
+    <title>ChessHub | گشایش‌های شطرنج</title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
@@ -15,7 +15,6 @@
       href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css"
       rel="stylesheet"
     />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
     <style>
       * {
         margin: 0;
@@ -34,7 +33,7 @@
         margin: 0 auto;
       }
 
-      /* هدر (مثل ایندکس) */
+      /* هدر (مشابه index.html) */
       .site-header {
         background: rgba(255, 255, 255, 0.96);
         backdrop-filter: blur(10px);
@@ -86,7 +85,6 @@
         display: inline-flex;
         align-items: center;
         gap: 0.4rem;
-        white-space: nowrap;
       }
       .nav-list li a:hover {
         background: #e6edf4;
@@ -114,7 +112,7 @@
         list-style: none;
         opacity: 0;
         visibility: hidden;
-        transition: all 0.2s ease;
+        transition: 0.2s;
         z-index: 100;
         border: 1px solid #e2e8f0;
       }
@@ -122,16 +120,6 @@
         opacity: 1;
         visibility: visible;
         transform: translateY(5px);
-      }
-      .dropdown-menu li a {
-        display: block;
-        padding: 0.6rem 1.2rem;
-        white-space: nowrap;
-        border-radius: 0;
-      }
-      .dropdown-menu li a:hover {
-        background: #f1f5f9;
-        padding-right: 1.5rem;
       }
       .menu-toggle {
         display: none;
@@ -142,123 +130,79 @@
         color: #2c7da0;
       }
 
-      /* شبکه کارت‌ها */
+      /* صفحه اصلی کارت‌ها */
+      .openings-header {
+        text-align: center;
+        margin-bottom: 40px;
+      }
+      .openings-header h2 {
+        font-size: 2rem;
+        color: #2c7da0;
+      }
       .openings-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(580px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
         gap: 30px;
       }
       .opening-card {
         background: white;
-        border-radius: 32px;
+        border-radius: 48px;
         overflow: hidden;
-        transition: all 0.3s ease;
-        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+        transition: 0.3s;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
         display: flex;
         flex-direction: column;
       }
       .opening-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 20px 35px rgba(0, 0, 0, 0.12);
+        transform: translateY(-8px);
+        box-shadow: 0 25px 40px rgba(0, 0, 0, 0.15);
       }
-      .card-header {
+      .card-image {
+        height: 160px;
         background: linear-gradient(135deg, #2c7da0, #1f6392);
-        padding: 20px 25px;
-        text-align: center;
-      }
-      .card-header h3 {
-        color: white;
-        font-size: 1.6rem;
-        font-weight: bold;
-        margin: 0;
-      }
-      .variants-bar {
-        background: #f8fafc;
-        padding: 12px 20px;
         display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        justify-content: center;
-        border-bottom: 1px solid #e2e8f0;
-      }
-      .variant-btn {
-        background: white;
-        border: 1px solid #cbd5e1;
-        padding: 6px 18px;
-        border-radius: 40px;
-        font-size: 0.85rem;
-        font-family: "Vazir";
-        font-weight: 500;
-        cursor: pointer;
-        transition: 0.2s;
-        color: #2c3e4e;
-      }
-      .variant-btn.active {
-        background: #2c7da0;
-        border-color: #2c7da0;
-        color: white;
-        box-shadow: 0 2px 8px rgba(44, 125, 160, 0.2);
-      }
-      .chessboard-area {
-        padding: 25px;
-        display: flex;
-        flex-direction: column;
         align-items: center;
-        background: #ffffff;
-      }
-      .board-wrapper {
-        background: #f8fafc;
-        padding: 12px;
-        border-radius: 28px;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
-      }
-      canvas {
-        width: 480px;
-        height: 480px;
-        border-radius: 24px;
-        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
-        background-color: #f0d9b5;
-        display: block;
-      }
-      .move-controls {
-        display: flex;
         justify-content: center;
-        gap: 15px;
-        margin: 20px 0 10px;
-      }
-      .move-ctrl {
-        background: #eef2f5;
-        border: none;
-        padding: 8px 24px;
-        border-radius: 40px;
-        font-family: "Vazir";
-        font-weight: bold;
-        font-size: 0.9rem;
-        cursor: pointer;
-        transition: 0.2s;
-      }
-      .move-ctrl:hover {
-        background: #e2e8f0;
-        transform: scale(0.96);
-      }
-      .btn-green {
-        background: #22c55e;
+        font-size: 4rem;
         color: white;
-        border: none;
-        padding: 10px 24px;
-        border-radius: 40px;
-        font-family: "Vazir";
+      }
+      .card-content {
+        padding: 25px;
+        flex: 1;
+      }
+      .card-title {
+        font-size: 1.5rem;
         font-weight: bold;
+        color: #1e2f3e;
+        margin-bottom: 8px;
+      }
+      .card-sub {
+        color: #5f7f9e;
+        font-size: 0.85rem;
+        margin-bottom: 15px;
+        border-right: 2px solid #2c7da0;
+        padding-right: 10px;
+      }
+      .card-description {
+        color: #4a627a;
         font-size: 0.9rem;
-        cursor: pointer;
-        transition: 0.2s;
-        margin-top: 5px;
+        line-height: 1.6;
+        margin-bottom: 20px;
+      }
+      .btn-detail {
+        background: #eef2f5;
+        color: #2c7da0;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 40px;
+        font-weight: bold;
+        text-decoration: none;
         display: inline-flex;
         align-items: center;
         gap: 8px;
       }
-      .btn-green:hover {
-        background: #16a34a;
+      .btn-detail:hover {
+        background: #e2e8f0;
         transform: scale(0.96);
       }
       footer {
@@ -268,9 +212,7 @@
         padding: 15px;
         margin-top: 40px;
         color: #4a627a;
-        font-size: 0.8rem;
       }
-
       @media (max-width: 768px) {
         .menu-toggle {
           display: block;
@@ -297,32 +239,15 @@
         }
         .dropdown-menu {
           position: static;
-          box-shadow: none;
           background: #f8fafc;
           width: 100%;
-          opacity: 1;
-          visibility: visible;
           display: none;
-          margin-top: 0;
-          border-radius: 12px;
         }
         .dropdown-menu.show-mobile {
           display: block;
         }
-        .dropdown .dropdown-toggle i {
-          float: left;
-          margin-top: 5px;
-        }
         .openings-grid {
           grid-template-columns: 1fr;
-        }
-        canvas {
-          width: 100%;
-          height: auto;
-          max-width: 380px;
-        }
-        .card-header h3 {
-          font-size: 1.3rem;
         }
       }
     </style>
@@ -391,443 +316,133 @@
         </div>
       </header>
 
+      <div class="openings-header">
+        <h2>📚 دانشنامه گشایش‌های شطرنج</h2>
+        <p style="margin-top: 10px">
+          محبوب‌ترین و مؤثرترین گشایش‌ها همراه با تحلیل و واریانت‌های اصلی
+        </p>
+      </div>
+
       <div class="openings-grid" id="openingsGrid"></div>
+
       <footer>
-        © ۱۴۰۵ - ChessHub | دانشنامه گشایش‌های شطرنج – با کیفیت حرفه‌ای
+        © ChessHub | منبع جامع گشایش‌های شطرنج – به‌روزرسانی مداوم
       </footer>
     </div>
 
     <script>
-      (function () {
-        // ==================== بارگذاری مهره‌های محلی ====================
-        const pieceImages = {};
-        const pieceCodes = {
-          wK: "wK.svg",
-          wQ: "wQ.svg",
-          wR: "wR.svg",
-          wB: "wB.svg",
-          wN: "wN.svg",
-          wP: "wP.svg",
-          bK: "bK.svg",
-          bQ: "bQ.svg",
-          bR: "bR.svg",
-          bB: "bB.svg",
-          bN: "bN.svg",
-          bP: "bP.svg",
-        };
-        function loadPieces() {
-          return new Promise((resolve) => {
-            let loaded = 0;
-            const total = Object.keys(pieceCodes).length;
-            for (const [key, filename] of Object.entries(pieceCodes)) {
-              const img = new Image();
-              img.onload = () => {
-                loaded++;
-                if (loaded === total) resolve();
-              };
-              img.onerror = () => {
-                loaded++;
-                if (loaded === total) resolve();
-              };
-              img.src = `pieces/merida/${filename}`;
-              pieceImages[key] = img;
-            }
-          });
+      const openingsData = [
+        {
+          id: "sicilian",
+          name: "دفاع سیسیلی",
+          english: "Sicilian Defense",
+          icon: "fa-dragon",
+          desc: "محبوب‌ترین پاسخ به 1.e4. ایجاد بازی‌های نامتوازن و فرصت‌های حمله عالی.",
+          link: "openings/sicilian.html",
+        },
+        {
+          id: "ruy-lopez",
+          name: "گشایش اسپانیایی",
+          english: "Ruy Lopez",
+          icon: "fa-crown",
+          desc: "قدیمی‌ترین گشایش کلاسیک. سفید با 3.Bb5 فشار روی اسب سیاه ایجاد می‌کند.",
+          link: "openings/ruy-lopez.html",
+        },
+        {
+          id: "italian",
+          name: "گشایش ایتالیایی",
+          english: "Italian Game",
+          icon: "fa-church",
+          desc: "آغاز آرام و کلاسیک، مناسب برای همه سطوح.",
+          link: "openings/italian.html",
+        },
+        {
+          id: "french",
+          name: "دفاع فرانسوی",
+          english: "French Defense",
+          icon: "fa-flag",
+          desc: "بازی بسته و استراتژیک با 1.e4 e6.",
+          link: "openings/french.html",
+        },
+        {
+          id: "caro-kann",
+          name: "دفاع کارو-کان",
+          english: "Caro-Kann Defense",
+          icon: "fa-shield-alt",
+          desc: "محکم و پایدار، یکی از گزینه‌های اصلی سیاه.",
+          link: "openings/caro-kann.html",
+        },
+        {
+          id: "queens-gambit",
+          name: "گامبی وزیر",
+          english: "Queen's Gambit",
+          icon: "fa-chess-queen",
+          desc: "1.d4 d5 2.c4 – گشایش معروف برای کسب کنترل مرکز.",
+          link: "openings/queens-gambit.html",
+        },
+        {
+          id: "kings-indian",
+          name: "دفاع هند شاه",
+          english: "King's Indian Defense",
+          icon: "fa-crown",
+          desc: "ضدحمله قدرتمند بعد از دادن مرکز به سفید.",
+          link: "openings/kings-indian.html",
+        },
+        {
+          id: "nimzo-indian",
+          name: "دفاع نیمزو-هندی",
+          english: "Nimzo-Indian Defense",
+          icon: "fa-hand-peace",
+          desc: "فشار روی اسب c3 و مهار d4. یک گشایش فوق‌العاده استراتژیک.",
+          link: "openings/nimzo-indian.html",
+        },
+        {
+          id: "english",
+          name: "گشایش انگلیسی",
+          english: "English Opening",
+          icon: "fa-flag-checkered",
+          desc: "1.c4 – انعطاف‌پذیر و مدرن.",
+          link: "openings/english.html",
+        },
+      ];
+      function renderCards() {
+        const grid = document.getElementById("openingsGrid");
+        grid.innerHTML = "";
+        for (const op of openingsData) {
+          const card = document.createElement("div");
+          card.className = "opening-card";
+          card.innerHTML = `
+                <div class="card-image"><i class="fas ${op.icon}"></i></div>
+                <div class="card-content">
+                    <div class="card-title">${op.name}</div>
+                    <div class="card-sub">${op.english}</div>
+                    <div class="card-description">${op.desc}</div>
+                    <a href="${op.link}" class="btn-detail">مشاهده جزئیات <i class="fas fa-arrow-left"></i></a>
+                </div>
+            `;
+          grid.appendChild(card);
         }
+      }
+      renderCards();
 
-        // رسم تخته (بدون مختصات)
-        function drawBoard(ctx, game, cellSize) {
-          const board = game.board();
-          for (let i = 0; i < 8; i++) {
-            for (let j = 0; j < 8; j++) {
-              const isLight = (i + j) % 2 === 0;
-              ctx.fillStyle = isLight ? "#f0d9b5" : "#b58863";
-              ctx.fillRect(j * cellSize, i * cellSize, cellSize, cellSize);
-              const piece = board[i][j];
-              if (piece) {
-                const pieceCode =
-                  (piece.color === "w" ? "w" : "b") + piece.type.toUpperCase();
-                const img = pieceImages[pieceCode];
-                if (img && img.complete && img.naturalWidth > 0) {
-                  ctx.drawImage(
-                    img,
-                    j * cellSize,
-                    i * cellSize,
-                    cellSize,
-                    cellSize,
-                  );
-                } else {
-                  ctx.font = `${cellSize * 0.55}px Arial, 'Segoe UI Symbol'`;
-                  ctx.fillStyle = "#222";
-                  ctx.textAlign = "center";
-                  ctx.textBaseline = "middle";
-                  const sym =
-                    {
-                      wK: "♔",
-                      wQ: "♕",
-                      wR: "♖",
-                      wB: "♗",
-                      wN: "♘",
-                      wP: "♙",
-                      bK: "♚",
-                      bQ: "♛",
-                      bR: "♜",
-                      bB: "♝",
-                      bN: "♞",
-                      bP: "♟",
-                    }[pieceCode] || "";
-                  ctx.fillText(
-                    sym,
-                    j * cellSize + cellSize / 2,
-                    i * cellSize + cellSize / 2,
-                  );
-                }
-              }
-            }
-          }
-          // مختصات حذف شده (هیچ چیزی رسم نمی‌شود)
-        }
-
-        // ==================== داده‌های گشایش ====================
-        const openingsData = [
-          {
-            name: "بازی ایتالیایی",
-            variants: [
-              {
-                name: "Giuoco Piano",
-                moves: ["e4", "e5", "Nf3", "Nc6", "Bc4", "Bc5"],
-              },
-              {
-                name: "Two Knights Defense",
-                moves: ["e4", "e5", "Nf3", "Nc6", "Bc4", "Nf6"],
-              },
-              {
-                name: "Evans Gambit",
-                moves: ["e4", "e5", "Nf3", "Nc6", "Bc4", "Bc5", "b4"],
-              },
-            ],
-          },
-          {
-            name: "روی لوپز (Ruy Lopez)",
-            variants: [
-              {
-                name: "Morphy Defense",
-                moves: ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6"],
-              },
-              {
-                name: "Berlin Defense",
-                moves: ["e4", "e5", "Nf3", "Nc6", "Bb5", "Nf6"],
-              },
-              {
-                name: "Exchange Variation",
-                moves: ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Bxc6"],
-              },
-            ],
-          },
-          {
-            name: "دفاع سیسیلی",
-            variants: [
-              {
-                name: "Najdorf",
-                moves: [
-                  "e4",
-                  "c5",
-                  "Nf3",
-                  "d6",
-                  "d4",
-                  "cxd4",
-                  "Nxd4",
-                  "Nf6",
-                  "Nc3",
-                  "a6",
-                ],
-              },
-              {
-                name: "Dragon",
-                moves: [
-                  "e4",
-                  "c5",
-                  "Nf3",
-                  "d6",
-                  "d4",
-                  "cxd4",
-                  "Nxd4",
-                  "Nf6",
-                  "Nc3",
-                  "g6",
-                ],
-              },
-              {
-                name: "Scheveningen",
-                moves: [
-                  "e4",
-                  "c5",
-                  "Nf3",
-                  "d6",
-                  "d4",
-                  "cxd4",
-                  "Nxd4",
-                  "Nf6",
-                  "Nc3",
-                  "e6",
-                ],
-              },
-            ],
-          },
-          {
-            name: "دفاع فرانسوی",
-            variants: [
-              { name: "Advance", moves: ["e4", "e6", "d4", "d5", "e5"] },
-              {
-                name: "Exchange",
-                moves: ["e4", "e6", "d4", "d5", "exd5", "exd5"],
-              },
-              {
-                name: "Winawer",
-                moves: ["e4", "e6", "d4", "d5", "Nc3", "Bb4"],
-              },
-              { name: "Tarrasch", moves: ["e4", "e6", "d4", "d5", "Nd2"] },
-            ],
-          },
-          {
-            name: "دفاع کارو-کان",
-            variants: [
-              {
-                name: "Classical",
-                moves: ["e4", "c6", "d4", "d5", "Nc3", "dxe4", "Nxe4", "Bf5"],
-              },
-              { name: "Advance", moves: ["e4", "c6", "d4", "d5", "e5"] },
-              {
-                name: "Panov-Botvinnik",
-                moves: ["e4", "c6", "d4", "d5", "exd5", "cxd5", "c4"],
-              },
-            ],
-          },
-          {
-            name: "گامبی وزیر",
-            variants: [
-              { name: "Accepted", moves: ["d4", "d5", "c4", "dxc4"] },
-              { name: "Declined", moves: ["d4", "d5", "c4", "e6"] },
-              { name: "Slav Defense", moves: ["d4", "d5", "c4", "c6"] },
-              {
-                name: "Semi-Slav",
-                moves: ["d4", "d5", "c4", "c6", "Nf3", "Nf6", "Nc3", "e6"],
-              },
-            ],
-          },
-          {
-            name: "دفاع هند شاه",
-            variants: [
-              {
-                name: "Main Line",
-                moves: [
-                  "d4",
-                  "Nf6",
-                  "c4",
-                  "g6",
-                  "Nc3",
-                  "Bg7",
-                  "e4",
-                  "d6",
-                  "Nf3",
-                  "O-O",
-                  "Be2",
-                  "e5",
-                ],
-              },
-            ],
-          },
-          {
-            name: "دفاع نیمزو-هندی",
-            variants: [
-              {
-                name: "Rubinstein System",
-                moves: ["d4", "Nf6", "c4", "e6", "Nc3", "Bb4", "e3"],
-              },
-            ],
-          },
-          {
-            name: "سیستم لندن",
-            variants: [
-              {
-                name: "Main Setup",
-                moves: ["d4", "d5", "Bf4", "Nf6", "Nf3", "e6", "e3"],
-              },
-            ],
-          },
-          {
-            name: "گشایش انگلیسی",
-            variants: [
-              { name: "Symmetrical", moves: ["c4", "c5"] },
-              { name: "Reversed Sicilian", moves: ["c4", "e5"] },
-            ],
-          },
-        ];
-
-        // ==================== کلاس کارت گشایش ====================
-        class OpeningCard {
-          constructor(container, data) {
-            this.container = container;
-            this.data = data;
-            this.activeVariantIndex = 0;
-            this.currentMoveIndex = 0;
-            this.game = null;
-            this.movesList = [];
-            this.canvas = null;
-            this.ctx = null;
-            this.cellSize = 0;
-            this.card = null;
-            this.variantBtns = [];
-            this.prevBtn = null;
-            this.nextBtn = null;
-            this.downloadBtn = null;
-            this.buildCard();
-          }
-
-          buildCard() {
-            this.card = document.createElement("div");
-            this.card.className = "opening-card";
-
-            const header = document.createElement("div");
-            header.className = "card-header";
-            header.innerHTML = `<h3>${this.data.name}</h3>`;
-            this.card.appendChild(header);
-
-            const variantsBar = document.createElement("div");
-            variantsBar.className = "variants-bar";
-            this.data.variants.forEach((v, idx) => {
-              const btn = document.createElement("button");
-              btn.className =
-                "variant-btn" +
-                (idx === this.activeVariantIndex ? " active" : "");
-              btn.textContent = v.name;
-              btn.addEventListener("click", (e) => {
-                e.stopPropagation();
-                this.setVariant(idx);
-              });
-              variantsBar.appendChild(btn);
-              this.variantBtns.push(btn);
-            });
-            this.card.appendChild(variantsBar);
-
-            const chessboardArea = document.createElement("div");
-            chessboardArea.className = "chessboard-area";
-            const boardWrapper = document.createElement("div");
-            boardWrapper.className = "board-wrapper";
-            this.canvas = document.createElement("canvas");
-            this.canvas.width = 480;
-            this.canvas.height = 480;
-            this.cellSize = 480 / 8;
-            this.ctx = this.canvas.getContext("2d");
-            boardWrapper.appendChild(this.canvas);
-            chessboardArea.appendChild(boardWrapper);
-
-            const controlsDiv = document.createElement("div");
-            controlsDiv.className = "move-controls";
-            this.prevBtn = document.createElement("button");
-            this.prevBtn.innerHTML =
-              '<i class="fas fa-step-backward"></i> قبلی';
-            this.prevBtn.className = "move-ctrl";
-            this.nextBtn = document.createElement("button");
-            this.nextBtn.innerHTML = 'بعدی <i class="fas fa-step-forward"></i>';
-            this.nextBtn.className = "move-ctrl";
-            controlsDiv.appendChild(this.prevBtn);
-            controlsDiv.appendChild(this.nextBtn);
-            chessboardArea.appendChild(controlsDiv);
-
-            // دکمه سبز رنگ
-            this.downloadBtn = document.createElement("button");
-            this.downloadBtn.className = "btn-green";
-            this.downloadBtn.innerHTML =
-              '<i class="fas fa-download"></i> دانلود بازی‌های مشابه';
-            this.downloadBtn.addEventListener("click", (e) => {
-              e.stopPropagation();
-              alert("🔻 لینک دانلود بازی‌های مشابه به زودی اضافه می‌شود.");
-            });
-            chessboardArea.appendChild(this.downloadBtn);
-
-            this.card.appendChild(chessboardArea);
-            this.container.appendChild(this.card);
-
-            this.prevBtn.addEventListener("click", (e) => {
-              e.stopPropagation();
-              this.prevMove();
-            });
-            this.nextBtn.addEventListener("click", (e) => {
-              e.stopPropagation();
-              this.nextMove();
-            });
-
-            this.setVariant(this.activeVariantIndex);
-          }
-
-          setVariant(idx) {
-            if (idx < 0 || idx >= this.data.variants.length) return;
-            this.activeVariantIndex = idx;
-            this.currentMoveIndex = 0;
-            this.movesList = this.data.variants[idx].moves;
-            if (this.variantBtns) {
-              this.variantBtns.forEach((btn, i) => {
-                if (i === idx) btn.classList.add("active");
-                else btn.classList.remove("active");
-              });
-            }
-            this.updateGameAndBoard();
-          }
-
-          updateGameAndBoard() {
-            this.game = new Chess();
-            for (let i = 0; i < this.currentMoveIndex; i++) {
-              const moveSan = this.movesList[i];
-              if (moveSan) this.game.move(moveSan, { sloppy: true });
-            }
-            drawBoard(this.ctx, this.game, this.cellSize);
-          }
-
-          prevMove() {
-            if (this.currentMoveIndex > 0) {
-              this.currentMoveIndex--;
-              this.updateGameAndBoard();
-            }
-          }
-
-          nextMove() {
-            if (this.currentMoveIndex < this.movesList.length) {
-              this.currentMoveIndex++;
-              this.updateGameAndBoard();
-            }
-          }
-        }
-
-        // ==================== راه‌اندازی ====================
-        window.addEventListener("DOMContentLoaded", async () => {
-          await loadPieces();
-          const grid = document.getElementById("openingsGrid");
-          if (grid) {
-            for (const opening of openingsData) {
-              new OpeningCard(grid, opening);
-            }
-          }
-          const menuToggle = document.getElementById("menuToggle");
-          const mainNav = document.getElementById("mainNav");
-          if (menuToggle)
-            menuToggle.addEventListener("click", () =>
-              mainNav.classList.toggle("show"),
-            );
-          if (window.innerWidth <= 768) {
-            document.querySelectorAll(".dropdown").forEach((drop) => {
-              const toggle = drop.querySelector(".dropdown-toggle");
-              const menu = drop.querySelector(".dropdown-menu");
-              if (toggle && menu) {
-                toggle.addEventListener("click", (e) => {
-                  e.preventDefault();
-                  menu.classList.toggle("show-mobile");
-                });
-              }
+      const menuToggle = document.getElementById("menuToggle");
+      const mainNav = document.getElementById("mainNav");
+      if (menuToggle)
+        menuToggle.addEventListener("click", () =>
+          mainNav.classList.toggle("show"),
+        );
+      if (window.innerWidth <= 768) {
+        document.querySelectorAll(".dropdown").forEach((drop) => {
+          const toggle = drop.querySelector(".dropdown-toggle");
+          const menu = drop.querySelector(".dropdown-menu");
+          if (toggle && menu) {
+            toggle.addEventListener("click", (e) => {
+              e.preventDefault();
+              menu.classList.toggle("show-mobile");
             });
           }
         });
-      })();
+      }
     </script>
   </body>
 </html>
