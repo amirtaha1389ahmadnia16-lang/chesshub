@@ -33,8 +33,6 @@
         max-width: 1400px;
         margin: 0 auto;
       }
-
-      /* هدر (مشابه ایندکس) */
       .site-header {
         background: rgba(255, 255, 255, 0.96);
         backdrop-filter: blur(10px);
@@ -81,7 +79,7 @@
         font-weight: 500;
         padding: 0.6rem 1rem;
         border-radius: 40px;
-        transition: all 0.2s;
+        transition: 0.2s;
         font-size: 0.9rem;
         display: inline-flex;
         align-items: center;
@@ -114,7 +112,7 @@
         list-style: none;
         opacity: 0;
         visibility: hidden;
-        transition: all 0.2s ease;
+        transition: 0.2s;
         z-index: 100;
         border: 1px solid #e2e8f0;
       }
@@ -122,6 +120,16 @@
         opacity: 1;
         visibility: visible;
         transform: translateY(5px);
+      }
+      .dropdown-menu li a {
+        display: block;
+        padding: 0.6rem 1.2rem;
+        white-space: nowrap;
+        border-radius: 0;
+      }
+      .dropdown-menu li a:hover {
+        background: #f1f5f9;
+        padding-right: 1.5rem;
       }
       .menu-toggle {
         display: none;
@@ -131,8 +139,6 @@
         cursor: pointer;
         color: #2c7da0;
       }
-
-      /* صفحه اصلی گشایش‌ها */
       .openings-header {
         text-align: center;
         margin-bottom: 30px;
@@ -191,7 +197,6 @@
         justify-content: space-between;
         align-items: center;
         color: white;
-        transition: 0.2s;
       }
       .group-header h3 {
         font-size: 1.5rem;
@@ -219,9 +224,9 @@
         padding: 8px 15px;
         border-radius: 28px;
         font-size: 0.9rem;
-        transition: 0.1s;
         cursor: pointer;
         border: 1px solid #e2e8f0;
+        transition: 0.1s;
       }
       .variation-item:hover {
         background: #e2e8f0;
@@ -232,7 +237,6 @@
         padding: 40px;
         color: #5f7f9e;
       }
-      /* مودال تخته حرفه‌ای */
       .modal-overlay {
         position: fixed;
         top: 0;
@@ -261,7 +265,6 @@
         width: 90%;
         text-align: center;
         box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
-        position: relative;
       }
       .modal-content h3 {
         color: #2c7da0;
@@ -291,11 +294,6 @@
         font-family: "Vazir";
         font-weight: bold;
         cursor: pointer;
-        transition: 0.2s;
-      }
-      .modal-nav button:hover {
-        background: #e2e8f0;
-        transform: scale(0.96);
       }
       .close-modal {
         background: #e25555;
@@ -306,11 +304,6 @@
         border-radius: 40px;
         font-weight: bold;
         cursor: pointer;
-        transition: 0.2s;
-      }
-      .close-modal:hover {
-        background: #c0392b;
-        transform: scale(0.96);
       }
       footer {
         background: white;
@@ -364,6 +357,16 @@
         }
         canvas {
           max-width: 300px;
+        }
+        .controls {
+          gap: 10px;
+        }
+        .search-box {
+          width: 100%;
+        }
+        .filter-btn {
+          padding: 4px 12px;
+          font-size: 0.8rem;
         }
       }
     </style>
@@ -423,8 +426,8 @@
                   >📖 کتاب‌ها <i class="fas fa-chevron-down"></i
                 ></a>
                 <ul class="dropdown-menu">
-                  <li><a href="books.html">کتاب‌ها</a></li>
                   <li><a href="book-translate.html">ترجمه کتاب</a></li>
+                  <li><a href="books.html">کتاب‌ها</a></li>
                 </ul>
               </li>
             </ul>
@@ -459,21 +462,20 @@
       </footer>
     </div>
 
-    <!-- مودال تخته -->
     <div id="boardModal" class="modal-overlay">
       <div class="modal-content">
         <h3 id="modalTitle"></h3>
         <canvas id="modalCanvas" width="420" height="420"></canvas>
         <div class="modal-nav">
-          <button id="modalPrevBtn">◀ قبلی</button>
-          <button id="modalNextBtn">بعدی ▶</button>
+          <button id="modalPrevBtn">◀ قبلی</button
+          ><button id="modalNextBtn">بعدی ▶</button>
         </div>
         <button id="closeModalBtn" class="close-modal">✖ بستن</button>
       </div>
     </div>
 
     <script>
-      // ---------- بارگذاری مهره‌های محلی (در صورت وجود) ----------
+      // بارگذاری مهره‌های محلی
       const pieceImages = {};
       const pieceCodes = {
         wK: "wK.svg",
@@ -505,23 +507,26 @@
         });
       }
 
-      // ---------- دیتابیس گشایش‌ها (۳۲ گروه اصلی با واریانت‌ها و حرکت‌های معروف) ----------
+      // ---------- دیتابیس کامل گشایش‌ها (۳۲ گروه با همه واریانت‌های درخواستی) ----------
       const openingsDatabase = [
         {
           name: "دفاع سیسیلی (Sicilian Defense)",
           firstMove: "e4",
           variations: [
             {
-              name: "Open Variation",
+              name: "Sicilian Defense: Open Variation",
               moves: ["e4", "c5", "Nf3", "d6", "d4", "cxd4", "Nxd4"],
             },
             {
-              name: "Old Sicilian Variation",
+              name: "Sicilian Defense: Old Sicilian Variation",
               moves: ["e4", "c5", "Nf3", "Nc6", "d4", "cxd4", "Nxd4"],
             },
-            { name: "French Variation", moves: ["e4", "c5", "Nf3", "e6"] },
             {
-              name: "Open, Najdorf Variation",
+              name: "Sicilian Defense: French Variation",
+              moves: ["e4", "c5", "Nf3", "e6"],
+            },
+            {
+              name: "Sicilian Defense: Open, Najdorf Variation",
               moves: [
                 "e4",
                 "c5",
@@ -535,31 +540,9 @@
                 "a6",
               ],
             },
-          ],
-        },
-        {
-          name: "دفاع فرانسوی (French Defense)",
-          firstMove: "e4",
-          variations: [
             {
-              name: "Normal Variation",
-              moves: ["e4", "e6", "d4", "d5", "Nc3", "Nf6", "Bg5", "Be7"],
-            },
-            {
-              name: "Tarrasch Variation",
-              moves: ["e4", "e6", "d4", "d5", "Nd2"],
-            },
-            {
-              name: "Winawer Variation",
-              moves: ["e4", "e6", "d4", "d5", "Nc3", "Bb4"],
-            },
-            {
-              name: "Classical Variation",
-              moves: ["e4", "e6", "d4", "d5", "Nc3", "Nf6"],
-            },
-            {
-              name: "Winawer, Advance Variation",
-              moves: ["e4", "e6", "d4", "d5", "Nc3", "Bb4", "e5"],
+              name: "Sicilian Defense: Open (2.Nf3 Nc6)",
+              moves: ["e4", "c5", "Nf3", "Nc6", "d4"],
             },
           ],
         },
@@ -568,7 +551,7 @@
           firstMove: "e4",
           variations: [
             {
-              name: "Morphy Defense",
+              name: "Ruy López Opening: Morphy Defense",
               moves: [
                 "e4",
                 "e5",
@@ -583,48 +566,7 @@
               ],
             },
             {
-              name: "Morphy Defense, Columbus Variation",
-              moves: [
-                "e4",
-                "e5",
-                "Nf3",
-                "Nc6",
-                "Bb5",
-                "a6",
-                "Ba4",
-                "Nf6",
-                "O-O",
-                "Be7",
-                "Re1",
-                "b5",
-                "Bb3",
-                "d6",
-                "c3",
-                "O-O",
-                "d4",
-                "Bg4",
-              ],
-            },
-            {
-              name: "Morphy Defense, Closed",
-              moves: [
-                "e4",
-                "e5",
-                "Nf3",
-                "Nc6",
-                "Bb5",
-                "a6",
-                "Ba4",
-                "Nf6",
-                "O-O",
-                "Be7",
-                "Re1",
-                "b5",
-                "Bb3",
-              ],
-            },
-            {
-              name: "Morphy Defense, Keres Variation",
+              name: "Ruy López Opening: Morphy Defense, Columbus Variation",
               moves: [
                 "e4",
                 "e5",
@@ -647,7 +589,48 @@
               ],
             },
             {
-              name: "Berlin Defense",
+              name: "Ruy López Opening: Morphy Defense, Closed",
+              moves: [
+                "e4",
+                "e5",
+                "Nf3",
+                "Nc6",
+                "Bb5",
+                "a6",
+                "Ba4",
+                "Nf6",
+                "O-O",
+                "Be7",
+                "Re1",
+                "b5",
+                "Bb3",
+              ],
+            },
+            {
+              name: "Ruy López Opening: Morphy Defense, Keres Variation",
+              moves: [
+                "e4",
+                "e5",
+                "Nf3",
+                "Nc6",
+                "Bb5",
+                "a6",
+                "Ba4",
+                "Nf6",
+                "O-O",
+                "Be7",
+                "Re1",
+                "b5",
+                "Bb3",
+                "d6",
+                "c3",
+                "O-O",
+                "d4",
+                "Bg4",
+              ],
+            },
+            {
+              name: "Ruy López Opening: Berlin Defense",
               moves: ["e4", "e5", "Nf3", "Nc6", "Bb5", "Nf6"],
             },
           ],
@@ -657,23 +640,23 @@
           firstMove: "e4",
           variations: [
             {
-              name: "Main Line",
+              name: "Caro-Kann Defense: Main Line",
               moves: ["e4", "c6", "d4", "d5", "Nc3", "dxe4", "Nxe4", "Bf5"],
             },
             {
-              name: "Advance Variation",
+              name: "Caro-Kann Defense: Advance Variation",
               moves: ["e4", "c6", "d4", "d5", "e5", "Bf5"],
             },
             {
-              name: "Exchange Variation",
+              name: "Caro-Kann Defense: Exchange Variation",
               moves: ["e4", "c6", "d4", "d5", "exd5", "cxd5"],
             },
             {
-              name: "Classical Variation",
+              name: "Caro-Kann Defense: Classical Variation",
               moves: ["e4", "c6", "d4", "d5", "Nc3", "dxe4", "Nxe4", "Nd7"],
             },
             {
-              name: "Panov Attack",
+              name: "Caro-Kann Defense: Panov Attack",
               moves: ["e4", "c6", "d4", "d5", "exd5", "cxd5", "c4"],
             },
           ],
@@ -683,15 +666,15 @@
           firstMove: "e4",
           variations: [
             {
-              name: "Giuoco Piano",
+              name: "Giuoco Piano Game",
               moves: ["e4", "e5", "Nf3", "Nc6", "Bc4", "Bc5"],
             },
             {
-              name: "Two Knights Defense",
+              name: "Italian Game: Two Knights Defense",
               moves: ["e4", "e5", "Nf3", "Nc6", "Bc4", "Nf6"],
             },
             {
-              name: "Two Knights, Modern Bishop's Opening",
+              name: "Italian Game: Two Knights, Modern Bishop's Opening",
               moves: [
                 "e4",
                 "e5",
@@ -705,7 +688,7 @@
               ],
             },
             {
-              name: "Giuoco Piano: Main Line",
+              name: "Giuoco Piano Game: Main Line",
               moves: [
                 "e4",
                 "e5",
@@ -726,8 +709,34 @@
               ],
             },
             {
-              name: "Giuoco Pianissimo Variation",
+              name: "Giuoco Piano Game: Main Line, Giuoco Pianissimo Variation",
               moves: ["e4", "e5", "Nf3", "Nc6", "Bc4", "Bc5", "d3"],
+            },
+          ],
+        },
+        {
+          name: "دفاع فرانسوی (French Defense)",
+          firstMove: "e4",
+          variations: [
+            {
+              name: "French Defense: Normal Variation",
+              moves: ["e4", "e6", "d4", "d5", "Nc3", "Nf6", "Bg5", "Be7"],
+            },
+            {
+              name: "French Defense: Tarrasch Variation",
+              moves: ["e4", "e6", "d4", "d5", "Nd2"],
+            },
+            {
+              name: "French Defense: Winawer Variation",
+              moves: ["e4", "e6", "d4", "d5", "Nc3", "Bb4"],
+            },
+            {
+              name: "French Defense: Classical Variation",
+              moves: ["e4", "e6", "d4", "d5", "Nc3", "Nf6"],
+            },
+            {
+              name: "French Defense: Winawer, Advance Variation",
+              moves: ["e4", "e6", "d4", "d5", "Nc3", "Bb4", "e5"],
             },
           ],
         },
@@ -736,20 +745,23 @@
           firstMove: "e4",
           variations: [
             {
-              name: "Mieses-Kotrč Variation",
+              name: "Scandinavian Defense: Mieses-Kotrč Variation",
               moves: ["e4", "d5", "exd5", "Qxd5", "Nc3", "Qa5"],
             },
             {
-              name: "Mieses-Kotrč, Main Line",
+              name: "Scandinavian Defense: Mieses-Kotrč, Main Line",
               moves: ["e4", "d5", "exd5", "Qxd5", "Nc3", "Qa5", "d4", "Nf6"],
             },
-            { name: "Modern Variation", moves: ["e4", "d5", "exd5", "Nf6"] },
             {
-              name: "Mieses-Kotrč, Gubinsky-Melts Defense",
+              name: "Scandinavian Defense: Modern Variation",
+              moves: ["e4", "d5", "exd5", "Nf6"],
+            },
+            {
+              name: "Scandinavian Defense: Mieses-Kotrč, Gubinsky-Melts Defense",
               moves: ["e4", "d5", "exd5", "Qxd5", "Nc3", "Qd8"],
             },
             {
-              name: "Modern, Marshall Variation",
+              name: "Scandinavian Defense: Modern, Marshall Variation",
               moves: ["e4", "d5", "exd5", "Nf6", "d4", "Nxd5", "c4", "Nb6"],
             },
           ],
@@ -759,7 +771,7 @@
           firstMove: "e4",
           variations: [
             {
-              name: "Normal Variation",
+              name: "Pirc Defense",
               moves: ["e4", "d6", "d4", "Nf6", "Nc3", "g6"],
             },
           ],
@@ -768,17 +780,20 @@
           name: "دفاع آلخین (Alekhine's Defense)",
           firstMove: "e4",
           variations: [
-            { name: "Normal Variation", moves: ["e4", "Nf6", "e5", "Nd5"] },
             {
-              name: "Modern Variation",
+              name: "Alekhine's Defense: Normal Variation",
+              moves: ["e4", "Nf6", "e5", "Nd5"],
+            },
+            {
+              name: "Alekhine's Defense: Modern Variation",
               moves: ["e4", "Nf6", "e5", "Nd5", "d4", "d6", "Nf3", "Bg4"],
             },
             {
-              name: "Exchange Variation",
+              name: "Alekhine's Defense: Exchange Variation",
               moves: ["e4", "Nf6", "e5", "Nd5", "d4", "d6", "c4", "Nb6", "f4"],
             },
             {
-              name: "Modern, Main Line",
+              name: "Alekhine's Defense: Modern, Main Line",
               moves: [
                 "e4",
                 "Nf6",
@@ -793,7 +808,7 @@
               ],
             },
             {
-              name: "Scandinavian Variation",
+              name: "Alekhine's Defense: Scandinavian Variation",
               moves: [
                 "e4",
                 "Nf6",
@@ -813,21 +828,24 @@
           name: "گامبی شاه (King's Gambit)",
           firstMove: "e4",
           variations: [
-            { name: "Accepted", moves: ["e4", "e5", "f4", "exf4"] },
             {
-              name: "Accepted: King's Knight Gambit",
+              name: "King's Gambit Accepted",
+              moves: ["e4", "e5", "f4", "exf4"],
+            },
+            {
+              name: "King's Gambit Accepted: King's Knight Gambit",
               moves: ["e4", "e5", "f4", "exf4", "Nf3"],
             },
             {
-              name: "Declined: Falkbeer Countergambit",
+              name: "King's Gambit Declined: Falkbeer Countergambit",
               moves: ["e4", "e5", "f4", "d5"],
             },
             {
-              name: "Declined: Falkbeer Countergambit Accepted",
+              name: "King's Gambit Declined: Falkbeer Countergambit Accepted",
               moves: ["e4", "e5", "f4", "d5", "exd5", "e4"],
             },
             {
-              name: "Accepted: Bishop's Gambit",
+              name: "King's Gambit Accepted: Bishop's Gambit",
               moves: ["e4", "e5", "f4", "exf4", "Bc4"],
             },
           ],
@@ -837,15 +855,15 @@
           firstMove: "e4",
           variations: [
             {
-              name: "Schmidt Variation",
+              name: "Scotch Game: Schmidt Variation",
               moves: ["e4", "e5", "Nf3", "Nc6", "d4", "exd4", "Nxd4", "Bc5"],
             },
             {
-              name: "Classical Variation",
+              name: "Scotch Game: Classical Variation",
               moves: ["e4", "e5", "Nf3", "Nc6", "d4", "exd4", "Nxd4", "Nf6"],
             },
             {
-              name: "Scotch Gambit, Dubois Réti Defense",
+              name: "Scotch Game: Scotch Gambit, Dubois Réti Defense",
               moves: [
                 "e4",
                 "e5",
@@ -861,11 +879,11 @@
               ],
             },
             {
-              name: "Scotch Gambit",
+              name: "Scotch Game: Scotch Gambit",
               moves: ["e4", "e5", "Nf3", "Nc6", "d4", "exd4", "Bc4"],
             },
             {
-              name: "Schmidt, Mieses Variation",
+              name: "Scotch Game: Schmidt, Mieses Variation",
               moves: [
                 "e4",
                 "e5",
@@ -884,18 +902,24 @@
           name: "بازی وین (Vienna Game)",
           firstMove: "e4",
           variations: [
-            { name: "Falkbeer Variation", moves: ["e4", "e5", "Nc3", "Nf6"] },
-            { name: "Max Lange Defense", moves: ["e4", "e5", "Nc3", "Nc6"] },
             {
-              name: "Falkbeer, Stanley Variation",
+              name: "Vienna Game: Falkbeer Variation",
+              moves: ["e4", "e5", "Nc3", "Nf6"],
+            },
+            {
+              name: "Vienna Game: Max Lange Defense",
+              moves: ["e4", "e5", "Nc3", "Nc6"],
+            },
+            {
+              name: "Vienna Game: Falkbeer, Stanley Variation",
               moves: ["e4", "e5", "Nc3", "Nf6", "f4"],
             },
             {
-              name: "Falkbeer, Mieses Variation",
+              name: "Vienna Game: Falkbeer, Mieses Variation",
               moves: ["e4", "e5", "Nc3", "Nf6", "g3"],
             },
             {
-              name: "Falkbeer, Vienna Gambit",
+              name: "Vienna Game: Falkbeer, Vienna Gambit",
               moves: ["e4", "e5", "Nc3", "Nf6", "f4", "d5"],
             },
           ],
@@ -904,18 +928,24 @@
           name: "گامبی وزیر (Queen's Gambit)",
           firstMove: "d4",
           variations: [
-            { name: "Declined", moves: ["d4", "d5", "c4", "e6"] },
             {
-              name: "Declined: Three Knights Variation",
+              name: "Queen's Gambit Declined",
+              moves: ["d4", "d5", "c4", "e6"],
+            },
+            {
+              name: "Queen's Gambit Declined: Three Knights Variation",
               moves: ["d4", "d5", "c4", "e6", "Nc3", "Nf6"],
             },
             {
-              name: "Declined: Queen's Knight Variation",
+              name: "Queen's Gambit Declined: Queen's Knight Variation",
               moves: ["d4", "d5", "c4", "e6", "Nc3", "Be7"],
             },
-            { name: "Accepted", moves: ["d4", "d5", "c4", "dxc4"] },
             {
-              name: "Declined: Exchange Variation",
+              name: "Queen's Gambit Accepted",
+              moves: ["d4", "d5", "c4", "dxc4"],
+            },
+            {
+              name: "Queen's Gambit Declined: Exchange Variation",
               moves: ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "cxd5", "exd5"],
             },
           ],
@@ -924,17 +954,20 @@
           name: "دفاع اسلاو (Slav Defense)",
           firstMove: "d4",
           variations: [
-            { name: "Modern Line", moves: ["d4", "d5", "c4", "c6"] },
             {
-              name: "Modern, Three Knights Variation",
+              name: "Slav Defense: Modern Line",
+              moves: ["d4", "d5", "c4", "c6"],
+            },
+            {
+              name: "Slav Defense: Modern, Three Knights Variation",
               moves: ["d4", "d5", "c4", "c6", "Nf3", "Nf6", "Nc3"],
             },
             {
-              name: "Modern, Quiet Variation",
+              name: "Slav Defense: Modern, Quiet Variation",
               moves: ["d4", "d5", "c4", "c6", "Nf3", "Nf6", "e3"],
             },
             {
-              name: "Modern, Two Knights Attack",
+              name: "Slav Defense: Modern, Two Knights Attack",
               moves: [
                 "d4",
                 "d5",
@@ -948,7 +981,7 @@
               ],
             },
             {
-              name: "Modern, Alapin Variation",
+              name: "Slav Defense: Modern, Alapin Variation",
               moves: ["d4", "d5", "c4", "c6", "Nf3", "Nf6", "e3", "Bg4"],
             },
           ],
@@ -958,11 +991,11 @@
           firstMove: "d4",
           variations: [
             {
-              name: "Normal Variation",
+              name: "King's Indian Defense: Normal Variation",
               moves: ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "e4", "d6"],
             },
             {
-              name: "Orthodox Variation",
+              name: "King's Indian Defense: Orthodox Variation",
               moves: [
                 "d4",
                 "Nf6",
@@ -979,7 +1012,7 @@
               ],
             },
             {
-              name: "Fianchetto, Yugoslav, Panno System",
+              name: "King's Indian Defense: Fianchetto, Yugoslav, Panno System",
               moves: [
                 "d4",
                 "Nf6",
@@ -996,7 +1029,7 @@
               ],
             },
             {
-              name: "Standard Development",
+              name: "King's Indian Defense: Standard Development",
               moves: [
                 "d4",
                 "Nf6",
@@ -1013,7 +1046,7 @@
               ],
             },
             {
-              name: "Sämisch Variation",
+              name: "King's Indian Defense: Sämisch Variation",
               moves: ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "e4", "d6", "f3"],
             },
           ],
@@ -1023,19 +1056,19 @@
           firstMove: "d4",
           variations: [
             {
-              name: "Normal Line",
+              name: "Nimzo-Indian Defense: Normal Line",
               moves: ["d4", "Nf6", "c4", "e6", "Nc3", "Bb4"],
             },
             {
-              name: "Classical Variation",
+              name: "Nimzo-Indian Defense: Classical Variation",
               moves: ["d4", "Nf6", "c4", "e6", "Nc3", "Bb4", "Qc2"],
             },
             {
-              name: "Bishop Attack",
+              name: "Nimzo-Indian Defense: Bishop Attack",
               moves: ["d4", "Nf6", "c4", "e6", "Nc3", "Bb4", "Bd2"],
             },
             {
-              name: "Hübner Variation",
+              name: "Nimzo-Indian Defense: Hübner Variation",
               moves: [
                 "d4",
                 "Nf6",
@@ -1054,7 +1087,7 @@
               ],
             },
             {
-              name: "Bishop Attack, Classical Defense",
+              name: "Nimzo-Indian Defense: Bishop Attack, Classical Defense",
               moves: ["d4", "Nf6", "c4", "e6", "Nc3", "Bb4", "Bd2", "O-O"],
             },
           ],
@@ -1064,7 +1097,7 @@
           firstMove: "d4",
           variations: [
             {
-              name: "Fianchetto Variation",
+              name: "Queen's Indian Defense: Fianchetto Variation",
               moves: [
                 "d4",
                 "Nf6",
@@ -1079,7 +1112,7 @@
               ],
             },
             {
-              name: "Fianchetto, Nimzowitsch Variation",
+              name: "Queen's Indian Defense: Fianchetto, Nimzowitsch Variation",
               moves: [
                 "d4",
                 "Nf6",
@@ -1097,7 +1130,7 @@
               ],
             },
             {
-              name: "Fianchetto, Traditional Line",
+              name: "Queen's Indian Defense: Fianchetto, Traditional Line",
               moves: [
                 "d4",
                 "Nf6",
@@ -1115,11 +1148,11 @@
               ],
             },
             {
-              name: "Petrosian Variation",
+              name: "Queen's Indian Defense: Petrosian Variation",
               moves: ["d4", "Nf6", "c4", "e6", "Nf3", "b6", "a3"],
             },
             {
-              name: "Fianchetto, Classical Variation",
+              name: "Queen's Indian Defense: Fianchetto, Classical Variation",
               moves: [
                 "d4",
                 "Nf6",
@@ -1144,7 +1177,7 @@
           firstMove: "d4",
           variations: [
             {
-              name: "Closed",
+              name: "Queen's Gambit Declined: Catalan Opening",
               moves: [
                 "d4",
                 "Nf6",
@@ -1160,7 +1193,23 @@
               ],
             },
             {
-              name: "Closed, Main Line",
+              name: "Catalan Opening: Closed",
+              moves: [
+                "d4",
+                "Nf6",
+                "c4",
+                "e6",
+                "g3",
+                "d5",
+                "Bg2",
+                "Be7",
+                "Nf3",
+                "O-O",
+                "O-O",
+              ],
+            },
+            {
+              name: "Catalan Opening: Closed, Main Line",
               moves: [
                 "d4",
                 "Nf6",
@@ -1186,15 +1235,15 @@
           firstMove: "d4",
           variations: [
             {
-              name: "Grünfeld Variation",
+              name: "Bogo-Indian Defense: Grünfeld Variation",
               moves: ["d4", "Nf6", "c4", "e6", "Nf3", "Bb4+", "Bd2", "Be7"],
             },
             {
-              name: "Nimzowitsch Variation",
+              name: "Bogo-Indian Defense: Nimzowitsch Variation",
               moves: ["d4", "Nf6", "c4", "e6", "Nf3", "Bb4+", "Nbd2"],
             },
             {
-              name: "Wade-Smyslov Variation",
+              name: "Bogo-Indian Defense: Wade-Smyslov Variation",
               moves: [
                 "d4",
                 "Nf6",
@@ -1209,11 +1258,11 @@
               ],
             },
             {
-              name: "Vītoliņš Variation",
+              name: "Bogo-Indian Defense: Vītoliņš Variation",
               moves: ["d4", "Nf6", "c4", "e6", "Nf3", "Bb4+", "Nbd2", "b6"],
             },
             {
-              name: "Exchange Variation",
+              name: "Bogo-Indian Defense: Exchange Variation",
               moves: [
                 "d4",
                 "Nf6",
@@ -1233,7 +1282,7 @@
           firstMove: "d4",
           variations: [
             {
-              name: "Exchange Variation",
+              name: "Grünfeld Defense: Exchange Variation",
               moves: [
                 "d4",
                 "Nf6",
@@ -1250,7 +1299,7 @@
               ],
             },
             {
-              name: "Three Knights Variation",
+              name: "Grünfeld Defense: Three Knights Variation",
               moves: [
                 "d4",
                 "Nf6",
@@ -1264,7 +1313,7 @@
               ],
             },
             {
-              name: "Exchange, Modern Exchange Variation",
+              name: "Grünfeld Defense: Exchange, Modern Exchange Variation",
               moves: [
                 "d4",
                 "Nf6",
@@ -1282,11 +1331,11 @@
               ],
             },
             {
-              name: "Neo-Grünfeld: Classical, Original Defense",
+              name: "Neo-Grünfeld Defense: Classical, Original Defense",
               moves: ["d4", "Nf6", "c4", "g6", "Nc3", "d5", "Qb3"],
             },
             {
-              name: "Neo-Grünfeld: Classical Variation",
+              name: "Neo-Grünfeld Defense: Classical Variation",
               moves: [
                 "d4",
                 "Nf6",
@@ -1309,7 +1358,7 @@
           firstMove: "d4",
           variations: [
             {
-              name: "Fianchetto Attack",
+              name: "Dutch Defense: Fianchetto Attack",
               moves: [
                 "d4",
                 "f5",
@@ -1324,11 +1373,11 @@
               ],
             },
             {
-              name: "Classical Variation",
+              name: "Dutch Defense: Classical Variation",
               moves: ["d4", "f5", "c4", "Nf6", "Nc3", "e6"],
             },
             {
-              name: "Fianchetto, Semi-Leningrad Variation",
+              name: "Dutch Defense: Fianchetto, Semi-Leningrad Variation",
               moves: [
                 "d4",
                 "f5",
@@ -1344,9 +1393,9 @@
                 "d6",
               ],
             },
-            { name: "Normal Variation", moves: ["d4", "f5"] },
+            { name: "Dutch Defense: Normal Variation", moves: ["d4", "f5"] },
             {
-              name: "Raphael Variation",
+              name: "Dutch Defense: Raphael Variation",
               moves: ["d4", "f5", "Nc3", "Nf6", "Bg5", "e6"],
             },
           ],
@@ -1355,9 +1404,12 @@
           name: "حمله ترومپوسکی (Trompowsky Attack)",
           firstMove: "d4",
           variations: [
-            { name: "Classical Defense", moves: ["d4", "Nf6", "Bg5", "e6"] },
             {
-              name: "Classical, Big Center Variation",
+              name: "Trompowsky Attack: Classical Defense",
+              moves: ["d4", "Nf6", "Bg5", "e6"],
+            },
+            {
+              name: "Trompowsky Attack: Classical, Big Center Variation",
               moves: [
                 "d4",
                 "Nf6",
@@ -1371,15 +1423,15 @@
               ],
             },
             {
-              name: "Raptor Variation",
+              name: "Trompowsky Attack: Raptor Variation",
               moves: ["d4", "Nf6", "Bg5", "c5", "d5", "Qb6"],
             },
             {
-              name: "Edge Variation",
+              name: "Trompowsky Attack: Edge Variation",
               moves: ["d4", "Nf6", "Bg5", "Ne4", "Bh4", "c5", "f3", "Nf6"],
             },
             {
-              name: "Poisoned Pawn Variation",
+              name: "Trompowsky Attack: Poisoned Pawn Variation",
               moves: ["d4", "Nf6", "Bg5", "c5", "d5", "Qb6", "Nc3", "Qxb2"],
             },
           ],
@@ -1389,11 +1441,11 @@
           firstMove: "d4",
           variations: [
             {
-              name: "Half-Accepted",
+              name: "Benko Gambit Half-Accepted",
               moves: ["d4", "Nf6", "c4", "c5", "d5", "b5", "cxb5", "a6"],
             },
             {
-              name: "Fully-Accepted",
+              name: "Benko Gambit Fully-Accepted",
               moves: [
                 "d4",
                 "Nf6",
@@ -1410,15 +1462,15 @@
               ],
             },
             {
-              name: "Declined: Main Line",
+              name: "Benko Gambit Declined: Main Line",
               moves: ["d4", "Nf6", "c4", "c5", "d5", "b5", "Nf3"],
             },
             {
-              name: "Half-Accepted: Pawn Return Variation",
+              name: "Benko Gambit Half-Accepted: Pawn Return Variation",
               moves: ["d4", "Nf6", "c4", "c5", "d5", "b5", "cxb5", "a6", "e3"],
             },
             {
-              name: "Half-Accepted: Modern Variation",
+              name: "Benko Gambit Half-Accepted: Modern Variation",
               moves: [
                 "d4",
                 "Nf6",
@@ -1441,7 +1493,7 @@
           firstMove: "d4",
           variations: [
             {
-              name: "Accelerated London System",
+              name: "Queen's Pawn Opening: Accelerated London System",
               moves: ["d4", "d5", "Bf4", "Nf6", "Nf3", "e6", "e3"],
             },
             {
@@ -1449,15 +1501,15 @@
               moves: ["d4", "Nf6", "Bf4", "g6", "Nf3", "Bg7", "e3", "O-O"],
             },
             {
-              name: "East Indian, London System",
+              name: "Indian Game: East Indian, London System",
               moves: ["d4", "Nf6", "Bf4", "d6", "Nf3", "Bg4"],
             },
             {
-              name: "Accelerated London, Steinitz Countergambit",
+              name: "Queen's Pawn Opening: Accelerated London, Steinitz Countergambit",
               moves: ["d4", "d5", "Bf4", "c5", "e3", "Nc6", "c3", "Qb6"],
             },
             {
-              name: "Poisoned Pawn Variation",
+              name: "London System: Poisoned Pawn Variation",
               moves: [
                 "d4",
                 "d5",
@@ -1478,7 +1530,7 @@
           firstMove: "d4",
           variations: [
             {
-              name: "Modern Variation",
+              name: "Benoni Defense",
               moves: [
                 "d4",
                 "Nf6",
@@ -1501,17 +1553,20 @@
           firstMove: "other",
           variations: [
             {
-              name: "King's Indian Attack",
+              name: "Réti Opening: King's Indian Attack",
               moves: ["Nf3", "d5", "g3", "Nf6", "Bg2", "c5"],
             },
-            { name: "Sicilian Invitation", moves: ["Nf3", "c5"] },
+            { name: "Réti Opening: Sicilian Invitation", moves: ["Nf3", "c5"] },
             {
-              name: "King's Indian Attack, Symmetrical Defense",
+              name: "Réti Opening: King's Indian Attack, Symmetrical Defense",
               moves: ["Nf3", "Nf6", "g3", "c5", "Bg2", "Nc6", "O-O", "e5"],
             },
-            { name: "Réti Gambit", moves: ["Nf3", "d5", "c4", "dxc4"] },
             {
-              name: "Kingside Fianchetto Variation",
+              name: "Réti Opening: Réti Gambit",
+              moves: ["Nf3", "d5", "c4", "dxc4"],
+            },
+            {
+              name: "Réti Opening: Kingside Fianchetto Variation",
               moves: ["Nf3", "d5", "g3", "c6", "Bg2", "Bg4"],
             },
           ],
@@ -1521,33 +1576,42 @@
           firstMove: "other",
           variations: [
             {
-              name: "Anglo-Indian, King's Knight Variation",
+              name: "English Opening: Anglo-Indian, King's Knight Variation",
               moves: ["c4", "Nf6", "Nc3", "g6", "Nf3"],
             },
-            { name: "Anglo-Indian Defense", moves: ["c4", "Nf6", "Nc3", "e6"] },
-            { name: "King's English Variation", moves: ["c4", "e5"] },
             {
-              name: "Anglo-Indian, Queen's Knight Variation",
+              name: "English Opening: Anglo-Indian Defense",
+              moves: ["c4", "Nf6", "Nc3", "e6"],
+            },
+            {
+              name: "English Opening: King's English Variation",
+              moves: ["c4", "e5"],
+            },
+            {
+              name: "English Opening: Anglo-Indian, Queen's Knight Variation",
               moves: ["c4", "Nf6", "Nc3", "e6", "e4"],
             },
-            { name: "Agincourt Defense", moves: ["c4", "e6", "Nf3", "d5"] },
+            {
+              name: "English Opening: Agincourt Defense",
+              moves: ["c4", "e6", "Nf3", "d5"],
+            },
           ],
         },
         {
           name: "گشایش برد (Bird's Opening)",
           firstMove: "other",
           variations: [
-            { name: "Dutch Variation", moves: ["f4", "d5"] },
-            { name: "From's Gambit", moves: ["f4", "e5"] },
+            { name: "Bird's Opening: Dutch Variation", moves: ["f4", "d5"] },
+            { name: "Bird's Opening: From's Gambit", moves: ["f4", "e5"] },
             {
-              name: "From's Gambit, Lasker Variation",
+              name: "Bird's Opening: From's Gambit, Lasker Variation",
               moves: ["f4", "e5", "fxe5", "d6"],
             },
             {
-              name: "Dutch, Lasker Variation",
+              name: "Bird's Opening: Dutch, Lasker Variation",
               moves: ["f4", "d5", "Nf3", "c5", "g3", "Nc6", "Bg2"],
             },
-            { name: "Horsefly Defense", moves: ["f4", "Nf6"] },
+            { name: "Bird's Opening: Horsefly Defense", moves: ["f4", "Nf6"] },
           ],
         },
         {
@@ -1555,11 +1619,11 @@
           firstMove: "other",
           variations: [
             {
-              name: "Yugoslav Variation",
+              name: "King's Indian Attack: Yugoslav Variation",
               moves: ["Nf3", "d5", "g3", "Nf6", "Bg2", "c5", "O-O"],
             },
             {
-              name: "Double Fianchetto Variation",
+              name: "King's Indian Attack: Double Fianchetto Variation",
               moves: [
                 "Nf3",
                 "d5",
@@ -1573,7 +1637,7 @@
               ],
             },
             {
-              name: "Keres Variation",
+              name: "King's Indian Attack: Keres Variation",
               moves: [
                 "Nf3",
                 "d5",
@@ -1588,7 +1652,7 @@
               ],
             },
             {
-              name: "Sicilian Variation",
+              name: "King's Indian Attack: Sicilian Variation",
               moves: [
                 "Nf3",
                 "c5",
@@ -1602,7 +1666,7 @@
               ],
             },
             {
-              name: "French Variation",
+              name: "King's Indian Attack: French Variation",
               moves: ["Nf3", "e6", "g3", "d5", "Bg2", "Nf6", "O-O", "Be7"],
             },
           ],
@@ -1612,13 +1676,25 @@
           firstMove: "other",
           variations: [
             {
-              name: "Indian Defense",
+              name: "King's Fianchetto Opening: Indian Defense",
               moves: ["g3", "Nf6", "Bg2", "d5", "Nf3"],
             },
-            { name: "Symmetrical Variation", moves: ["g3", "g6"] },
-            { name: "Sicilian Invitation", moves: ["g3", "c5"] },
-            { name: "Slav Formation", moves: ["g3", "c6"] },
-            { name: "Dutch Defense", moves: ["g3", "f5"] },
+            {
+              name: "King's Fianchetto Opening: Symmetrical Variation",
+              moves: ["g3", "g6"],
+            },
+            {
+              name: "King's Fianchetto Opening: Sicilian Invitation",
+              moves: ["g3", "c5"],
+            },
+            {
+              name: "King's Fianchetto Opening: Slav Formation",
+              moves: ["g3", "c6"],
+            },
+            {
+              name: "King's Fianchetto Opening: Dutch Defense",
+              moves: ["g3", "f5"],
+            },
           ],
         },
         {
@@ -1626,22 +1702,25 @@
           firstMove: "other",
           variations: [
             {
-              name: "Modern Variation",
+              name: "Nimzowitsch-Larsen Attack: Modern Variation",
               moves: ["b3", "e5", "Bb2", "Nc6", "e3"],
             },
             {
-              name: "Classical Variation",
+              name: "Nimzowitsch-Larsen Attack: Classical Variation",
               moves: ["b3", "d5", "Bb2", "c5", "e3", "Nf6"],
             },
             {
-              name: "Indian Variation",
+              name: "Nimzowitsch-Larsen Attack: Indian Variation",
               moves: ["b3", "Nf6", "Bb2", "g6", "e3", "Bg7"],
             },
             {
-              name: "English Variation",
+              name: "Nimzowitsch-Larsen Attack: English Variation",
               moves: ["b3", "c5", "Bb2", "Nc6", "e3", "Nf6", "Bb5"],
             },
-            { name: "Symmetrical Variation", moves: ["b3", "b6"] },
+            {
+              name: "Nimzowitsch-Larsen Attack: Symmetrical Variation",
+              moves: ["b3", "b6"],
+            },
           ],
         },
         {
@@ -1649,35 +1728,45 @@
           firstMove: "other",
           variations: [
             {
-              name: "Kucharkowski-Meybohm Gambit",
+              name: "Polish Opening: Kucharkowski-Meybohm Gambit",
               moves: ["b4", "c5", "bxc5", "e5", "Bb2", "Bxc5"],
             },
-            { name: "Czech Defense", moves: ["b4", "e5", "Bb2", "Bxb4"] },
             {
-              name: "King's Indian Defense",
+              name: "Polish Opening: Czech Defense",
+              moves: ["b4", "e5", "Bb2", "Bxb4"],
+            },
+            {
+              name: "Polish Opening: King's Indian Defense",
               moves: ["b4", "Nf6", "Bb2", "g6"],
             },
             {
-              name: "Zukertort System",
+              name: "Polish Opening: Zukertort System",
               moves: ["b4", "Nf6", "Bb2", "e6", "a3"],
             },
-            { name: "Outflank Variation", moves: ["b4", "c6", "Bb2", "d5"] },
+            {
+              name: "Polish Opening: Outflank Variation",
+              moves: ["b4", "c6", "Bb2", "d5"],
+            },
           ],
         },
         {
           name: "گشایش گروب (Grob Opening)",
           firstMove: "other",
-          variations: [{ name: "Main Line", moves: ["g4", "d5", "Bg2", "c6"] }],
+          variations: [
+            {
+              name: "Grob Opening (Main Line)",
+              moves: ["g4", "d5", "Bg2", "c6"],
+            },
+          ],
         },
       ];
 
-      let currentModalGame = null;
-      let currentModalMoves = [];
-      let currentModalIndex = 0;
-      let modalCanvas = null;
-      let modalCtx = null;
-
-      // ---------- رسم تخته در مودال ----------
+      // ---------- منطق مودال و رندرینگ ----------
+      let currentModalGame = null,
+        currentModalMoves = [],
+        currentModalIndex = 0,
+        modalCanvas = null,
+        modalCtx = null;
       function drawModalBoard() {
         if (!modalCanvas || !modalCtx || !currentModalGame) return;
         const board = currentModalGame.board();
@@ -1730,7 +1819,6 @@
           }
         }
       }
-
       function updateModalPosition() {
         currentModalGame = new Chess();
         for (let i = 0; i < currentModalIndex; i++) {
@@ -1738,7 +1826,6 @@
         }
         drawModalBoard();
       }
-
       function showModal(title, moves) {
         currentModalMoves = moves;
         currentModalIndex = 0;
@@ -1747,11 +1834,9 @@
         updateModalPosition();
         document.getElementById("boardModal").classList.add("active");
       }
-
       function closeModal() {
         document.getElementById("boardModal").classList.remove("active");
       }
-
       function modalPrev() {
         if (currentModalIndex > 0) {
           currentModalIndex--;
@@ -1765,10 +1850,9 @@
         }
       }
 
-      // ---------- رندر گشایش‌ها در صفحه ----------
-      let currentFilter = "all";
-      let searchTerm = "";
-
+      // رندر اصلی
+      let currentFilter = "all",
+        searchTerm = "";
       function renderOpenings() {
         const container = document.getElementById("openingsGrid");
         container.innerHTML = "";
@@ -1814,7 +1898,6 @@
               : "rotate(0deg)";
           });
         });
-        // اضافه کردن رویداد کلیک به آیتم‌های واریانت
         document.querySelectorAll(".variation-item").forEach((item) => {
           item.addEventListener("click", (e) => {
             e.stopPropagation();
@@ -1826,7 +1909,6 @@
         });
       }
 
-      // جستجو و فیلتر
       document.getElementById("searchInput").addEventListener("input", (e) => {
         searchTerm = e.target.value.trim();
         renderOpenings();
@@ -1842,7 +1924,6 @@
         });
       });
 
-      // مودال رویدادها
       modalCanvas = document.getElementById("modalCanvas");
       modalCtx = modalCanvas.getContext("2d");
       document
@@ -1854,12 +1935,10 @@
       document
         .getElementById("closeModalBtn")
         .addEventListener("click", closeModal);
-      // بستن با کلیک روی پس‌زمینه
       document.getElementById("boardModal").addEventListener("click", (e) => {
         if (e.target === document.getElementById("boardModal")) closeModal();
       });
 
-      // منوی همبرگر
       const menuToggle = document.getElementById("menuToggle");
       const mainNav = document.getElementById("mainNav");
       if (menuToggle)
@@ -1879,9 +1958,7 @@
         });
       }
 
-      loadPieces().then(() => {
-        renderOpenings();
-      });
+      loadPieces().then(() => renderOpenings());
     </script>
   </body>
 </html>
