@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
-    <title>ChessHub | گشایش‌های شطرنج</title>
+    <title>ChessHub | دانشنامه کامل گشایش‌های شطرنج</title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
@@ -15,14 +15,15 @@
       href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css"
       rel="stylesheet"
     />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
     <style>
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
+        font-family: "Vazir", Tahoma, sans-serif;
       }
       body {
-        font-family: "Vazir", Tahoma, sans-serif;
         background: linear-gradient(135deg, #f5f7fc 0%, #eef2f5 100%);
         direction: rtl;
         padding: 20px;
@@ -33,7 +34,7 @@
         margin: 0 auto;
       }
 
-      /* هدر (مشابه index.html) */
+      /* هدر (مشابه ایندکس) */
       .site-header {
         background: rgba(255, 255, 255, 0.96);
         backdrop-filter: blur(10px);
@@ -85,6 +86,7 @@
         display: inline-flex;
         align-items: center;
         gap: 0.4rem;
+        white-space: nowrap;
       }
       .nav-list li a:hover {
         background: #e6edf4;
@@ -112,7 +114,7 @@
         list-style: none;
         opacity: 0;
         visibility: hidden;
-        transition: 0.2s;
+        transition: all 0.2s ease;
         z-index: 100;
         border: 1px solid #e2e8f0;
       }
@@ -130,79 +132,184 @@
         color: #2c7da0;
       }
 
-      /* صفحه اصلی کارت‌ها */
+      /* صفحه اصلی گشایش‌ها */
       .openings-header {
         text-align: center;
-        margin-bottom: 40px;
+        margin-bottom: 30px;
       }
       .openings-header h2 {
         font-size: 2rem;
         color: #2c7da0;
       }
-      .openings-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-        gap: 30px;
-      }
-      .opening-card {
-        background: white;
-        border-radius: 48px;
-        overflow: hidden;
-        transition: 0.3s;
-        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+      .controls {
         display: flex;
-        flex-direction: column;
-      }
-      .opening-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 25px 40px rgba(0, 0, 0, 0.15);
-      }
-      .card-image {
-        height: 160px;
-        background: linear-gradient(135deg, #2c7da0, #1f6392);
-        display: flex;
-        align-items: center;
         justify-content: center;
-        font-size: 4rem;
+        gap: 15px;
+        margin: 20px auto;
+        flex-wrap: wrap;
+      }
+      .search-box {
+        padding: 8px 18px;
+        border-radius: 60px;
+        border: 1px solid #cbd5e1;
+        width: 260px;
+        font-family: "Vazir";
+      }
+      .filter-buttons {
+        display: flex;
+        gap: 10px;
+      }
+      .filter-btn {
+        background: #eef2f5;
+        border: none;
+        padding: 6px 18px;
+        border-radius: 40px;
+        cursor: pointer;
+        font-family: "Vazir";
+        font-weight: bold;
+      }
+      .filter-btn.active {
+        background: #2c7da0;
         color: white;
       }
-      .card-content {
-        padding: 25px;
-        flex: 1;
+      .openings-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
       }
-      .card-title {
+      .opening-group {
+        background: white;
+        border-radius: 32px;
+        overflow: hidden;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+      }
+      .group-header {
+        background: linear-gradient(135deg, #2c7da0, #1f6392);
+        padding: 15px 25px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: white;
+        transition: 0.2s;
+      }
+      .group-header h3 {
         font-size: 1.5rem;
-        font-weight: bold;
-        color: #1e2f3e;
-        margin-bottom: 8px;
       }
-      .card-sub {
-        color: #5f7f9e;
-        font-size: 0.85rem;
-        margin-bottom: 15px;
-        border-right: 2px solid #2c7da0;
-        padding-right: 10px;
+      .group-header i {
+        transition: transform 0.2s;
       }
-      .card-description {
-        color: #4a627a;
+      .group-content {
+        padding: 0;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+      }
+      .group-content.open {
+        max-height: 3000px;
+        padding: 20px;
+      }
+      .variations-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 12px;
+      }
+      .variation-item {
+        background: #f8fafc;
+        padding: 8px 15px;
+        border-radius: 28px;
         font-size: 0.9rem;
-        line-height: 1.6;
-        margin-bottom: 20px;
+        transition: 0.1s;
+        cursor: pointer;
+        border: 1px solid #e2e8f0;
       }
-      .btn-detail {
-        background: #eef2f5;
+      .variation-item:hover {
+        background: #e2e8f0;
+        transform: translateX(-3px);
+      }
+      .no-result {
+        text-align: center;
+        padding: 40px;
+        color: #5f7f9e;
+      }
+      /* مودال تخته حرفه‌ای */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(8px);
+        z-index: 1000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        visibility: hidden;
+        opacity: 0;
+        transition: 0.2s;
+      }
+      .modal-overlay.active {
+        visibility: visible;
+        opacity: 1;
+      }
+      .modal-content {
+        background: white;
+        border-radius: 48px;
+        padding: 25px;
+        max-width: 520px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        position: relative;
+      }
+      .modal-content h3 {
         color: #2c7da0;
+        margin-bottom: 15px;
+        font-size: 1.5rem;
+      }
+      canvas {
+        width: 100%;
+        max-width: 420px;
+        height: auto;
+        background-color: #f0d9b5;
+        border-radius: 24px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        margin: 15px auto;
+      }
+      .modal-nav {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 15px;
+      }
+      .modal-nav button {
+        background: #eef2f5;
         border: none;
+        padding: 8px 24px;
+        border-radius: 40px;
+        font-family: "Vazir";
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+      .modal-nav button:hover {
+        background: #e2e8f0;
+        transform: scale(0.96);
+      }
+      .close-modal {
+        background: #e25555;
+        color: white;
+        border: none;
+        margin-top: 20px;
         padding: 8px 20px;
         border-radius: 40px;
         font-weight: bold;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
+        cursor: pointer;
+        transition: 0.2s;
       }
-      .btn-detail:hover {
-        background: #e2e8f0;
+      .close-modal:hover {
+        background: #c0392b;
         transform: scale(0.96);
       }
       footer {
@@ -246,8 +353,17 @@
         .dropdown-menu.show-mobile {
           display: block;
         }
-        .openings-grid {
+        .group-header h3 {
+          font-size: 1.2rem;
+        }
+        .variations-list {
           grid-template-columns: 1fr;
+        }
+        .modal-content {
+          padding: 15px;
+        }
+        canvas {
+          max-width: 300px;
         }
       }
     </style>
@@ -317,114 +433,1433 @@
       </header>
 
       <div class="openings-header">
-        <h2>📚 دانشنامه گشایش‌های شطرنج</h2>
-        <p style="margin-top: 10px">
-          محبوب‌ترین و مؤثرترین گشایش‌ها همراه با تحلیل و واریانت‌های اصلی
-        </p>
+        <h2>📘 دانشنامه کامل گشایش‌های شطرنج</h2>
+        <div class="controls">
+          <input
+            type="text"
+            id="searchInput"
+            class="search-box"
+            placeholder="🔍 جستجو بر اساس نام گشایش یا واریانت..."
+          />
+          <div class="filter-buttons">
+            <button class="filter-btn active" data-filter="all">همه</button>
+            <button class="filter-btn" data-filter="e4">حرکات 1.e4</button>
+            <button class="filter-btn" data-filter="d4">حرکات 1.d4</button>
+            <button class="filter-btn" data-filter="other">
+              سایر گشایش‌ها
+            </button>
+          </div>
+        </div>
       </div>
 
-      <div class="openings-grid" id="openingsGrid"></div>
-
+      <div id="openingsGrid" class="openings-grid"></div>
       <footer>
-        © ChessHub | منبع جامع گشایش‌های شطرنج – به‌روزرسانی مداوم
+        © ChessHub | مرجع کامل گشایش‌های شطرنج – کلیک روی هر واریانت، تخته
+        تعاملی را باز می‌کند
       </footer>
     </div>
 
+    <!-- مودال تخته -->
+    <div id="boardModal" class="modal-overlay">
+      <div class="modal-content">
+        <h3 id="modalTitle"></h3>
+        <canvas id="modalCanvas" width="420" height="420"></canvas>
+        <div class="modal-nav">
+          <button id="modalPrevBtn">◀ قبلی</button>
+          <button id="modalNextBtn">بعدی ▶</button>
+        </div>
+        <button id="closeModalBtn" class="close-modal">✖ بستن</button>
+      </div>
+    </div>
+
     <script>
-      const openingsData = [
+      // ---------- بارگذاری مهره‌های محلی (در صورت وجود) ----------
+      const pieceImages = {};
+      const pieceCodes = {
+        wK: "wK.svg",
+        wQ: "wQ.svg",
+        wR: "wR.svg",
+        wB: "wB.svg",
+        wN: "wN.svg",
+        wP: "wP.svg",
+        bK: "bK.svg",
+        bQ: "bQ.svg",
+        bR: "bR.svg",
+        bB: "bB.svg",
+        bN: "bN.svg",
+        bP: "bP.svg",
+      };
+      function loadPieces() {
+        return new Promise((resolve) => {
+          let loaded = 0;
+          const total = Object.keys(pieceCodes).length;
+          for (const [key, filename] of Object.entries(pieceCodes)) {
+            const img = new Image();
+            img.onload = img.onerror = () => {
+              loaded++;
+              if (loaded === total) resolve();
+            };
+            img.src = `pieces/merida/${filename}`;
+            pieceImages[key] = img;
+          }
+        });
+      }
+
+      // ---------- دیتابیس گشایش‌ها (۳۲ گروه اصلی با واریانت‌ها و حرکت‌های معروف) ----------
+      const openingsDatabase = [
         {
-          id: "sicilian",
-          name: "دفاع سیسیلی",
-          english: "Sicilian Defense",
-          icon: "fa-dragon",
-          desc: "محبوب‌ترین پاسخ به 1.e4. ایجاد بازی‌های نامتوازن و فرصت‌های حمله عالی.",
-          link: "openings/sicilian.html",
+          name: "دفاع سیسیلی (Sicilian Defense)",
+          firstMove: "e4",
+          variations: [
+            {
+              name: "Open Variation",
+              moves: ["e4", "c5", "Nf3", "d6", "d4", "cxd4", "Nxd4"],
+            },
+            {
+              name: "Old Sicilian Variation",
+              moves: ["e4", "c5", "Nf3", "Nc6", "d4", "cxd4", "Nxd4"],
+            },
+            { name: "French Variation", moves: ["e4", "c5", "Nf3", "e6"] },
+            {
+              name: "Open, Najdorf Variation",
+              moves: [
+                "e4",
+                "c5",
+                "Nf3",
+                "d6",
+                "d4",
+                "cxd4",
+                "Nxd4",
+                "Nf6",
+                "Nc3",
+                "a6",
+              ],
+            },
+          ],
         },
         {
-          id: "ruy-lopez",
-          name: "گشایش اسپانیایی",
-          english: "Ruy Lopez",
-          icon: "fa-crown",
-          desc: "قدیمی‌ترین گشایش کلاسیک. سفید با 3.Bb5 فشار روی اسب سیاه ایجاد می‌کند.",
-          link: "openings/ruy-lopez.html",
+          name: "دفاع فرانسوی (French Defense)",
+          firstMove: "e4",
+          variations: [
+            {
+              name: "Normal Variation",
+              moves: ["e4", "e6", "d4", "d5", "Nc3", "Nf6", "Bg5", "Be7"],
+            },
+            {
+              name: "Tarrasch Variation",
+              moves: ["e4", "e6", "d4", "d5", "Nd2"],
+            },
+            {
+              name: "Winawer Variation",
+              moves: ["e4", "e6", "d4", "d5", "Nc3", "Bb4"],
+            },
+            {
+              name: "Classical Variation",
+              moves: ["e4", "e6", "d4", "d5", "Nc3", "Nf6"],
+            },
+            {
+              name: "Winawer, Advance Variation",
+              moves: ["e4", "e6", "d4", "d5", "Nc3", "Bb4", "e5"],
+            },
+          ],
         },
         {
-          id: "italian",
-          name: "گشایش ایتالیایی",
-          english: "Italian Game",
-          icon: "fa-church",
-          desc: "آغاز آرام و کلاسیک، مناسب برای همه سطوح.",
-          link: "openings/italian.html",
+          name: "گشایش روی لوپز (Ruy López Opening)",
+          firstMove: "e4",
+          variations: [
+            {
+              name: "Morphy Defense",
+              moves: [
+                "e4",
+                "e5",
+                "Nf3",
+                "Nc6",
+                "Bb5",
+                "a6",
+                "Ba4",
+                "Nf6",
+                "O-O",
+                "Be7",
+              ],
+            },
+            {
+              name: "Morphy Defense, Columbus Variation",
+              moves: [
+                "e4",
+                "e5",
+                "Nf3",
+                "Nc6",
+                "Bb5",
+                "a6",
+                "Ba4",
+                "Nf6",
+                "O-O",
+                "Be7",
+                "Re1",
+                "b5",
+                "Bb3",
+                "d6",
+                "c3",
+                "O-O",
+                "d4",
+                "Bg4",
+              ],
+            },
+            {
+              name: "Morphy Defense, Closed",
+              moves: [
+                "e4",
+                "e5",
+                "Nf3",
+                "Nc6",
+                "Bb5",
+                "a6",
+                "Ba4",
+                "Nf6",
+                "O-O",
+                "Be7",
+                "Re1",
+                "b5",
+                "Bb3",
+              ],
+            },
+            {
+              name: "Morphy Defense, Keres Variation",
+              moves: [
+                "e4",
+                "e5",
+                "Nf3",
+                "Nc6",
+                "Bb5",
+                "a6",
+                "Ba4",
+                "Nf6",
+                "O-O",
+                "Be7",
+                "Re1",
+                "b5",
+                "Bb3",
+                "d6",
+                "c3",
+                "O-O",
+                "d4",
+                "Bg4",
+              ],
+            },
+            {
+              name: "Berlin Defense",
+              moves: ["e4", "e5", "Nf3", "Nc6", "Bb5", "Nf6"],
+            },
+          ],
         },
         {
-          id: "french",
-          name: "دفاع فرانسوی",
-          english: "French Defense",
-          icon: "fa-flag",
-          desc: "بازی بسته و استراتژیک با 1.e4 e6.",
-          link: "openings/french.html",
+          name: "دفاع کارو-کان (Caro-Kann Defense)",
+          firstMove: "e4",
+          variations: [
+            {
+              name: "Main Line",
+              moves: ["e4", "c6", "d4", "d5", "Nc3", "dxe4", "Nxe4", "Bf5"],
+            },
+            {
+              name: "Advance Variation",
+              moves: ["e4", "c6", "d4", "d5", "e5", "Bf5"],
+            },
+            {
+              name: "Exchange Variation",
+              moves: ["e4", "c6", "d4", "d5", "exd5", "cxd5"],
+            },
+            {
+              name: "Classical Variation",
+              moves: ["e4", "c6", "d4", "d5", "Nc3", "dxe4", "Nxe4", "Nd7"],
+            },
+            {
+              name: "Panov Attack",
+              moves: ["e4", "c6", "d4", "d5", "exd5", "cxd5", "c4"],
+            },
+          ],
         },
         {
-          id: "caro-kann",
-          name: "دفاع کارو-کان",
-          english: "Caro-Kann Defense",
-          icon: "fa-shield-alt",
-          desc: "محکم و پایدار، یکی از گزینه‌های اصلی سیاه.",
-          link: "openings/caro-kann.html",
+          name: "گشایش ایتالیایی (Italian Game)",
+          firstMove: "e4",
+          variations: [
+            {
+              name: "Giuoco Piano",
+              moves: ["e4", "e5", "Nf3", "Nc6", "Bc4", "Bc5"],
+            },
+            {
+              name: "Two Knights Defense",
+              moves: ["e4", "e5", "Nf3", "Nc6", "Bc4", "Nf6"],
+            },
+            {
+              name: "Two Knights, Modern Bishop's Opening",
+              moves: [
+                "e4",
+                "e5",
+                "Nf3",
+                "Nc6",
+                "Bc4",
+                "Nf6",
+                "d4",
+                "exd4",
+                "e5",
+              ],
+            },
+            {
+              name: "Giuoco Piano: Main Line",
+              moves: [
+                "e4",
+                "e5",
+                "Nf3",
+                "Nc6",
+                "Bc4",
+                "Bc5",
+                "c3",
+                "Nf6",
+                "d4",
+                "exd4",
+                "cxd4",
+                "Bb4+",
+                "Bd2",
+                "Bxd2+",
+                "Nbxd2",
+                "d5",
+              ],
+            },
+            {
+              name: "Giuoco Pianissimo Variation",
+              moves: ["e4", "e5", "Nf3", "Nc6", "Bc4", "Bc5", "d3"],
+            },
+          ],
         },
         {
-          id: "queens-gambit",
-          name: "گامبی وزیر",
-          english: "Queen's Gambit",
-          icon: "fa-chess-queen",
-          desc: "1.d4 d5 2.c4 – گشایش معروف برای کسب کنترل مرکز.",
-          link: "openings/queens-gambit.html",
+          name: "دفاع اسکاندیناوی (Scandinavian Defense)",
+          firstMove: "e4",
+          variations: [
+            {
+              name: "Mieses-Kotrč Variation",
+              moves: ["e4", "d5", "exd5", "Qxd5", "Nc3", "Qa5"],
+            },
+            {
+              name: "Mieses-Kotrč, Main Line",
+              moves: ["e4", "d5", "exd5", "Qxd5", "Nc3", "Qa5", "d4", "Nf6"],
+            },
+            { name: "Modern Variation", moves: ["e4", "d5", "exd5", "Nf6"] },
+            {
+              name: "Mieses-Kotrč, Gubinsky-Melts Defense",
+              moves: ["e4", "d5", "exd5", "Qxd5", "Nc3", "Qd8"],
+            },
+            {
+              name: "Modern, Marshall Variation",
+              moves: ["e4", "d5", "exd5", "Nf6", "d4", "Nxd5", "c4", "Nb6"],
+            },
+          ],
         },
         {
-          id: "kings-indian",
-          name: "دفاع هند شاه",
-          english: "King's Indian Defense",
-          icon: "fa-crown",
-          desc: "ضدحمله قدرتمند بعد از دادن مرکز به سفید.",
-          link: "openings/kings-indian.html",
+          name: "دفاع پیرک (Pirc Defense)",
+          firstMove: "e4",
+          variations: [
+            {
+              name: "Normal Variation",
+              moves: ["e4", "d6", "d4", "Nf6", "Nc3", "g6"],
+            },
+          ],
         },
         {
-          id: "nimzo-indian",
-          name: "دفاع نیمزو-هندی",
-          english: "Nimzo-Indian Defense",
-          icon: "fa-hand-peace",
-          desc: "فشار روی اسب c3 و مهار d4. یک گشایش فوق‌العاده استراتژیک.",
-          link: "openings/nimzo-indian.html",
+          name: "دفاع آلخین (Alekhine's Defense)",
+          firstMove: "e4",
+          variations: [
+            { name: "Normal Variation", moves: ["e4", "Nf6", "e5", "Nd5"] },
+            {
+              name: "Modern Variation",
+              moves: ["e4", "Nf6", "e5", "Nd5", "d4", "d6", "Nf3", "Bg4"],
+            },
+            {
+              name: "Exchange Variation",
+              moves: ["e4", "Nf6", "e5", "Nd5", "d4", "d6", "c4", "Nb6", "f4"],
+            },
+            {
+              name: "Modern, Main Line",
+              moves: [
+                "e4",
+                "Nf6",
+                "e5",
+                "Nd5",
+                "d4",
+                "d6",
+                "Nf3",
+                "dxe5",
+                "Nxe5",
+                "c6",
+              ],
+            },
+            {
+              name: "Scandinavian Variation",
+              moves: [
+                "e4",
+                "Nf6",
+                "e5",
+                "Nd5",
+                "c4",
+                "Nb6",
+                "d4",
+                "d6",
+                "exd6",
+                "cxd6",
+              ],
+            },
+          ],
         },
         {
-          id: "english",
-          name: "گشایش انگلیسی",
-          english: "English Opening",
-          icon: "fa-flag-checkered",
-          desc: "1.c4 – انعطاف‌پذیر و مدرن.",
-          link: "openings/english.html",
+          name: "گامبی شاه (King's Gambit)",
+          firstMove: "e4",
+          variations: [
+            { name: "Accepted", moves: ["e4", "e5", "f4", "exf4"] },
+            {
+              name: "Accepted: King's Knight Gambit",
+              moves: ["e4", "e5", "f4", "exf4", "Nf3"],
+            },
+            {
+              name: "Declined: Falkbeer Countergambit",
+              moves: ["e4", "e5", "f4", "d5"],
+            },
+            {
+              name: "Declined: Falkbeer Countergambit Accepted",
+              moves: ["e4", "e5", "f4", "d5", "exd5", "e4"],
+            },
+            {
+              name: "Accepted: Bishop's Gambit",
+              moves: ["e4", "e5", "f4", "exf4", "Bc4"],
+            },
+          ],
+        },
+        {
+          name: "بازی اسکاچ (Scotch Game)",
+          firstMove: "e4",
+          variations: [
+            {
+              name: "Schmidt Variation",
+              moves: ["e4", "e5", "Nf3", "Nc6", "d4", "exd4", "Nxd4", "Bc5"],
+            },
+            {
+              name: "Classical Variation",
+              moves: ["e4", "e5", "Nf3", "Nc6", "d4", "exd4", "Nxd4", "Nf6"],
+            },
+            {
+              name: "Scotch Gambit, Dubois Réti Defense",
+              moves: [
+                "e4",
+                "e5",
+                "Nf3",
+                "Nc6",
+                "d4",
+                "exd4",
+                "Bc4",
+                "Bc5",
+                "c3",
+                "dxc3",
+                "Nxc3",
+              ],
+            },
+            {
+              name: "Scotch Gambit",
+              moves: ["e4", "e5", "Nf3", "Nc6", "d4", "exd4", "Bc4"],
+            },
+            {
+              name: "Schmidt, Mieses Variation",
+              moves: [
+                "e4",
+                "e5",
+                "Nf3",
+                "Nc6",
+                "d4",
+                "exd4",
+                "Nxd4",
+                "Bc5",
+                "Be3",
+              ],
+            },
+          ],
+        },
+        {
+          name: "بازی وین (Vienna Game)",
+          firstMove: "e4",
+          variations: [
+            { name: "Falkbeer Variation", moves: ["e4", "e5", "Nc3", "Nf6"] },
+            { name: "Max Lange Defense", moves: ["e4", "e5", "Nc3", "Nc6"] },
+            {
+              name: "Falkbeer, Stanley Variation",
+              moves: ["e4", "e5", "Nc3", "Nf6", "f4"],
+            },
+            {
+              name: "Falkbeer, Mieses Variation",
+              moves: ["e4", "e5", "Nc3", "Nf6", "g3"],
+            },
+            {
+              name: "Falkbeer, Vienna Gambit",
+              moves: ["e4", "e5", "Nc3", "Nf6", "f4", "d5"],
+            },
+          ],
+        },
+        {
+          name: "گامبی وزیر (Queen's Gambit)",
+          firstMove: "d4",
+          variations: [
+            { name: "Declined", moves: ["d4", "d5", "c4", "e6"] },
+            {
+              name: "Declined: Three Knights Variation",
+              moves: ["d4", "d5", "c4", "e6", "Nc3", "Nf6"],
+            },
+            {
+              name: "Declined: Queen's Knight Variation",
+              moves: ["d4", "d5", "c4", "e6", "Nc3", "Be7"],
+            },
+            { name: "Accepted", moves: ["d4", "d5", "c4", "dxc4"] },
+            {
+              name: "Declined: Exchange Variation",
+              moves: ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "cxd5", "exd5"],
+            },
+          ],
+        },
+        {
+          name: "دفاع اسلاو (Slav Defense)",
+          firstMove: "d4",
+          variations: [
+            { name: "Modern Line", moves: ["d4", "d5", "c4", "c6"] },
+            {
+              name: "Modern, Three Knights Variation",
+              moves: ["d4", "d5", "c4", "c6", "Nf3", "Nf6", "Nc3"],
+            },
+            {
+              name: "Modern, Quiet Variation",
+              moves: ["d4", "d5", "c4", "c6", "Nf3", "Nf6", "e3"],
+            },
+            {
+              name: "Modern, Two Knights Attack",
+              moves: [
+                "d4",
+                "d5",
+                "c4",
+                "c6",
+                "Nf3",
+                "Nf6",
+                "Nc3",
+                "dxc4",
+                "e4",
+              ],
+            },
+            {
+              name: "Modern, Alapin Variation",
+              moves: ["d4", "d5", "c4", "c6", "Nf3", "Nf6", "e3", "Bg4"],
+            },
+          ],
+        },
+        {
+          name: "دفاع هند شاه (King's Indian Defense)",
+          firstMove: "d4",
+          variations: [
+            {
+              name: "Normal Variation",
+              moves: ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "e4", "d6"],
+            },
+            {
+              name: "Orthodox Variation",
+              moves: [
+                "d4",
+                "Nf6",
+                "c4",
+                "g6",
+                "Nc3",
+                "Bg7",
+                "e4",
+                "d6",
+                "Nf3",
+                "O-O",
+                "Be2",
+                "e5",
+              ],
+            },
+            {
+              name: "Fianchetto, Yugoslav, Panno System",
+              moves: [
+                "d4",
+                "Nf6",
+                "c4",
+                "g6",
+                "Nf3",
+                "Bg7",
+                "g3",
+                "O-O",
+                "Bg2",
+                "d6",
+                "O-O",
+                "Nc6",
+              ],
+            },
+            {
+              name: "Standard Development",
+              moves: [
+                "d4",
+                "Nf6",
+                "c4",
+                "g6",
+                "Nc3",
+                "Bg7",
+                "e4",
+                "d6",
+                "Nf3",
+                "O-O",
+                "Be2",
+                "e5",
+              ],
+            },
+            {
+              name: "Sämisch Variation",
+              moves: ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "e4", "d6", "f3"],
+            },
+          ],
+        },
+        {
+          name: "دفاع نیمزو-هندی (Nimzo-Indian Defense)",
+          firstMove: "d4",
+          variations: [
+            {
+              name: "Normal Line",
+              moves: ["d4", "Nf6", "c4", "e6", "Nc3", "Bb4"],
+            },
+            {
+              name: "Classical Variation",
+              moves: ["d4", "Nf6", "c4", "e6", "Nc3", "Bb4", "Qc2"],
+            },
+            {
+              name: "Bishop Attack",
+              moves: ["d4", "Nf6", "c4", "e6", "Nc3", "Bb4", "Bd2"],
+            },
+            {
+              name: "Hübner Variation",
+              moves: [
+                "d4",
+                "Nf6",
+                "c4",
+                "e6",
+                "Nc3",
+                "Bb4",
+                "e3",
+                "c5",
+                "Bd3",
+                "Nc6",
+                "Nf3",
+                "Bxc3+",
+                "bxc3",
+                "d6",
+              ],
+            },
+            {
+              name: "Bishop Attack, Classical Defense",
+              moves: ["d4", "Nf6", "c4", "e6", "Nc3", "Bb4", "Bd2", "O-O"],
+            },
+          ],
+        },
+        {
+          name: "دفاع هند وزیر (Queen's Indian Defense)",
+          firstMove: "d4",
+          variations: [
+            {
+              name: "Fianchetto Variation",
+              moves: [
+                "d4",
+                "Nf6",
+                "c4",
+                "e6",
+                "Nf3",
+                "b6",
+                "g3",
+                "Bb7",
+                "Bg2",
+                "Be7",
+              ],
+            },
+            {
+              name: "Fianchetto, Nimzowitsch Variation",
+              moves: [
+                "d4",
+                "Nf6",
+                "c4",
+                "e6",
+                "Nf3",
+                "b6",
+                "g3",
+                "Bb7",
+                "Bg2",
+                "Be7",
+                "O-O",
+                "O-O",
+                "b3",
+              ],
+            },
+            {
+              name: "Fianchetto, Traditional Line",
+              moves: [
+                "d4",
+                "Nf6",
+                "c4",
+                "e6",
+                "Nf3",
+                "b6",
+                "g3",
+                "Bb7",
+                "Bg2",
+                "Be7",
+                "O-O",
+                "O-O",
+                "Nc3",
+              ],
+            },
+            {
+              name: "Petrosian Variation",
+              moves: ["d4", "Nf6", "c4", "e6", "Nf3", "b6", "a3"],
+            },
+            {
+              name: "Fianchetto, Classical Variation",
+              moves: [
+                "d4",
+                "Nf6",
+                "c4",
+                "e6",
+                "Nf3",
+                "b6",
+                "g3",
+                "Bb7",
+                "Bg2",
+                "Be7",
+                "O-O",
+                "O-O",
+                "Nc3",
+                "Ne4",
+              ],
+            },
+          ],
+        },
+        {
+          name: "گشایش کاتالان (Catalan Opening)",
+          firstMove: "d4",
+          variations: [
+            {
+              name: "Closed",
+              moves: [
+                "d4",
+                "Nf6",
+                "c4",
+                "e6",
+                "g3",
+                "d5",
+                "Bg2",
+                "Be7",
+                "Nf3",
+                "O-O",
+                "O-O",
+              ],
+            },
+            {
+              name: "Closed, Main Line",
+              moves: [
+                "d4",
+                "Nf6",
+                "c4",
+                "e6",
+                "g3",
+                "d5",
+                "Bg2",
+                "Be7",
+                "Nf3",
+                "O-O",
+                "O-O",
+                "c6",
+                "Qc2",
+                "Nbd7",
+                "Rd1",
+              ],
+            },
+          ],
+        },
+        {
+          name: "دفاع بوگو-هندی (Bogo-Indian Defense)",
+          firstMove: "d4",
+          variations: [
+            {
+              name: "Grünfeld Variation",
+              moves: ["d4", "Nf6", "c4", "e6", "Nf3", "Bb4+", "Bd2", "Be7"],
+            },
+            {
+              name: "Nimzowitsch Variation",
+              moves: ["d4", "Nf6", "c4", "e6", "Nf3", "Bb4+", "Nbd2"],
+            },
+            {
+              name: "Wade-Smyslov Variation",
+              moves: [
+                "d4",
+                "Nf6",
+                "c4",
+                "e6",
+                "Nf3",
+                "Bb4+",
+                "Nc3",
+                "O-O",
+                "a3",
+                "Be7",
+              ],
+            },
+            {
+              name: "Vītoliņš Variation",
+              moves: ["d4", "Nf6", "c4", "e6", "Nf3", "Bb4+", "Nbd2", "b6"],
+            },
+            {
+              name: "Exchange Variation",
+              moves: [
+                "d4",
+                "Nf6",
+                "c4",
+                "e6",
+                "Nf3",
+                "Bb4+",
+                "Bd2",
+                "Bxd2+",
+                "Qxd2",
+              ],
+            },
+          ],
+        },
+        {
+          name: "دفاع گرونفلد (Grünfeld Defense)",
+          firstMove: "d4",
+          variations: [
+            {
+              name: "Exchange Variation",
+              moves: [
+                "d4",
+                "Nf6",
+                "c4",
+                "g6",
+                "Nc3",
+                "d5",
+                "cxd5",
+                "Nxd5",
+                "e4",
+                "Nxc3",
+                "bxc3",
+                "Bg7",
+              ],
+            },
+            {
+              name: "Three Knights Variation",
+              moves: [
+                "d4",
+                "Nf6",
+                "c4",
+                "g6",
+                "Nc3",
+                "d5",
+                "Nf3",
+                "Bg7",
+                "Qb3",
+              ],
+            },
+            {
+              name: "Exchange, Modern Exchange Variation",
+              moves: [
+                "d4",
+                "Nf6",
+                "c4",
+                "g6",
+                "Nc3",
+                "d5",
+                "cxd5",
+                "Nxd5",
+                "e4",
+                "Nxc3",
+                "bxc3",
+                "Bg7",
+                "Bc4",
+              ],
+            },
+            {
+              name: "Neo-Grünfeld: Classical, Original Defense",
+              moves: ["d4", "Nf6", "c4", "g6", "Nc3", "d5", "Qb3"],
+            },
+            {
+              name: "Neo-Grünfeld: Classical Variation",
+              moves: [
+                "d4",
+                "Nf6",
+                "c4",
+                "g6",
+                "Nc3",
+                "d5",
+                "Nf3",
+                "Bg7",
+                "Qb3",
+                "dxc4",
+                "Qxc4",
+                "O-O",
+              ],
+            },
+          ],
+        },
+        {
+          name: "دفاع هلندی (Dutch Defense)",
+          firstMove: "d4",
+          variations: [
+            {
+              name: "Fianchetto Attack",
+              moves: [
+                "d4",
+                "f5",
+                "g3",
+                "Nf6",
+                "Bg2",
+                "g6",
+                "Nf3",
+                "Bg7",
+                "O-O",
+                "O-O",
+              ],
+            },
+            {
+              name: "Classical Variation",
+              moves: ["d4", "f5", "c4", "Nf6", "Nc3", "e6"],
+            },
+            {
+              name: "Fianchetto, Semi-Leningrad Variation",
+              moves: [
+                "d4",
+                "f5",
+                "g3",
+                "Nf6",
+                "Bg2",
+                "g6",
+                "Nf3",
+                "Bg7",
+                "O-O",
+                "O-O",
+                "c4",
+                "d6",
+              ],
+            },
+            { name: "Normal Variation", moves: ["d4", "f5"] },
+            {
+              name: "Raphael Variation",
+              moves: ["d4", "f5", "Nc3", "Nf6", "Bg5", "e6"],
+            },
+          ],
+        },
+        {
+          name: "حمله ترومپوسکی (Trompowsky Attack)",
+          firstMove: "d4",
+          variations: [
+            { name: "Classical Defense", moves: ["d4", "Nf6", "Bg5", "e6"] },
+            {
+              name: "Classical, Big Center Variation",
+              moves: [
+                "d4",
+                "Nf6",
+                "Bg5",
+                "e6",
+                "e4",
+                "h6",
+                "Bxf6",
+                "Qxf6",
+                "c3",
+              ],
+            },
+            {
+              name: "Raptor Variation",
+              moves: ["d4", "Nf6", "Bg5", "c5", "d5", "Qb6"],
+            },
+            {
+              name: "Edge Variation",
+              moves: ["d4", "Nf6", "Bg5", "Ne4", "Bh4", "c5", "f3", "Nf6"],
+            },
+            {
+              name: "Poisoned Pawn Variation",
+              moves: ["d4", "Nf6", "Bg5", "c5", "d5", "Qb6", "Nc3", "Qxb2"],
+            },
+          ],
+        },
+        {
+          name: "گامبی بنکو (Benko Gambit)",
+          firstMove: "d4",
+          variations: [
+            {
+              name: "Half-Accepted",
+              moves: ["d4", "Nf6", "c4", "c5", "d5", "b5", "cxb5", "a6"],
+            },
+            {
+              name: "Fully-Accepted",
+              moves: [
+                "d4",
+                "Nf6",
+                "c4",
+                "c5",
+                "d5",
+                "b5",
+                "cxb5",
+                "a6",
+                "bxa6",
+                "Bxa6",
+                "Nc3",
+                "d6",
+              ],
+            },
+            {
+              name: "Declined: Main Line",
+              moves: ["d4", "Nf6", "c4", "c5", "d5", "b5", "Nf3"],
+            },
+            {
+              name: "Half-Accepted: Pawn Return Variation",
+              moves: ["d4", "Nf6", "c4", "c5", "d5", "b5", "cxb5", "a6", "e3"],
+            },
+            {
+              name: "Half-Accepted: Modern Variation",
+              moves: [
+                "d4",
+                "Nf6",
+                "c4",
+                "c5",
+                "d5",
+                "b5",
+                "cxb5",
+                "a6",
+                "Nc3",
+                "axb5",
+                "Nxb5",
+                "Ba6",
+              ],
+            },
+          ],
+        },
+        {
+          name: "سیستم لندن (London System)",
+          firstMove: "d4",
+          variations: [
+            {
+              name: "Accelerated London System",
+              moves: ["d4", "d5", "Bf4", "Nf6", "Nf3", "e6", "e3"],
+            },
+            {
+              name: "Indian Game: London System",
+              moves: ["d4", "Nf6", "Bf4", "g6", "Nf3", "Bg7", "e3", "O-O"],
+            },
+            {
+              name: "East Indian, London System",
+              moves: ["d4", "Nf6", "Bf4", "d6", "Nf3", "Bg4"],
+            },
+            {
+              name: "Accelerated London, Steinitz Countergambit",
+              moves: ["d4", "d5", "Bf4", "c5", "e3", "Nc6", "c3", "Qb6"],
+            },
+            {
+              name: "Poisoned Pawn Variation",
+              moves: [
+                "d4",
+                "d5",
+                "Bf4",
+                "c5",
+                "e3",
+                "Nc6",
+                "c3",
+                "Qb6",
+                "Qb3",
+                "cxd4",
+              ],
+            },
+          ],
+        },
+        {
+          name: "دفاع بنونی (Benoni Defense)",
+          firstMove: "d4",
+          variations: [
+            {
+              name: "Modern Variation",
+              moves: [
+                "d4",
+                "Nf6",
+                "c4",
+                "c5",
+                "d5",
+                "e6",
+                "Nc3",
+                "exd5",
+                "cxd5",
+                "d6",
+                "e4",
+                "g6",
+              ],
+            },
+          ],
+        },
+        {
+          name: "گشایش رتی (Réti Opening)",
+          firstMove: "other",
+          variations: [
+            {
+              name: "King's Indian Attack",
+              moves: ["Nf3", "d5", "g3", "Nf6", "Bg2", "c5"],
+            },
+            { name: "Sicilian Invitation", moves: ["Nf3", "c5"] },
+            {
+              name: "King's Indian Attack, Symmetrical Defense",
+              moves: ["Nf3", "Nf6", "g3", "c5", "Bg2", "Nc6", "O-O", "e5"],
+            },
+            { name: "Réti Gambit", moves: ["Nf3", "d5", "c4", "dxc4"] },
+            {
+              name: "Kingside Fianchetto Variation",
+              moves: ["Nf3", "d5", "g3", "c6", "Bg2", "Bg4"],
+            },
+          ],
+        },
+        {
+          name: "گشایش انگلیسی (English Opening)",
+          firstMove: "other",
+          variations: [
+            {
+              name: "Anglo-Indian, King's Knight Variation",
+              moves: ["c4", "Nf6", "Nc3", "g6", "Nf3"],
+            },
+            { name: "Anglo-Indian Defense", moves: ["c4", "Nf6", "Nc3", "e6"] },
+            { name: "King's English Variation", moves: ["c4", "e5"] },
+            {
+              name: "Anglo-Indian, Queen's Knight Variation",
+              moves: ["c4", "Nf6", "Nc3", "e6", "e4"],
+            },
+            { name: "Agincourt Defense", moves: ["c4", "e6", "Nf3", "d5"] },
+          ],
+        },
+        {
+          name: "گشایش برد (Bird's Opening)",
+          firstMove: "other",
+          variations: [
+            { name: "Dutch Variation", moves: ["f4", "d5"] },
+            { name: "From's Gambit", moves: ["f4", "e5"] },
+            {
+              name: "From's Gambit, Lasker Variation",
+              moves: ["f4", "e5", "fxe5", "d6"],
+            },
+            {
+              name: "Dutch, Lasker Variation",
+              moves: ["f4", "d5", "Nf3", "c5", "g3", "Nc6", "Bg2"],
+            },
+            { name: "Horsefly Defense", moves: ["f4", "Nf6"] },
+          ],
+        },
+        {
+          name: "حمله هند شاه (King's Indian Attack)",
+          firstMove: "other",
+          variations: [
+            {
+              name: "Yugoslav Variation",
+              moves: ["Nf3", "d5", "g3", "Nf6", "Bg2", "c5", "O-O"],
+            },
+            {
+              name: "Double Fianchetto Variation",
+              moves: [
+                "Nf3",
+                "d5",
+                "g3",
+                "Nf6",
+                "Bg2",
+                "c5",
+                "b3",
+                "Bb7",
+                "Bb2",
+              ],
+            },
+            {
+              name: "Keres Variation",
+              moves: [
+                "Nf3",
+                "d5",
+                "g3",
+                "Nf6",
+                "Bg2",
+                "c5",
+                "O-O",
+                "Nc6",
+                "d3",
+                "e5",
+              ],
+            },
+            {
+              name: "Sicilian Variation",
+              moves: [
+                "Nf3",
+                "c5",
+                "g3",
+                "Nc6",
+                "Bg2",
+                "g6",
+                "O-O",
+                "Bg7",
+                "d3",
+              ],
+            },
+            {
+              name: "French Variation",
+              moves: ["Nf3", "e6", "g3", "d5", "Bg2", "Nf6", "O-O", "Be7"],
+            },
+          ],
+        },
+        {
+          name: "فیل‌بند شاه (King's Fianchetto Opening)",
+          firstMove: "other",
+          variations: [
+            {
+              name: "Indian Defense",
+              moves: ["g3", "Nf6", "Bg2", "d5", "Nf3"],
+            },
+            { name: "Symmetrical Variation", moves: ["g3", "g6"] },
+            { name: "Sicilian Invitation", moves: ["g3", "c5"] },
+            { name: "Slav Formation", moves: ["g3", "c6"] },
+            { name: "Dutch Defense", moves: ["g3", "f5"] },
+          ],
+        },
+        {
+          name: "حمله لارسن (Nimzowitsch-Larsen Attack)",
+          firstMove: "other",
+          variations: [
+            {
+              name: "Modern Variation",
+              moves: ["b3", "e5", "Bb2", "Nc6", "e3"],
+            },
+            {
+              name: "Classical Variation",
+              moves: ["b3", "d5", "Bb2", "c5", "e3", "Nf6"],
+            },
+            {
+              name: "Indian Variation",
+              moves: ["b3", "Nf6", "Bb2", "g6", "e3", "Bg7"],
+            },
+            {
+              name: "English Variation",
+              moves: ["b3", "c5", "Bb2", "Nc6", "e3", "Nf6", "Bb5"],
+            },
+            { name: "Symmetrical Variation", moves: ["b3", "b6"] },
+          ],
+        },
+        {
+          name: "گشایش لهستانی (Polish Opening)",
+          firstMove: "other",
+          variations: [
+            {
+              name: "Kucharkowski-Meybohm Gambit",
+              moves: ["b4", "c5", "bxc5", "e5", "Bb2", "Bxc5"],
+            },
+            { name: "Czech Defense", moves: ["b4", "e5", "Bb2", "Bxb4"] },
+            {
+              name: "King's Indian Defense",
+              moves: ["b4", "Nf6", "Bb2", "g6"],
+            },
+            {
+              name: "Zukertort System",
+              moves: ["b4", "Nf6", "Bb2", "e6", "a3"],
+            },
+            { name: "Outflank Variation", moves: ["b4", "c6", "Bb2", "d5"] },
+          ],
+        },
+        {
+          name: "گشایش گروب (Grob Opening)",
+          firstMove: "other",
+          variations: [{ name: "Main Line", moves: ["g4", "d5", "Bg2", "c6"] }],
         },
       ];
-      function renderCards() {
-        const grid = document.getElementById("openingsGrid");
-        grid.innerHTML = "";
-        for (const op of openingsData) {
-          const card = document.createElement("div");
-          card.className = "opening-card";
-          card.innerHTML = `
-                <div class="card-image"><i class="fas ${op.icon}"></i></div>
-                <div class="card-content">
-                    <div class="card-title">${op.name}</div>
-                    <div class="card-sub">${op.english}</div>
-                    <div class="card-description">${op.desc}</div>
-                    <a href="${op.link}" class="btn-detail">مشاهده جزئیات <i class="fas fa-arrow-left"></i></a>
-                </div>
-            `;
-          grid.appendChild(card);
+
+      let currentModalGame = null;
+      let currentModalMoves = [];
+      let currentModalIndex = 0;
+      let modalCanvas = null;
+      let modalCtx = null;
+
+      // ---------- رسم تخته در مودال ----------
+      function drawModalBoard() {
+        if (!modalCanvas || !modalCtx || !currentModalGame) return;
+        const board = currentModalGame.board();
+        const cellSize = modalCanvas.width / 8;
+        for (let i = 0; i < 8; i++) {
+          for (let j = 0; j < 8; j++) {
+            const isLight = (i + j) % 2 === 0;
+            modalCtx.fillStyle = isLight ? "#f0d9b5" : "#b58863";
+            modalCtx.fillRect(j * cellSize, i * cellSize, cellSize, cellSize);
+            const piece = board[i][j];
+            if (piece) {
+              const code =
+                (piece.color === "w" ? "w" : "b") + piece.type.toUpperCase();
+              const img = pieceImages[code];
+              if (img && img.complete) {
+                modalCtx.drawImage(
+                  img,
+                  j * cellSize,
+                  i * cellSize,
+                  cellSize,
+                  cellSize,
+                );
+              } else {
+                modalCtx.font = `${cellSize * 0.55}px Arial`;
+                modalCtx.fillStyle = "#222";
+                modalCtx.textAlign = "center";
+                modalCtx.textBaseline = "middle";
+                const sym =
+                  {
+                    wK: "♔",
+                    wQ: "♕",
+                    wR: "♖",
+                    wB: "♗",
+                    wN: "♘",
+                    wP: "♙",
+                    bK: "♚",
+                    bQ: "♛",
+                    bR: "♜",
+                    bB: "♝",
+                    bN: "♞",
+                    bP: "♟",
+                  }[code] || "";
+                modalCtx.fillText(
+                  sym,
+                  j * cellSize + cellSize / 2,
+                  i * cellSize + cellSize / 2,
+                );
+              }
+            }
+          }
         }
       }
-      renderCards();
 
+      function updateModalPosition() {
+        currentModalGame = new Chess();
+        for (let i = 0; i < currentModalIndex; i++) {
+          currentModalGame.move(currentModalMoves[i], { sloppy: true });
+        }
+        drawModalBoard();
+      }
+
+      function showModal(title, moves) {
+        currentModalMoves = moves;
+        currentModalIndex = 0;
+        document.getElementById("modalTitle").innerText = title;
+        currentModalGame = new Chess();
+        updateModalPosition();
+        document.getElementById("boardModal").classList.add("active");
+      }
+
+      function closeModal() {
+        document.getElementById("boardModal").classList.remove("active");
+      }
+
+      function modalPrev() {
+        if (currentModalIndex > 0) {
+          currentModalIndex--;
+          updateModalPosition();
+        }
+      }
+      function modalNext() {
+        if (currentModalIndex < currentModalMoves.length) {
+          currentModalIndex++;
+          updateModalPosition();
+        }
+      }
+
+      // ---------- رندر گشایش‌ها در صفحه ----------
+      let currentFilter = "all";
+      let searchTerm = "";
+
+      function renderOpenings() {
+        const container = document.getElementById("openingsGrid");
+        container.innerHTML = "";
+        let filtered = openingsDatabase.filter((group) => {
+          if (currentFilter !== "all" && group.firstMove !== currentFilter)
+            return false;
+          if (searchTerm) {
+            const matchName = group.name.includes(searchTerm);
+            const matchVar = group.variations.some((v) =>
+              v.name.includes(searchTerm),
+            );
+            if (!matchName && !matchVar) return false;
+          }
+          return true;
+        });
+        if (filtered.length === 0) {
+          container.innerHTML =
+            '<div class="no-result">❌ هیچ گشایشی با این جستجو یافت نشد.</div>';
+          return;
+        }
+        filtered.forEach((group) => {
+          const groupDiv = document.createElement("div");
+          groupDiv.className = "opening-group";
+          groupDiv.innerHTML = `
+                <div class="group-header">
+                    <h3>${group.name}</h3>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="group-content">
+                    <div class="variations-list">
+                        ${group.variations.map((v) => `<div class="variation-item" data-name="${v.name}" data-moves='${JSON.stringify(v.moves)}'>${v.name}</div>`).join("")}
+                    </div>
+                </div>
+            `;
+          container.appendChild(groupDiv);
+          const header = groupDiv.querySelector(".group-header");
+          const content = groupDiv.querySelector(".group-content");
+          header.addEventListener("click", () => {
+            content.classList.toggle("open");
+            const icon = header.querySelector("i");
+            icon.style.transform = content.classList.contains("open")
+              ? "rotate(180deg)"
+              : "rotate(0deg)";
+          });
+        });
+        // اضافه کردن رویداد کلیک به آیتم‌های واریانت
+        document.querySelectorAll(".variation-item").forEach((item) => {
+          item.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const name = item.getAttribute("data-name");
+            const movesJson = item.getAttribute("data-moves");
+            const moves = JSON.parse(movesJson);
+            showModal(name, moves);
+          });
+        });
+      }
+
+      // جستجو و فیلتر
+      document.getElementById("searchInput").addEventListener("input", (e) => {
+        searchTerm = e.target.value.trim();
+        renderOpenings();
+      });
+      document.querySelectorAll(".filter-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document
+            .querySelectorAll(".filter-btn")
+            .forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          currentFilter = btn.getAttribute("data-filter");
+          renderOpenings();
+        });
+      });
+
+      // مودال رویدادها
+      modalCanvas = document.getElementById("modalCanvas");
+      modalCtx = modalCanvas.getContext("2d");
+      document
+        .getElementById("modalPrevBtn")
+        .addEventListener("click", modalPrev);
+      document
+        .getElementById("modalNextBtn")
+        .addEventListener("click", modalNext);
+      document
+        .getElementById("closeModalBtn")
+        .addEventListener("click", closeModal);
+      // بستن با کلیک روی پس‌زمینه
+      document.getElementById("boardModal").addEventListener("click", (e) => {
+        if (e.target === document.getElementById("boardModal")) closeModal();
+      });
+
+      // منوی همبرگر
       const menuToggle = document.getElementById("menuToggle");
       const mainNav = document.getElementById("mainNav");
       if (menuToggle)
@@ -443,6 +1878,10 @@
           }
         });
       }
+
+      loadPieces().then(() => {
+        renderOpenings();
+      });
     </script>
   </body>
 </html>
