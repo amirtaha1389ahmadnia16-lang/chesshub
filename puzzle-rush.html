@@ -7,17 +7,14 @@
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
     <title>ChessHub | پازل عجله‌ای (Puzzle Rush)</title>
-    <!-- Font Awesome 6 -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
     />
-    <!-- Vazir Font -->
     <link
       href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css"
       rel="stylesheet"
     />
-    <!-- chess.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
     <style>
       * {
@@ -82,7 +79,7 @@
         font-weight: 500;
         padding: 0.6rem 1rem;
         border-radius: 40px;
-        transition: all 0.2s;
+        transition: 0.2s;
         font-size: 0.9rem;
         display: inline-flex;
         align-items: center;
@@ -115,7 +112,7 @@
         list-style: none;
         opacity: 0;
         visibility: hidden;
-        transition: all 0.2s ease;
+        transition: 0.2s;
         z-index: 100;
         border: 1px solid #e2e8f0;
       }
@@ -200,7 +197,6 @@
         border-radius: 12px;
         overflow: hidden;
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-        transition: opacity 0.3s;
       }
       .board-locked {
         opacity: 0.6;
@@ -295,6 +291,9 @@
         color: #4a627a;
       }
       @media (max-width: 768px) {
+        body {
+          padding: 10px;
+        }
         .menu-toggle {
           display: block;
         }
@@ -340,6 +339,16 @@
           max-width: 100%;
           margin: 0 10px;
         }
+        #chessboard {
+          max-width: 100%;
+        }
+        .stats {
+          font-size: 0.8rem;
+        }
+        .mode-btn {
+          padding: 6px 16px;
+          font-size: 0.8rem;
+        }
       }
     </style>
   </head>
@@ -363,7 +372,6 @@
                 ></a>
                 <ul class="dropdown-menu">
                   <li><a href="puzzle-rush.html">پازل عجله‌ای</a></li>
-                  <!-- حذف شد: پازل سفارشی -->
                 </ul>
               </li>
               <li class="dropdown">
@@ -442,37 +450,33 @@
     </div>
 
     <script>
-      // ---------- داده‌ها ----------
-      let puzzlesList = [];
-      let currentPuzzle = null;
-      let game = null;
-      let selectedSquare = null;
-      let currentMode = null;
-      let timeLeft = 0;
-      let mistakes = 0;
-      let gameActive = false;
-      let timerInterval = null;
-      let solvedCount = 0;
-      let bestRecord = { 3: 0, 5: 0, unlimited: 0 };
-      let isExecutingAutoMoves = false;
-      let currentMoveIndex = 0;
-      let isLocked = false;
-      let lockTimer = null;
-
-      const boardDiv = document.getElementById("chessboard");
-      const msgDiv = document.getElementById("message");
-      const puzzleCounterSpan = document.getElementById("puzzleCounter");
-      const timerDisplaySpan = document.getElementById("timerDisplay");
-      const mistakeDisplaySpan = document.getElementById("mistakeDisplay");
-      const turnDisplaySpan = document.getElementById("turnDisplay");
-      const recordDisplayDiv = document.getElementById("recordDisplay");
-      const resetBtn = document.getElementById("resetGameBtn");
-      const hintBtn = document.getElementById("hintBtn");
-
-      // ---------- رکوردها ----------
+      let puzzlesList = [],
+        currentPuzzle = null,
+        game = null,
+        selectedSquare = null,
+        currentMode = null,
+        timeLeft = 0,
+        mistakes = 0,
+        gameActive = false,
+        timerInterval = null,
+        solvedCount = 0,
+        bestRecord = { 3: 0, 5: 0, unlimited: 0 },
+        isExecutingAutoMoves = false,
+        currentMoveIndex = 0,
+        isLocked = false,
+        lockTimer = null;
+      const boardDiv = document.getElementById("chessboard"),
+        msgDiv = document.getElementById("message"),
+        puzzleCounterSpan = document.getElementById("puzzleCounter"),
+        timerDisplaySpan = document.getElementById("timerDisplay"),
+        mistakeDisplaySpan = document.getElementById("mistakeDisplay"),
+        turnDisplaySpan = document.getElementById("turnDisplay"),
+        recordDisplayDiv = document.getElementById("recordDisplay"),
+        resetBtn = document.getElementById("resetGameBtn"),
+        hintBtn = document.getElementById("hintBtn");
       function loadRecords() {
         const stored = localStorage.getItem("chesshub_puzzle_records");
-        if (stored) {
+        if (stored)
           try {
             const parsed = JSON.parse(stored);
             if (parsed["3"]) bestRecord["3"] = parsed["3"];
@@ -480,7 +484,6 @@
             if (parsed["unlimited"])
               bestRecord["unlimited"] = parsed["unlimited"];
           } catch (e) {}
-        }
       }
       function saveRecord(mode, score) {
         if (score > bestRecord[mode]) {
@@ -497,15 +500,9 @@
         if (score === bestRecord[mode] && score > 0) {
           recordDisplayDiv.textContent = `🏆 رکورد جدید ${mode === "unlimited" ? "بی‌زمان" : mode + " دقیقه"}: ${score} پازل! 🏆`;
           recordDisplayDiv.style.display = "block";
-          setTimeout(() => {
-            recordDisplayDiv.style.display = "none";
-          }, 4000);
-        } else {
-          recordDisplayDiv.style.display = "none";
-        }
+          setTimeout(() => (recordDisplayDiv.style.display = "none"), 4000);
+        } else recordDisplayDiv.style.display = "none";
       }
-
-      // ---------- بارگذاری پازل‌ها ----------
       async function loadPuzzles() {
         try {
           const response = await fetch("puzzles.txt");
@@ -513,25 +510,21 @@
           const lines = text.split("\n");
           for (let line of lines) {
             line = line.trim();
-            if (line === "") continue;
+            if (!line) continue;
             const parts = line.split(",");
             if (parts.length >= 3) {
               const fen = parts[1].trim();
               const movesStr = parts[2].trim();
               const movesUCI = movesStr.split(/\s+/);
-              if (fen && movesUCI.length > 0) {
-                puzzlesList.push({ fen, movesUCI });
-              }
+              if (fen && movesUCI.length) puzzlesList.push({ fen, movesUCI });
             }
           }
-          console.log(`Loaded ${puzzlesList.length} puzzles from file`);
           if (puzzlesList.length === 0) useSamplePuzzles();
         } catch (err) {
-          console.error("خطا در بارگذاری فایل:", err);
+          console.error(err);
           useSamplePuzzles();
         }
       }
-
       function useSamplePuzzles() {
         puzzlesList = [
           {
@@ -543,10 +536,7 @@
             movesUCI: ["f3e5", "c6e5", "c4e5"],
           },
         ];
-        console.log("Using sample puzzles (2 items)");
       }
-
-      // ---------- توابع کمکی ----------
       function showMessage(text, type) {
         msgDiv.textContent = text;
         msgDiv.className = `message ${type}`;
@@ -554,14 +544,10 @@
           if (msgDiv.textContent === text) msgDiv.className = "message";
         }, 3000);
       }
-
       function stopTimer() {
-        if (timerInterval) {
-          clearInterval(timerInterval);
-          timerInterval = null;
-        }
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = null;
       }
-
       function startTimer(seconds) {
         stopTimer();
         timeLeft = seconds;
@@ -580,25 +566,19 @@
           }
         }, 1000);
       }
-
       function updateTimerDisplay() {
-        if (currentMode === "unlimited") {
-          timerDisplaySpan.textContent = "⏱️ ∞";
-        } else {
-          const minutes = Math.floor(timeLeft / 60);
-          const seconds = timeLeft % 60;
-          timerDisplaySpan.textContent = `⏱️ ${minutes}:${seconds.toString().padStart(2, "0")}`;
+        if (currentMode === "unlimited") timerDisplaySpan.textContent = "⏱️ ∞";
+        else {
+          const m = Math.floor(timeLeft / 60),
+            s = timeLeft % 60;
+          timerDisplaySpan.textContent = `⏱️ ${m}:${s.toString().padStart(2, "0")}`;
         }
       }
-
       function updateMistakeDisplay() {
-        if (currentMode === "unlimited") {
+        if (currentMode === "unlimited")
           mistakeDisplaySpan.textContent = `❌ خطا: ${mistakes}/3`;
-        } else {
-          mistakeDisplaySpan.textContent = `❌ خطا: ${mistakes}`;
-        }
+        else mistakeDisplaySpan.textContent = `❌ خطا: ${mistakes}`;
       }
-
       function updateTurnDisplay() {
         if (game && gameActive) {
           const turn = game.turn() === "w" ? "سفید" : "سیاه";
@@ -606,22 +586,18 @@
           turnDisplaySpan.textContent = `${icon} نوبت: ${turn}`;
         }
       }
-
       function getRandomPuzzle() {
-        if (puzzlesList.length === 0) return null;
-        const idx = Math.floor(Math.random() * puzzlesList.length);
-        return puzzlesList[idx];
+        if (!puzzlesList.length) return null;
+        return puzzlesList[Math.floor(Math.random() * puzzlesList.length)];
       }
-
       function uciToSan(uci, fen) {
-        const tempGame = new Chess(fen);
-        const from = uci.substring(0, 2);
-        const to = uci.substring(2, 4);
-        const promotion = uci.length === 5 ? uci[4] : undefined;
-        const move = tempGame.move({ from, to, promotion });
+        const temp = new Chess(fen);
+        const from = uci.slice(0, 2),
+          to = uci.slice(2, 4),
+          promo = uci[4];
+        const move = temp.move({ from, to, promotion: promo });
         return move ? move.san : uci;
       }
-
       function lockBoardTemp() {
         if (isLocked) return;
         isLocked = true;
@@ -641,30 +617,27 @@
           lockTimer = null;
         }, 5000);
       }
-
       async function autoMoveOnce() {
         if (!gameActive) return false;
         if (isExecutingAutoMoves) return false;
         if (currentMoveIndex >= currentPuzzle.movesUCI.length) return false;
-        if (currentMoveIndex % 2 !== 0) return false; // فقط اندیس زوج خودکار
+        if (currentMoveIndex % 2 !== 0) return false;
         isExecutingAutoMoves = true;
         const moveUCI = currentPuzzle.movesUCI[currentMoveIndex];
-        const from = moveUCI.substring(0, 2);
-        const to = moveUCI.substring(2, 4);
-        const promotion = moveUCI.length === 5 ? moveUCI[4] : undefined;
+        const from = moveUCI.slice(0, 2),
+          to = moveUCI.slice(2, 4),
+          promo = moveUCI[4];
         try {
-          const move = game.move({ from, to, promotion });
+          const move = game.move({ from, to, promotion: promo });
           if (move) {
             renderBoard();
             updateTurnDisplay();
             currentMoveIndex++;
-            if (game.game_over()) {
-              if (game.in_checkmate()) {
-                showMessage("🎉 مات! پازل با موفقیت حل شد.", "success");
-                await handlePuzzleSolved();
-                isExecutingAutoMoves = false;
-                return true;
-              }
+            if (game.game_over() && game.in_checkmate()) {
+              showMessage("🎉 مات! پازل با موفقیت حل شد.", "success");
+              await handlePuzzleSolved();
+              isExecutingAutoMoves = false;
+              return true;
             }
             if (currentMoveIndex >= currentPuzzle.movesUCI.length) {
               await handlePuzzleSolved();
@@ -685,7 +658,6 @@
           return false;
         }
       }
-
       async function handlePuzzleSolved() {
         solvedCount++;
         puzzleCounterSpan.textContent = solvedCount;
@@ -703,7 +675,6 @@
           stopTimer();
         }
       }
-
       async function loadPuzzleAndStart(puzzle) {
         if (!puzzle) return false;
         game = new Chess(puzzle.fen);
@@ -717,14 +688,12 @@
         }
         return true;
       }
-
-      // رندر تخته با جهت درست (سفید پایین)
       function renderBoard() {
         if (!game) return;
         const board = game.board();
         boardDiv.innerHTML = "";
         boardDiv.style.display = "grid";
-        boardDiv.style.gridTemplateColumns = "repeat(8, 1fr)";
+        boardDiv.style.gridTemplateColumns = "repeat(8,1fr)";
         for (let i = 7; i >= 0; i--) {
           for (let j = 0; j < 8; j++) {
             const piece = board[i][j];
@@ -771,14 +740,12 @@
           }
         }
         if (selectedSquare) {
-          const selectedEl = document.querySelector(
+          const el = document.querySelector(
             `.square[data-square="${selectedSquare}"]`,
           );
-          if (selectedEl) selectedEl.classList.add("selected");
+          if (el) el.classList.add("selected");
         }
       }
-
-      // حرکت کاربر (فقط اندیس فرد)
       async function onSquareClick(square) {
         if (!gameActive) {
           showMessage("بازی تمام شده، دکمه شروع مجدد را بزنید.", "info");
@@ -869,7 +836,6 @@
           renderBoard();
         }
       }
-
       function showHint() {
         if (!gameActive) {
           showMessage("بازی فعال نیست.", "info");
@@ -880,14 +846,15 @@
           return;
         }
         if (currentPuzzle && currentMoveIndex < currentPuzzle.movesUCI.length) {
-          const expectedUCI = currentPuzzle.movesUCI[currentMoveIndex];
-          const sanMove = uciToSan(expectedUCI, game.fen());
-          showMessage(`💡 حرکت بعدی باید: ${sanMove}`, "hint");
+          const san = uciToSan(
+            currentPuzzle.movesUCI[currentMoveIndex],
+            game.fen(),
+          );
+          showMessage(`💡 حرکت بعدی باید: ${san}`, "hint");
         } else {
           showMessage("پازل تمام شد!", "success");
         }
       }
-
       async function startNewGame(mode) {
         stopTimer();
         if (lockTimer) clearTimeout(lockTimer);
@@ -912,7 +879,6 @@
         else timerDisplaySpan.textContent = "⏱️ ∞";
         currentMode = mode;
       }
-
       function setMode(mode) {
         startNewGame(mode);
         document.querySelectorAll(".mode-btn").forEach((btn) => {
@@ -920,32 +886,32 @@
           else btn.classList.remove("active");
         });
       }
-
       resetBtn.addEventListener("click", () => {
         if (currentMode) setMode(currentMode);
         else showMessage("لطفاً ابتدا یک حالت را انتخاب کنید.", "info");
       });
       hintBtn.addEventListener("click", showHint);
-      document.querySelectorAll(".mode-btn").forEach((btn) => {
-        btn.addEventListener("click", () => setMode(btn.dataset.mode));
-      });
-
-      const menuToggle = document.getElementById("menuToggle");
-      const mainNav = document.getElementById("mainNav");
+      document
+        .querySelectorAll(".mode-btn")
+        .forEach((btn) =>
+          btn.addEventListener("click", () => setMode(btn.dataset.mode)),
+        );
+      const menuToggle = document.getElementById("menuToggle"),
+        mainNav = document.getElementById("mainNav");
       menuToggle.addEventListener("click", () =>
         mainNav.classList.toggle("show"),
       );
       if (window.innerWidth <= 768) {
         document.querySelectorAll(".dropdown").forEach((drop) => {
-          const toggle = drop.querySelector(".dropdown-toggle");
-          const menu = drop.querySelector(".dropdown-menu");
-          toggle.addEventListener("click", (e) => {
-            e.preventDefault();
-            menu.classList.toggle("show-mobile");
-          });
+          const toggle = drop.querySelector(".dropdown-toggle"),
+            menu = drop.querySelector(".dropdown-menu");
+          if (toggle && menu)
+            toggle.addEventListener("click", (e) => {
+              e.preventDefault();
+              menu.classList.toggle("show-mobile");
+            });
         });
       }
-
       loadRecords();
       loadPuzzles().then(() => {
         showMessage(
