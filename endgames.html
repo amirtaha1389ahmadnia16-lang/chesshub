@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
-    <title>ChessHub | تمرین آخر بازی – Stockfish + کشیدن مهره</title>
+    <title>ChessHub | آخربازی ها</title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
@@ -15,131 +15,17 @@
       href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="css/style.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
     <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        user-select: none;
-      }
-      body {
-        font-family: "Vazir", Tahoma, sans-serif;
-        background: radial-gradient(circle at 10% 20%, #eef2f9, #d4e0e8);
-        direction: rtl;
-        padding: 20px;
-        min-height: 100vh;
-      }
-      .container {
-        max-width: 1300px;
-        margin: 0 auto;
-      }
-      /* هدر شیشه‌ای */
-      .site-header {
-        background: rgba(255, 255, 255, 0.85);
-        backdrop-filter: blur(16px);
-        border-radius: 50px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-        margin-bottom: 30px;
-        padding: 0 24px;
-        border: 1px solid rgba(255, 255, 255, 0.6);
-      }
-      .header-flex {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        padding: 12px 0;
-      }
-      .logo h1 {
-        background: linear-gradient(135deg, #1e5a7a, #2c8eb3);
-        background-clip: text;
-        -webkit-background-clip: text;
-        color: transparent;
-        font-size: 1.9rem;
-        font-weight: 800;
-      }
-      .tagline {
-        font-size: 0.7rem;
-        color: #4f6f8f;
-      }
-      .main-nav {
-        flex: 1;
-        display: flex;
-        justify-content: flex-end;
-      }
-      .nav-list {
-        display: flex;
-        list-style: none;
-        gap: 0.6rem;
-        flex-wrap: wrap;
-      }
-      .nav-list li a {
-        text-decoration: none;
-        color: #2c3e4e;
-        font-weight: 600;
-        padding: 0.5rem 1.2rem;
-        border-radius: 40px;
-        transition: 0.2s;
-        font-size: 0.9rem;
-        background: rgba(255, 255, 255, 0.5);
-        backdrop-filter: blur(4px);
-      }
-      .nav-list li a:hover {
-        background: white;
-        color: #1b6b8f;
-        transform: translateY(-2px);
-      }
-      .dropdown {
-        position: relative;
-      }
-      .dropdown-toggle i {
-        font-size: 0.7rem;
-        transition: 0.2s;
-      }
-      .dropdown:hover .dropdown-toggle i {
-        transform: rotate(180deg);
-      }
-      .dropdown-menu {
-        position: absolute;
-        top: 100%;
-        right: 0;
-        background: rgba(255, 255, 255, 0.98);
-        backdrop-filter: blur(8px);
-        min-width: 180px;
-        border-radius: 24px;
-        padding: 0.5rem 0;
-        list-style: none;
-        opacity: 0;
-        visibility: hidden;
-        transition: 0.2s;
-        z-index: 100;
-        border: 1px solid #ddd;
-      }
-      .dropdown:hover .dropdown-menu {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(8px);
-      }
-      .dropdown-menu li a {
-        display: block;
-        padding: 0.5rem 1.2rem;
-        background: transparent;
-      }
-      .menu-toggle {
-        display: none;
-        background: none;
-        border: none;
-        font-size: 1.8rem;
-        cursor: pointer;
-        color: #2c7da0;
-      }
+      /* استایل‌های مخصوص صفحه تمرین آخر بازی */
       .training-card {
-        background: rgba(255, 255, 255, 0.94);
-        backdrop-filter: blur(4px);
-        border-radius: 48px;
+        background: white;
+        border-radius: 32px;
         overflow: hidden;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+        position: relative;
+        z-index: 1;
       }
       .card-header {
         background: linear-gradient(115deg, #1a4b6e, #2a7f9c);
@@ -184,7 +70,7 @@
       .stats {
         display: flex;
         gap: 20px;
-        background: #eef2f8;
+        background: #f8fafc;
         padding: 8px 24px;
         border-radius: 60px;
         font-weight: 700;
@@ -213,11 +99,10 @@
         align-items: center;
       }
       .board-wrapper {
-        background: #eef2f6;
+        background: #f8fafc;
         padding: 16px;
-        border-radius: 40px;
-        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
-        position: relative;
+        border-radius: 28px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
       }
       canvas {
         width: 100%;
@@ -241,32 +126,28 @@
         flex-wrap: wrap;
       }
       .btn {
-        background: white;
+        background: #eef2f5;
         border: none;
-        padding: 10px 24px;
-        border-radius: 50px;
+        padding: 8px 20px;
+        border-radius: 40px;
         font-family: "Vazir";
-        font-weight: 700;
+        font-weight: bold;
         cursor: pointer;
         transition: 0.2s;
-        border: 1px solid #dce3ec;
-        color: #1f4a6e;
       }
       .btn-primary {
         background: #2c7da0;
         color: white;
-        border: none;
-        box-shadow: 0 4px 12px rgba(44, 125, 160, 0.3);
       }
       .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        transform: scale(0.96);
+        background: #e2e8f0;
       }
       .info-section {
         flex: 1.4;
         min-width: 260px;
-        background: #fbfdff;
-        border-radius: 44px;
+        background: #f9fafc;
+        border-radius: 32px;
         padding: 24px;
         display: flex;
         flex-direction: column;
@@ -274,16 +155,16 @@
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
       }
       .engine-status {
-        background: #eef3fc;
+        background: white;
         padding: 12px 16px;
-        border-radius: 60px;
+        border-radius: 40px;
         text-align: center;
-        font-weight: 700;
+        font-weight: 600;
         color: #166b8f;
       }
       .move-history {
-        background: #fefefe;
-        border-radius: 36px;
+        background: white;
+        border-radius: 28px;
         padding: 18px;
         max-height: 260px;
         overflow-y: auto;
@@ -303,67 +184,19 @@
         font-size: 0.85rem;
       }
       .message-area {
-        background: #eef2fa;
-        border-radius: 36px;
+        background: #dbeafe;
+        border-radius: 40px;
         padding: 16px;
         text-align: center;
         font-weight: 500;
-        color: #1e4a6b;
-      }
-      footer {
-        background: rgba(255, 255, 255, 0.6);
-        backdrop-filter: blur(8px);
-        border-radius: 40px;
-        text-align: center;
-        padding: 14px;
-        margin-top: 40px;
-        color: #4a627a;
-        font-size: 0.75rem;
+        color: #1e40af;
       }
       @media (max-width: 768px) {
-        body {
-          padding: 12px;
-        }
-        .menu-toggle {
-          display: block;
-        }
-        .main-nav {
-          display: none;
-          width: 100%;
-          order: 3;
-          margin-top: 1rem;
-        }
-        .main-nav.show {
-          display: block;
-        }
-        .nav-list {
-          flex-direction: column;
-          width: 100%;
-          gap: 0;
-        }
-        .dropdown {
-          position: static;
-        }
-        .dropdown-menu {
-          position: static;
-          background: #f8fafc;
-          width: 100%;
-          display: none;
-          box-shadow: none;
-        }
-        .dropdown-menu.show-mobile {
-          display: block;
-        }
         .card-header h2 {
           font-size: 1.4rem;
         }
         .card-body {
           padding: 20px;
-        }
-        .stats {
-          gap: 12px;
-          padding: 6px 16px;
-          font-size: 0.8rem;
         }
         canvas {
           max-width: 100%;
@@ -373,13 +206,12 @@
   </head>
   <body>
     <div class="container">
-      <header class="site-header">
-        <!-- همان هدر قبلی، حذف شد برای اختصار -->
-      </header>
+      <div id="header-placeholder"></div>
+
       <div class="training-card">
         <div class="card-header">
-          <h2>🎯 تمرین آخر بازی – Stockfish + کشیدن مهره</h2>
-          <p>مهره را بگیر و بکش (Drag & Drop) | شما سفید</p>
+          <h2>🎯 تمرین آخر بازی – کشیدن مهره (Drag & Drop)</h2>
+          <p>مهره سفید را بگیر و بکش | Stockfish حرفه‌ای</p>
         </div>
         <div class="card-body">
           <div class="top-bar">
@@ -409,24 +241,26 @@
             </div>
             <div class="info-section">
               <div class="engine-status" id="engineStatus">
-                🧠 Stockfish (قوی) آماده است
+                🧠 Stockfish (نهایت قدرت) آماده است
               </div>
               <div class="move-history">
-                <h4>📜 تاریخچه</h4>
+                <h4>📜 تاریخچه حرکات</h4>
                 <div id="historyList"></div>
               </div>
               <div class="message-area" id="messageBox">
-                ✨ مهره را بکشید و رها کنید
+                ✨ مهره را بگیرید و روی خانه مقصد رها کنید
               </div>
             </div>
           </div>
         </div>
       </div>
-      <footer>© ۱۴۰۵ ChessHub | کشیدن مهره + Stockfish (نهایت قدرت)</footer>
+
+      <div id="footer-placeholder"></div>
     </div>
 
+    <script src="js/script.js"></script>
     <script>
-      // ========== بارگذاری مهره‌ها (کانواس) ==========
+      // ========== بارگذاری مهره‌ها ==========
       const pieceImages = {};
       const pieceCodes = {
         wK: "wK.svg",
@@ -463,8 +297,8 @@
       let currentIndex = 0;
       let game = null;
       let gameActive = true;
-      let selectedSquare = null; // برای حالت کلیک معمولی (اختیاری)
-      let orientation = "white"; // همیشه سفید (عدم چرخش)
+      let selectedSquare = null;
+      let orientation = "white";
       let stockfish = null;
       let stockfishReady = false;
       let isComputerThinking = false;
@@ -473,13 +307,9 @@
         autoTimerInterval = null;
       const autoTimerSeconds = 5;
 
-      // متغیرهای کشیدن مهره
+      // Drag & Drop
       let dragStartSquare = null;
       let isDragging = false;
-      let dragStartX = 0,
-        dragStartY = 0;
-      let ghostCanvas = null,
-        ghostCtx = null; // برای نمایش مجازی مهره
 
       const canvas = document.getElementById("chessCanvas");
       const ctx = canvas.getContext("2d");
@@ -515,7 +345,6 @@
         return { x: file * cellSize, y: rank * cellSize };
       }
 
-      // رسم تخته با هایلایت (در صورت drag)
       function drawBoard() {
         const board = game.board();
         for (let i = 0; i < 8; i++) {
@@ -584,12 +413,11 @@
           );
         }
       }
-
       function renderBoard() {
         drawBoard();
       }
 
-      // ========== Stockfish (با fallback) ==========
+      // ========== Stockfish ==========
       function initStockfish() {
         try {
           stockfish = new Worker("js/stockfish.js");
@@ -663,7 +491,6 @@
         } else fallbackComputerMove();
       }
 
-      // موتور ساده (ارزش مهره)
       const pieceVal = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 100 };
       function evalBoard(board, turn) {
         let score = 0;
@@ -747,13 +574,13 @@
 
       function showMessage(msg, isErr = false) {
         messageBox.textContent = msg;
-        messageBox.style.background = isErr ? "#ffe3e3" : "#e1f0fa";
-        messageBox.style.color = isErr ? "#b91c1c" : "#1a5d7a";
+        messageBox.style.background = isErr ? "#fee2e2" : "#dbeafe";
+        messageBox.style.color = isErr ? "#991b1b" : "#1e40af";
         setTimeout(() => {
           if (messageBox.textContent === msg) {
-            messageBox.textContent = "✨ مهره را بکشید و رها کنید";
-            messageBox.style.background = "#eef2fa";
-            messageBox.style.color = "#1e4a6b";
+            messageBox.textContent = "✨ مهره را بگیرید و رها کنید";
+            messageBox.style.background = "#dbeafe";
+            messageBox.style.color = "#1e40af";
           }
         }, 4000);
       }
@@ -777,7 +604,6 @@
         return false;
       }
 
-      // تایمر خودکار برای پازل بعدی
       function stopAutoTimer() {
         if (autoTimerId) clearTimeout(autoTimerId);
         if (autoTimerInterval) clearInterval(autoTimerInterval);
@@ -803,7 +629,6 @@
         }, autoTimerSeconds * 1000);
       }
 
-      // بارگذاری موقعیت
       function loadPosition(index, isAuto = false) {
         if (!endgames.length) return;
         if (isComputerThinking && !isAuto) return;
@@ -838,7 +663,6 @@
         loadPosition((currentIndex + 1) % endgames.length);
       }
 
-      // ========== اجرای حرکت (از طرف کاربر) ==========
       function tryMove(from, to) {
         if (!gameActive || game.turn() !== "w") return false;
         if (isComputerThinking || waitingForStockfish) {
@@ -867,7 +691,7 @@
         }
       }
 
-      // ========== رویدادهای کشیدن مهره (Drag & Drop) ==========
+      // ========== رویدادهای کشیدن مهره ==========
       function onMouseDown(e) {
         if (!gameActive || game.turn() !== "w") return;
         if (isComputerThinking || waitingForStockfish) {
@@ -880,16 +704,8 @@
         if (!piece || piece.color !== "w") return;
         dragStartSquare = square;
         isDragging = true;
-        dragStartX = e.clientX;
-        dragStartY = e.clientY;
         canvas.style.cursor = "grabbing";
         e.preventDefault();
-      }
-
-      function onMouseMove(e) {
-        if (!isDragging || !dragStartSquare) return;
-        // می‌توانیم یک المان شفاف برای نمایش مهره در حین کشیدن بسازیم (اختیاری)
-        // برای سادگی، فقط cursor رو عوض می‌کنیم
       }
 
       function onMouseUp(e) {
@@ -907,7 +723,7 @@
         canvas.style.cursor = "grab";
       }
 
-      // ========== کلیک معمولی (به عنوان fallback) ==========
+      // کلیک معمولی (fallback)
       function onCanvasClick(e) {
         if (isDragging) return;
         if (!gameActive) {
@@ -987,7 +803,6 @@
       // ========== راه‌اندازی ==========
       function initEventListeners() {
         canvas.addEventListener("mousedown", onMouseDown);
-        window.addEventListener("mousemove", onMouseMove);
         window.addEventListener("mouseup", onMouseUp);
         canvas.addEventListener("click", onCanvasClick);
         undoBtn.onclick = () => {
@@ -1009,23 +824,6 @@
         };
         resetBtn.onclick = resetGame;
         nextBtn.onclick = nextPuzzle;
-      }
-
-      // منوی موبایل (همان کد قبلی)
-      const menuToggle = document.getElementById("menuToggle");
-      const mainNav = document.getElementById("mainNav");
-      if (menuToggle)
-        menuToggle.onclick = () => mainNav.classList.toggle("show");
-      if (window.innerWidth <= 768) {
-        document.querySelectorAll(".dropdown").forEach((drop) => {
-          const togg = drop.querySelector(".dropdown-toggle"),
-            menu = drop.querySelector(".dropdown-menu");
-          if (togg && menu)
-            togg.onclick = (e) => {
-              e.preventDefault();
-              menu.classList.toggle("show-mobile");
-            };
-        });
       }
 
       loadPieces().then(() => {
