@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>ChessHub | تمرین آخر بازی – Stockfish نهایت قدرت</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Vazir', Tahoma, sans-serif;
+      background: radial-gradient(circle at 10% 20%, #eef2f9, #d4e0e8);
+      direction: rtl;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+    /* هدر شیشه‌ای */
+    .site-header {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(16px);
+      border-radius: 50px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      margin-bottom: 30px;
+      padding: 0 24px;
+      border: 1px solid rgba(255,255,255,0.6);
+    }
+    .header-flex {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      padding: 12px 0;
+    }
+    .logo h1 {
+      background: linear-gradient(135deg, #1e5a7a, #2c8eb3);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      font-size: 1.9rem;
+      font-weight: 800;
+    }
+    .tagline {
+      font-size: 0.7rem;
+      color: #4f6f8f;
+    }
+    .main-nav {
+      flex: 1;
+      display: flex;
+      justify-content: flex-end;
+    }
+    .nav-list {
+      display: flex;
+      list-style: none;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+    .nav-list li a {
+      text-decoration: none;
+      color: #2c3e4e;
+      font-weight: 600;
+      padding: 0.5rem 1.2rem;
+      border-radius: 40px;
+      transition: 0.2s;
+      font-size: 0.9rem;
+      background: rgba(255,255,255,0.5);
+      backdrop-filter: blur(4px);
+    }
+    .nav-list li a:hover {
+      background: white;
+      color: #1b6b8f;
+      transform: translateY(-2px);
+    }
+    .dropdown { position: relative; }
+    .dropdown-toggle i { font-size: 0.7rem; transition: 0.2s; }
+    .dropdown:hover .dropdown-toggle i { transform: rotate(180deg); }
+    .dropdown-menu {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: rgba(255,255,255,0.98);
+      backdrop-filter: blur(8px);
+      min-width: 180px;
+      border-radius: 24px;
+      padding: 0.5rem 0;
+      list-style: none;
+      opacity: 0;
+      visibility: hidden;
+      transition: 0.2s;
+      z-index: 100;
+      border: 1px solid #ddd;
+    }
+    .dropdown:hover .dropdown-menu {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(8px);
+    }
+    .dropdown-menu li a {
+      display: block;
+      padding: 0.5rem 1.2rem;
+      background: transparent;
+    }
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.8rem;
+      cursor: pointer;
+      color: #2c7da0;
+    }
+    /* کارت اصلی */
+    .training-card {
+      background: rgba(255,255,255,0.94);
+      backdrop-filter: blur(4px);
+      border-radius: 48px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+    }
+    .card-header {
+      background: linear-gradient(115deg, #1a4b6e, #2a7f9c);
+      padding: 24px 32px;
+      text-align: center;
+    }
+    .card-header h2 {
+      color: white;
+      font-size: 1.8rem;
+      font-weight: 800;
+    }
+    .card-header p {
+      color: rgba(255,255,255,0.9);
+      margin-top: 6px;
+    }
+    .card-body {
+      padding: 28px;
+    }
+    .top-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+    .endgame-selector {
+      flex: 2;
+      min-width: 240px;
+    }
+    .endgame-selector select {
+      width: 100%;
+      padding: 12px 20px;
+      border-radius: 60px;
+      border: 1px solid #cbd5e1;
+      font-family: 'Vazir';
+      background: white;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .stats {
+      display: flex;
+      gap: 20px;
+      background: #eef2f8;
+      padding: 8px 24px;
+      border-radius: 60px;
+      font-weight: 700;
+      color: #1e3b4f;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .auto-timer {
+      background: #2c7da0;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 40px;
+      font-size: 0.8rem;
+      direction: ltr;
+    }
+    .main-panel {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 32px;
+    }
+    .board-section {
+      flex: 2;
+      min-width: 300px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .board-wrapper {
+      background: #eef2f6;
+      padding: 16px;
+      border-radius: 40px;
+      box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+    }
+    canvas {
+      width: 100%;
+      max-width: 520px;
+      height: auto;
+      background-color: #f0d9b5;
+      border-radius: 28px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      cursor: pointer;
+      display: block;
+      margin: 0 auto;
+    }
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      background: white;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 50px;
+      font-family: 'Vazir';
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s;
+      border: 1px solid #dce3ec;
+      color: #1f4a6e;
+    }
+    .btn-primary {
+      background: #2c7da0;
+      color: white;
+      border: none;
+      box-shadow: 0 4px 12px rgba(44,125,160,0.3);
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+    .info-section {
+      flex: 1.4;
+      min-width: 260px;
+      background: #fbfdff;
+      border-radius: 44px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    }
+    .engine-status {
+      background: #eef3fc;
+      padding: 12px 16px;
+      border-radius: 60px;
+      text-align: center;
+      font-weight: 700;
+      color: #166b8f;
+    }
+    .move-history {
+      background: #fefefe;
+      border-radius: 36px;
+      padding: 18px;
+      max-height: 260px;
+      overflow-y: auto;
+      border: 1px solid #eef2f8;
+    }
+    .move-history h4 {
+      color: #2c7da0;
+      margin-bottom: 12px;
+      border-right: 4px solid #2c7da0;
+      padding-right: 12px;
+    }
+    .history-item {
+      font-family: monospace;
+      direction: ltr;
+      padding: 5px 0;
+      border-bottom: 1px solid #edf2f7;
+      font-size: 0.85rem;
+    }
+    .message-area {
+      background: #eef2fa;
+      border-radius: 36px;
+      padding: 16px;
+      text-align: center;
+      font-weight: 500;
+      color: #1e4a6b;
+    }
+    footer {
+      background: rgba(255,255,255,0.6);
+      backdrop-filter: blur(8px);
+      border-radius: 40px;
+      text-align: center;
+      padding: 14px;
+      margin-top: 40px;
+      color: #4a627a;
+      font-size: 0.75rem;
+    }
+    @media (max-width: 768px) {
+      body { padding: 12px; }
+      .menu-toggle { display: block; }
+      .main-nav { display: none; width: 100%; order: 3; margin-top: 1rem; }
+      .main-nav.show { display: block; }
+      .nav-list { flex-direction: column; width: 100%; gap: 0; }
+      .dropdown { position: static; }
+      .dropdown-menu { position: static; background: #f8fafc; width: 100%; display: none; box-shadow: none; }
+      .dropdown-menu.show-mobile { display: block; }
+      .card-header h2 { font-size: 1.4rem; }
+      .card-body { padding: 20px; }
+      .stats { gap: 12px; padding: 6px 16px; font-size: 0.8rem; }
+      canvas { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header class="site-header">
+    <div class="header-flex">
+      <div class="logo">
+        <h1>♟️ ChessHub</h1>
+        <div class="tagline">تمرین آخر بازی – نهایت قدرت Stockfish</div>
+      </div>
+      <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+      <nav class="main-nav" id="mainNav">
+        <ul class="nav-list">
+          <li><a href="index.html">خانه</a></li>
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle">🧩 پازل <i class="fas fa-chevron-down"></i></a>
+            <ul class="dropdown-menu"><li><a href="puzzle-rush.html">پازل عجله‌ای</a></li></ul>
+          </li>
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle">📚 آموزش <i class="fas fa-chevron-down"></i></a>
+            <ul class="dropdown-menu">
+              <li><a href="lessons.html">دروس</a></li>
+              <li><a href="openings.html">گشایش‌ها</a></li>
+              <li><a href="endgames.html">خاتمه‌ها</a></li>
+            </ul>
+          </li>
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle">⚙️ ابزارها <i class="fas fa-chevron-down"></i></a>
+            <ul class="dropdown-menu">
+              <li><a href="analysis.html">آنالیز</a></li>
+              <li><a href="practice.html">تمرین</a></li>
+            </ul>
+          </li>
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle">🗄️ بانک اطلاعات <i class="fas fa-chevron-down"></i></a>
+            <ul class="dropdown-menu">
+              <li><a href="games-database.html">پایگاه بازی‌ها</a></li>
+              <li><a href="downloads.html">دانلود PGN</a></li>
+            </ul>
+          </li>
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle">📖 کتاب‌ها <i class="fas fa-chevron-down"></i></a>
+            <ul class="dropdown-menu">
+              <li><a href="book-translate.html">ترجمه کتاب</a></li>
+              <li><a href="books.html">کتاب‌ها</a></li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <div class="training-card">
+    <div class="card-header">
+      <h2>🎯 تمرین آخر بازی – Stockfish در نهایت قدرت</h2>
+      <p>شما سفید | کامپیوتر سیاه (Stockfish با عمق ۲۲)</p>
+    </div>
+    <div class="card-body">
+      <div class="top-bar">
+        <div class="endgame-selector">
+          <select id="endgameSelect"></select>
+        </div>
+        <div class="stats">
+          <span>⚙️ عمق موتور: <span id="engineDepth">22</span></span>
+          <span id="turnIndicator">⚪ نوبت شما</span>
+          <span id="autoTimerSpan" class="auto-timer" style="display: none;">⏳ بعدی در 5 ثانیه</span>
+        </div>
+      </div>
+      <div class="main-panel">
+        <div class="board-section">
+          <div class="board-wrapper">
+            <canvas id="chessCanvas" width="520" height="520"></canvas>
+          </div>
+          <div class="action-buttons">
+            <button id="undoBtn" class="btn">↩️ برگشت حرکت</button>
+            <button id="resetBtn" class="btn">🔄 شروع مجدد</button>
+            <button id="nextBtn" class="btn btn-primary">▶ پازل بعدی</button>
+          </div>
+        </div>
+        <div class="info-section">
+          <div class="engine-status" id="engineStatus">🧠 Stockfish (نهایت قدرت) آماده است</div>
+          <div class="move-history">
+            <h4>📜 تاریخچه حرکات</h4>
+            <div id="historyList"></div>
+          </div>
+          <div class="message-area" id="messageBox">✨ در حال بارگذاری موقعیت‌ها از فایل endgames.txt ...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer>© ۱۴۰۵ ChessHub | داده‌ها از endgames.txt | تکرار سه‌باره = مساوی | Stockfish max strength | ذخیره خودکار موقعیت</footer>
+</div>
+
+<script>
+  // ========== بارگذاری مهره‌ها ==========
+  const pieceImages = {};
+  const pieceCodes = {
+    wK: "wK.svg", wQ: "wQ.svg", wR: "wR.svg", wB: "wB.svg", wN: "wN.svg", wP: "wP.svg",
+    bK: "bK.svg", bQ: "bQ.svg", bR: "bR.svg", bB: "bB.svg", bN: "bN.svg", bP: "bP.svg",
+  };
+  function loadPieces() {
+    return new Promise((resolve) => {
+      let loaded = 0;
+      const total = Object.keys(pieceCodes).length;
+      for (const [key, filename] of Object.entries(pieceCodes)) {
+        const img = new Image();
+        img.onload = img.onerror = () => { loaded++; if (loaded === total) resolve(); };
+        img.src = `pieces/merida/${filename}`;
+        pieceImages[key] = img;
+      }
+    });
+  }
+
+  // ========== متغیرها ==========
+  let endgames = [];
+  let currentIndex = 0;
+  let game = null;
+  let gameActive = true;
+  let selectedSquare = null;
+  let stockfish = null;
+  let isComputerThinking = false;
+  let waitingForStockfish = false;
+  let autoTimerId = null;
+  let autoTimerSeconds = 5;
+  let autoTimerInterval = null;
+
+  const canvas = document.getElementById("chessCanvas");
+  const ctx = canvas.getContext("2d");
+  let cellSize = canvas.width / 8;
+  const endgameSelect = document.getElementById("endgameSelect");
+  const turnIndicatorSpan = document.getElementById("turnIndicator");
+  const engineStatusSpan = document.getElementById("engineStatus");
+  const historyListDiv = document.getElementById("historyList");
+  const messageBox = document.getElementById("messageBox");
+  const undoBtn = document.getElementById("undoBtn");
+  const resetBtn = document.getElementById("resetBtn");
+  const nextBtn = document.getElementById("nextBtn");
+  const autoTimerSpan = document.getElementById("autoTimerSpan");
+
+  // ========== توابع تایمر خودکار ==========
+  function stopAutoTimer() {
+    if (autoTimerId) clearTimeout(autoTimerId);
+    if (autoTimerInterval) clearInterval(autoTimerInterval);
+    autoTimerId = null;
+    autoTimerInterval = null;
+    autoTimerSpan.style.display = "none";
+  }
+
+  function startAutoTimer() {
+    stopAutoTimer();
+    if (!endgames.length) return;
+    let remaining = autoTimerSeconds;
+    autoTimerSpan.style.display = "inline-block";
+    autoTimerSpan.textContent = `⏳ بعدی در ${remaining} ثانیه`;
+    autoTimerInterval = setInterval(() => {
+      remaining--;
+      if (remaining <= 0) {
+        if (autoTimerInterval) clearInterval(autoTimerInterval);
+        autoTimerInterval = null;
+        autoTimerSpan.textContent = `⏳ رفتن به بعدی...`;
+      } else {
+        autoTimerSpan.textContent = `⏳ بعدی در ${remaining} ثانیه`;
+      }
+    }, 1000);
+    autoTimerId = setTimeout(() => {
+      stopAutoTimer();
+      // رفتن به پازل بعدی
+      if (endgames.length) {
+        let nextIndex = (currentIndex + 1) % endgames.length;
+        loadPosition(nextIndex, true); // true = از side effect جلوگیری از تایمر مجدد
+      }
+    }, autoTimerSeconds * 1000);
+  }
+
+  // ========== ذخیره و بازیابی ایندکس ==========
+  function saveCurrentIndex() {
+    if (endgames.length && currentIndex < endgames.length) {
+      localStorage.setItem("chesshub_endgame_index", currentIndex);
+    }
+  }
+
+  function loadSavedIndex() {
+    const saved = localStorage.getItem("chesshub_endgame_index");
+    if (saved !== null && endgames.length) {
+      let idx = parseInt(saved);
+      if (!isNaN(idx) && idx >= 0 && idx < endgames.length) {
+        currentIndex = idx;
+      } else {
+        currentIndex = 0;
+      }
+    } else {
+      currentIndex = 0;
+    }
+  }
+
+  // ========== Stockfish نهایت قدرت ==========
+  function initStockfish() {
+    try {
+      stockfish = new Worker("js/stockfish.js");
+      stockfish.onmessage = (e) => {
+        const data = e.data;
+        if (data.includes("bestmove")) {
+          const movePart = data.split("bestmove ")[1]?.split(" ")[0];
+          if (movePart && movePart !== "(none)" && waitingForStockfish) {
+            waitingForStockfish = false;
+            isComputerThinking = false;
+            const from = movePart.slice(0, 2);
+            const to = movePart.slice(2, 4);
+            const promotion = movePart[4] || "q";
+            const move = game.move({ from, to, promotion, verbose: true });
+            if (move) {
+              renderBoard();
+              updateHistory();
+              checkGameOverAndMaybeAuto();
+              updateTurnDisplay();
+              if (!game.game_over() && game.turn() === "b" && gameActive) setTimeout(() => requestComputerMove(), 100);
+            } else {
+              fallbackComputerMove();
+            }
+          } else {
+            waitingForStockfish = false;
+            isComputerThinking = false;
+            fallbackComputerMove();
+          }
+        }
+      };
+      stockfish.postMessage("uci");
+      stockfish.postMessage("setoption name Threads value 4");
+      stockfish.postMessage("setoption name Hash value 256");
+      stockfish.postMessage("setoption name Skill Level value 20");
+      engineStatusSpan.innerHTML = "🧠 Stockfish (نهایت قدرت) فعال - عمق 22";
+    } catch(e) {
+      console.warn(e);
+      engineStatusSpan.innerHTML = "⚠️ Stockfish در دسترس نیست (موتور ساده جایگزین)";
+    }
+  }
+
+  function requestComputerMove() {
+    if (!gameActive) return;
+    if (game.turn() !== "b") return;
+    if (isComputerThinking || waitingForStockfish) return;
+    if (game.game_over()) return;
+    isComputerThinking = true;
+    waitingForStockfish = true;
+    updateTurnDisplay("🤖 کامپیوتر در حال فکر کردن...");
+    if (stockfish) {
+      stockfish.postMessage("stop");
+      stockfish.postMessage(`position fen ${game.fen()}`);
+      stockfish.postMessage("go depth 22");
+    } else {
+      fallbackComputerMove();
+    }
+  }
+
+  // Fallback ساده (اگر Stockfish نبود)
+  const pieceValue = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 100 };
+  function evaluateBoardSimple(board, turn) {
+    let score = 0;
+    for (let i=0;i<8;i++) for (let j=0;j<8;j++) {
+      const piece = board[i][j];
+      if (piece) {
+        let val = pieceValue[piece.type];
+        if (piece.color === "w") score += val;
+        else score -= val;
+      }
+    }
+    return turn === "w" ? score : -score;
+  }
+  function getBestMoveSimple() {
+    const moves = game.moves({ verbose: true });
+    if (!moves.length) return null;
+    let bestMove = moves[0];
+    let bestScore = -Infinity;
+    for (const move of moves) {
+      const testGame = new Chess(game.fen());
+      testGame.move(move);
+      const score = evaluateBoardSimple(testGame.board(), testGame.turn());
+      if (score > bestScore) { bestScore = score; bestMove = move; }
+    }
+    return bestMove;
+  }
+  function fallbackComputerMove() {
+    if (!gameActive || game.turn() !== "b") return;
+    const move = getBestMoveSimple();
+    if (move) {
+      game.move(move);
+      renderBoard();
+      updateHistory();
+      checkGameOverAndMaybeAuto();
+      updateTurnDisplay();
+      if (game.turn() === "b" && !game.game_over() && gameActive) setTimeout(() => requestComputerMove(), 200);
+    }
+    isComputerThinking = false;
+    waitingForStockfish = false;
+  }
+
+  // ========== توابع تخته و تاریخچه ==========
+  function drawBoard() {
+    const board = game.board();
+    for (let i=0;i<8;i++) {
+      for (let j=0;j<8;j++) {
+        const isLight = (i+j)%2===0;
+        ctx.fillStyle = isLight ? "#f0d9b5" : "#b58863";
+        ctx.fillRect(j*cellSize, i*cellSize, cellSize, cellSize);
+        const piece = board[i][j];
+        if (piece) {
+          const code = (piece.color==='w'?'w':'b')+piece.type.toUpperCase();
+          const img = pieceImages[code];
+          if (img && img.complete) {
+            ctx.drawImage(img, j*cellSize, i*cellSize, cellSize, cellSize);
+          } else {
+            ctx.font = `${cellSize*0.55}px Arial`;
+            ctx.fillStyle = "#222";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            const sym = { wK:"♔",wQ:"♕",wR:"♖",wB:"♗",wN:"♘",wP:"♙", bK:"♚",bQ:"♛",bR:"♜",bB:"♝",bN:"♞",bP:"♟" }[code] || "";
+            ctx.fillText(sym, j*cellSize+cellSize/2, i*cellSize+cellSize/2);
+          }
+        }
+      }
+    }
+    if (selectedSquare) {
+      const file = selectedSquare.charCodeAt(0)-97;
+      const rank = 8-parseInt(selectedSquare[1]);
+      ctx.save();
+      ctx.strokeStyle = "#b7d968";
+      ctx.lineWidth = 5;
+      ctx.strokeRect(file*cellSize+2, rank*cellSize+2, cellSize-4, cellSize-4);
+      ctx.restore();
+    }
+    ctx.font = `${cellSize*0.22}px 'Vazir'`;
+    ctx.fillStyle = "#4a4a4a";
+    for (let i=0;i<8;i++) {
+      ctx.fillText((8-i).toString(), 5, i*cellSize+cellSize/2);
+      ctx.fillText(String.fromCharCode(97+i), i*cellSize+cellSize-12, 8*cellSize-6);
+    }
+  }
+  function renderBoard() { drawBoard(); }
+
+  function updateHistory() {
+    const history = game.history({ verbose: true });
+    historyListDiv.innerHTML = "";
+    if (!history.length) {
+      historyListDiv.innerHTML = '<div style="color:#94a3b8;">هیچ حرکتی ثبت نشده</div>';
+      return;
+    }
+    for (let i=0; i<history.length; i+=2) {
+      const num = Math.floor(i/2)+1;
+      const white = history[i] ? history[i].san : "...";
+      const black = history[i+1] ? history[i+1].san : "";
+      const div = document.createElement("div");
+      div.className = "history-item";
+      div.textContent = `${num}. ${white} ${black}`;
+      historyListDiv.appendChild(div);
+    }
+    historyListDiv.scrollTop = historyListDiv.scrollHeight;
+  }
+
+  function updateTurnDisplay(custom=null) {
+    if (custom) { turnIndicatorSpan.innerHTML = custom; return; }
+    if (game.game_over()) { turnIndicatorSpan.innerHTML = "🏁 پایان بازی"; return; }
+    turnIndicatorSpan.innerHTML = game.turn()==='w' ? "⚪ نوبت شما (سفید)" : "⚫ نوبت کامپیوتر (سیاه)";
+  }
+
+  function showMessage(msg, isError=false) {
+    messageBox.textContent = msg;
+    messageBox.style.background = isError ? "#ffe3e3" : "#e1f0fa";
+    messageBox.style.color = isError ? "#b91c1c" : "#1a5d7a";
+    setTimeout(() => {
+      if (messageBox.textContent === msg) {
+        messageBox.textContent = "✨ در حال بازی با کامپیوتر...";
+        messageBox.style.background = "#eef2fa";
+        messageBox.style.color = "#1e4a6b";
+      }
+    }, 4000);
+  }
+
+  function checkGameOverAndMaybeAuto() {
+    if (game.game_over()) {
+      gameActive = false;
+      let msg = "";
+      if (game.in_checkmate()) {
+        const loser = game.turn()==='w' ? "سفید مات شد" : "سیاه مات شد";
+        msg = `🏆 مات! ${loser}`;
+      } else if (game.in_stalemate()) msg = "🤝 پات (مساوی)";
+      else if (game.in_threefold_repetition()) msg = "🔄 تکرار سه‌گانه (مساوی)";
+      else msg = "🏁 بازی تمام شد";
+      showMessage(msg);
+      engineStatusSpan.innerHTML = "🎯 بازی پایان یافت";
+      updateTurnDisplay();
+      // شروع تایمر خودکار برای پازل بعدی
+      startAutoTimer();
+      return true;
+    }
+    return false;
+  }
+
+  // ========== بارگذاری موقعیت ==========
+  function loadPosition(index, isAuto = false) {
+    if (!endgames.length) return;
+    if (isComputerThinking && !isAuto) return;
+    // توقف تایمر خودکار قبلی
+    stopAutoTimer();
+    const endgame = endgames[index];
+    if (!endgame) return;
+    game = new Chess(endgame.fen);
+    selectedSquare = null;
+    gameActive = true;
+    if (stockfish) stockfish.postMessage("stop");
+    isComputerThinking = false;
+    waitingForStockfish = false;
+    renderBoard();
+    updateHistory();
+    messageBox.textContent = `📍 ${endgame.name} | شروع بازی. حرکت کن!`;
+    engineStatusSpan.innerHTML = "🧠 Stockfish نهایت قدرت فعال";
+    updateTurnDisplay();
+    currentIndex = index;
+    saveCurrentIndex();
+    endgameSelect.value = index;
+    if (game.turn() === 'b' && !game.game_over()) setTimeout(() => requestComputerMove(), 400);
+  }
+
+  function resetGame() { loadPosition(currentIndex); }
+  function nextPuzzle() {
+    if (!endgames.length) return;
+    stopAutoTimer();
+    let nextIndex = (currentIndex + 1) % endgames.length;
+    loadPosition(nextIndex);
+  }
+  function undoMove() {
+    if (!gameActive) { showMessage("بازی تمام شده!", true); return; }
+    if (game.turn() !== 'w') { showMessage("الان نوبت کامپیوتر است!", true); return; }
+    const history = game.history({ verbose: true });
+    if (!history.length) return;
+    game.undo();
+    if (game.turn() !== 'w' && history.length > 1) game.undo();
+    selectedSquare = null;
+    renderBoard();
+    updateHistory();
+    gameActive = true;
+    if (game.turn() === 'b' && !game.game_over()) setTimeout(() => requestComputerMove(), 300);
+    updateTurnDisplay();
+    // در صورت Undo در حالت تمام شده، تایمر را لغو کن
+    stopAutoTimer();
+  }
+
+  // ========== کلیک روی تخته ==========
+  function getSquareFromClick(e) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
+    const col = Math.floor(x / cellSize);
+    const row = Math.floor(y / cellSize);
+    if (row<0 || row>=8 || col<0 || col>=8) return null;
+    const file = String.fromCharCode(97+col);
+    const rank = 8-row;
+    return file+rank;
+  }
+
+  function onCanvasClick(e) {
+    if (!gameActive) {
+      showMessage("بازی تمام شده! از دکمه پازل بعدی استفاده کنید.", true);
+      return;
+    }
+    if (game.turn() !== 'w') { showMessage("نوبت کامپیوتر است، صبر کنید.", false); return; }
+    if (isComputerThinking || waitingForStockfish) { showMessage("کامپیوتر در حال فکر...", false); return; }
+    const square = getSquareFromClick(e);
+    if (!square) return;
+    if (selectedSquare === null) {
+      const piece = game.get(square);
+      if (piece && piece.color === 'w') {
+        selectedSquare = square;
+        renderBoard();
+      } else { showMessage("مهره سفید خود را انتخاب کنید.", true); }
+      return;
+    }
+    const move = { from: selectedSquare, to: square, promotion: 'q' };
+    try {
+      const result = game.move(move);
+      if (result) {
+        selectedSquare = null;
+        renderBoard();
+        updateHistory();
+        const over = checkGameOverAndMaybeAuto();
+        if (over) return;
+        updateTurnDisplay();
+        if (game.turn() === 'b') setTimeout(() => requestComputerMove(), 100);
+      } else {
+        showMessage("حرکت غیرمجاز", true);
+        selectedSquare = null;
+        renderBoard();
+      }
+    } catch(e) { showMessage("خطا در حرکت", true); selectedSquare = null; renderBoard(); }
+  }
+
+  // ========== بارگذاری از فایل endgames.txt ==========
+  async function loadEndgamesFromFile() {
+    try {
+      const response = await fetch('endgames.txt');
+      if (!response.ok) throw new Error('فایل یافت نشد');
+      const text = await response.text();
+      const lines = text.split(/\r?\n/);
+      endgames = [];
+      for (let line of lines) {
+        line = line.trim();
+        if (line === '' || line.startsWith('#')) continue;
+        const parts = line.split('|');
+        if (parts.length === 2) {
+          const fen = parts[0].trim();
+          const name = parts[1].trim();
+          if (fen && name) endgames.push({ name, fen });
+        }
+      }
+      if (endgames.length === 0) {
+        messageBox.textContent = '⚠️ هیچ موقعیتی در endgames.txt یافت نشد. یک نمونه اضافه کنید.';
+        engineStatusSpan.innerHTML = '⛔ دیتابیس خالی';
+        endgames.push({ name: 'موقعیت نمونه (فایل خالی)', fen: 'start' });
+      } else {
+        messageBox.textContent = `✅ ${endgames.length} موقعیت بارگذاری شد.`;
+      }
+      populateSelect();
+      loadSavedIndex();
+      if (endgames.length) loadPosition(currentIndex);
+    } catch(err) {
+      console.error(err);
+      messageBox.textContent = '❌ خطا در خواندن endgames.txt. لطفاً فایل را در کنار صفحه قرار دهید.';
+      engineStatusSpan.innerHTML = '⛔ فایل یافت نشد';
+      endgames = [{ name: 'موقعیت پیش‌فرض (فایل موجود نیست)', fen: 'start' }];
+      populateSelect();
+      loadSavedIndex();
+      loadPosition(currentIndex);
+    }
+  }
+
+  function populateSelect() {
+    endgameSelect.innerHTML = '';
+    if (!endgames.length) {
+      const opt = document.createElement('option');
+      opt.textContent = '❌ بدون موقعیت';
+      endgameSelect.appendChild(opt);
+      return;
+    }
+    endgames.forEach((eg, idx) => {
+      const opt = document.createElement('option');
+      opt.value = idx;
+      opt.textContent = eg.name;
+      endgameSelect.appendChild(opt);
+    });
+    endgameSelect.removeEventListener('change', endgameSelect._listener);
+    endgameSelect._listener = (e) => {
+      const idx = parseInt(e.target.value);
+      stopAutoTimer();
+      loadPosition(idx);
+    };
+    endgameSelect.addEventListener('change', endgameSelect._listener);
+  }
+
+  canvas.addEventListener('click', onCanvasClick);
+  undoBtn.addEventListener('click', undoMove);
+  resetBtn.addEventListener('click', resetGame);
+  nextBtn.addEventListener('click', () => { stopAutoTimer(); nextPuzzle(); });
+
+  const menuToggle = document.getElementById('menuToggle');
+  const mainNav = document.getElementById('mainNav');
+  if (menuToggle) menuToggle.addEventListener('click', () => mainNav.classList.toggle('show'));
+  if (window.innerWidth <= 768) {
+    document.querySelectorAll('.dropdown').forEach(drop => {
+      const toggle = drop.querySelector('.dropdown-toggle');
+      const menu = drop.querySelector('.dropdown-menu');
+      if (toggle && menu) {
+        toggle.addEventListener('click', (e) => {
+          e.preventDefault();
+          menu.classList.toggle('show-mobile');
+        });
+      }
+    });
+  }
+
+  loadPieces().then(() => {
+    initStockfish();
+    loadEndgamesFromFile();
+  });
+</script>
+</body>
+</html>
