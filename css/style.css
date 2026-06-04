@@ -2,10 +2,10 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Vazir", "Azadi", Tahoma, sans-serif;
 }
 
 body {
+  font-family: "Vazir", "Azadi", Tahoma, sans-serif;
   background: linear-gradient(135deg, #f5f7fc 0%, #eef2f5 100%);
   color: #1e2f3e;
   line-height: 1.5;
