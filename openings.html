@@ -15,130 +15,10 @@
       href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="css/style.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
     <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: "Vazir", Tahoma, sans-serif;
-      }
-      body {
-        background: linear-gradient(135deg, #f5f7fc 0%, #eef2f5 100%);
-        direction: rtl;
-        padding: 20px;
-        min-height: 100vh;
-      }
-      .container {
-        max-width: 1400px;
-        margin: 0 auto;
-      }
-      .site-header {
-        background: rgba(255, 255, 255, 0.96);
-        backdrop-filter: blur(10px);
-        border-radius: 32px;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
-        margin-bottom: 30px;
-        padding: 0 20px;
-        border: 1px solid rgba(44, 125, 160, 0.2);
-      }
-      .header-flex {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        padding: 12px 0;
-      }
-      .logo h1 {
-        background: linear-gradient(135deg, #2c7da0, #1f6392);
-        background-clip: text;
-        -webkit-background-clip: text;
-        color: transparent;
-        font-size: 1.8rem;
-      }
-      .tagline {
-        font-size: 0.7rem;
-        color: #5f7f9e;
-        display: block;
-      }
-      .main-nav {
-        flex: 1;
-        display: flex;
-        justify-content: flex-end;
-      }
-      .nav-list {
-        display: flex;
-        list-style: none;
-        gap: 0.5rem;
-        align-items: center;
-        flex-wrap: wrap;
-      }
-      .nav-list li a {
-        text-decoration: none;
-        color: #2c3e4e;
-        font-weight: 500;
-        padding: 0.6rem 1rem;
-        border-radius: 40px;
-        transition: 0.2s;
-        font-size: 0.9rem;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        white-space: nowrap;
-      }
-      .nav-list li a:hover {
-        background: #e6edf4;
-        color: #1b6b8f;
-      }
-      .dropdown {
-        position: relative;
-      }
-      .dropdown-toggle i {
-        font-size: 0.7rem;
-        transition: transform 0.2s;
-      }
-      .dropdown:hover .dropdown-toggle i {
-        transform: rotate(180deg);
-      }
-      .dropdown-menu {
-        position: absolute;
-        top: 100%;
-        right: 0;
-        background: white;
-        min-width: 180px;
-        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
-        border-radius: 20px;
-        padding: 0.5rem 0;
-        list-style: none;
-        opacity: 0;
-        visibility: hidden;
-        transition: 0.2s;
-        z-index: 100;
-        border: 1px solid #e2e8f0;
-      }
-      .dropdown:hover .dropdown-menu {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(5px);
-      }
-      .dropdown-menu li a {
-        display: block;
-        padding: 0.6rem 1.2rem;
-        white-space: nowrap;
-        border-radius: 0;
-      }
-      .dropdown-menu li a:hover {
-        background: #f1f5f9;
-        padding-right: 1.5rem;
-      }
-      .menu-toggle {
-        display: none;
-        background: none;
-        border: none;
-        font-size: 1.8rem;
-        cursor: pointer;
-        color: #2c7da0;
-      }
+      /* استایل‌های مخصوص صفحه گشایش‌ها */
       .openings-header {
         text-align: center;
         margin-bottom: 30px;
@@ -305,47 +185,7 @@
         font-weight: bold;
         cursor: pointer;
       }
-      footer {
-        background: white;
-        border-radius: 28px;
-        text-align: center;
-        padding: 15px;
-        margin-top: 40px;
-        color: #4a627a;
-      }
       @media (max-width: 768px) {
-        .menu-toggle {
-          display: block;
-        }
-        .main-nav {
-          display: none;
-          width: 100%;
-          order: 3;
-          margin-top: 1rem;
-        }
-        .main-nav.show {
-          display: block;
-        }
-        .nav-list {
-          flex-direction: column;
-          width: 100%;
-          gap: 0;
-        }
-        .nav-list li a {
-          justify-content: center;
-        }
-        .dropdown {
-          position: static;
-        }
-        .dropdown-menu {
-          position: static;
-          background: #f8fafc;
-          width: 100%;
-          display: none;
-        }
-        .dropdown-menu.show-mobile {
-          display: block;
-        }
         .group-header h3 {
           font-size: 1.2rem;
         }
@@ -373,67 +213,7 @@
   </head>
   <body>
     <div class="container">
-      <header class="site-header">
-        <div class="header-flex">
-          <div class="logo">
-            <h1>♟️ ChessHub</h1>
-            <div class="tagline">جایی که شطرنجت پیشرفت میکنه!</div>
-          </div>
-          <button class="menu-toggle" id="menuToggle">
-            <i class="fas fa-bars"></i>
-          </button>
-          <nav class="main-nav" id="mainNav">
-            <ul class="nav-list">
-              <li><a href="index.html">خانه</a></li>
-              <li class="dropdown">
-                <a href="#" class="dropdown-toggle"
-                  >🧩 پازل <i class="fas fa-chevron-down"></i
-                ></a>
-                <ul class="dropdown-menu">
-                  <li><a href="puzzle-rush.html">پازل عجله‌ای</a></li>
-                </ul>
-              </li>
-              <li class="dropdown">
-                <a href="#" class="dropdown-toggle"
-                  >📚 آموزش <i class="fas fa-chevron-down"></i
-                ></a>
-                <ul class="dropdown-menu">
-                  <li><a href="lessons.html">دروس</a></li>
-                  <li><a href="openings.html">گشایش‌ها</a></li>
-                  <li><a href="endgames.html">خاتمه‌ها</a></li>
-                </ul>
-              </li>
-              <li class="dropdown">
-                <a href="#" class="dropdown-toggle"
-                  >⚙️ ابزارها <i class="fas fa-chevron-down"></i
-                ></a>
-                <ul class="dropdown-menu">
-                  <li><a href="analysis.html">آنالیز</a></li>
-                  <li><a href="practice.html">تمرین</a></li>
-                </ul>
-              </li>
-              <li class="dropdown">
-                <a href="#" class="dropdown-toggle"
-                  >🗄️ بانک اطلاعات <i class="fas fa-chevron-down"></i
-                ></a>
-                <ul class="dropdown-menu">
-                  <li><a href="games-database.html">پایگاه بازی‌ها</a></li>
-                  <li><a href="downloads.html">دانلود PGN</a></li>
-                </ul>
-              </li>
-              <li class="dropdown">
-                <a href="#" class="dropdown-toggle"
-                  >📖 کتاب‌ها <i class="fas fa-chevron-down"></i
-                ></a>
-                <ul class="dropdown-menu">
-                  <li><a href="book-translate.html">ترجمه کتاب</a></li>
-                  <li><a href="books.html">کتاب‌ها</a></li>
-                </ul>
-              </li>
-            </ul>
-          </nav>
-        </div>
-      </header>
+      <div id="header-placeholder"></div>
 
       <div class="openings-header">
         <h2>📘 دانشنامه کامل گشایش‌های شطرنج</h2>
@@ -456,10 +236,8 @@
       </div>
 
       <div id="openingsGrid" class="openings-grid"></div>
-      <footer>
-        © ChessHub | مرجع کامل گشایش‌های شطرنج – کلیک روی هر واریانت، تخته
-        تعاملی را باز می‌کند
-      </footer>
+
+      <div id="footer-placeholder"></div>
     </div>
 
     <div id="boardModal" class="modal-overlay">
@@ -467,13 +245,14 @@
         <h3 id="modalTitle"></h3>
         <canvas id="modalCanvas" width="420" height="420"></canvas>
         <div class="modal-nav">
-          <button id="modalPrevBtn">◀ قبلی</button
-          ><button id="modalNextBtn">بعدی ▶</button>
+          <button id="modalPrevBtn">◀ قبلی</button>
+          <button id="modalNextBtn">بعدی ▶</button>
         </div>
         <button id="closeModalBtn" class="close-modal">✖ بستن</button>
       </div>
     </div>
 
+    <script src="js/script.js"></script>
     <script>
       // بارگذاری مهره‌های محلی
       const pieceImages = {};
@@ -507,7 +286,7 @@
         });
       }
 
-      // ---------- دیتابیس کامل گشایش‌ها (۳۲ گروه با همه واریانت‌های درخواستی) ----------
+      // ---------- دیتابیس کامل گشایش‌ها (همان دیتابیس قبلی) ----------
       const openingsDatabase = [
         {
           name: "دفاع سیسیلی (Sicilian Defense)",
@@ -1877,16 +1656,16 @@
           const groupDiv = document.createElement("div");
           groupDiv.className = "opening-group";
           groupDiv.innerHTML = `
-                <div class="group-header">
-                    <h3>${group.name}</h3>
-                    <i class="fas fa-chevron-down"></i>
-                </div>
-                <div class="group-content">
-                    <div class="variations-list">
-                        ${group.variations.map((v) => `<div class="variation-item" data-name="${v.name}" data-moves='${JSON.stringify(v.moves)}'>${v.name}</div>`).join("")}
-                    </div>
-                </div>
-            `;
+        <div class="group-header">
+          <h3>${group.name}</h3>
+          <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="group-content">
+          <div class="variations-list">
+            ${group.variations.map((v) => `<div class="variation-item" data-name="${v.name}" data-moves='${JSON.stringify(v.moves)}'>${v.name}</div>`).join("")}
+          </div>
+        </div>
+      `;
           container.appendChild(groupDiv);
           const header = groupDiv.querySelector(".group-header");
           const content = groupDiv.querySelector(".group-content");
@@ -1939,25 +1718,7 @@
         if (e.target === document.getElementById("boardModal")) closeModal();
       });
 
-      const menuToggle = document.getElementById("menuToggle");
-      const mainNav = document.getElementById("mainNav");
-      if (menuToggle)
-        menuToggle.addEventListener("click", () =>
-          mainNav.classList.toggle("show"),
-        );
-      if (window.innerWidth <= 768) {
-        document.querySelectorAll(".dropdown").forEach((drop) => {
-          const toggle = drop.querySelector(".dropdown-toggle");
-          const menu = drop.querySelector(".dropdown-menu");
-          if (toggle && menu) {
-            toggle.addEventListener("click", (e) => {
-              e.preventDefault();
-              menu.classList.toggle("show-mobile");
-            });
-          }
-        });
-      }
-
+      // منوی موبایل قبلاً در script.js مدیریت می‌شود، نیازی به کد جداگانه نیست.
       loadPieces().then(() => renderOpenings());
     </script>
   </body>
