@@ -1,5 +1,19 @@
-// منوی همبرگر (برای تمام صفحات)
-document.addEventListener("DOMContentLoaded", function () {
+// ========== بارگذاری هدر و فوتر از فایل‌های خارجی ==========
+async function loadComponent(selector, url) {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const html = await response.text();
+    const element = document.querySelector(selector);
+    if (element) element.innerHTML = html;
+    else console.warn(`المان ${selector} پیدا نشد`);
+  } catch (error) {
+    console.error(`خطا در بارگذاری ${url}:`, error);
+  }
+}
+
+// ========== منوی همبرگر و مدیریت دراپ‌داون موبایل ==========
+function initMobileMenu() {
   const menuToggle = document.getElementById("menuToggle");
   const mainNav = document.getElementById("mainNav");
 
@@ -45,4 +59,14 @@ document.addEventListener("DOMContentLoaded", function () {
   // اجرای اولیه و هنگام تغییر اندازه صفحه
   initMobileDropdowns();
   window.addEventListener("resize", initMobileDropdowns);
+}
+
+// ========== اجرا بعد از بارگذاری کامل DOM ==========
+document.addEventListener("DOMContentLoaded", async () => {
+  // بارگذاری هدر و فوتر
+  await loadComponent("#header-placeholder", "header.html");
+  await loadComponent("#footer-placeholder", "footer.html");
+
+  // راه‌اندازی منوی موبایل (بعد از لود هدر)
+  initMobileMenu();
 });
