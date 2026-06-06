@@ -1,0 +1,945 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>ChessHub | پایگاه بازی‌های شطرنج</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <style>
+      /* استایل اختصاصی صفحه پایگاه بازی‌ها */
+      .players-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+        gap: 25px;
+        margin-bottom: 30px;
+      }
+      .player-card {
+        background: white;
+        border-radius: 32px;
+        padding: 20px 15px;
+        text-align: center;
+        cursor: pointer;
+        transition: 0.2s;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+      }
+      .player-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+      }
+      .player-avatar {
+        width: 100px;
+        height: 100px;
+        background: #eef2f5;
+        border-radius: 50%;
+        margin: 0 auto 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+      .player-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .player-name {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #2c7da0;
+      }
+      .player-title {
+        font-size: 0.8rem;
+        color: #5f7f9e;
+        margin-top: 5px;
+      }
+      .games-section {
+        background: white;
+        border-radius: 32px;
+        padding: 25px;
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+        margin-top: 20px;
+      }
+      .search-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        align-items: flex-end;
+        margin-bottom: 25px;
+        background: #f8fafc;
+        padding: 20px;
+        border-radius: 36px;
+      }
+      .search-field {
+        flex: 2;
+        min-width: 150px;
+      }
+      .search-field select,
+      .search-field input {
+        width: 100%;
+        padding: 10px 15px;
+        border-radius: 60px;
+        border: 1px solid #cbd5e1;
+        font-family: "Vazir";
+        font-size: 0.9rem;
+      }
+      .search-buttons {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .games-list {
+        max-height: 550px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .game-item {
+        background: #f9fafc;
+        border-radius: 28px;
+        padding: 12px 18px;
+        cursor: pointer;
+        transition: 0.1s;
+        border: 1px solid #eef2f8;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .game-item:hover {
+        background: #f1f5f9;
+        transform: translateX(-3px);
+      }
+      .game-info {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        font-size: 0.85rem;
+      }
+      .game-info span {
+        background: white;
+        padding: 4px 12px;
+        border-radius: 30px;
+      }
+      .game-viewer {
+        background: white;
+        border-radius: 36px;
+        padding: 25px;
+        margin-top: 20px;
+      }
+      .viewer-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+      }
+      .viewer-board {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 30px;
+        justify-content: center;
+      }
+      canvas {
+        width: 100%;
+        max-width: 480px;
+        height: auto;
+        background: #f0d9b5;
+        border-radius: 24px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      }
+      .eval-bar-container {
+        width: 100%;
+        max-width: 480px;
+        margin-top: 15px;
+      }
+      .eval-bar-bg {
+        background: #e2e8f0;
+        height: 12px;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .eval-fill {
+        width: 50%;
+        height: 100%;
+        background: #2c7da0;
+        transition: width 0.2s;
+      }
+      .eval-num {
+        font-size: 1.2rem;
+        font-weight: bold;
+        text-align: center;
+        margin-top: 5px;
+      }
+      .engine-status {
+        font-size: 0.7rem;
+        text-align: center;
+        color: #5f7f9e;
+        margin-top: 4px;
+      }
+      .control-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin: 20px 0;
+        flex-wrap: wrap;
+      }
+      .game-moves {
+        background: #f9fafc;
+        border-radius: 28px;
+        padding: 15px;
+        max-height: 250px;
+        overflow-y: auto;
+        direction: ltr;
+        font-family: monospace;
+        font-size: 0.85rem;
+      }
+      .move-item {
+        cursor: pointer;
+        padding: 3px 8px;
+        border-radius: 20px;
+        display: inline-block;
+        margin: 2px;
+        background: white;
+      }
+      .move-item.current-move {
+        background: #2c7da0;
+        color: white;
+      }
+      .pgn-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        margin-top: 20px;
+        flex-wrap: wrap;
+      }
+      .pgn-textarea {
+        margin-top: 20px;
+        width: 100%;
+      }
+      .pgn-textarea textarea {
+        width: 100%;
+        padding: 10px;
+        border-radius: 20px;
+        border: 1px solid #cbd5e1;
+        font-family: monospace;
+        font-size: 0.75rem;
+        direction: ltr;
+        resize: vertical;
+        max-height: 120px;
+        overflow-y: auto;
+        background: #fefefe;
+      }
+      .back-btn {
+        background: #eef2f5;
+        border: none;
+        padding: 8px 24px;
+        border-radius: 40px;
+        cursor: pointer;
+        font-family: "Vazir";
+        font-weight: bold;
+      }
+      @media (max-width: 768px) {
+        .players-grid {
+          grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+          gap: 15px;
+        }
+        .player-avatar {
+          width: 70px;
+          height: 70px;
+        }
+        .game-info {
+          font-size: 0.7rem;
+        }
+        .control-buttons .btn {
+          padding: 6px 16px;
+          font-size: 0.8rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div id="header-placeholder"></div>
+      <div id="mainContent">
+        <div class="players-grid" id="playersGrid"></div>
+      </div>
+      <div id="footer-placeholder"></div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+      // ========== لیست بازیکنان ==========
+      const players = [
+        {
+          name: "Alexander Alekhine",
+          title: "استاد بزرگ",
+          avatar: "images/players/alekhine.jpg",
+          file: "Alekhine.pgn",
+        },
+        {
+          name: "José Raúl Capablanca",
+          title: "استاد بزرگ",
+          avatar: "images/players/capablanca.jpg",
+          file: "Capablanca.pgn",
+        },
+        {
+          name: "Magnus Carlsen",
+          title: "استاد بزرگ",
+          avatar: "images/players/carlsen.jpg",
+          file: "Carlsen.pgn",
+        },
+        {
+          name: "Ding Liren",
+          title: "استاد بزرگ",
+          avatar: "images/players/ding.jpg",
+          file: "Ding.pgn",
+        },
+        {
+          name: "Max Euwe",
+          title: "استاد بزرگ",
+          avatar: "images/players/euwe.jpg",
+          file: "Euwe.pgn",
+        },
+        {
+          name: "Bobby Fischer",
+          title: "استاد بزرگ",
+          avatar: "images/players/fischer.jpg",
+          file: "Fischer.pgn",
+        },
+        {
+          name: "Gukesh D",
+          title: "استاد بزرگ",
+          avatar: "images/players/gukesh.jpg",
+          file: "Gukesh.pgn",
+        },
+        {
+          name: "Anatoly Karpov",
+          title: "استاد بزرگ",
+          avatar: "images/players/karpov.jpg",
+          file: "Karpov.pgn",
+        },
+        {
+          name: "Garry Kasparov",
+          title: "استاد بزرگ",
+          avatar: "images/players/kasparov.jpg",
+          file: "Kasparov.pgn",
+        },
+        {
+          name: "Emanuel Lasker",
+          title: "استاد بزرگ",
+          avatar: "images/players/lasker.jpg",
+          file: "Lasker.pgn",
+        },
+        {
+          name: "Tigran Petrosian",
+          title: "استاد بزرگ",
+          avatar: "images/players/petrosian.jpg",
+          file: "Petrosian.pgn",
+        },
+        {
+          name: "Vasily Smyslov",
+          title: "استاد بزرگ",
+          avatar: "images/players/smyslov.jpg",
+          file: "Smyslov.pgn",
+        },
+        {
+          name: "Wilhelm Steinitz",
+          title: "استاد بزرگ",
+          avatar: "images/players/steinitz.jpg",
+          file: "Steinitz.pgn",
+        },
+        {
+          name: "Mikhail Tal",
+          title: "استاد بزرگ",
+          avatar: "images/players/tal.jpg",
+          file: "Tal.pgn",
+        },
+      ];
+
+      let currentPlayerGames = [];
+      let filteredGames = [];
+      let selectedGameIndex = 0;
+      let gameViewerActive = false;
+
+      let modalGame = null;
+      let modalMovesFens = [];
+      let modalMoveIndex = 0;
+      let autoPlayInterval = null;
+      let isPlaying = false;
+      let stockfish = null;
+      let stockfishReady = false;
+
+      const mainContent = document.getElementById("mainContent");
+      const playersGrid = document.getElementById("playersGrid");
+
+      // ========== بارگذاری تصاویر مهره‌ها ==========
+      const pieceImages = {};
+      const pieceCodes = {
+        wK: "wK.svg",
+        wQ: "wQ.svg",
+        wR: "wR.svg",
+        wB: "wB.svg",
+        wN: "wN.svg",
+        wP: "wP.svg",
+        bK: "bK.svg",
+        bQ: "bQ.svg",
+        bR: "bR.svg",
+        bB: "bB.svg",
+        bN: "bN.svg",
+        bP: "bP.svg",
+      };
+      function loadPieces() {
+        return new Promise((resolve) => {
+          let loaded = 0;
+          const total = Object.keys(pieceCodes).length;
+          for (const [key, filename] of Object.entries(pieceCodes)) {
+            const img = new Image();
+            img.onload = img.onerror = () => {
+              loaded++;
+              if (loaded === total) resolve();
+            };
+            img.src = `pieces/merida/${filename}`;
+            pieceImages[key] = img;
+          }
+        });
+      }
+
+      // ========== Stockfish (عمق ۳۰، ریست در هر حرکت) ==========
+      function initStockfish() {
+        try {
+          stockfish = new Worker("js/stockfish.js");
+          stockfish.onmessage = (e) => {
+            const data = e.data;
+            if (data.includes("uciok")) {
+              stockfishReady = true;
+              stockfish.postMessage("setoption name Threads value 4");
+              stockfish.postMessage("setoption name Hash value 256");
+              stockfish.postMessage("setoption name Skill Level value 20");
+              if (gameViewerActive && modalGame)
+                requestAnalysis(modalGame.fen());
+              const statusEl = document.getElementById("engineStatus");
+              if (statusEl)
+                statusEl.innerHTML = "✅ Stockfish فعال (قوی‌ترین حالت)";
+            } else if (data.includes("bestmove")) return;
+            else if (data.includes("info depth")) {
+              const scoreMatch = data.match(/score (cp|mate) ([-\d]+)/);
+              const depthMatch = data.match(/depth (\d+)/);
+              if (scoreMatch && modalGame) {
+                const scoreVal = parseInt(scoreMatch[2]);
+                const isMate = scoreMatch[1] === "mate";
+                let whiteAdv = isMate
+                  ? scoreVal > 0
+                    ? 1000
+                    : -1000
+                  : scoreVal;
+                let percent = Math.min(95, Math.max(5, 50 + whiteAdv / 100));
+                const evalFill = document.getElementById("evalFill");
+                const evalNum = document.getElementById("evalNum");
+                if (evalFill && evalNum) {
+                  evalFill.style.width = percent + "%";
+                  evalNum.innerHTML = isMate
+                    ? scoreVal > 0
+                      ? `مات در ${scoreVal}`
+                      : `مات در ${-scoreVal}`
+                    : (whiteAdv / 100).toFixed(2);
+                }
+                const statusEl = document.getElementById("engineStatus");
+                if (statusEl && depthMatch)
+                  statusEl.innerHTML = `🧠 Stockfish عمق ${depthMatch[1]} ...`;
+              }
+            }
+          };
+          stockfish.postMessage("uci");
+          setTimeout(() => {
+            if (!stockfishReady) console.warn("Stockfish not ready");
+          }, 2000);
+        } catch (e) {
+          console.warn(e);
+        }
+      }
+
+      function requestAnalysis(fen) {
+        if (stockfish && stockfishReady) {
+          stockfish.postMessage("stop");
+          stockfish.postMessage(`position fen ${fen}`);
+          stockfish.postMessage("go depth 30");
+          const statusEl = document.getElementById("engineStatus");
+          if (statusEl)
+            statusEl.innerHTML = "🧠 Stockfish در حال تحلیل (عمق 1 → 30)...";
+        }
+      }
+
+      // ========== پارسر PGN ==========
+      function parsePGN(pgnText) {
+        const games = [];
+        const rawGames = pgnText.split(/(?=\[Event ")/);
+        for (let raw of rawGames) {
+          if (!raw.trim()) continue;
+          const whiteMatch = raw.match(/\[White "([^"]+)"\]/);
+          const blackMatch = raw.match(/\[Black "([^"]+)"\]/);
+          const resultMatch = raw.match(/\[Result "([^"]+)"\]/);
+          const dateMatch = raw.match(/\[Date "([^"]+)"\]/);
+          const openingMatch = raw.match(/\[Opening "([^"]+)"\]/);
+          let movesSection = raw.split(/\n\n/).pop() || "";
+          movesSection = movesSection
+            .replace(/\{[^}]*\}/g, "")
+            .replace(/;[^\n]*/g, "");
+          const moveRegex = /\d+\.\s*([^\d]+?)(?=\s+\d+\.|\s*$)/g;
+          let moves = [];
+          let match;
+          while ((match = moveRegex.exec(movesSection)) !== null) {
+            let part = match[1].trim();
+            const parts = part.split(/\s+/);
+            if (parts[0]) moves.push(parts[0]);
+            if (parts[1]) moves.push(parts[1]);
+          }
+          if (moves.length === 0) {
+            let clean = movesSection
+              .replace(/\d+\./g, "")
+              .replace(/\s+/g, " ")
+              .trim();
+            moves = clean.split(/\s+/).filter((m) => m.match(/[a-h][1-8]/));
+          }
+          games.push({
+            white: whiteMatch ? whiteMatch[1] : "?",
+            black: blackMatch ? blackMatch[1] : "?",
+            result: resultMatch ? resultMatch[1] : "*",
+            date: dateMatch ? dateMatch[1] : "????.??.??",
+            movesCount: moves.length,
+            opening: openingMatch ? openingMatch[1] : "نامشخص",
+            pgn: raw,
+            moves: moves,
+          });
+        }
+        return games;
+      }
+
+      // ========== رندر بازیکنان ==========
+      function renderPlayers() {
+        playersGrid.innerHTML = "";
+        players.forEach((p) => {
+          const card = document.createElement("div");
+          card.className = "player-card";
+          card.innerHTML = `
+        <div class="player-avatar">
+          <img src="${p.avatar}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/100?text=No+Image'">
+        </div>
+        <div class="player-name">${p.name}</div>
+        <div class="player-title">${p.title}</div>
+      `;
+          card.addEventListener("click", () => loadPlayerGames(p));
+          playersGrid.appendChild(card);
+        });
+      }
+
+      async function loadPlayerGames(player) {
+        mainContent.innerHTML = `<div style="text-align:center; padding:40px;">⏳ بارگذاری بازی‌های ${player.name} ...</div>`;
+        try {
+          const response = await fetch(`pgn/${player.file}`);
+          if (!response.ok) throw new Error("فایل یافت نشد");
+          const pgnText = await response.text();
+          currentPlayerGames = parsePGN(pgnText);
+          filteredGames = [...currentPlayerGames];
+          showGamesList(player.name);
+        } catch (err) {
+          console.error(err);
+          mainContent.innerHTML = `<div style="text-align:center; padding:40px;">❌ خطا در بارگذاری بازی‌ها</div>`;
+          const backBtn = document.createElement("button");
+          backBtn.className = "btn";
+          backBtn.innerHTML = "↩️ بازگشت به صفحه اصلی";
+          backBtn.onclick = () => location.reload();
+          mainContent.appendChild(backBtn);
+        }
+      }
+
+      // ========== نمایش لیست بازی‌ها با جستجو ==========
+      function showGamesList(playerName) {
+        const container = document.createElement("div");
+        container.className = "games-section";
+        container.innerHTML = `
+      <div style="margin-bottom:15px;">
+        <button class="back-btn" id="backToPlayersBtn">↩️ بازگشت به بازیکنان</button>
+        <h3 style="margin-top:15px;">🎯 بازی‌های ${playerName}</h3>
+      </div>
+      <div class="search-container">
+        <div class="search-field">
+          <select id="searchField">
+            <option value="white">سفید</option>
+            <option value="black">سیاه</option>
+            <option value="result">نتیجه</option>
+            <option value="moves">تعداد حرکت</option>
+            <option value="date">تاریخ</option>
+          </select>
+        </div>
+        <div class="search-field">
+          <input type="text" id="searchValue" placeholder="مقدار مورد جستجو...">
+        </div>
+        <div class="search-buttons">
+          <button class="btn" id="searchBtn">🔍 جستجو</button>
+          <button class="btn" id="resetSearchBtn">🗑️ پاک کردن</button>
+        </div>
+      </div>
+      <div id="gamesListContainer" class="games-list"></div>
+    `;
+        mainContent.innerHTML = "";
+        mainContent.appendChild(container);
+
+        document
+          .getElementById("backToPlayersBtn")
+          .addEventListener("click", () => {
+            mainContent.innerHTML = `<div class="players-grid" id="playersGrid"></div>`;
+            renderPlayers();
+          });
+        document
+          .getElementById("searchBtn")
+          .addEventListener("click", performSearch);
+        document
+          .getElementById("resetSearchBtn")
+          .addEventListener("click", resetSearch);
+
+        function performSearch() {
+          const field = document.getElementById("searchField").value;
+          const query = document
+            .getElementById("searchValue")
+            .value.trim()
+            .toLowerCase();
+          if (!query) {
+            filteredGames = [...currentPlayerGames];
+            renderGamesList(filteredGames);
+            return;
+          }
+          const listContainer = document.getElementById("gamesListContainer");
+          listContainer.innerHTML =
+            "<div style='text-align:center; padding:20px;'>⏳ در حال جستجو...</div>";
+          setTimeout(() => {
+            filteredGames = currentPlayerGames.filter((game) => {
+              if (field === "white")
+                return game.white.toLowerCase().includes(query);
+              if (field === "black")
+                return game.black.toLowerCase().includes(query);
+              if (field === "result") {
+                const resultText =
+                  game.result === "1-0"
+                    ? "برد سفید"
+                    : game.result === "0-1"
+                      ? "برد سیاه"
+                      : "مساوی";
+                return resultText.includes(query);
+              }
+              if (field === "moves")
+                return game.movesCount.toString().includes(query);
+              if (field === "date") return game.date.includes(query);
+              return false;
+            });
+            renderGamesList(filteredGames);
+          }, 50);
+        }
+
+        function resetSearch() {
+          document.getElementById("searchValue").value = "";
+          filteredGames = [...currentPlayerGames];
+          renderGamesList(filteredGames);
+        }
+
+        renderGamesList(filteredGames);
+      }
+
+      function renderGamesList(games) {
+        const container = document.getElementById("gamesListContainer");
+        if (!container) return;
+        if (!games.length) {
+          container.innerHTML =
+            "<div style='text-align:center; padding:30px;'>❌ هیچ بازی‌ای یافت نشد</div>";
+          return;
+        }
+        container.innerHTML = "";
+        games.forEach((game, idx) => {
+          const div = document.createElement("div");
+          div.className = "game-item";
+          const resultText =
+            game.result === "1-0"
+              ? "برد سفید"
+              : game.result === "0-1"
+                ? "برد سیاه"
+                : "مساوی";
+          div.innerHTML = `
+        <div class="game-info">
+          <span>⚪ ${game.white}</span>
+          <span>⚫ ${game.black}</span>
+          <span>🏆 ${resultText}</span>
+          <span>🔢 ${game.movesCount} حرکت</span>
+          <span>📅 ${game.date}</span>
+          <span>📖 ${game.opening}</span>
+        </div>
+        <div class="game-result">${resultText}</div>
+      `;
+          div.addEventListener("click", () => openGameViewer(idx, games));
+          container.appendChild(div);
+        });
+      }
+
+      // ========== نمایشگر بازی (با نمایش PGN) ==========
+      function openGameViewer(gameIdx, games) {
+        const game = games[gameIdx];
+        selectedGameIndex = gameIdx;
+        const tempGame = new Chess();
+        tempGame.load_pgn(game.pgn);
+        const movesFens = [tempGame.fen()];
+        const moveHistory = tempGame.history({ verbose: true });
+        const temp = new Chess();
+        for (let move of moveHistory) {
+          temp.move(move);
+          movesFens.push(temp.fen());
+        }
+        modalMovesFens = movesFens;
+        modalMoveIndex = 0;
+        modalGame = new Chess(modalMovesFens[0]);
+
+        const viewerDiv = document.createElement("div");
+        viewerDiv.className = "game-viewer";
+        viewerDiv.innerHTML = `
+      <div class="viewer-header">
+        <h3>${game.white} vs ${game.black} (${game.result === "1-0" ? "برد سفید" : game.result === "0-1" ? "برد سیاه" : "مساوی"})</h3>
+        <button class="back-btn" id="backToGamesListBtn">↩️ بازگشت به لیست</button>
+      </div>
+      <div class="viewer-board">
+        <div>
+          <canvas id="gameCanvas" width="480" height="480"></canvas>
+          <div class="eval-bar-container">
+            <div class="eval-bar-bg"><div class="eval-fill" id="evalFill" style="width:50%"></div></div>
+            <div id="evalNum" class="eval-num">0.00</div>
+            <div id="engineStatus" class="engine-status">🧠 Stockfish در حال راه‌اندازی...</div>
+          </div>
+        </div>
+        <div style="flex:1; min-width:200px;">
+          <div class="control-buttons">
+            <button id="prevMoveBtn" class="btn">◀ قبلی</button>
+            <button id="playPauseBtn" class="btn btn-primary">▶ شروع</button>
+            <button id="nextMoveBtn" class="btn">بعدی ▶</button>
+          </div>
+          <div id="movesList" class="game-moves"></div>
+          <div class="pgn-actions">
+            <button id="copyPgnBtn" class="btn">📋 کپی PGN</button>
+            <button id="downloadPgnBtn" class="btn">📥 دانلود PGN</button>
+          </div>
+          <div class="pgn-textarea">
+            <textarea id="pgnDisplay" readonly rows="3" placeholder="PGN بازی"></textarea>
+          </div>
+        </div>
+      </div>
+    `;
+        mainContent.innerHTML = "";
+        mainContent.appendChild(viewerDiv);
+        gameViewerActive = true;
+
+        // نمایش PGN
+        const pgnDisplay = document.getElementById("pgnDisplay");
+        if (pgnDisplay) pgnDisplay.value = game.pgn;
+
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        const cellSize = canvas.width / 8;
+
+        function drawBoard() {
+          const board = modalGame.board();
+          for (let i = 0; i < 8; i++) {
+            for (let j = 0; j < 8; j++) {
+              const isLight = (i + j) % 2 === 0;
+              ctx.fillStyle = isLight ? "#f0d9b5" : "#b58863";
+              ctx.fillRect(j * cellSize, i * cellSize, cellSize, cellSize);
+              const piece = board[i][j];
+              if (piece) {
+                const code =
+                  (piece.color === "w" ? "w" : "b") + piece.type.toUpperCase();
+                const img = pieceImages[code];
+                if (img && img.complete) {
+                  ctx.drawImage(
+                    img,
+                    j * cellSize,
+                    i * cellSize,
+                    cellSize,
+                    cellSize,
+                  );
+                } else {
+                  ctx.font = `${cellSize * 0.55}px Arial`;
+                  ctx.fillStyle = "#222";
+                  ctx.textAlign = "center";
+                  ctx.textBaseline = "middle";
+                  const sym =
+                    {
+                      wK: "♔",
+                      wQ: "♕",
+                      wR: "♖",
+                      wB: "♗",
+                      wN: "♘",
+                      wP: "♙",
+                      bK: "♚",
+                      bQ: "♛",
+                      bR: "♜",
+                      bB: "♝",
+                      bN: "♞",
+                      bP: "♟",
+                    }[code] || "";
+                  ctx.fillText(
+                    sym,
+                    j * cellSize + cellSize / 2,
+                    i * cellSize + cellSize / 2,
+                  );
+                }
+              }
+            }
+          }
+          ctx.font = `${cellSize * 0.22}px Vazir`;
+          ctx.fillStyle = "#4a4a4a";
+          for (let i = 0; i < 8; i++) {
+            ctx.fillText((8 - i).toString(), 5, i * cellSize + cellSize / 2);
+            ctx.fillText(
+              String.fromCharCode(97 + i),
+              i * cellSize + cellSize - 12,
+              canvas.height - 6,
+            );
+          }
+        }
+
+        function updatePosition() {
+          modalGame.load(modalMovesFens[modalMoveIndex]);
+          drawBoard();
+          requestAnalysis(modalGame.fen());
+          highlightCurrentMove();
+        }
+
+        function highlightCurrentMove() {
+          const items = document.querySelectorAll(".move-item");
+          items.forEach((item, idx) => {
+            if (idx === modalMoveIndex - 1) item.classList.add("current-move");
+            else item.classList.remove("current-move");
+          });
+        }
+
+        function buildMovesList() {
+          const container = document.getElementById("movesList");
+          container.innerHTML = "";
+          const moves = modalGame.history({ verbose: true });
+          for (let i = 0; i < moves.length; i++) {
+            const moveDiv = document.createElement("div");
+            moveDiv.className = "move-item";
+            moveDiv.style.display = "inline-block";
+            moveDiv.textContent = `${Math.floor(i / 2) + 1}. ${moves[i].san} ${moves[i + 1] ? moves[i + 1].san : ""}`;
+            moveDiv.addEventListener(
+              "click",
+              (function (idx) {
+                return function () {
+                  stopAutoPlay();
+                  modalMoveIndex = idx;
+                  updatePosition();
+                };
+              })(i + 1),
+            );
+            container.appendChild(moveDiv);
+          }
+        }
+
+        function nextMove() {
+          if (modalMoveIndex < modalMovesFens.length - 1) {
+            stopAutoPlay();
+            modalMoveIndex++;
+            updatePosition();
+          }
+        }
+        function prevMove() {
+          if (modalMoveIndex > 0) {
+            stopAutoPlay();
+            modalMoveIndex--;
+            updatePosition();
+          }
+        }
+        function startAutoPlay() {
+          if (modalMoveIndex >= modalMovesFens.length - 1) return;
+          isPlaying = true;
+          const playBtn = document.getElementById("playPauseBtn");
+          if (playBtn) playBtn.innerHTML = "⏸ ایست";
+          autoPlayInterval = setInterval(() => {
+            if (modalMoveIndex < modalMovesFens.length - 1) {
+              modalMoveIndex++;
+              updatePosition();
+            } else {
+              stopAutoPlay();
+            }
+          }, 2000);
+        }
+        function stopAutoPlay() {
+          if (autoPlayInterval) clearInterval(autoPlayInterval);
+          isPlaying = false;
+          const playBtn = document.getElementById("playPauseBtn");
+          if (playBtn) playBtn.innerHTML = "▶ شروع";
+        }
+        function toggleAutoPlay() {
+          if (isPlaying) stopAutoPlay();
+          else startAutoPlay();
+        }
+
+        document.getElementById("prevMoveBtn").addEventListener("click", () => {
+          stopAutoPlay();
+          prevMove();
+        });
+        document.getElementById("nextMoveBtn").addEventListener("click", () => {
+          stopAutoPlay();
+          nextMove();
+        });
+        document
+          .getElementById("playPauseBtn")
+          .addEventListener("click", toggleAutoPlay);
+        document
+          .getElementById("backToGamesListBtn")
+          .addEventListener("click", () => {
+            stopAutoPlay();
+            showGamesList(
+              players.find(
+                (p) =>
+                  p.file ===
+                  game.pgn?.split("\n")[0]?.match(/\[White "[^"]+"\]/)?.[1],
+              )?.name || "بازیکن",
+            );
+          });
+        document.getElementById("copyPgnBtn").addEventListener("click", () => {
+          navigator.clipboard.writeText(game.pgn);
+          alert("PGN کپی شد");
+        });
+        document
+          .getElementById("downloadPgnBtn")
+          .addEventListener("click", () => {
+            const blob = new Blob([game.pgn], { type: "text/plain" });
+            const a = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            a.href = url;
+            a.download = `${game.white}_vs_${game.black}.pgn`;
+            a.click();
+            URL.revokeObjectURL(url);
+          });
+
+        buildMovesList();
+        updatePosition();
+      }
+
+      // ========== راه‌اندازی ==========
+      loadPieces().then(() => {
+        renderPlayers();
+        initStockfish();
+      });
+    </script>
+  </body>
+</html>
