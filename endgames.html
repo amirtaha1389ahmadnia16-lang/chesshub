@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="css/style.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
     <style>
-      /* استایل‌های مدرن برای صفحه آخربازی‌ها */
+      /* فقط استایل‌های مخصوص بخش آخربازی – هیچ دستکاری روی هدر/فوتر */
       .endgame-container {
         max-width: 1200px;
         margin: 0 auto;
@@ -208,7 +208,6 @@
         color: #1e40af;
         font-size: 0.85rem;
       }
-      /* مودال ترفیع */
       .promotion-modal {
         position: fixed;
         top: 0;
@@ -268,54 +267,59 @@
     </style>
   </head>
   <body>
-    <div class="container endgame-container">
+    <div class="container">
       <div id="header-placeholder"></div>
 
-      <div class="training-card">
-        <div class="card-header">
-          <h2>🎯 تمرین آخربازی‌ها – با Stockfish 18 حرفه‌ای</h2>
-          <p>مهره سفید را بگیر و بکش | موتور پیشرفته با عمق ۲۴</p>
-        </div>
-        <div class="card-body">
-          <div class="top-bar">
-            <div class="endgame-selector">
-              <select id="endgameSelect"></select>
-            </div>
-            <div class="stats">
-              <span>⚙️ عمق: <span id="engineDepth">۲۴</span></span>
-              <span id="turnIndicator" class="stat-badge">⚪ نوبت شما</span>
-              <span id="autoTimerSpan" class="stat-badge" style="display: none"
-                >⏳ بعدی در 5 ثانیه</span
-              >
-            </div>
+      <div class="endgame-container">
+        <div class="training-card">
+          <div class="card-header">
+            <h2>🎯 تمرین آخربازی‌ها – با Stockfish 18 حرفه‌ای</h2>
+            <p>مهره سفید را بگیر و بکش | موتور پیشرفته با عمق ۲۴</p>
           </div>
-          <div class="main-panel">
-            <div class="board-section">
-              <div class="board-wrapper">
-                <canvas id="chessCanvas" width="520" height="520"></canvas>
+          <div class="card-body">
+            <div class="top-bar">
+              <div class="endgame-selector">
+                <select id="endgameSelect"></select>
               </div>
-              <div class="action-buttons">
-                <button id="undoBtn" class="btn">
-                  <i class="fas fa-undo-alt"></i> برگشت
-                </button>
-                <button id="resetBtn" class="btn">
-                  <i class="fas fa-sync-alt"></i> شروع مجدد
-                </button>
-                <button id="nextBtn" class="btn btn-primary">
-                  <i class="fas fa-forward"></i> پازل بعدی
-                </button>
+              <div class="stats">
+                <span>⚙️ عمق: <span id="engineDepth">۲۴</span></span>
+                <span id="turnIndicator" class="stat-badge">⚪ نوبت شما</span>
+                <span
+                  id="autoTimerSpan"
+                  class="stat-badge"
+                  style="display: none"
+                  >⏳ بعدی در 5 ثانیه</span
+                >
               </div>
             </div>
-            <div class="info-section">
-              <div class="engine-status" id="engineStatus">
-                🧠 Stockfish 18 (قوی‌ترین تنظیمات)
+            <div class="main-panel">
+              <div class="board-section">
+                <div class="board-wrapper">
+                  <canvas id="chessCanvas" width="520" height="520"></canvas>
+                </div>
+                <div class="action-buttons">
+                  <button id="undoBtn" class="btn">
+                    <i class="fas fa-undo-alt"></i> برگشت
+                  </button>
+                  <button id="resetBtn" class="btn">
+                    <i class="fas fa-sync-alt"></i> شروع مجدد
+                  </button>
+                  <button id="nextBtn" class="btn btn-primary">
+                    <i class="fas fa-forward"></i> پازل بعدی
+                  </button>
+                </div>
               </div>
-              <div class="move-history">
-                <h4>📜 تاریخچه حرکات</h4>
-                <div id="historyList"></div>
-              </div>
-              <div class="message-area" id="messageBox">
-                ✨ مهره را بگیرید و روی خانه مقصد رها کنید
+              <div class="info-section">
+                <div class="engine-status" id="engineStatus">
+                  🧠 Stockfish 18 (قوی‌ترین تنظیمات)
+                </div>
+                <div class="move-history">
+                  <h4>📜 تاریخچه حرکات</h4>
+                  <div id="historyList"></div>
+                </div>
+                <div class="message-area" id="messageBox">
+                  ✨ مهره را بگیرید و روی خانه مقصد رها کنید
+                </div>
               </div>
             </div>
           </div>
@@ -325,7 +329,6 @@
       <div id="footer-placeholder"></div>
     </div>
 
-    <!-- مودال ترفیع پیاده -->
     <div id="promotionModal" class="promotion-modal">
       <div class="promotion-content">
         <h3>ترفیع پیاده</h3>
@@ -399,7 +402,6 @@
         const autoTimerSpan = document.getElementById("autoTimerSpan");
         const engineDepthSpan = document.getElementById("engineDepth");
 
-        // ---------- توابع کمکی ----------
         function getSquareFromXY(clientX, clientY) {
           const rect = canvas.getBoundingClientRect();
           const scaleX = canvas.width / rect.width;
@@ -479,7 +481,6 @@
             );
             ctx.restore();
           }
-          // حروف و اعداد مختصات اضافه نمی‌شود (طبق درخواست قبلی)
         }
         function renderBoard() {
           drawBoard();
@@ -553,7 +554,6 @@
           return false;
         }
 
-        // ---------- Stockfish 18 با حداکثر توان (عمق 24، 4 ترد، هش 512 مگابایت) ----------
         function initStockfish() {
           try {
             stockfish = new Worker("js/stockfish.js");
@@ -586,23 +586,17 @@
                       updateHistory();
                       const ended = checkGameOver();
                       updateTurnDisplay();
-                      if (!ended && game.turn() === "b" && gameActive) {
+                      if (!ended && game.turn() === "b" && gameActive)
                         setTimeout(() => requestComputerMove(), 100);
-                      }
-                    } else {
-                      fallbackComputerMove();
-                    }
+                    } else fallbackComputerMove();
                   } catch (e) {
                     fallbackComputerMove();
                   }
-                } else {
-                  fallbackComputerMove();
-                }
+                } else fallbackComputerMove();
               } else if (data.includes("info depth")) {
                 const depthMatch = data.match(/depth (\d+)/);
-                if (depthMatch && engineStatusSpan && !waitingForStockfish) {
+                if (depthMatch && engineStatusSpan && !waitingForStockfish)
                   engineStatusSpan.innerHTML = `🧠 Stockfish 18 (عمق ${depthMatch[1]})`;
-                }
               }
             };
             stockfish.postMessage("uci");
@@ -635,12 +629,9 @@
             stockfish.postMessage("stop");
             stockfish.postMessage(`position fen ${game.fen()}`);
             stockfish.postMessage("go depth 24");
-          } else {
-            fallbackComputerMove();
-          }
+          } else fallbackComputerMove();
         }
 
-        // موتور ساده (برای مواقع خطا)
         const pieceVal = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 100 };
         function evalBoardSimple(board, turn) {
           let score = 0;
@@ -687,7 +678,6 @@
           waitingForStockfish = false;
         }
 
-        // ---------- تایمر خودکار پازل بعدی ----------
         function stopAutoTimer() {
           if (autoTimerId) clearTimeout(autoTimerId);
           if (autoTimerInterval) clearInterval(autoTimerInterval);
@@ -715,7 +705,6 @@
           }, AUTO_TIMER_SEC * 1000);
         }
 
-        // ---------- بارگذاری موقعیت جدید ----------
         async function loadPosition(index, isAuto = false) {
           if (!endgames.length) return;
           if (isComputerThinking && !isAuto) return;
@@ -742,7 +731,6 @@
             setTimeout(() => requestComputerMove(), 300);
         }
 
-        // ---------- حرکت کاربر (با پشتیبانی از ترفیع) ----------
         async function tryMove(from, to) {
           if (!gameActive || game.turn() !== "w") {
             showMessage("نوبت شما نیست!", true);
@@ -752,7 +740,6 @@
             showMessage("کامپیوتر در حال فکر...", false);
             return false;
           }
-
           const piece = game.get(from);
           const isPawnPromotion =
             piece &&
@@ -801,9 +788,8 @@
               updateHistory();
               const ended = checkGameOver();
               updateTurnDisplay();
-              if (!ended && game.turn() === "b") {
+              if (!ended && game.turn() === "b")
                 setTimeout(() => requestComputerMove(), 100);
-              }
               return true;
             } else {
               showMessage("حرکت غیرمجاز", true);
@@ -815,7 +801,6 @@
           }
         }
 
-        // ---------- رویدادهای کشیدن مهره (ماوس و لمسی) ----------
         function onPointerDown(e) {
           e.preventDefault();
           if (!gameActive || game.turn() !== "w") return;
@@ -859,9 +844,8 @@
             clientY = e.clientY;
           }
           const targetSquare = getSquareFromXY(clientX, clientY);
-          if (targetSquare && targetSquare !== dragStartSquare) {
+          if (targetSquare && targetSquare !== dragStartSquare)
             tryMove(dragStartSquare, targetSquare);
-          }
           cleanupDrag();
         }
         function cleanupDrag() {
@@ -871,7 +855,6 @@
           document.body.style.overflow = "";
           canvas.style.touchAction = "";
         }
-        // کلیک جایگزین
         function onClickFallback(e) {
           if (isDragging) return;
           if (!gameActive || game.turn() !== "w") return;
@@ -886,16 +869,13 @@
             if (piece && piece.color === "w") {
               selectedSquare = square;
               renderBoard();
-            } else {
-              showMessage("مهره سفید خود را انتخاب کنید", true);
-            }
+            } else showMessage("مهره سفید خود را انتخاب کنید", true);
           } else {
             tryMove(selectedSquare, square);
             selectedSquare = null;
           }
         }
 
-        // ---------- بارگذاری دیتابیس endgames.txt ----------
         async function loadEndgamesFromFile() {
           try {
             const resp = await fetch("endgames.txt");
@@ -941,7 +921,6 @@
           };
         }
 
-        // ---------- دکمه‌ها ----------
         function resetGame() {
           loadPosition(currentIndex);
         }
@@ -970,12 +949,9 @@
             renderBoard();
             updateHistory();
             updateTurnDisplay();
-          } else {
-            showMessage("هیچ حرکتی برای برگشت وجود ندارد", false);
-          }
+          } else showMessage("هیچ حرکتی برای برگشت وجود ندارد", false);
         }
 
-        // ---------- راه‌اندازی ----------
         loadPieces().then(() => {
           initStockfish();
           loadEndgamesFromFile();
