@@ -1,0 +1,1317 @@
+{
+  "categories": [
+    {
+      "name": "گشایش‌های 1.e4",
+      "code": "e4",
+      "openings": [
+        {
+          "name": "King's Pawn Opening",
+          "moves": ["e4"],
+          "variants": []
+        },
+        {
+          "name": "Sicilian Defense",
+          "moves": ["e4", "c5"],
+          "variants": [
+            { "name": "Open Sicilian", "moves": ["e4", "c5", "Nf3", "d6", "d4", "cxd4", "Nxd4", "Nf6", "Nc3"] },
+            { "name": "Najdorf Variation", "moves": ["e4", "c5", "Nf3", "d6", "d4", "cxd4", "Nxd4", "Nf6", "Nc3", "a6"] },
+            { "name": "Dragon Variation", "moves": ["e4", "c5", "Nf3", "d6", "d4", "cxd4", "Nxd4", "Nf6", "Nc3", "g6"] },
+            { "name": "Scheveningen Variation", "moves": ["e4", "c5", "Nf3", "d6", "d4", "cxd4", "Nxd4", "Nf6", "Nc3", "e6"] },
+            { "name": "Taimanov Variation", "moves": ["e4", "c5", "Nf3", "e6", "d4", "cxd4", "Nxd4", "Nc6"] },
+            { "name": "Kan Variation", "moves": ["e4", "c5", "Nf3", "e6", "d4", "cxd4", "Nxd4", "a6"] },
+            { "name": "Accelerated Dragon", "moves": ["e4", "c5", "Nf3", "Nc6", "d4", "cxd4", "Nxd4", "g6"] },
+            { "name": "Hyperaccelerated Dragon", "moves": ["e4", "c5", "Nf3", "g6"] },
+            { "name": "O'Kelly Variation", "moves": ["e4", "c5", "Nf3", "a6"] },
+            { "name": "Four Knights Variation", "moves": ["e4", "c5", "Nf3", "e6", "d4", "cxd4", "Nxd4", "Nf6", "Nc3", "Nc6"] },
+            { "name": "Pin Variation", "moves": ["e4", "c5", "Nf3", "e6", "d4", "cxd4", "Nxd4", "Nf6", "Nc3", "Bb4"] },
+            { "name": "McDonnell Attack", "moves": ["e4", "c5", "f4"] },
+            { "name": "Wing Gambit", "moves": ["e4", "c5", "b4"] },
+            { "name": "Keres Variation", "moves": ["e4", "c5", "Ne2"] },
+            { "name": "Mengarini Variation", "moves": ["e4", "c5", "a3"] },
+            { "name": "Staunton-Cochrane Variation", "moves": ["e4", "c5", "c4"] },
+            { "name": "Lasker-Dunne Attack", "moves": ["e4", "c5", "g3"] },
+            { "name": "Smith-Morra Gambit", "moves": ["e4", "c5", "d4", "cxd4", "c3"] },
+            { "name": "Alapin Variation", "moves": ["e4", "c5", "c3"] },
+            { "name": "Closed Sicilian", "moves": ["e4", "c5", "Nc3"] },
+            { "name": "Nimzowitsch Variation", "moves": ["e4", "c5", "Nf3", "Nf6"] },
+            { "name": "Rossolimo Attack", "moves": ["e4", "c5", "Nf3", "Nc6", "Bb5"] },
+            { "name": "Canal Attack", "moves": ["e4", "c5", "Nf3", "d6", "Bb5+"] },
+            { "name": "Old Sicilian Variation", "moves": ["e4", "c5", "Nf3", "Nc6"] },
+            { "name": "Nyezhmetdinov-Rossolimo Attack", "moves": ["e4", "c5", "Nf3", "Nc6", "Bb5"] },
+            { "name": "Cowboy Attack", "moves": ["e4", "c5", "b3"] },
+            { "name": "Slow Variation", "moves": ["e4", "c5", "Be2"] },
+            { "name": "O'Kelly, Venice System", "moves": ["e4", "c5", "Nf3", "a6", "c3"] },
+            { "name": "Nimzowitsch, Advance Variation", "moves": ["e4", "c5", "Nf3", "Nf6", "e5"] },
+            { "name": "Westerinen Attack", "moves": ["e4", "c5", "Nf3", "e6", "b3"] },
+            { "name": "O'Kelly, Yerevan System", "moves": ["e4", "c5", "Nf3", "a6", "Nc3"] },
+            { "name": "O'Kelly, Maróczy Bind Formation", "moves": ["e4", "c5", "Nf3", "a6", "c4"] },
+            { "name": "Nimzowitsch, Closed", "moves": ["e4", "c5", "Nf3", "Nf6", "Nc3"] },
+            { "name": "Delayed Alapin Variation", "moves": ["e4", "c5", "Nf3", "d6", "c3"] },
+            { "name": "Wing, Marshall Variation", "moves": ["e4", "c5", "b4", "cxb4", "a3"] },
+            { "name": "Smith-Morra Gambit Declined, Push Variation", "moves": ["e4", "c5", "d4", "cxd4", "c3", "d3"] },
+            { "name": "Smith-Morra Gambit Declined, Alapin Formation", "moves": ["e4", "c5", "d4", "cxd4", "c3", "Nf6"] },
+            { "name": "Hyperaccelerated Dragon, Fianchetto Variation", "moves": ["e4", "c5", "Nf3", "g6", "d4"] },
+            { "name": "Hyperaccelerated Dragon, Fianchetto, Pterodactyl Defense", "moves": ["e4", "c5", "Nf3", "g6", "d4", "Bg7"] },
+            { "name": "Magnus Sicilian", "moves": ["e4", "c5", "Nc3", "d6", "d4"] },
+            { "name": "Chekhover Variation", "moves": ["e4", "c5", "Nf3", "d6", "d4", "cxd4", "Qxd4"] },
+            { "name": "Godiva Variation", "moves": ["e4", "c5", "Nf3", "Nc6", "d4", "cxd4", "Nxd4", "Qb6"] },
+            { "name": "Flohr Variation", "moves": ["e4", "c5", "Nf3", "Nc6", "d4", "cxd4", "Nxd4", "Qc7"] },
+            { "name": "Kveinis Variation", "moves": ["e4", "c5", "Nf3", "e6", "d4", "cxd4", "Nxd4", "Qb6"] },
+            { "name": "Kupreichik Variation", "moves": ["e4", "c5", "Nf3", "d6", "d4", "cxd4", "Nxd4", "Nf6", "Nc3", "Bd7"] },
+            { "name": "Four Knights, Cobra Variation", "moves": ["e4", "c5", "Nf3", "e6", "d4", "cxd4", "Nxd4", "Nf6", "Nc3", "Nc6", "Ndb5", "Bc5"] }
+          ]
+        },
+        {
+          "name": "French Defense",
+          "moves": ["e4", "e6"],
+          "variants": [
+            { "name": "Classical Variation", "moves": ["e4", "e6", "d4", "d5", "Nc3", "Nf6"] },
+            { "name": "Winawer Variation", "moves": ["e4", "e6", "d4", "d5", "Nc3", "Bb4"] },
+            { "name": "Tarrasch Variation", "moves": ["e4", "e6", "d4", "d5", "Nd2"] },
+            { "name": "Advance Variation", "moves": ["e4", "e6", "d4", "d5", "e5"] },
+            { "name": "Exchange Variation", "moves": ["e4", "e6", "d4", "d5", "exd5"] },
+            { "name": "King's Indian Attack", "moves": ["e4", "e6", "d3"] },
+            { "name": "Steiner Variation", "moves": ["e4", "e6", "c4"] },
+            { "name": "Horwitz Attack", "moves": ["e4", "e6", "b3"] },
+            { "name": "Knight Variation", "moves": ["e4", "e6", "Nf3"] },
+            { "name": "Schlechter Variation", "moves": ["e4", "e6", "d4", "d5", "Bd3"] },
+            { "name": "Chigorin Variation", "moves": ["e4", "e6", "Qe2"] },
+            { "name": "St. George Defense", "moves": ["e4", "e6", "d4", "a6"] },
+            { "name": "Rubinstein, Fort Knox Variation", "moves": ["e4", "e6", "d4", "d5", "Nc3", "dxe4", "Nxe4", "Bd7", "Nf3", "Bc6"] },
+            { "name": "Tarrasch, Modern System", "moves": ["e4", "e6", "d4", "d5", "Nd2", "a6"] },
+            { "name": "Tarrasch, Closed", "moves": ["e4", "e6", "d4", "d5", "Nd2", "Nf6"] },
+            { "name": "Tarrasch, Guimard Defense", "moves": ["e4", "e6", "d4", "d5", "Nd2", "Nc6"] },
+            { "name": "Tarrasch, Morozevich Variation", "moves": ["e4", "e6", "d4", "d5", "Nd2", "Be7"] },
+            { "name": "Tarrasch, Open", "moves": ["e4", "e6", "d4", "d5", "Nd2", "c5"] },
+            { "name": "Tarrasch, Open, Euwe-Keres Line", "moves": ["e4", "e6", "d4", "d5", "Nd2", "c5", "Ngf3"] },
+            { "name": "Tarrasch, Open, Chistyakov Defense", "moves": ["e4", "e6", "d4", "d5", "Nd2", "c5", "exd5", "Qxd5"] },
+            { "name": "Tarrasch, Open, Delayed Exchange Variation", "moves": ["e4", "e6", "d4", "d5", "Nd2", "c5", "exd5", "exd5"] },
+            { "name": "Tarrasch, Open, Delayed Exchange, Main Line", "moves": ["e4", "e6", "d4", "d5", "Nd2", "c5", "exd5", "exd5", "Ngf3", "Nc6"] },
+            { "name": "Tarrasch, Closed, Pawn Center Variation", "moves": ["e4", "e6", "d4", "d5", "Nd2", "Nf6", "e5", "Nfd7", "f4"] },
+            { "name": "Advance, Paulsen Attack", "moves": ["e4", "e6", "d4", "d5", "e5", "c5", "c3", "Nc6", "Nf3"] },
+            { "name": "Advance, Paulsen, Main Line", "moves": ["e4", "e6", "d4", "d5", "e5", "c5", "c3", "Nc6", "Nf3", "Qb6", "a3"] },
+            { "name": "Advance, Paulsen, Euwe Variation", "moves": ["e4", "e6", "d4", "d5", "e5", "c5", "c3", "Nc6", "Nf3", "Bd7"] },
+            { "name": "Advance, Paulsen, Milner-Barry Gambit", "moves": ["e4", "e6", "d4", "d5", "e5", "c5", "c3", "Nc6", "Nf3", "Qb6", "Bd3"] },
+            { "name": "Advance, Nimzowitsch System", "moves": ["e4", "e6", "d4", "d5", "e5", "c5", "Nf3"] },
+            { "name": "Advance, Wade Variation", "moves": ["e4", "e6", "d4", "d5", "e5", "c5", "c3", "Qb6", "Nf3", "Bd7"] },
+            { "name": "Winawer, Advance Variation", "moves": ["e4", "e6", "d4", "d5", "Nc3", "Bb4", "e5"] },
+            { "name": "Winawer, Advance, Petrosian Variation", "moves": ["e4", "e6", "d4", "d5", "Nc3", "Bb4", "e5", "Qd7"] },
+            { "name": "Winawer, Advance, Bogoljubov Variation", "moves": ["e4", "e6", "d4", "d5", "Nc3", "Bb4", "e5", "c5", "Bd2"] },
+            { "name": "Winawer, Advance, Retreat Variation", "moves": ["e4", "e6", "d4", "d5", "Nc3", "Bb4", "e5", "c5", "a3", "Ba5"] },
+            { "name": "Winawer, Advance, Retreat Variation, Armenian Line", "moves": ["e4", "e6", "d4", "d5", "Nc3", "Bb4", "e5", "c5", "a3", "Ba5", "b4", "cxd4"] },
+            { "name": "Winawer, Advance, Poisoned Pawn Variation", "moves": ["e4", "e6", "d4", "d5", "Nc3", "Bb4", "e5", "c5", "a3", "Bxc3+", "bxc3", "Ne7", "Qg4"] },
+            { "name": "Winawer, Delayed Exchange Variation", "moves": ["e4", "e6", "d4", "d5", "Nc3", "Bb4", "exd5"] },
+            { "name": "Winawer, Alekhine-Maróczy Gambit", "moves": ["e4", "e6", "d4", "d5", "Nc3", "Bb4", "Ne2"] },
+            { "name": "Winawer, Winckelmann-Riemer Gambit", "moves": ["e4", "e6", "d4", "d5", "Nc3", "Bb4", "a3"] },
+            { "name": "Winawer, Positional Variation", "moves": ["e4", "e6", "d4", "d5", "Nc3", "Bb4", "e5", "c5", "a3", "Bxc3+", "bxc3", "Ne7", "Nf3"] },
+            { "name": "Classical, Burn Variation", "moves": ["e4", "e6", "d4", "d5", "Nc3", "Nf6", "Bg5", "dxe4"] },
+            { "name": "Classical, Steinitz Variation", "moves": ["e4", "e6", "d4", "d5", "Nc3", "Nf6", "e5"] },
+            { "name": "Classical, MacCutcheon Variation", "moves": ["e4", "e6", "d4", "d5", "Nc3", "Nf6", "Bg5", "Bb4"] },
+            { "name": "Classical, MacCutcheon, Advance Variation", "moves": ["e4", "e6", "d4", "d5", "Nc3", "Nf6", "Bg5", "Bb4", "e5"] },
+            { "name": "Classical, MacCutcheon, Advance, Lasker Variation", "moves": ["e4", "e6", "d4", "d5", "Nc3", "Nf6", "Bg5", "Bb4", "e5", "h6", "Bd2", "Bxc3"] },
+            { "name": "Main Line (Alekhine-Chatard Attack)", "moves": ["e4", "e6", "d4", "d5", "Nc3", "Nf6", "Bg5", "Be7", "e5", "Nfd7", "h4"] },
+            { "name": "Rubinstein, Blackburne Defense", "moves": ["e4", "e6", "d4", "d5", "Nc3", "dxe4", "Nxe4", "Nd7"] },
+            { "name": "Horwitz, Papa-Ticulat Gambit", "moves": ["e4", "e6", "b3", "d5", "Bb2"] },
+            { "name": "Knight Variation, Wing Gambit", "moves": ["e4", "e6", "Nf3", "d5", "e5", "c5", "b4"] }
+          ]
+        },
+        {
+          "name": "Caro-Kann Defense",
+          "moves": ["e4", "c6"],
+          "variants": [
+            { "name": "Classical Variation", "moves": ["e4", "c6", "d4", "d5", "Nc3", "dxe4", "Nxe4", "Bf5"] },
+            { "name": "Advance Variation", "moves": ["e4", "c6", "d4", "d5", "e5"] },
+            { "name": "Exchange Variation", "moves": ["e4", "c6", "d4", "d5", "exd5"] },
+            { "name": "Panov Attack", "moves": ["e4", "c6", "d4", "d5", "exd5", "cxd5", "c4"] },
+            { "name": "Karpov Variation", "moves": ["e4", "c6", "d4", "d5", "Nc3", "dxe4", "Nxe4", "Nd7"] },
+            { "name": "Two Knights Attack", "moves": ["e4", "c6", "Nc3", "d5", "Nf3"] },
+            { "name": "Fantasy Variation", "moves": ["e4", "c6", "d4", "d5", "f3"] },
+            { "name": "Gurgenidze System", "moves": ["e4", "c6", "d4", "d5", "Nc3", "g6"] },
+            { "name": "Bronstein-Larsen Variation", "moves": ["e4", "c6", "d4", "d5", "Nc3", "dxe4", "Nxe4", "Nf6", "Nxf6+", "gxf6"] },
+            { "name": "Breyer Variation", "moves": ["e4", "c6", "d3"] },
+            { "name": "Tartakower Variation", "moves": ["e4", "c6", "d4", "d5", "Nc3", "dxe4", "Nxe4", "Nf6", "Nxf6+", "exf6"] },
+            { "name": "Accelerated Panov, Open", "moves": ["e4", "c6", "c4", "e5"] },
+            { "name": "Accelerated Panov, Modern Variation", "moves": ["e4", "c6", "c4", "d5", "exd5", "cxd5", "cxd5", "Nf6"] },
+            { "name": "Advance, Botvinnik-Carls Defense", "moves": ["e4", "c6", "d4", "d5", "e5", "c5"] },
+            { "name": "Advance, Van der Wiel Attack", "moves": ["e4", "c6", "d4", "d5", "e5", "Bf5", "Nc3"] },
+            { "name": "Advance, Short Variation with 4.Nf3", "moves": ["e4", "c6", "d4", "d5", "e5", "Bf5", "Nf3"] },
+            { "name": "Advance, Tal Variation", "moves": ["e4", "c6", "d4", "d5", "e5", "Bf5", "h4"] },
+            { "name": "Classical, Spassky Variation", "moves": ["e4", "c6", "d4", "d5", "Nc3", "dxe4", "Nxe4", "Bf5", "Ng3", "Bg6", "h4", "h6", "Nf3", "Nd7", "h5"] },
+            { "name": "Classical, Flohr Variation", "moves": ["e4", "c6", "d4", "d5", "Nc3", "dxe4", "Nxe4", "Bf5", "Ng3", "Bg6", "Nh3"] },
+            { "name": "Panov, Modern Defense", "moves": ["e4", "c6", "d4", "d5", "exd5", "cxd5", "c4", "Nf6", "Nc3", "Nc6"] },
+            { "name": "Panov, Fianchetto Defense", "moves": ["e4", "c6", "d4", "d5", "exd5", "cxd5", "c4", "Nf6", "Nc3", "g6"] },
+            { "name": "Panov, Modern, Mieses Line", "moves": ["e4", "c6", "d4", "d5", "exd5", "cxd5", "c4", "Nf6", "Nc3", "Nc6", "Nf3", "Bg4"] },
+            { "name": "Karpov, Kasparov Attack", "moves": ["e4", "c6", "d4", "d5", "Nc3", "dxe4", "Nxe4", "Nd7", "Nf3", "Ngf6", "Ng3"] },
+            { "name": "Karpov, Smyslov Variation", "moves": ["e4", "c6", "d4", "d5", "Nc3", "dxe4", "Nxe4", "Nd7", "Bc4", "Ngf6", "Ng5", "e6", "Qe2", "Nb6"] },
+            { "name": "Two Knights, Mindeno Variation", "moves": ["e4", "c6", "Nc3", "d5", "Nf3", "Bg4"] },
+            { "name": "Two Knights, Mindeno, Exchange Line", "moves": ["e4", "c6", "Nc3", "d5", "Nf3", "Bg4", "h3", "Bxf3"] },
+            { "name": "Tartakower, Forgács Variation", "moves": ["e4", "c6", "d4", "d5", "Nc3", "dxe4", "Nxe4", "Nf6", "Nxf6+", "exf6", "Bc4"] }
+          ]
+        },
+        {
+          "name": "Italian Game",
+          "moves": ["e4", "e5", "Nf3", "Nc6", "Bc4"],
+          "variants": [
+            { "name": "Giuoco Piano", "moves": ["e4", "e5", "Nf3", "Nc6", "Bc4", "Bc5"] },
+            { "name": "Two Knights Defense", "moves": ["e4", "e5", "Nf3", "Nc6", "Bc4", "Nf6"] },
+            { "name": "Evans Gambit", "moves": ["e4", "e5", "Nf3", "Nc6", "Bc4", "Bc5", "b4"] },
+            { "name": "Hungarian Defense", "moves": ["e4", "e5", "Nf3", "Nc6", "Bc4", "Be7"] },
+            { "name": "Knight Attack", "moves": ["e4", "e5", "Nf3", "Nc6", "Bc4", "Nf6", "Ng5"] },
+            { "name": "Knight Attack, Normal Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "Bc4", "Nf6", "Ng5", "d5"] },
+            { "name": "Knight Attack, Polerio Defense", "moves": ["e4", "e5", "Nf3", "Nc6", "Bc4", "Nf6", "Ng5", "d5", "exd5", "Na5"] },
+            { "name": "Knight Attack, Polerio, Bishop Check Line", "moves": ["e4", "e5", "Nf3", "Nc6", "Bc4", "Nf6", "Ng5", "d5", "exd5", "Na5", "Bb5+"] },
+            { "name": "Center Attack", "moves": ["e4", "e5", "Nf3", "Nc6", "Bc4", "Bc5", "c3", "Nf6", "d4"] },
+            { "name": "Main Line, Giuoco Pianissimo Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "Bc4", "Bc5", "c3", "Nf6", "d3"] },
+            { "name": "Giuoco Pianissimo, Italian Four Knights Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "Bc4", "Bc5", "d3", "Nf6", "Nc3"] },
+            { "name": "Evans Gambit Accepted", "moves": ["e4", "e5", "Nf3", "Nc6", "Bc4", "Bc5", "b4", "Bxb4"] },
+            { "name": "Evans Accepted, Main Line", "moves": ["e4", "e5", "Nf3", "Nc6", "Bc4", "Bc5", "b4", "Bxb4", "c3", "Ba5"] },
+            { "name": "Four Knights Game (Italian)", "moves": ["e4", "e5", "Nf3", "Nc6", "Bc4", "Bc5", "Nc3", "Nf6"] }
+          ]
+        },
+        {
+          "name": "Ruy López Opening",
+          "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5"],
+          "variants": [
+            { "name": "Morphy Defense", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Nf6"] },
+            { "name": "Berlin Defense", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "Nf6"] },
+            { "name": "Open Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Nf6", "O-O", "Nxe4"] },
+            { "name": "Closed Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Nf6", "O-O", "Be7"] },
+            { "name": "Marshall Attack", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Nf6", "O-O", "Be7", "Re1", "b5", "Bb3", "O-O", "c3", "d5"] },
+            { "name": "Arkhangelsk Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Nf6", "O-O", "b5", "Bb3", "Bb7"] },
+            { "name": "Cozio Defense", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "Nge7"] },
+            { "name": "Fianchetto Defense", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "g6"] },
+            { "name": "Jaenisch Gambit", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "f5"] },
+            { "name": "Old Steinitz Defense", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "d6"] },
+            { "name": "Bird's Defense", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "Nd4"] },
+            { "name": "Exchange Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Bxc6"] },
+            { "name": "Morphy Defense, Columbus Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4"] },
+            { "name": "Morphy Defense, Anderssen Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Nf6", "d3"] },
+            { "name": "Morphy Defense, Wormald Attack", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Nf6", "Qe2"] },
+            { "name": "Morphy Defense, Mackenzie Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Nf6", "d4"] },
+            { "name": "Morphy Defense, Tarrasch Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Nf6", "Nc3"] },
+            { "name": "Morphy Defense, Worrall Attack", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Nf6", "O-O", "Be7", "Qe2"] },
+            { "name": "Morphy Defense, Worrall, Castling Line", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Nf6", "O-O", "Be7", "Qe2", "b5", "Bb3", "O-O"] },
+            { "name": "Morphy Defense, Closed", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Nf6", "O-O", "Be7", "Re1"] },
+            { "name": "Morphy Defense, Closed, Averbakh Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Nf6", "O-O", "Be7", "Re1", "d6"] },
+            { "name": "Morphy Defense, Closed, Yates Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Nf6", "O-O", "Be7", "Re1", "b5", "Bb3", "d6", "c3", "O-O", "d4"] },
+            { "name": "Morphy Defense, Closed, Pilnik Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Nf6", "O-O", "Be7", "Re1", "b5", "Bb3", "d6", "c3", "O-O", "d3"] },
+            { "name": "Morphy Defense, Closed, Martinez Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Nf6", "O-O", "Be7", "d3"] },
+            { "name": "Morphy Defense, Deferred Steinitz Defense", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Nf6", "O-O", "d6"] },
+            { "name": "Morphy Defense, Deferred Classical Defense", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Bc5"] },
+            { "name": "Morphy Defense, Neo-Arkhangelsk Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Nf6", "O-O", "Bc5"] },
+            { "name": "Morphy Defense, Caro Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "b5"] },
+            { "name": "Morphy Defense, Modern Steinitz Defense", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "d6"] },
+            { "name": "Morphy Defense, Cozio Defense", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Nge7"] },
+            { "name": "Exchange, Normal Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Bxc6", "dxc6", "O-O"] },
+            { "name": "Exchange, Keres Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Bxc6", "dxc6", "Nc3"] },
+            { "name": "Exchange, Gligorić Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Bxc6", "dxc6", "O-O", "f6"] },
+            { "name": "Exchange, Alapin Gambit", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Bxc6", "dxc6", "O-O", "Bg4", "h3", "h5"] },
+            { "name": "Exchange, Bronstein Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Bxc6", "dxc6", "O-O", "Qd6"] },
+            { "name": "Berlin, l'Hermet Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "Nf6", "O-O", "Nxe4", "d4", "Nd6"] },
+            { "name": "Berlin, Rio Gambit Accepted", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "Nf6", "O-O", "Nxe4"] },
+            { "name": "Berlin, Beverwijk Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "Nf6", "O-O", "Bc5"] },
+            { "name": "Berlin, l'Hermet, Berlin Wall Defense", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "Nf6", "O-O", "Nxe4", "d4", "Nd6", "Bxc6", "dxc6", "dxe5", "Nf5", "Qxd8+", "Kxd8"] },
+            { "name": "Open, Main Line", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Nf6", "O-O", "Nxe4", "d4", "b5", "Bb3", "d5", "dxe5", "Be6"] },
+            { "name": "Open, Bernstein Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Nf6", "O-O", "Nxe4", "d4", "b5", "Bb3", "d5", "dxe5", "Be6", "Nbd2"] },
+            { "name": "Open, Howell Attack", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Nf6", "O-O", "Nxe4", "d4", "b5", "Bb3", "d5", "dxe5", "Be6", "Qe2"] },
+            { "name": "Open, Classical Defense", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Nf6", "O-O", "Nxe4", "d4", "b5", "Bb3", "d5", "dxe5", "Be6", "c3", "Be7"] },
+            { "name": "Open, Italian Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Nf6", "O-O", "Nxe4", "d4", "b5", "Bb3", "d5", "dxe5", "Be6", "c3", "Bc5"] },
+            { "name": "Marshall Attack, Modern Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Nf6", "O-O", "Be7", "Re1", "b5", "Bb3", "O-O", "c3", "d5", "exd5", "Nxd5", "Nxe5", "Nxe5", "Rxe5", "c6"] },
+            { "name": "Anti-Marshall Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Nf6", "O-O", "Be7", "Re1", "b5", "Bb3", "O-O", "a4"] },
+            { "name": "Delayed Exchange Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Nf6", "O-O", "Be7", "Bxc6"] },
+            { "name": "Keres Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Nf6", "O-O", "Be7", "Re1", "b5", "Bb3", "d6", "c3", "O-O", "h3"] },
+            { "name": "Keres, Breyer Defense", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Nf6", "O-O", "Be7", "Re1", "b5", "Bb3", "d6", "c3", "O-O", "h3", "Nb8"] },
+            { "name": "Keres, Flohr-Zaitsev System", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Nf6", "O-O", "Be7", "Re1", "b5", "Bb3", "d6", "c3", "O-O", "h3", "Bb7"] },
+            { "name": "Keres, Chigorin Defense", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Nf6", "O-O", "Be7", "Re1", "b5", "Bb3", "d6", "c3", "O-O", "h3", "Na5", "Bc2", "c5", "d4", "Qc7"] },
+            { "name": "Keres, Smyslov Defense", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6", "Ba4", "Nf6", "O-O", "Be7", "Re1", "b5", "Bb3", "d6", "c3", "O-O", "h3", "h6"] },
+            { "name": "Jaenisch, Dyckhoff, Tartakower Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "f5", "Nc3", "fxe4", "Nxe4", "Nf6"] },
+            { "name": "Classical Defense", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "Bc5"] },
+            { "name": "Fianchetto Defense (with g6)", "moves": ["e4", "e5", "Nf3", "Nc6", "Bb5", "g6"] }
+          ]
+        },
+        {
+          "name": "Scotch Game",
+          "moves": ["e4", "e5", "Nf3", "Nc6", "d4"],
+          "variants": [
+            { "name": "Scotch Gambit", "moves": ["e4", "e5", "Nf3", "Nc6", "d4", "exd4", "Bc4"] },
+            { "name": "Schmidt Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "d4", "exd4", "Nxd4", "Nf6"] },
+            { "name": "Classical Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "d4", "exd4", "Nxd4", "Bc5"] },
+            { "name": "Mieses Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "d4", "exd4", "Nxd4", "Bc5", "Be3"] },
+            { "name": "Göring Gambit", "moves": ["e4", "e5", "Nf3", "Nc6", "d4", "exd4", "c3"] },
+            { "name": "Scotch Gambit, Dubois Réti Defense", "moves": ["e4", "e5", "Nf3", "Nc6", "d4", "exd4", "Bc4", "Nf6"] },
+            { "name": "Scotch Gambit, Dubois Réti, Advance Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "d4", "exd4", "Bc4", "Nf6", "e5"] },
+            { "name": "Scotch Gambit, Haxo Gambit", "moves": ["e4", "e5", "Nf3", "Nc6", "d4", "exd4", "Bc4", "Bc5"] },
+            { "name": "Malaniuk Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "d4", "exd4", "Nxd4", "Bb4+"] },
+            { "name": "Classical, Intermezzo Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "d4", "exd4", "Nxd4", "Bc5", "Nxc6", "Qf6"] },
+            { "name": "Schmidt, Mieses Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "d4", "exd4", "Nxd4", "Nf6", "Nxc6", "bxc6", "e5"] },
+            { "name": "Classical, Potter Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "d4", "exd4", "Nxd4", "Bc5", "Nb3"] },
+            { "name": "Dubois Réti, Scotch Gambit (5.O-O)", "moves": ["e4", "e5", "Nf3", "Nc6", "Bc4", "Nf6", "d4", "exd4", "O-O"] },
+            { "name": "Dubois Réti, Scotch Gambit, Anderssen Attack", "moves": ["e4", "e5", "Nf3", "Nc6", "Bc4", "Nf6", "d4", "exd4", "O-O", "Nxe4", "Re1", "d5", "Bxd5", "Qxd5", "Nc3"] }
+          ]
+        },
+        {
+          "name": "Vienna Game",
+          "moves": ["e4", "e5", "Nc3"],
+          "variants": [
+            { "name": "Falkbeer Variation", "moves": ["e4", "e5", "Nc3", "Nf6"] },
+            { "name": "Max Lange Defense", "moves": ["e4", "e5", "Nc3", "Nc6"] },
+            { "name": "Vienna Gambit", "moves": ["e4", "e5", "Nc3", "Nf6", "f4"] },
+            { "name": "Stanley Variation", "moves": ["e4", "e5", "Nc3", "Nf6", "Bc4"] },
+            { "name": "Falkbeer, Vienna Gambit", "moves": ["e4", "e5", "Nc3", "Nf6", "f4"] },
+            { "name": "Max Lange, Paulsen Variation", "moves": ["e4", "e5", "Nc3", "Nc6", "g3"] }
+          ]
+        },
+        {
+          "name": "King's Gambit",
+          "moves": ["e4", "e5", "f4"],
+          "variants": [
+            { "name": "King's Gambit Accepted", "moves": ["e4", "e5", "f4", "exf4"] },
+            { "name": "King's Gambit Declined: Classical Variation", "moves": ["e4", "e5", "f4", "Bc5"] },
+            { "name": "Falkbeer Countergambit", "moves": ["e4", "e5", "f4", "d5"] },
+            { "name": "Bishop's Gambit", "moves": ["e4", "e5", "f4", "exf4", "Bc4"] },
+            { "name": "King's Knight Gambit", "moves": ["e4", "e5", "f4", "exf4", "Nf3"] },
+            { "name": "King's Gambit Accepted: Modern, Abbazia Defense", "moves": ["e4", "e5", "f4", "exf4", "Nf3", "d5", "exd5", "Nf6"] }
+          ]
+        },
+        {
+          "name": "Bishop's Opening",
+          "moves": ["e4", "e5", "Bc4"],
+          "variants": [
+            { "name": "Berlin Defense", "moves": ["e4", "e5", "Bc4", "Nf6"] },
+            { "name": "Berlin, Spielmann Attack", "moves": ["e4", "e5", "Bc4", "Nf6", "d3", "Bc5", "Nc3"] }
+          ]
+        },
+        {
+          "name": "Center Game",
+          "moves": ["e4", "e5", "d4"],
+          "variants": [
+            { "name": "Center Game Accepted", "moves": ["e4", "e5", "d4", "exd4"] },
+            { "name": "Paulsen, Berger Variation", "moves": ["e4", "e5", "d4", "exd4", "Qxd4", "Nc6", "Qe3", "Nf6"] }
+          ]
+        },
+        {
+          "name": "Ponziani Opening",
+          "moves": ["e4", "e5", "Nf3", "Nc6", "c3"],
+          "variants": [
+            { "name": "Jaenisch Counterattack", "moves": ["e4", "e5", "Nf3", "Nc6", "c3", "Nf6"] }
+          ]
+        },
+        {
+          "name": "Four Knights Game",
+          "moves": ["e4", "e5", "Nf3", "Nc6", "Nc3", "Nf6"],
+          "variants": [
+            { "name": "Italian Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "Nc3", "Nf6", "Bc4"] },
+            { "name": "Spanish Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "Nc3", "Nf6", "Bb5"] },
+            { "name": "Scotch Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "Nc3", "Nf6", "d4"] },
+            { "name": "Scotch Variation Accepted", "moves": ["e4", "e5", "Nf3", "Nc6", "Nc3", "Nf6", "d4", "exd4"] },
+            { "name": "Double Spanish Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "Nc3", "Nf6", "Bb5", "Bb4"] },
+            { "name": "Spanish Variation, Rubinstein Countergambit", "moves": ["e4", "e5", "Nf3", "Nc6", "Nc3", "Nf6", "Bb5", "Nd4"] },
+            { "name": "Double Spanish, Symmetrical Variation", "moves": ["e4", "e5", "Nf3", "Nc6", "Nc3", "Nf6", "Bb5", "Bb4", "O-O", "O-O", "d3", "d6"] }
+          ]
+        },
+        {
+          "name": "Three Knights Opening",
+          "moves": ["e4", "e5", "Nf3", "Nc6", "Nc3"],
+          "variants": []
+        },
+        {
+          "name": "Petrov's Defense",
+          "moves": ["e4", "e5", "Nf3", "Nf6"],
+          "variants": [
+            { "name": "Classical Attack", "moves": ["e4", "e5", "Nf3", "Nf6", "Nxe5", "d6", "Nf3", "Nxe4", "d4"] },
+            { "name": "Classical, Nimzowitsch Attack", "moves": ["e4", "e5", "Nf3", "Nf6", "Nxe5", "d6", "Nf3", "Nxe4", "Nc3"] },
+            { "name": "Classical, Cozio Attack", "moves": ["e4", "e5", "Nf3", "Nf6", "Nxe5", "d6", "Nf3", "Nxe4", "Qe2"] },
+            { "name": "Classical, French Attack", "moves": ["e4", "e5", "Nf3", "Nf6", "Nxe5", "d6", "Nf3", "Nxe4", "d3"] },
+            { "name": "Classical, Marshall Variation", "moves": ["e4", "e5", "Nf3", "Nf6", "Nxe5", "d6", "Nf3", "Nxe4", "d4", "d5", "Bd3", "Bd6"] },
+            { "name": "Classical, Mason-Showalter Variation", "moves": ["e4", "e5", "Nf3", "Nf6", "Nxe5", "d6", "Nf3", "Nxe4", "d4", "d5", "Bd3", "Nc6", "c4"] },
+            { "name": "Steinitz Attack, Symmetrical Variation", "moves": ["e4", "e5", "Nf3", "Nf6", "d4", "Nxe4"] },
+            { "name": "Steinitz Attack, Symmetrical, Center Variation", "moves": ["e4", "e5", "Nf3", "Nf6", "d4", "Nxe4", "Bd3"] },
+            { "name": "Steinitz Attack, Symmetrical, Center Variation (again)", "moves": ["e4", "e5", "Nf3", "Nf6", "d4", "Nxe4", "Bd3"] }
+          ]
+        },
+        {
+          "name": "Philidor Defense",
+          "moves": ["e4", "e5", "Nf3", "d6"],
+          "variants": [
+            { "name": "Nimzowitsch Variation", "moves": ["e4", "e5", "Nf3", "d6", "d4", "Nf6"] },
+            { "name": "Hanham, Lion Variation", "moves": ["e4", "e5", "Nf3", "d6", "d4", "Nd7", "Nc3", "Ngf6"] },
+            { "name": "Hanham, Lion Variation (again)", "moves": ["e4", "e5", "Nf3", "d6", "d4", "Nf6", "Nc3", "Nbd7"] }
+          ]
+        },
+        {
+          "name": "Alekhine's Defense",
+          "moves": ["e4", "Nf6"],
+          "variants": [
+            { "name": "Normal Variation", "moves": ["e4", "Nf6", "e5", "Nd5"] },
+            { "name": "Modern Variation", "moves": ["e4", "Nf6", "e5", "Nd5", "d4", "d6", "Nf3", "Bg4"] },
+            { "name": "Exchange Variation", "moves": ["e4", "Nf6", "e5", "Nd5", "d4", "d6", "c4", "Nb6", "exd6"] },
+            { "name": "Four Pawns Attack", "moves": ["e4", "Nf6", "e5", "Nd5", "d4", "d6", "c4", "Nb6", "f4"] },
+            { "name": "Scandinavian Variation", "moves": ["e4", "Nf6", "Nc3", "d5"] },
+            { "name": "Modern, Main Line", "moves": ["e4", "Nf6", "e5", "Nd5", "d4", "d6", "Nf3", "Bg4"] },
+            { "name": "Modern, Flohr Variation", "moves": ["e4", "Nf6", "e5", "Nd5", "d4", "d6", "Nf3", "Bg4", "Be2", "c6"] },
+            { "name": "Modern, Larsen Variation", "moves": ["e4", "Nf6", "e5", "Nd5", "d4", "d6", "Nf3", "dxe5"] },
+            { "name": "Modern, Alburt Variation", "moves": ["e4", "Nf6", "e5", "Nd5", "d4", "d6", "Nf3", "g6"] }
+          ]
+        },
+        {
+          "name": "Pirc Defense",
+          "moves": ["e4", "d6"],
+          "variants": [
+            { "name": "Classical Variation", "moves": ["e4", "d6", "d4", "Nf6", "Nc3", "g6", "Nf3", "Bg7"] },
+            { "name": "Austrian Attack", "moves": ["e4", "d6", "d4", "Nf6", "Nc3", "g6", "f4"] },
+            { "name": "150 Attack", "moves": ["e4", "d6", "d4", "Nf6", "Nc3", "g6", "Be3"] },
+            { "name": "Czech Defense", "moves": ["e4", "d6", "d4", "Nf6", "Nc3", "c6"] },
+            { "name": "Classical, Quiet System", "moves": ["e4", "d6", "d4", "Nf6", "Nc3", "g6", "Nf3", "Bg7", "Be2"] },
+            { "name": "Classical, Quiet, Czech Defense", "moves": ["e4", "d6", "d4", "Nf6", "Nc3", "g6", "Nf3", "Bg7", "Be2", "O-O", "O-O", "c6"] },
+            { "name": "Classical, Quiet, Parma Defense", "moves": ["e4", "d6", "d4", "Nf6", "Nc3", "g6", "Nf3", "Bg7", "Be2", "O-O", "O-O", "Bg4"] },
+            { "name": "Classical, Quiet, Chigorin Line", "moves": ["e4", "d6", "d4", "Nf6", "Nc3", "g6", "Nf3", "Bg7", "Be2", "O-O", "O-O", "Nc6"] },
+            { "name": "Main Line, Austrian, Dragon Formation", "moves": ["e4", "d6", "d4", "Nf6", "Nc3", "g6", "f4", "Bg7", "Nf3", "c5"] },
+            { "name": "Main Line, Austrian, Unzicker Attack", "moves": ["e4", "d6", "d4", "Nf6", "Nc3", "g6", "f4", "Bg7", "Nf3", "O-O", "e5"] },
+            { "name": "Main Line, Austrian, Weiss Variation", "moves": ["e4", "d6", "d4", "Nf6", "Nc3", "g6", "f4", "Bg7", "Nf3", "O-O", "Bd3"] },
+            { "name": "Main Line, Byrne Variation", "moves": ["e4", "d6", "d4", "Nf6", "Nc3", "g6", "Bg5"] },
+            { "name": "Classical, Schlechter Variation", "moves": ["e4", "d6", "d4", "Nf6", "Nc3", "g6", "Nf3", "Bg7", "h3"] }
+          ]
+        },
+        {
+          "name": "Modern Defense (with 1.e4 g6)",
+          "moves": ["e4", "g6"],
+          "variants": [
+            { "name": "Standard Line", "moves": ["e4", "g6", "d4", "Bg7", "Nc3", "d6"] },
+            { "name": "Three Pawns Attack", "moves": ["e4", "g6", "d4", "Bg7", "f4"] },
+            { "name": "Pterodactyl Defense", "moves": ["e4", "g6", "d4", "Bg7", "c4", "c5"] },
+            { "name": "Semi-Averbakh Variation", "moves": ["e4", "g6", "d4", "Bg7", "c4", "c5", "Nf3"] },
+            { "name": "Rat Defense, Accelerated Gurgenidze Variation", "moves": ["e4", "g6", "d4", "d6", "Nc3", "c6"] },
+            { "name": "Standard, Pseudo-Austrian Attack", "moves": ["e4", "g6", "d4", "Bg7", "Nc3", "d6", "f4"] },
+            { "name": "Standard, Two Knights Variation", "moves": ["e4", "g6", "d4", "Bg7", "Nf3", "d6", "Nc3"] },
+            { "name": "Gurgenidze System (with c6)", "moves": ["e4", "g6", "d4", "Bg7", "Nc3", "c6", "f4", "d5", "e5", "h5"] }
+          ]
+        },
+        {
+          "name": "Scandinavian Defense",
+          "moves": ["e4", "d5"],
+          "variants": [
+            { "name": "Main Line", "moves": ["e4", "d5", "exd5", "Qxd5", "Nc3", "Qa5"] },
+            { "name": "Modern Variation", "moves": ["e4", "d5", "exd5", "Nf6"] },
+            { "name": "Closed Scandinavian", "moves": ["e4", "d5", "Nc3"] },
+            { "name": "Portuguese Variation", "moves": ["e4", "d5", "exd5", "Nf6", "d4", "Bg4"] },
+            { "name": "Gubinsky-Melts Defense", "moves": ["e4", "d5", "exd5", "Qxd5", "Nc3", "Qd6"] },
+            { "name": "Mieses-Kotrč Variation", "moves": ["e4", "d5", "exd5", "Qxd5"] },
+            { "name": "Mieses-Kotrč, Gubinsky-Melts Defense", "moves": ["e4", "d5", "exd5", "Qxd5", "Nc3", "Qd6"] },
+            { "name": "Mieses-Kotrč, Bronstein Variation", "moves": ["e4", "d5", "exd5", "Qxd5", "Nc3", "Qd6", "d4", "Nf6", "Nf3", "a6"] },
+            { "name": "Modern, Marshall, Gipslis Variation", "moves": ["e4", "d5", "exd5", "Nf6", "d4", "Nxd5", "Nf3", "Bg4"] }
+          ]
+        },
+        {
+          "name": "Nimzowitsch Defense",
+          "moves": ["e4", "Nc6"],
+          "variants": [
+            { "name": "Scandinavian Variation", "moves": ["e4", "Nc6", "d4", "d5"] },
+            { "name": "Williams Variation", "moves": ["e4", "Nc6", "Nf3", "d6"] },
+            { "name": "Declined", "moves": ["e4", "Nc6", "Nf3"] },
+            { "name": "Scandinavian, Advance Variation", "moves": ["e4", "Nc6", "d4", "d5", "e5"] }
+          ]
+        },
+        {
+          "name": "Owen's Defense",
+          "moves": ["e4", "b6"],
+          "variants": []
+        },
+        {
+          "name": "Englund Gambit",
+          "moves": ["d4", "e5"],
+          "variants": []
+        }
+      ]
+    },
+    {
+      "name": "گشایش‌های 1.d4",
+      "code": "d4",
+      "openings": [
+        {
+          "name": "Queen's Pawn Opening",
+          "moves": ["d4"],
+          "variants": [
+            { "name": "Horwitz Defense", "moves": ["d4", "e6"] },
+            { "name": "Polish Defense", "moves": ["d4", "b5"] },
+            { "name": "St. George Defense", "moves": ["d4", "a6"] },
+            { "name": "Keres Defense", "moves": ["d4", "e6", "c4", "Bb4+"] },
+            { "name": "Krause Variation", "moves": ["d4", "d5", "Nf3", "c5"] },
+            { "name": "English Defense", "moves": ["d4", "e6", "c4", "b6"] },
+            { "name": "Wade Defense", "moves": ["d4", "d6", "Nf3", "Bg4"] },
+            { "name": "English Rat Defense", "moves": ["d4", "d6", "c4", "e5"] },
+            { "name": "Rossolimo Variation", "moves": ["d4", "d6", "Nf3", "g6"] },
+            { "name": "Symmetrical Variation", "moves": ["d4", "d5", "Nf3", "Nf6"] },
+            { "name": "Torre Attack", "moves": ["d4", "d5", "Nf3", "Nf6", "Bg5"] },
+            { "name": "Torre, Gossip Variation", "moves": ["d4", "d5", "Nf3", "Nf6", "Bg5", "Ne4"] },
+            { "name": "Torre, Grünfeld, Main Line", "moves": ["d4", "d5", "Nf3", "Nf6", "Bg5", "g6", "e3", "Bg7", "Nbd2", "O-O"] },
+            { "name": "Chigorin, Barry Attack", "moves": ["d4", "d5", "Nc3", "Nf6", "Nf3", "g6", "Bf4", "Bg7", "e3", "O-O", "Be2"] },
+            { "name": "Stonewall Attack", "moves": ["d4", "d5", "e3", "Nf6", "Bd3"] },
+            { "name": "Accelerated London System", "moves": ["d4", "d5", "Bf4"] },
+            { "name": "Zukertort Variation", "moves": ["d4", "d5", "Nf3"] }
+          ]
+        },
+        {
+          "name": "Queen's Gambit",
+          "moves": ["d4", "d5", "c4"],
+          "variants": [
+            { "name": "Queen's Gambit Accepted", "moves": ["d4", "d5", "c4", "dxc4"] },
+            { "name": "Queen's Gambit Declined", "moves": ["d4", "d5", "c4", "e6"] },
+            { "name": "Slav Defense", "moves": ["d4", "d5", "c4", "c6"] },
+            { "name": "Semi-Slav Defense", "moves": ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Nf3", "c6"] },
+            { "name": "Tarrasch Defense", "moves": ["d4", "d5", "c4", "e6", "Nc3", "c5"] },
+            { "name": "Chigorin Defense", "moves": ["d4", "d5", "c4", "Nc6"] },
+            { "name": "Albin Countergambit", "moves": ["d4", "d5", "c4", "e5"] },
+            { "name": "Baltic Defense", "moves": ["d4", "d5", "c4", "Bf5"] },
+            { "name": "Queen's Gambit Declined: Baltic Defense", "moves": ["d4", "d5", "c4", "Bf5"] },
+            { "name": "Queen's Gambit Declined: Chigorin, Main Line", "moves": ["d4", "d5", "c4", "Nc6", "Nf3", "Bg4"] },
+            { "name": "Queen's Gambit Declined: Charousek Variation", "moves": ["d4", "d5", "c4", "e6", "Nc3", "Be7"] },
+            { "name": "Queen's Gambit Declined: Cambridge Springs Defense", "moves": ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Bg5", "Nbd7", "e3", "c6", "Nf3", "Qa5"] },
+            { "name": "Queen's Gambit Declined: Ragozin Defense", "moves": ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Nf3", "Bb4"] },
+            { "name": "Queen's Gambit Declined: Ragozin, Alekhine Variation", "moves": ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Nf3", "Bb4", "Qa4+"] },
+            { "name": "Queen's Gambit Declined: Semi-Tarrasch, Main Line", "moves": ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Nf3", "c5", "cxd5"] },
+            { "name": "Queen's Gambit Declined: Semi-Tarrasch, Main Line, Exchange Variation", "moves": ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Nf3", "c5", "cxd5", "Nxd5", "e4"] },
+            { "name": "Queen's Gambit Declined: Semi-Tarrasch, Main Line, Pillsbury Variation", "moves": ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Nf3", "c5", "cxd5", "Nxd5", "e3"] },
+            { "name": "Queen's Gambit Declined: Lasker Defense", "moves": ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Bg5", "Be7", "e3", "O-O", "Nf3", "h6", "Bh4", "Ne4"] },
+            { "name": "Queen's Gambit Declined: Orthodox Defense", "moves": ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Bg5", "Be7", "e3", "O-O", "Nf3", "Nbd7"] },
+            { "name": "Queen's Gambit Declined: Orthodox, Rubinstein Variation", "moves": ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Bg5", "Be7", "e3", "O-O", "Nf3", "Nbd7", "Qc2"] },
+            { "name": "Queen's Gambit Declined: Neo-Orthodox Variation", "moves": ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Bg5", "Be7", "e3", "O-O", "Nf3", "h6"] },
+            { "name": "Queen's Gambit Declined: Tartakower Defense", "moves": ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Bg5", "Be7", "e3", "O-O", "Nf3", "h6", "Bh4", "b6"] },
+            { "name": "Queen's Gambit Declined: Harrwitz, Two Knights Defense", "moves": ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Nf3", "Be7", "Bf4", "O-O", "e3", "Nbd7"] },
+            { "name": "Queen's Gambit Declined: Harrwitz, Main Line", "moves": ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Nf3", "Be7", "Bf4", "O-O", "e3", "c5", "dxc5", "Bxc5"] },
+            { "name": "Queen's Gambit Declined: Harrwitz, Fianchetto Defense", "moves": ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Nf3", "Be7", "Bf4", "O-O", "e3", "b6"] },
+            { "name": "Queen's Gambit Declined: Three Knights, Harrwitz Attack", "moves": ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Nf3", "Be7", "Bf4"] },
+            { "name": "Queen's Gambit Declined: Three Knights, Vienna Variation", "moves": ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Nf3", "dxc4"] },
+            { "name": "Queen's Gambit Declined: Three Knights, Semi-Tarrasch Defense", "moves": ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Nf3", "c5"] },
+            { "name": "Queen's Gambit Declined: Three Knights, Barmen Variation", "moves": ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Nf3", "Nbd7"] },
+            { "name": "Queen's Gambit Declined: Three Knights, Vienna, Quiet Variation", "moves": ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Nf3", "dxc4", "e3"] },
+            { "name": "Queen's Gambit Accepted: Classical Defense", "moves": ["d4", "d5", "c4", "dxc4", "Nf3", "Nf6", "e3", "e6", "Bxc4", "c5"] },
+            { "name": "Queen's Gambit Accepted: Classical, Main Line", "moves": ["d4", "d5", "c4", "dxc4", "Nf3", "Nf6", "e3", "e6", "Bxc4", "c5", "O-O", "a6"] },
+            { "name": "Queen's Gambit Accepted: Classical, Rubinstein Variation", "moves": ["d4", "d5", "c4", "dxc4", "Nf3", "Nf6", "e3", "e6", "Bxc4", "c5", "O-O", "a6", "a4"] },
+            { "name": "Queen's Gambit Accepted: Classical, Alekhine System", "moves": ["d4", "d5", "c4", "dxc4", "Nf3", "Nf6", "e3", "e6", "Bxc4", "c5", "O-O", "a6", "Qe2"] },
+            { "name": "Queen's Gambit Accepted: Central Variation, Alekhine System", "moves": ["d4", "d5", "c4", "dxc4", "e4", "Nf6"] },
+            { "name": "Queen's Gambit Accepted: Mannheim Variation", "moves": ["d4", "d5", "c4", "dxc4", "Nf3", "Nf6", "Qa4+"] },
+            { "name": "Queen's Gambit Accepted: Rosenthal Variation", "moves": ["d4", "d5", "c4", "dxc4", "Nf3", "e6"] },
+            { "name": "Queen's Gambit Accepted: Janowski-Larsen Variation", "moves": ["d4", "d5", "c4", "dxc4", "Nf3", "Nf6", "e3", "Bg4"] },
+            { "name": "Marshall Gambit", "moves": ["d4", "d5", "c4", "e6", "Nc3", "c6", "e4", "dxe4", "Nxe4", "Bb4+", "Bd2"] },
+            { "name": "Catalan Opening", "moves": ["d4", "d5", "c4", "e6", "Nf3", "Nf6", "g3"] },
+            { "name": "Catalan Opening: Closed, Main Line", "moves": ["d4", "Nf6", "c4", "e6", "g3", "d5", "Bg2", "Be7", "Nf3", "O-O", "O-O", "Nbd7", "Qc2", "c6", "Nbd2"] },
+            { "name": "Catalan Opening: Open Defense, Modern Sharp Variation", "moves": ["d4", "Nf6", "c4", "e6", "g3", "d5", "Bg2", "dxc4", "Nf3", "Nc6", "Qa4", "Bb4+"] },
+            { "name": "Neo-Grünfeld Defense", "moves": ["d4", "Nf6", "c4", "g6", "g3", "d5", "Bg2", "Bg7"] },
+            { "name": "Neo-Grünfeld Defense: Exchange Variation", "moves": ["d4", "Nf6", "c4", "g6", "g3", "d5", "Bg2", "Bg7", "cxd5", "Nxd5"] },
+            { "name": "Neo-Grünfeld Defense: Classical Variation", "moves": ["d4", "Nf6", "c4", "g6", "g3", "d5", "Bg2", "Bg7", "Nf3", "O-O", "O-O"] },
+            { "name": "Neo-Grünfeld Defense: Classical, Modern Defense", "moves": ["d4", "Nf6", "c4", "g6", "g3", "d5", "Bg2", "Bg7", "Nf3", "O-O", "O-O", "dxc4"] },
+            { "name": "Neo-Grünfeld Defense: Classical, Original Defense", "moves": ["d4", "Nf6", "c4", "g6", "g3", "d5", "Bg2", "Bg7", "Nf3", "O-O", "O-O", "c6"] },
+            { "name": "Neo-Grünfeld Defense: Classical, Ultra-Delayed Exchange Variation", "moves": ["d4", "Nf6", "c4", "g6", "g3", "d5", "Bg2", "Bg7", "Nf3", "O-O", "O-O", "c6", "cxd5", "cxd5"] },
+            { "name": "Queen's Gambit Declined: Catalan Opening (again)", "moves": ["d4", "d5", "c4", "e6", "Nf3", "Nf6", "g3"] }
+          ]
+        },
+        {
+          "name": "Slav Defense",
+          "moves": ["d4", "d5", "c4", "c6"],
+          "variants": [
+            { "name": "Main Line", "moves": ["d4", "d5", "c4", "c6", "Nf3", "Nf6", "Nc3", "dxc4"] },
+            { "name": "Exchange Variation", "moves": ["d4", "d5", "c4", "c6", "cxd5", "cxd5"] },
+            { "name": "Semi-Slav", "moves": ["d4", "d5", "c4", "c6", "Nf3", "Nf6", "Nc3", "e6"] },
+            { "name": "Czech Variation", "moves": ["d4", "d5", "c4", "c6", "Nf3", "Nf6", "Nc3", "dxc4", "a4", "Bf5"] },
+            { "name": "Geller Gambit", "moves": ["d4", "d5", "c4", "c6", "Nf3", "Nf6", "Nc3", "dxc4", "e4"] },
+            { "name": "Steiner Variation", "moves": ["d4", "d5", "c4", "c6", "Nf3", "Nf6", "Nc3", "g6"] },
+            { "name": "Modern Line", "moves": ["d4", "d5", "c4", "c6", "Nf3"] },
+            { "name": "Modern, Chameleon Variation", "moves": ["d4", "d5", "c4", "c6", "Nf3", "Nf6", "Nc3", "a6"] },
+            { "name": "Modern, Chameleon, Advance System", "moves": ["d4", "d5", "c4", "c6", "Nf3", "Nf6", "Nc3", "a6", "c5"] },
+            { "name": "Modern, Alapin Variation", "moves": ["d4", "d5", "c4", "c6", "Nf3", "Nf6", "Nc3", "dxc4", "a4"] },
+            { "name": "Modern, Alapin Variation, Czech Variation", "moves": ["d4", "d5", "c4", "c6", "Nf3", "Nf6", "Nc3", "dxc4", "a4", "Bf5"] },
+            { "name": "Modern, Alapin Variation, Czech, Classical System", "moves": ["d4", "d5", "c4", "c6", "Nf3", "Nf6", "Nc3", "dxc4", "a4", "Bf5", "e3"] },
+            { "name": "Modern, Alapin Variation, Czech, Krause Attack", "moves": ["d4", "d5", "c4", "c6", "Nf3", "Nf6", "Nc3", "dxc4", "a4", "Bf5", "Ne5"] },
+            { "name": "Modern, Alapin Variation, Czech, Krause, Carlsbad Variation", "moves": ["d4", "d5", "c4", "c6", "Nf3", "Nf6", "Nc3", "dxc4", "a4", "Bf5", "Ne5", "e6"] },
+            { "name": "Modern, Alapin Variation, Czech, Dutch, Main Line", "moves": ["d4", "d5", "c4", "c6", "Nf3", "Nf6", "Nc3", "dxc4", "a4", "Bf5", "e3", "e6", "Bxc4", "Bb4", "O-O"] },
+            { "name": "Modern, Alapin Variation, Czech, Bled Attack", "moves": ["d4", "d5", "c4", "c6", "Nf3", "Nf6", "Nc3", "dxc4", "a4", "Bf5", "Nh4"] },
+            { "name": "Modern, Alapin Variation, Soultanbéieff Variation", "moves": ["d4", "d5", "c4", "c6", "Nf3", "Nf6", "Nc3", "dxc4", "a4", "e6"] },
+            { "name": "Modern, Alapin Variation, Steiner Variation", "moves": ["d4", "d5", "c4", "c6", "Nf3", "Nf6", "Nc3", "dxc4", "a4", "Bg4"] },
+            { "name": "Modern, Two Knights Attack", "moves": ["d4", "d5", "c4", "c6", "Nf3", "Nf6", "Nc3", "dxc4"] },
+            { "name": "Modern, Quiet Variation", "moves": ["d4", "d5", "c4", "c6", "Nf3", "Nf6", "e3"] },
+            { "name": "Modern, Quiet, Schallopp Defense", "moves": ["d4", "d5", "c4", "c6", "Nf3", "Nf6", "e3", "Bf5"] },
+            { "name": "Modern, Quiet, Pin Defense", "moves": ["d4", "d5", "c4", "c6", "Nf3", "Nf6", "e3", "Bg4"] },
+            { "name": "Modern, Triangle, Noteboom Variation", "moves": ["d4", "d5", "c4", "c6", "Nf3", "e6", "Nc3", "dxc4"] },
+            { "name": "Modern, Triangle, Noteboom, Abrahams Variation with 7...a5", "moves": ["d4", "d5", "c4", "e6", "Nc3", "c6", "Nf3", "dxc4", "a4", "Bb4", "e3", "b5", "Bd2", "a5"] },
+            { "name": "Modern, Breyer Variation", "moves": ["d4", "d5", "c4", "c6", "Nf3", "Nf6", "Nbd2"] },
+            { "name": "Exchange, Symmetrical Line", "moves": ["d4", "d5", "c4", "c6", "Nf3", "Nf6", "cxd5", "cxd5", "Nc3", "Nc6", "Bf4", "Bf5"] },
+            { "name": "Schlechter Variation (with c6)", "moves": ["d4", "d5", "c4", "c6", "Nf3", "Nf6", "Nc3", "g6"] },
+            { "name": "Schlechter Variation (with g6)", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "d5", "Nf3", "c6"] }
+          ]
+        },
+        {
+          "name": "Semi-Slav Defense",
+          "moves": ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Nf3", "c6"],
+          "variants": [
+            { "name": "Main Line", "moves": ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Nf3", "c6", "e3"] },
+            { "name": "Main Line, Semi-Meran Variation", "moves": ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Nf3", "c6", "e3", "Nbd7", "Bd3", "dxc4", "Bxc4"] },
+            { "name": "Main Line, Semi-Meran Variation (with b5)", "moves": ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Nf3", "c6", "e3", "Nbd7", "Bd3", "dxc4", "Bxc4", "b5"] },
+            { "name": "Main Line, Stoltz Variation", "moves": ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Nf3", "c6", "e3", "Nbd7", "Qc2"] },
+            { "name": "Main Line, Stoltz, Shabalov Attack", "moves": ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Nf3", "c6", "e3", "Nbd7", "Qc2", "Bd6", "g4"] },
+            { "name": "Main Line, Chigorin Defense", "moves": ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Nf3", "c6", "e3", "Nbd7", "Bd3", "Bd6"] },
+            { "name": "Main Line, Normal Variation", "moves": ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Nf3", "c6", "e3", "Nbd7"] },
+            { "name": "Main Line (with a6)", "moves": ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Nf3", "c6", "e3", "a6"] },
+            { "name": "Anti-Meran Gambit", "moves": ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Nf3", "c6", "Bg5"] },
+            { "name": "Anti-Meran, Anti-Moscow Gambit", "moves": ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Nf3", "c6", "Bg5", "h6", "Bh4"] },
+            { "name": "Semi-Slav Defense Accepted", "moves": ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Nf3", "c6", "Bg5", "dxc4"] },
+            { "name": "Semi-Slav Defense Accepted: Botvinnik Variation", "moves": ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Nf3", "c6", "Bg5", "dxc4", "e4"] }
+          ]
+        },
+        {
+          "name": "King's Indian Defense",
+          "moves": ["d4", "Nf6", "c4", "g6"],
+          "variants": [
+            { "name": "Classical Variation", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "e4", "d6", "Nf3", "O-O", "Be2", "e5"] },
+            { "name": "Sämisch Variation", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "e4", "d6", "f3"] },
+            { "name": "Fianchetto Variation", "moves": ["d4", "Nf6", "c4", "g6", "g3", "Bg7", "Bg2", "O-O"] },
+            { "name": "Averbakh Variation", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "e4", "d6", "Be2", "O-O", "Bg5"] },
+            { "name": "Four Pawns Attack", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "e4", "d6", "f4"] },
+            { "name": "Petrosian Variation", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "e4", "d6", "Nf3", "O-O", "d5"] },
+            { "name": "Orthodox Variation", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "e4", "d6", "Nf3", "O-O", "Be2", "e5"] },
+            { "name": "Gligorić System", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "e4", "d6", "Nf3", "O-O", "Be2", "e5", "Be3"] },
+            { "name": "Normal, Fianchetto Variation", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "Nf3", "d6", "g3"] },
+            { "name": "Normal, Smyslov Variation", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "Nf3", "d6", "Bg5"] },
+            { "name": "Sämisch, Orthodox Variation", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "e4", "d6", "f3", "O-O", "Be3", "e5"] },
+            { "name": "Sämisch, Yates Defense", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "e4", "d6", "f3", "O-O", "Be3", "Nc6"] },
+            { "name": "Sämisch, Yates, Panno Formation", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "e4", "d6", "f3", "O-O", "Be3", "Nc6", "Nge2", "a6"] },
+            { "name": "Sämisch, Sämisch Gambit", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "e4", "d6", "f3", "O-O", "Be3", "c5"] },
+            { "name": "Orthodox, Aronin-Taimanov Defense", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "e4", "d6", "Nf3", "O-O", "Be2", "e5", "O-O", "Nc6"] },
+            { "name": "Orthodox, Positional Defense", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "e4", "d6", "Nf3", "O-O", "Be2", "e5", "O-O", "Nbd7"] },
+            { "name": "Orthodox, Glek Defense", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "e4", "d6", "Nf3", "O-O", "Be2", "e5", "O-O", "Na6"] },
+            { "name": "Orthodox, Kazakh Variation", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "e4", "d6", "Nf3", "O-O", "Be2", "e5", "O-O", "Na6"] },
+            { "name": "Fianchetto, Karlsbad Variation", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "Nf3", "d6", "g3", "O-O", "Bg2", "Nc6"] },
+            { "name": "Fianchetto, Debrecen Defense", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "Nf3", "d6", "g3", "O-O", "Bg2", "Nbd7"] },
+            { "name": "Fianchetto, Yugoslav, Panno System", "moves": ["d4", "Nf6", "c4", "g6", "g3", "Bg7", "Bg2", "d6", "Nf3", "O-O", "O-O", "Nc6"] },
+            { "name": "Fianchetto, Yugoslav, Kaválek-Bronstein Variation", "moves": ["d4", "Nf6", "c4", "g6", "g3", "Bg7", "Bg2", "d6", "Nf3", "O-O", "Nc3", "c6"] },
+            { "name": "Fianchetto, Yugoslav, Kaválek-Bronstein, Kaválek Defense", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "Nf3", "d6", "g3", "O-O", "Bg2", "c6", "O-O", "Qa5"] },
+            { "name": "Fianchetto, Yugoslav, Rare Line", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "Nf3", "d6", "g3", "O-O", "Bg2", "c5"] },
+            { "name": "Fianchetto, Karlsbad, Panno Variation", "moves": ["d4", "Nf6", "c4", "g6", "g3", "Bg7", "Bg2", "d6", "Nf3", "O-O", "Nc3", "Nc6", "O-O"] },
+            { "name": "Fianchetto, Karlsbad, Panno, Uhlmann-Szabó System", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "Nf3", "d6", "g3", "O-O", "Bg2", "Nc6", "O-O", "e5"] },
+            { "name": "Fianchetto, Karlsbad, Panno, Lesser Simagin Variation", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "Nf3", "d6", "g3", "O-O", "Bg2", "Nc6", "O-O", "Bf5"] },
+            { "name": "Fianchetto, Karlsbad, Panno, Simagin Variation", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "Nf3", "d6", "g3", "O-O", "Bg2", "Nc6", "O-O", "Bg4"] },
+            { "name": "Averbakh, Benoni Defense", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "e4", "d6", "Be2", "O-O", "Bg5", "c5"] },
+            { "name": "Averbakh, Modern Defense", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "e4", "d6", "Be2", "O-O", "Bg5", "Na6"] },
+            { "name": "Averbakh, Flexible Defense", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "e4", "d6", "Be2", "O-O", "Bg5", "h6"] },
+            { "name": "Semi-Averbakh System", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "e4", "d6", "Be2", "O-O", "Be3"] },
+            { "name": "Petrosian Variation, Stein Defense", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "e4", "d6", "Nf3", "O-O", "Be2", "e5", "d5", "a5"] },
+            { "name": "Makogonov Variation", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "e4", "d6", "h3"] },
+            { "name": "Kramer Variation", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "e4", "d6", "Nge2"] },
+            { "name": "Bayonet Attack", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "e4", "d6", "Nf3", "O-O", "Be2", "e5", "O-O", "Nc6", "d5", "Ne7", "b4"] },
+            { "name": "Bayonet, Sokolov Line", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "e4", "d6", "Nf3", "O-O", "Be2", "e5", "O-O", "Nc6", "d5", "Ne7", "b4", "Nh5", "Re1"] },
+            { "name": "Neo-Classical Line", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "e4", "d6", "Nf3", "O-O", "Be2", "e5", "O-O", "Nc6", "d5", "Ne7", "Ne1", "Nd7", "Be3"] },
+            { "name": "Accelerated Averbakh Variation", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "e4", "d6", "Be2", "O-O", "Bg5"] }
+          ]
+        },
+        {
+          "name": "Nimzo-Indian Defense",
+          "moves": ["d4", "Nf6", "c4", "e6", "Nc3", "Bb4"],
+          "variants": [
+            { "name": "Classical Variation", "moves": ["d4", "Nf6", "c4", "e6", "Nc3", "Bb4", "Qc2"] },
+            { "name": "Hübner Variation", "moves": ["d4", "Nf6", "c4", "e6", "Nc3", "Bb4", "e3", "c5"] },
+            { "name": "Sämisch Variation", "moves": ["d4", "Nf6", "c4", "e6", "Nc3", "Bb4", "a3"] },
+            { "name": "Kmoch Variation", "moves": ["d4", "Nf6", "c4", "e6", "Nc3", "Bb4", "f3"] },
+            { "name": "Bishop Attack", "moves": ["d4", "Nf6", "c4", "e6", "Nc3", "Bb4", "e3", "O-O", "Bd3"] },
+            { "name": "Normal Line", "moves": ["d4", "Nf6", "c4", "e6", "Nc3", "Bb4", "e3"] },
+            { "name": "Three Knights Variation", "moves": ["d4", "Nf6", "c4", "e6", "Nc3", "Bb4", "Nf3"] },
+            { "name": "St. Petersburg Variation", "moves": ["d4", "Nf6", "c4", "e6", "Nc3", "Bb4", "e3", "b6"] },
+            { "name": "Classical, Berlin Variation", "moves": ["d4", "Nf6", "c4", "e6", "Nc3", "Bb4", "Qc2", "c5"] },
+            { "name": "Classical, Noa Variation", "moves": ["d4", "Nf6", "c4", "e6", "Nc3", "Bb4", "Qc2", "d5"] },
+            { "name": "Classical, Keres Defense", "moves": ["d4", "Nf6", "c4", "e6", "Nc3", "Bb4", "Qc2", "O-O", "a3", "Bxc3+", "Qxc3", "b6"] },
+            { "name": "Gligorić System", "moves": ["d4", "Nf6", "c4", "e6", "Nc3", "Bb4", "e3", "O-O", "Nf3", "d5", "Bd3", "c5"] },
+            { "name": "Gligorić, Bernstein Defense", "moves": ["d4", "Nf6", "c4", "e6", "Nc3", "Bb4", "e3", "O-O", "Nf3", "d5", "Bd3", "c5", "O-O", "Nc6"] },
+            { "name": "Gligorić, Bronstein Variation", "moves": ["d4", "Nf6", "c4", "e6", "Nc3", "Bb4", "e3", "O-O", "Bd3", "d5", "Nf3", "c5", "O-O", "dxc4", "Bxc4"] },
+            { "name": "Hübner, Rubinstein Variation", "moves": ["d4", "Nf6", "c4", "e6", "Nc3", "Bb4", "e3", "c5", "Ne2"] },
+            { "name": "Sämisch, Keres Variation", "moves": ["d4", "Nf6", "c4", "e6", "Nc3", "Bb4", "a3", "Bxc3+", "bxc3", "c5", "f3", "d5", "cxd5", "Nxd5", "dxc5"] },
+            { "name": "Bishop Attack, Classical Defense", "moves": ["d4", "Nf6", "c4", "e6", "Nc3", "Bb4", "e3", "O-O", "Bd3", "d5"] },
+            { "name": "Bishop Attack, Classical, Botvinnik System", "moves": ["d4", "Nf6", "c4", "e6", "Nc3", "Bb4", "e3", "O-O", "Bd3", "d5", "a3", "Bxc3+", "bxc3"] },
+            { "name": "Reshevsky Variation", "moves": ["d4", "Nf6", "c4", "e6", "Nc3", "Bb4", "e3", "O-O", "Ne2"] },
+            { "name": "Schlechter Defense", "moves": ["d4", "Nf6", "c4", "e6", "Nc3", "Bb4", "e3", "O-O", "Nf3", "d5", "Bd3", "b6"] },
+            { "name": "Deferred Hübner Variation", "moves": ["d4", "Nf6", "c4", "e6", "Nc3", "Bb4", "e3", "O-O", "Nf3", "c5"] }
+          ]
+        },
+        {
+          "name": "Queen's Indian Defense",
+          "moves": ["d4", "Nf6", "c4", "e6", "Nf3", "b6"],
+          "variants": [
+            { "name": "Fianchetto Variation", "moves": ["d4", "Nf6", "c4", "e6", "Nf3", "b6", "g3", "Bb7", "Bg2", "Be7"] },
+            { "name": "Petrosian Variation", "moves": ["d4", "Nf6", "c4", "e6", "Nf3", "b6", "a3"] },
+            { "name": "Kasparov Variation", "moves": ["d4", "Nf6", "c4", "e6", "Nf3", "b6", "Nc3", "Bb7"] },
+            { "name": "Classical Variation", "moves": ["d4", "Nf6", "c4", "e6", "Nf3", "b6", "Nc3", "Bb4"] },
+            { "name": "Fianchetto, Classical Variation", "moves": ["d4", "Nf6", "c4", "e6", "Nf3", "b6", "g3", "Bb7", "Bg2", "Be7", "O-O", "O-O", "Nc3"] },
+            { "name": "Fianchetto, Nimzowitsch Variation", "moves": ["d4", "Nf6", "c4", "e6", "Nf3", "b6", "g3", "Ba6"] },
+            { "name": "Fianchetto, Nimzowitsch Variation, Quiet Line", "moves": ["d4", "Nf6", "c4", "e6", "Nf3", "b6", "g3", "Ba6", "b3"] },
+            { "name": "Fianchetto, Nimzowitsch Variation, Nimzowitsch Attack", "moves": ["d4", "Nf6", "c4", "e6", "Nf3", "b6", "g3", "Ba6", "Qa4"] },
+            { "name": "Fianchetto, Nimzowitsch Variation, Quiet, Check Variation", "moves": ["d4", "Nf6", "c4", "e6", "Nf3", "b6", "g3", "Ba6", "b3", "Bb4+"] },
+            { "name": "Fianchetto, Nimzowitsch Variation, Quiet, Check Variation, Intermezzo Line", "moves": ["d4", "Nf6", "c4", "e6", "Nf3", "b6", "g3", "Ba6", "b3", "Bb4+", "Bd2", "Be7"] },
+            { "name": "Fianchetto, Traditional Line", "moves": ["d4", "Nf6", "c4", "e6", "Nf3", "b6", "g3", "Bb7", "Bg2", "Be7", "O-O", "O-O"] },
+            { "name": "Spassky System", "moves": ["d4", "Nf6", "c4", "e6", "Nf3", "b6", "e3"] },
+            { "name": "Kasparov Variation, Petrosian Variation", "moves": ["d4", "Nf6", "c4", "e6", "Nf3", "b6", "Nc3", "Bb7", "a3", "d5"] },
+            { "name": "Petrosian Variation, Farago Defense", "moves": ["d4", "Nf6", "c4", "e6", "Nf3", "b6", "a3", "Ba6", "Qc2", "Bb7"] },
+            { "name": "Fianchetto, Capablanca Variation", "moves": ["d4", "Nf6", "c4", "e6", "Nf3", "b6", "g3", "Bb7", "Bg2", "Bb4+"] },
+            { "name": "Fianchetto, Anti-Queen's Indian System", "moves": ["d4", "Nf6", "c4", "e6", "Nf3", "b6", "g3", "Bb7", "Bg2", "Be7", "Nc3"] },
+            { "name": "Fianchetto, Classical, Kramnik Variation", "moves": ["d4", "Nf6", "c4", "e6", "Nf3", "b6", "g3", "Bb7", "Bg2", "Be7", "O-O", "O-O", "Re1"] }
+          ]
+        },
+        {
+          "name": "Grünfeld Defense",
+          "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "d5"],
+          "variants": [
+            { "name": "Exchange Variation", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "d5", "cxd5", "Nxd5", "e4", "Nxc3", "bxc3", "Bg7"] },
+            { "name": "Russian Variation", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "d5", "Nf3", "Bg7", "Qb3"] },
+            { "name": "Pawn Toss Variation", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "d5", "Qb3"] },
+            { "name": "Brinckmann Attack", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "d5", "Bf4"] },
+            { "name": "Petrosian System", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "d5", "Nf3", "Bg7", "Bg5"] },
+            { "name": "Hungarian Attack", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "d5", "Nf3", "Bg7", "Bf4"] },
+            { "name": "Schlechter Variation", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "d5", "e3"] },
+            { "name": "Schlechter, Makogonov Variation", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "d5", "e3", "Bg7"] },
+            { "name": "Stockholm Variation", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "d5", "Bg5"] },
+            { "name": "Burille Variation", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "d5", "Nf3", "Bg7", "e3"] },
+            { "name": "Russian, Hungarian Variation", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "d5", "Nf3", "Bg7", "Qb3", "dxc4", "Qxc4", "O-O", "e4", "a6"] },
+            { "name": "Brinckmann, Grünfeld Gambit", "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "d5", "Bf4", "Bg7", "e3", "O-O"] }
+          ]
+        },
+        {
+          "name": "Bogo-Indian Defense",
+          "moves": ["d4", "Nf6", "c4", "e6", "Nf3", "Bb4+"],
+          "variants": [
+            { "name": "Grünfeld Variation", "moves": ["d4", "Nf6", "c4", "e6", "Nf3", "Bb4+", "Bd2", "Be7"] },
+            { "name": "Nimzowitsch Variation", "moves": ["d4", "Nf6", "c4", "e6", "Nf3", "Bb4+", "Nbd2"] },
+            { "name": "Wade-Smyslov Variation", "moves": ["d4", "Nf6", "c4", "e6", "Nf3", "Bb4+", "Nc3"] },
+            { "name": "Exchange Variation", "moves": ["d4", "Nf6", "c4", "e6", "Nf3", "Bb4+", "Bd2", "Bxd2+"] },
+            { "name": "Vītoliņš Variation", "moves": ["d4", "Nf6", "c4", "e6", "Nf3", "Bb4+", "Bd2", "c5"] },
+            { "name": "Wade-Smyslov Variation (with a5)", "moves": ["d4", "Nf6", "c4", "e6", "Nf3", "b6", "g3", "Bb7", "Bg2", "Bb4+", "Bd2", "a5"] }
+          ]
+        },
+        {
+          "name": "Benoni Defense",
+          "moves": ["d4", "Nf6", "c4", "c5", "d5"],
+          "variants": [
+            { "name": "Modern Benoni", "moves": ["d4", "Nf6", "c4", "c5", "d5", "e6"] },
+            { "name": "Old Benoni", "moves": ["d4", "c5"] },
+            { "name": "Czech Variation", "moves": ["d4", "Nf6", "c4", "c5", "d5", "e5"] },
+            { "name": "Modern Variation", "moves": ["d4", "Nf6", "c4", "c5", "d5", "e6"] },
+            { "name": "Modern, Classical Variation", "moves": ["d4", "Nf6", "c4", "c5", "d5", "e6", "Nc3", "exd5", "cxd5", "d6", "e4", "g6", "Nf3"] },
+            { "name": "Modern, King's Pawn Line", "moves": ["d4", "Nf6", "c4", "c5", "d5", "e6", "Nc3", "exd5", "cxd5", "d6", "e4"] },
+            { "name": "Modern, Pawn Storm Variation", "moves": ["d4", "Nf6", "c4", "c5", "d5", "e6", "Nc3", "exd5", "cxd5", "d6", "e4", "g6", "f4"] },
+            { "name": "Modern, Taimanov Variation", "moves": ["d4", "Nf6", "c4", "c5", "d5", "e6", "Nc3", "exd5", "cxd5", "d6", "e4", "g6", "f4", "Bg7", "Bb5+"] },
+            { "name": "Modern, Knight's Tour Variation", "moves": ["d4", "Nf6", "c4", "c5", "d5", "e6", "Nc3", "exd5", "cxd5", "d6", "Nf3", "g6", "Nd2"] },
+            { "name": "Modern, Penrose Variation", "moves": ["d4", "Nf6", "c4", "c5", "d5", "e6", "Nc3", "exd5", "cxd5", "d6", "e4", "g6", "Bd3"] },
+            { "name": "Modern, Fianchetto Variation", "moves": ["d4", "Nf6", "c4", "c5", "d5", "e6", "Nc3", "exd5", "cxd5", "d6", "Nf3", "g6", "g3"] },
+            { "name": "Modern, Hastings, Main Line", "moves": ["d4", "Nf6", "c4", "c5", "d5", "e6", "Nc3", "exd5", "cxd5", "d6", "Nf3", "g6", "g3", "Bg7", "Bg2", "O-O", "O-O", "Nbd7", "Nd2", "a6", "a4", "Re8"] },
+            { "name": "Old Benoni: Benoni-Indian Defense", "moves": ["d4", "c5", "d5", "Nf6"] },
+            { "name": "Semi-Benoni Variation, Blockade Variation", "moves": ["d4", "c5", "d5", "e5", "e4", "d6"] }
+          ]
+        },
+        {
+          "name": "Dutch Defense",
+          "moves": ["d4", "f5"],
+          "variants": [
+            { "name": "Leningrad Variation", "moves": ["d4", "f5", "g3", "Nf6", "Bg2", "g6"] },
+            { "name": "Stonewall Variation", "moves": ["d4", "f5", "c4", "Nf6", "g3", "e6", "Bg2", "d5"] },
+            { "name": "Classical Variation", "moves": ["d4", "f5", "c4", "Nf6", "Nc3", "e6"] },
+            { "name": "Staunton Gambit", "moves": ["d4", "f5", "e4"] },
+            { "name": "Queen's Knight Variation", "moves": ["d4", "f5", "c4", "Nf6", "Nc3"] },
+            { "name": "Fianchetto Attack", "moves": ["d4", "f5", "g3"] },
+            { "name": "Raphael Variation", "moves": ["d4", "f5", "Nc3"] },
+            { "name": "Normal Variation", "moves": ["d4", "f5", "c4", "Nf6"] },
+            { "name": "Leningrad, Warsaw Variation", "moves": ["d4", "f5", "c4", "Nf6", "g3", "g6", "Bg2", "Bg7", "Nf3", "O-O", "O-O", "d6", "Nc3", "c6"] },
+            { "name": "Leningrad, Matulović Variation", "moves": ["d4", "f5", "c4", "Nf6", "g3", "g6", "Bg2", "Bg7", "Nf3", "O-O", "O-O", "d6", "Nc3", "Nc6"] },
+            { "name": "Fianchetto, Ilyin-Zhenevsky Variation", "moves": ["d4", "f5", "g3", "Nf6", "Bg2", "e6", "Nf3", "Be7", "O-O", "O-O", "c4"] },
+            { "name": "Fianchetto, Ilyin-Zhenevsky Variation with 7...Qe8", "moves": ["d4", "f5", "c4", "Nf6", "g3", "e6", "Bg2", "Be7", "Nf3", "O-O", "O-O", "d6", "Nc3", "Qe8"] },
+            { "name": "Fianchetto, Semi-Leningrad Variation", "moves": ["d4", "f5", "g3", "Nf6", "Bg2", "g6"] },
+            { "name": "Classical, Rubinstein Variation", "moves": ["d4", "f5", "c4", "e6", "Nc3"] },
+            { "name": "Classical, Stonewall Variation, Modern Variation", "moves": ["d4", "f5", "c4", "e6", "Nf3", "Nf6", "g3", "c6", "Bg2", "d5", "O-O", "Bd6"] },
+            { "name": "Queen's Knight, Ozols Variation", "moves": ["d4", "f5", "c4", "Nf6", "Nc3", "g6", "Nf3", "Bg7"] },
+            { "name": "Raphael Variation (2...d5)", "moves": ["d4", "d5", "Nc3", "f5"] }
+          ]
+        },
+        {
+          "name": "Trompowsky Attack",
+          "moves": ["d4", "Nf6", "Bg5"],
+          "variants": [
+            { "name": "Classical Defense", "moves": ["d4", "Nf6", "Bg5", "e6"] },
+            { "name": "Raptor Variation", "moves": ["d4", "Nf6", "Bg5", "c5", "d5", "Qb6"] },
+            { "name": "Edge Variation", "moves": ["d4", "Nf6", "Bg5", "Ne4", "Bh4", "c5", "f3", "Nf6"] },
+            { "name": "Poisoned Pawn Variation", "moves": ["d4", "Nf6", "Bg5", "c5", "d5", "Qb6", "Nc3", "Qxb2"] },
+            { "name": "Classical, Big Center Variation", "moves": ["d4", "Nf6", "Bg5", "e6", "e4"] }
+          ]
+        },
+        {
+          "name": "Benko Gambit",
+          "moves": ["d4", "Nf6", "c4", "c5", "d5", "b5"],
+          "variants": [
+            { "name": "Fully Accepted", "moves": ["d4", "Nf6", "c4", "c5", "d5", "b5", "cxb5", "a6", "bxa6"] },
+            { "name": "Half-Accepted", "moves": ["d4", "Nf6", "c4", "c5", "d5", "b5", "cxb5", "a6"] },
+            { "name": "Declined Main Line", "moves": ["d4", "Nf6", "c4", "c5", "d5", "b5", "Nf3"] },
+            { "name": "Fully-Accepted: Fianchetto Defense", "moves": ["d4", "Nf6", "c4", "c5", "d5", "b5", "cxb5", "a6", "bxa6", "Bxa6", "Nc3", "d6", "Nf3", "g6", "g3", "Bg7", "Bg2"] },
+            { "name": "Half-Accepted: Pawn Return Variation", "moves": ["d4", "Nf6", "c4", "c5", "d5", "b5", "cxb5", "a6", "b6"] },
+            { "name": "Half-Accepted: Modern Variation", "moves": ["d4", "Nf6", "c4", "c5", "d5", "b5", "cxb5", "a6", "e3"] },
+            { "name": "Half-Accepted: Dlugy Variation", "moves": ["d4", "Nf6", "c4", "c5", "d5", "b5", "cxb5", "a6", "f3"] },
+            { "name": "Half-Accepted: Zaitsev System", "moves": ["d4", "Nf6", "c4", "c5", "d5", "b5", "cxb5", "a6", "Nc3"] }
+          ]
+        },
+        {
+          "name": "London System",
+          "moves": ["d4", "d5", "Bf4", "Nf6", "Nf3", "e6", "e3"],
+          "variants": [
+            { "name": "Accelerated London", "moves": ["d4", "d5", "Bf4", "Nf6", "e3"] },
+            { "name": "Indian London", "moves": ["d4", "Nf6", "Bf4", "g6"] },
+            { "name": "Poisoned Pawn Variation", "moves": ["d4", "d5", "Bf4", "c5", "e3", "Nc6", "c3", "Qb6"] }
+          ]
+        },
+        {
+          "name": "Colle System",
+          "moves": ["d4", "d5", "Nf3", "Nf6", "e3"],
+          "variants": [
+            { "name": "Rubinstein Opening", "moves": ["d4", "d5", "Nf3", "Nf6", "e3", "e6", "Bd3", "c5", "b3"] },
+            { "name": "Traditional Line", "moves": ["d4", "d5", "Nf3", "Nf6", "e3", "e6", "Bd3", "c5", "c3"] },
+            { "name": "Anti-Colle Variation", "moves": ["d4", "d5", "Nf3", "Nf6", "e3", "Bf5"] }
+          ]
+        },
+        {
+          "name": "Torre Attack",
+          "moves": ["d4", "Nf6", "Nf3", "e6", "Bg5"],
+          "variants": [
+            { "name": "Classical Defense, Nimzowitsch Variation", "moves": ["d4", "Nf6", "Nf3", "e6", "Bg5", "h6"] },
+            { "name": "Fianchetto Defense", "moves": ["d4", "Nf6", "Nf3", "g6", "Bg5", "Bg7"] }
+          ]
+        },
+        {
+          "name": "Old Indian Defense",
+          "moves": ["d4", "Nf6", "c4", "d6"],
+          "variants": [
+            { "name": "Ukrainian Variation", "moves": ["d4", "Nf6", "c4", "d6", "Nc3", "e5"] },
+            { "name": "Ukrainian, Two Knights Variation", "moves": ["d4", "Nf6", "c4", "d6", "Nc3", "e5", "Nf3"] },
+            { "name": "Ukrainian, Two Knights, Main Line", "moves": ["d4", "Nf6", "c4", "d6", "Nc3", "e5", "Nf3", "Nbd7", "e4", "Be7", "Be2", "c6", "O-O", "O-O"] },
+            { "name": "Duz-Khotimirsky Variation", "moves": ["d4", "Nf6", "c4", "d6", "Nc3", "Nbd7"] }
+          ]
+        },
+        {
+          "name": "Budapest Gambit",
+          "moves": ["d4", "Nf6", "c4", "e5"],
+          "variants": [
+            { "name": "Adler Variation", "moves": ["d4", "Nf6", "c4", "e5", "dxe5", "Ng4", "Nf3"] }
+          ]
+        },
+        {
+          "name": "Blumenfeld Countergambit",
+          "moves": ["d4", "Nf6", "c4", "e6", "Nf3", "c5", "d5", "b5"],
+          "variants": [
+            { "name": "Duz-Khotimirsky Variation", "moves": ["d4", "Nf6", "c4", "e6", "Nf3", "c5", "d5", "b5", "Bg5"] }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "گشایش‌های 1.c4 (English Opening)",
+      "code": "c4",
+      "openings": [
+        {
+          "name": "English Opening",
+          "moves": ["c4"],
+          "variants": [
+            { "name": "Symmetrical Variation", "moves": ["c4", "c5"] },
+            { "name": "King's English Variation", "moves": ["c4", "e5"] },
+            { "name": "Anglo-Indian Defense", "moves": ["c4", "Nf6"] },
+            { "name": "Anglo-Dutch Defense", "moves": ["c4", "f5"] },
+            { "name": "Caro-Kann Defensive System", "moves": ["c4", "c6"] },
+            { "name": "Agincourt Defense", "moves": ["c4", "e6", "Nf3", "d5"] },
+            { "name": "Great Snake Variation", "moves": ["c4", "g6"] },
+            { "name": "Reversed Sicilian", "moves": ["c4", "e5"] },
+            { "name": "Symmetrical, Two Knights, Fianchetto Variation", "moves": ["c4", "c5", "Nc3", "Nc6", "g3"] },
+            { "name": "Symmetrical, Three Knights System", "moves": ["c4", "c5", "Nc3", "Nf6", "Nf3"] },
+            { "name": "Symmetrical, Four Knights Variation", "moves": ["c4", "c5", "Nc3", "Nc6", "Nf3", "Nf6"] },
+            { "name": "Symmetrical, Fianchetto Variation", "moves": ["c4", "c5", "Nc3", "Nf6", "g3"] },
+            { "name": "Symmetrical, Double Fianchetto Defense", "moves": ["c4", "c5", "Nf3", "Nf6", "g3", "b6", "Bg2", "Bb7", "O-O", "g6"] },
+            { "name": "Symmetrical, Hedgehog Defense", "moves": ["c4", "c5", "Nf3", "Nf6", "g3", "b6", "Bg2", "Bb7", "O-O", "e6", "Nc3", "Be7"] },
+            { "name": "Symmetrical, Anti-Benoni, Geller Variation", "moves": ["c4", "c5", "Nf3", "Nf6", "d4", "cxd4", "Nxd4", "e6", "Nc3", "Nc6", "g3", "Qb6"] },
+            { "name": "Symmetrical, Fianchetto, Rubinstein Variation", "moves": ["c4", "c5", "Nc3", "Nf6", "g3", "d5", "cxd5", "Nxd5", "Bg2", "Nc7"] },
+            { "name": "Symmetrical, Fianchetto, Ultra-Symmetrical Line", "moves": ["c4", "c5", "Nc3", "Nc6", "g3", "g6", "Bg2", "Bg7"] },
+            { "name": "Symmetrical, Fianchetto, Ultra-Symmetrical, Botvinnik System", "moves": ["c4", "c5", "Nc3", "Nc6", "g3", "g6", "Bg2", "Bg7", "e4"] },
+            { "name": "Symmetrical, Fianchetto, Ultra-Symmetrical, Mecking Variation", "moves": ["c4", "c5", "Nc3", "Nc6", "g3", "g6", "Bg2", "Bg7", "Nf3", "Nf6", "O-O", "O-O", "d4"] },
+            { "name": "Symmetrical, Fianchetto, Ultra-Symmetrical, Duchamp Variation", "moves": ["c4", "c5", "Nc3", "Nc6", "g3", "g6", "Bg2", "Bg7", "Nf3", "Nf6", "O-O", "O-O", "d3"] },
+            { "name": "Two Knights, Fianchetto, Ultra-Symmetrical, Reversed Botvinnik System", "moves": ["c4", "c5", "Nc3", "Nc6", "g3", "g6", "Bg2", "Bg7", "Nf3", "e5"] },
+            { "name": "King's English Variation: Carls-Bremen System", "moves": ["c4", "e5", "Nc3", "Nf6", "g3"] },
+            { "name": "King's English Variation: Four Knights, Flexible Line", "moves": ["c4", "e5", "Nc3", "Nc6", "Nf3", "Nf6", "d3"] },
+            { "name": "King's English Variation: Four Knights, Nimzowitsch Variation", "moves": ["c4", "e5", "Nc3", "Nc6", "Nf3", "Nf6", "e4"] },
+            { "name": "King's English Variation: Four Knights, Quiet Line", "moves": ["c4", "e5", "Nc3", "Nc6", "Nf3", "Nf6", "e3"] },
+            { "name": "King's English Variation: Reversed Sicilian, Closed", "moves": ["c4", "e5", "Nc3", "Nc6"] },
+            { "name": "King's English Variation: Reversed Sicilian, Three Knights System", "moves": ["c4", "e5", "Nc3", "Nc6", "Nf3"] },
+            { "name": "King's English Variation: Reversed Sicilian, Taimanov Variation", "moves": ["c4", "e5", "Nc3", "Nc6", "g3", "g6", "Bg2", "Bg7"] },
+            { "name": "King's English Variation: Reversed Sicilian, Taimanov, Full Symmetry Line", "moves": ["c4", "e5", "Nc3", "Nc6", "g3", "g6", "Bg2", "Bg7", "d3", "d6"] },
+            { "name": "King's English Variation: Carls-Bremen, Smyslov System", "moves": ["c4", "e5", "Nc3", "Nf6", "g3", "Bb4"] },
+            { "name": "King's English Variation: Carls-Bremen, Reversed Dragon Variation", "moves": ["c4", "e5", "Nc3", "Nf6", "g3", "d5"] },
+            { "name": "Anglo-Indian, King's Knight Variation", "moves": ["c4", "Nf6", "Nf3"] },
+            { "name": "Anglo-Indian, Queen's Knight Variation", "moves": ["c4", "Nf6", "Nc3"] },
+            { "name": "Anglo-Indian, King's Knight, Queen's Indian Formation", "moves": ["c4", "Nf6", "Nf3", "b6"] },
+            { "name": "Anglo-Indian, King's Knight, Queen's Indian Formation with 4...Bb7", "moves": ["c4", "Nf6", "Nf3", "e6", "g3", "b6", "Bg2", "Bb7"] },
+            { "name": "Anglo-Indian, Old Indian Formation", "moves": ["c4", "Nf6", "Nf3", "d6"] },
+            { "name": "Anglo-Indian, Anglo-Grünfeld Defense", "moves": ["c4", "Nf6", "Nc3", "d5"] },
+            { "name": "Anglo-Indian, Anglo-Grünfeld, Stein Attack", "moves": ["c4", "Nf6", "Nc3", "d5", "cxd5", "Nxd5", "Nf3", "g6", "Qa4+"] },
+            { "name": "Anglo-Indian, King's Indian Defense", "moves": ["c4", "Nf6", "Nf3", "g6"] },
+            { "name": "Anglo-Indian, Queen's Indian Formation", "moves": ["c4", "Nf6", "Nc3", "e6", "Nf3", "b6"] },
+            { "name": "Anglo-Indian, King's Indian Attack", "moves": ["c4", "Nf6", "Nf3", "g6", "g3"] },
+            { "name": "Anglo-Indian, Nimzo-English Opening", "moves": ["c4", "Nf6", "Nc3", "e6", "Nf3", "Bb4"] },
+            { "name": "Anglo-Indian, East Indian Defense", "moves": ["c4", "Nf6", "Nc3", "e6"] },
+            { "name": "Caro-Kann Defensive System, Anglo-Slav Variation", "moves": ["c4", "c6", "Nf3", "d5", "b3"] },
+            { "name": "Agincourt Defense (with ...d5)", "moves": ["c4", "e6", "Nf3", "d5"] },
+            { "name": "Agincourt, Wimpey System", "moves": ["c4", "e6", "Nf3", "d5", "b3", "Nf6", "Bb2", "c5", "e3"] },
+            { "name": "Agincourt, Romanishin Variation", "moves": ["c4", "e6", "Nf3", "Nf6", "g3", "a6"] },
+            { "name": "Agincourt, Romanishin Variation, Romanishin Gambit", "moves": ["c4", "e6", "Nf3", "Nf6", "g3", "a6", "Bg2", "b5"] },
+            { "name": "Neo-Catalan Defense", "moves": ["c4", "e6", "Nf3", "d5", "g3", "Nf6"] },
+            { "name": "Neo-Catalan Defense Declined", "moves": ["c4", "e6", "Nf3", "d5", "g3", "Nf6", "Bg2", "Be7"] },
+            { "name": "Neo-Catalan Defense Accepted", "moves": ["c4", "e6", "Nf3", "d5", "g3", "Nf6", "Bg2", "dxc4"] },
+            { "name": "Neo-Catalan, Semi-Slav Defense", "moves": ["c4", "e6", "Nf3", "d5", "g3", "Nf6", "Bg2", "c6"] },
+            { "name": "Mikėnas-Carls Variation", "moves": ["c4", "Nf6", "Nc3", "e6", "e4"] },
+            { "name": "Four Knights, Korchnoi Line", "moves": ["c4", "e5", "Nc3", "Nc6", "Nf3", "Nf6", "a3"] },
+            { "name": "Anglo-Dutch Defense", "moves": ["c4", "f5"] }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "گشایش‌های 1.Nf3 (Réti Opening)",
+      "code": "Nf3",
+      "openings": [
+        {
+          "name": "Réti Opening",
+          "moves": ["Nf3"],
+          "variants": [
+            { "name": "King's Indian Attack", "moves": ["Nf3", "d5", "g3"] },
+            { "name": "Sicilian Invitation", "moves": ["Nf3", "c5"] },
+            { "name": "Black Mustang Defense", "moves": ["Nf3", "Nc6"] },
+            { "name": "Queen's Gambit Invitation", "moves": ["Nf3", "e6"] },
+            { "name": "Dutch Variation", "moves": ["Nf3", "f5"] },
+            { "name": "Pirc Invitation", "moves": ["Nf3", "d6"] },
+            { "name": "Réti Gambit", "moves": ["Nf3", "d5", "c4"] },
+            { "name": "Réti Gambit Accepted", "moves": ["Nf3", "d5", "c4", "dxc4"] },
+            { "name": "Réti Gambit Declined, Advance Variation", "moves": ["Nf3", "d5", "c4", "d4"] },
+            { "name": "King's Indian Attack, Symmetrical Defense", "moves": ["Nf3", "Nf6", "g3", "g6"] },
+            { "name": "King's Indian Attack, Spassky Variation", "moves": ["Nf3", "Nf6", "g3", "b5"] },
+            { "name": "King's Indian Attack, Double Fianchetto Variation", "moves": ["Nf3", "d5", "g3", "g6"] },
+            { "name": "King's Indian Attack, Double Fianchetto, Pachman System", "moves": ["Nf3", "d5", "g3", "g6", "Bg2", "Bg7", "O-O", "e5", "d3", "Ne7"] },
+            { "name": "King's Indian Attack, French Variation", "moves": ["Nf3", "d5", "g3", "c5", "Bg2", "Nc6"] },
+            { "name": "King's Indian Attack, Sicilian Variation", "moves": ["Nf3", "d5", "g3", "c5"] },
+            { "name": "Quiet System", "moves": ["Nf3", "Nf6", "e3"] },
+            { "name": "Nimzowitsch-Larsen Attack", "moves": ["Nf3", "d5", "b3"] },
+            { "name": "Caro-Kann Defensive System (with c4 and c6)", "moves": ["Nf3", "d5", "c4", "c6"] },
+            { "name": "King's Indian Attack, French Variation (again)", "moves": ["Nf3", "d5", "g3", "c5", "Bg2", "Nc6"] },
+            { "name": "King's Indian Attack, Sicilian Variation (again)", "moves": ["Nf3", "d5", "g3", "c5"] }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "سایر گشایش‌ها",
+      "code": "other",
+      "openings": [
+        {
+          "name": "King's Fianchetto Opening (1.g3)",
+          "moves": ["g3"],
+          "variants": [
+            { "name": "Indian Defense", "moves": ["g3", "Nf6", "Bg2"] },
+            { "name": "Symmetrical Variation", "moves": ["g3", "g6"] },
+            { "name": "Dutch Defense", "moves": ["g3", "f5"] },
+            { "name": "Sicilian Invitation", "moves": ["g3", "c5"] },
+            { "name": "Slav Formation", "moves": ["g3", "c6"] }
+          ]
+        },
+        {
+          "name": "Bird's Opening (1.f4)",
+          "moves": ["f4"],
+          "variants": [
+            { "name": "Dutch Variation", "moves": ["f4", "d5"] },
+            { "name": "From's Gambit", "moves": ["f4", "e5"] },
+            { "name": "Horsefly Defense", "moves": ["f4", "Nf6"] },
+            { "name": "From's Gambit (again)", "moves": ["f4", "e5"] }
+          ]
+        },
+        {
+          "name": "Nimzowitsch-Larsen Attack (1.b3)",
+          "moves": ["b3"],
+          "variants": [
+            { "name": "Modern Variation", "moves": ["b3", "e5"] },
+            { "name": "Classical Variation", "moves": ["b3", "d5"] },
+            { "name": "Indian Variation", "moves": ["b3", "Nf6"] },
+            { "name": "English Variation", "moves": ["b3", "c5"] },
+            { "name": "Symmetrical Variation", "moves": ["b3", "b6"] },
+            { "name": "Indian Variation (again)", "moves": ["b3", "Nf6"] }
+          ]
+        },
+        {
+          "name": "Polish Opening (1.b4)",
+          "moves": ["b4"],
+          "variants": [
+            { "name": "Czech Defense", "moves": ["b4", "e5"] },
+            { "name": "King's Indian Defense", "moves": ["b4", "Nf6"] },
+            { "name": "Outflank Variation", "moves": ["b4", "c6"] },
+            { "name": "Zukertort System", "moves": ["b4", "Nf6", "Bb2", "e6", "a3"] }
+          ]
+        },
+        {
+          "name": "Grob Opening (1.g4)",
+          "moves": ["g4"],
+          "variants": [
+            { "name": "Main Line", "moves": ["g4", "d5", "Bg2", "c6"] },
+            { "name": "From's Gambit", "moves": ["g4", "e5"] }
+          ]
+        },
+        {
+          "name": "Van Geet Opening (1.Nc3)",
+          "moves": ["Nc3"],
+          "variants": []
+        },
+        {
+          "name": "Mieses Opening (1.d3)",
+          "moves": ["d3"],
+          "variants": []
+        },
+        {
+          "name": "Van 't Kruijs Opening (1.e3)",
+          "moves": ["e3"],
+          "variants": []
+        },
+        {
+          "name": "Kádas Opening (1.h4)",
+          "moves": ["h4"],
+          "variants": []
+        },
+        {
+          "name": "Anderssen Opening (1.a3)",
+          "moves": ["a3"],
+          "variants": []
+        },
+        {
+          "name": "Queen's Pawn Opening (1.d4) – some early lines are here? Actually we already have d4 category. This is just a placeholder.",
+          "moves": ["d4"],
+          "variants": []
+        },
+        {
+          "name": "King's Pawn Opening (1.e4) – same as above.",
+          "moves": ["e4"],
+          "variants": []
+        },
+        {
+          "name": "English Opening: Symmetrical Variation (already in c4 category)",
+          "moves": ["c4", "c5"],
+          "variants": []
+        },
+        {
+          "name": "Owen's Defense (1.e4 b6)",
+          "moves": ["e4", "b6"],
+          "variants": []
+        },
+        {
+          "name": "King's Fianchetto Opening: Indian Defense (already in g3)",
+          "moves": ["g3", "Nf6"],
+          "variants": []
+        },
+        {
+          "name": "English Opening: Great Snake Variation (1.c4 g6)",
+          "moves": ["c4", "g6"],
+          "variants": []
+        },
+        {
+          "name": "Réti Opening: Black Mustang Defense (1.Nf3 Nc6)",
+          "moves": ["Nf3", "Nc6"],
+          "variants": []
+        },
+        {
+          "name": "Queen's Pawn Opening: Horwitz Defense (1.d4 e6)",
+          "moves": ["d4", "e6"],
+          "variants": []
+        },
+        {
+          "name": "Réti Opening: Queen's Gambit Invitation (1.Nf3 e6)",
+          "moves": ["Nf3", "e6"],
+          "variants": []
+        },
+        {
+          "name": "Réti Opening: Kingside Fianchetto Variation (1.Nf3 g6)",
+          "moves": ["Nf3", "g6"],
+          "variants": []
+        },
+        {
+          "name": "English Opening: Caro-Kann Defensive System (1.c4 c6)",
+          "moves": ["c4", "c6"],
+          "variants": []
+        },
+        {
+          "name": "Modern Defense with 1.e4 (1.e4 g6)",
+          "moves": ["e4", "g6"],
+          "variants": []
+        },
+        {
+          "name": "English Opening: King's English Variation (1.c4 e5)",
+          "moves": ["c4", "e5"],
+          "variants": []
+        },
+        {
+          "name": "Nimzowitsch-Larsen Attack: Indian Variation (1.b3 Nf6)",
+          "moves": ["b3", "Nf6"],
+          "variants": []
+        },
+        {
+          "name": "Réti Opening: Sicilian Invitation (1.Nf3 c5)",
+          "moves": ["Nf3", "c5"],
+          "variants": []
+        },
+        {
+          "name": "English Defense (1.d4 b6)",
+          "moves": ["d4", "b6"],
+          "variants": []
+        },
+        {
+          "name": "Scandinavian Defense (1.e4 d5)",
+          "moves": ["e4", "d5"],
+          "variants": []
+        },
+        {
+          "name": "French Defense (1.e4 e6)",
+          "moves": ["e4", "e6"],
+          "variants": []
+        },
+        {
+          "name": "Nimzowitsch Defense (1.e4 Nc6)",
+          "moves": ["e4", "Nc6"],
+          "variants": []
+        },
+        {
+          "name": "Englund Gambit (1.d4 e5)",
+          "moves": ["d4", "e5"],
+          "variants": []
+        },
+        {
+          "name": "Réti Opening: Dutch Variation (1.Nf3 f5)",
+          "moves": ["Nf3", "f5"],
+          "variants": []
+        },
+        {
+          "name": "Réti Opening: Pirc Invitation (1.Nf3 d6)",
+          "moves": ["Nf3", "d6"],
+          "variants": []
+        },
+        {
+          "name": "Queen's Pawn Opening: Polish Defense (1.d4 b5)",
+          "moves": ["d4", "b5"],
+          "variants": []
+        },
+        {
+          "name": "Queen's Pawn Opening: St. George Defense (1.d4 a6)",
+          "moves": ["d4", "a6"],
+          "variants": []
+        },
+        {
+          "name": "Old Benoni Defense (1.d4 c5)",
+          "moves": ["d4", "c5"],
+          "variants": []
+        },
+        {
+          "name": "Pirc Defense (1.e4 d6)",
+          "moves": ["e4", "d6"],
+          "variants": []
+        },
+        {
+          "name": "Caro-Kann Defense (1.e4 c6)",
+          "moves": ["e4", "c6"],
+          "variants": []
+        },
+        {
+          "name": "Bird's Opening: From's Gambit (1.f4 e5)",
+          "moves": ["f4", "e5"],
+          "variants": []
+        },
+        {
+          "name": "French Defense: King's Indian Attack (1.e4 e6 2.d3)",
+          "moves": ["e4", "e6", "d3"],
+          "variants": []
+        },
+        {
+          "name": "Scandinavian Defense: Closed (1.e4 d5 2.Nc3)",
+          "moves": ["e4", "d5", "Nc3"],
+          "variants": []
+        },
+        {
+          "name": "Sicilian Defense: McDonnell Attack (1.e4 c5 2.f4)",
+          "moves": ["e4", "c5", "f4"],
+          "variants": []
+        },
+        {
+          "name": "French Defense: Chigorin Variation (1.e4 e6 2.Qe2)",
+          "moves": ["e4", "e6", "Qe2"],
+          "variants": []
+        },
+        {
+          "name": "Vienna Game (1.e4 e5 2.Nc3)",
+          "moves": ["e4", "e5", "Nc3"],
+          "variants": []
+        },
+        {
+          "name": "Queen's Pawn Opening: Accelerated London System (1.d4 d5 2.Bf4)",
+          "moves": ["d4", "d5", "Bf4"],
+          "variants": []
+        },
+        {
+          "name": "Bishop's Opening (1.e4 e5 2.Bc4)",
+          "moves": ["e4", "e5", "Bc4"],
+          "variants": []
+        },
+        {
+          "name": "Caro-Kann Defense: Breyer Variation (1.e4 c6 2.d3)",
+          "moves": ["e4", "c6", "d3"],
+          "variants": []
+        },
+        {
+          "name": "Dutch Defense: Raphael Variation (1.d4 f5 2.Nc3)",
+          "moves": ["d4", "f5", "Nc3"],
+          "variants": []
+        },
+        {
+          "name": "Dutch Defense: Fianchetto Attack (1.d4 f5 2.g3)",
+          "moves": ["d4", "f5", "g3"],
+          "variants": []
+        },
+        {
+          "name": "Queen's Pawn Opening: Chigorin Variation (1.d4 d5 2.Nc3)",
+          "moves": ["d4", "d5", "Nc3"],
+          "variants": []
+        },
+        {
+          "name": "Sicilian Defense: Cowboy Attack (1.e4 c5 2.b3)",
+          "moves": ["e4", "c5", "b3"],
+          "variants": []
+        },
+        {
+          "name": "Queen's Pawn Opening: Tartakower Variation (1.d4 d6 2.Nf3)",
+          "moves": ["d4", "d6", "Nf3"],
+          "variants": []
+        },
+        {
+          "name": "Indian Game: Tartakower Attack (1.d4 Nf6 2.g3)",
+          "moves": ["d4", "Nf6", "g3"],
+          "variants": []
+        },
+        {
+          "name": "Réti Opening: Nimzowitsch-Larsen Attack (1.Nf3 d5 2.b3)",
+          "moves": ["Nf3", "d5", "b3"],
+          "variants": []
+        },
+        {
+          "name": "French Defense: Knight Variation (1.e4 e6 2.Nf3)",
+          "moves": ["e4", "e6", "Nf3"],
+          "variants": []
+        },
+        {
+          "name": "Réti Opening: Réti Gambit (1.Nf3 d5 2.c4)",
+          "moves": ["Nf3", "d5", "c4"],
+          "variants": []
+        },
+        {
+          "name": "Center Game (1.e4 e5 2.d4)",
+          "moves": ["e4", "e5", "d4"],
+          "variants": []
+        },
+        {
+          "name": "Sicilian Defense: Keres Variation (1.e4 c5 2.Ne2)",
+          "moves": ["e4", "c5", "Ne2"],
+          "variants": []
+        },
+        {
+          "name": "Sicilian Defense: Wing Gambit (1.e4 c5 2.b4)",
+          "moves": ["e4", "c5", "b4"],
+          "variants": []
+        },
+        {
+          "name": "Dutch Defense: Staunton Gambit (1.d4 f5 2.e4)",
+          "moves": ["d4", "f5", "e4"],
+          "variants": []
+        },
+        {
+          "name": "Queen's Pawn Opening: Zukertort Variation (1.d4 d5 2.Nf3)",
+          "moves": ["d4", "d5", "Nf3"],
+          "variants": []
+        },
+        {
+          "name": "Alapin Sicilian Defense (1.e4 c5 2.c3)",
+          "moves": ["e4", "c5", "c3"],
+          "variants": []
+        },
+        {
+          "name": "English Opening: Anglo-Indian, King's Knight Variation (1.c4 Nf6 2.Nf3)",
+          "moves": ["c4", "Nf6", "Nf3"],
+          "variants": []
+        },
+        {
+          "name": "King's Indian Attack (1.Nf3 d5 2.g3)",
+          "moves": ["Nf3", "d5", "g3"],
+          "variants": []
+        },
+        {
+          "name": "English Opening: Anglo-Indian, Queen's Knight Variation (1.c4 Nf6 2.Nc3)",
+          "moves": ["c4", "Nf6", "Nc3"],
+          "variants": []
+        },
+        {
+          "name": "Sicilian Defense: Slow Variation (1.e4 c5 2.Be2)",
+          "moves": ["e4", "c5", "Be2"],
+          "variants": []
+        },
+        {
+          "name": "French Defense: Steiner Variation (1.e4 e6 2.c4)",
+          "moves": ["e4", "e6", "c4"],
+          "variants": []
+        },
+        {
+          "name": "Sicilian Defense: Mengarini Variation (1.e4 c5 2.a3)",
+          "moves": ["e4", "c5", "a3"],
+          "variants": []
+        },
+        {
+          "name": "French Defense: Queen's Knight Variation (1.e4 e6 2.Nc3)",
+          "moves": ["e4", "e6", "Nc3"],
+          "variants": []
+        },
+        {
+          "name": "Réti Opening: Quiet System (1.Nf3 Nf6 2.e3)",
+          "moves": ["Nf3", "Nf6", "e3"],
+          "variants": []
+        },
+        {
+          "name": "Réti Opening: King's Indian Attack (1.Nf3 Nf6 2.g3)",
+          "moves": ["Nf3", "Nf6", "g3"],
+          "variants": []
+        },
+        {
+          "name": "Sicilian Defense: Staunton-Cochrane Variation (1.e4 c5 2.c4)",
+          "moves": ["e4", "c5", "c4"],
+          "variants": []
+        },
+        {
+          "name": "French Defense: Horwitz Attack (1.e4 e6 2.b3)",
+          "moves": ["e4", "e6", "b3"],
+          "variants": []
+        },
+        {
+          "name": "Sicilian Defense: Lasker-Dunne Attack (1.e4 c5 2.g3)",
+          "moves": ["e4", "c5", "g3"],
+          "variants": []
+        },
+        {
+          "name": "Indian Game: Knights Variation (1.d4 Nf6 2.Nf3)",
+          "moves": ["d4", "Nf6", "Nf3"],
+          "variants": []
+        },
+        {
+          "name": "Queen's Gambit (1.d4 d5 2.c4)",
+          "moves": ["d4", "d5", "c4"],
+          "variants": []
+        },
+        {
+          "name": "King's Gambit (1.e4 e5 2.f4)",
+          "moves": ["e4", "e5", "f4"],
+          "variants": []
+        }
+      ]
+    }
+  ]
+}
