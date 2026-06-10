@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
-    <title>ChessHub | پایگاه بازی استادان بزرگ</title>
+    <title>ChessHub | پایگاه بازی‌ها</title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
@@ -405,7 +405,7 @@
           { name: "Gukesh D", title: "سوپر استاد", file: "Gukesh.pgn" },
         ];
 
-        let currentPlayerGames = []; // لیست بازی‌های فعلی
+        let currentPlayerGames = [];
         let filteredGames = [];
         let modalMovesFens = [];
         let modalMoveIndex = 0;
@@ -473,10 +473,10 @@
             card.className = "player-card";
             const avatarUrl = `images/players/${p.file.replace(".pgn", ".jpg")}`;
             card.innerHTML = `
-          <div class="player-avatar"><img src="${avatarUrl}" alt="${p.name}" onerror="this.src='https://ui-avatars.com/api/?background=2c7da0&color=fff&name=${encodeURIComponent(p.name)}'"></div>
-          <div class="player-name">${p.name}</div>
-          <div class="player-title">${p.title}</div>
-        `;
+              <div class="player-avatar"><img src="${avatarUrl}" alt="${p.name}" onerror="this.src='https://ui-avatars.com/api/?background=2c7da0&color=fff&name=${encodeURIComponent(p.name)}'"></div>
+              <div class="player-name">${p.name}</div>
+              <div class="player-title">${p.title}</div>
+            `;
             card.addEventListener("click", () =>
               loadPlayerGames(p.name, p.file),
             );
@@ -509,17 +509,17 @@
           const container = document.createElement("div");
           container.className = "games-section";
           container.innerHTML = `
-        <div class="section-header">
-          <button class="back-btn" id="backToPlayersBtn">↩️ بازگشت به بازیکنان</button>
-          <h3>🎯 بازی‌های ${playerName}</h3>
-        </div>
-        <div class="search-container">
-          <div class="search-field"><select id="searchField"><option value="white">سفید</option><option value="black">سیاه</option><option value="result">نتیجه</option><option value="date">تاریخ</option></select></div>
-          <div class="search-field"><input type="text" id="searchQuery" placeholder="مقدار جستجو..."></div>
-          <div class="search-buttons"><button class="btn" id="searchBtn">🔍 جستجو</button><button class="btn" id="resetSearchBtn">🗑️ پاک کردن</button></div>
-        </div>
-        <div id="gamesListContainer" class="games-list"></div>
-      `;
+            <div class="section-header">
+              <button class="back-btn" id="backToPlayersBtn">↩️ بازگشت به بازیکنان</button>
+              <h3>🎯 بازی‌های ${playerName}</h3>
+            </div>
+            <div class="search-container">
+              <div class="search-field"><select id="searchField"><option value="white">سفید</option><option value="black">سیاه</option><option value="result">نتیجه</option><option value="date">تاریخ</option></select></div>
+              <div class="search-field"><input type="text" id="searchQuery" placeholder="مقدار جستجو..."></div>
+              <div class="search-buttons"><button class="btn" id="searchBtn">🔍 جستجو</button><button class="btn" id="resetSearchBtn">🗑️ پاک کردن</button></div>
+            </div>
+            <div id="gamesListContainer" class="games-list"></div>
+          `;
           mainDiv.innerHTML = "";
           mainDiv.appendChild(container);
           document
@@ -589,14 +589,14 @@
                   ? "برد سیاه"
                   : "مساوی";
             div.innerHTML = `
-          <div class="game-info">
-            <span>⚪ ${game.white}</span>
-            <span>⚫ ${game.black}</span>
-            <span>🏆 ${resultText}</span>
-            <span>📅 ${game.date}</span>
-          </div>
-          <div><i class="fas fa-chevron-left"></i></div>
-        `;
+              <div class="game-info">
+                <span>⚪ ${game.white}</span>
+                <span>⚫ ${game.black}</span>
+                <span>🏆 ${resultText}</span>
+                <span>📅 ${game.date}</span>
+              </div>
+              <div><i class="fas fa-chevron-left"></i></div>
+            `;
             div.addEventListener("click", () => openGameViewer(game));
             container.appendChild(div);
           });
@@ -625,31 +625,31 @@
 
           const mainDiv = document.getElementById("mainContent");
           const viewerHtml = `
-        <div class="game-viewer">
-          <div class="viewer-header">
-            <h3>♜ ${game.white} vs ${game.black} (${game.result === "1-0" ? "برد سفید" : game.result === "0-1" ? "برد سیاه" : "مساوی"})</h3>
-            <button class="back-btn" id="exitViewerBtn">↩️ بازگشت به لیست</button>
-          </div>
-          <div class="viewer-board">
-            <div>
-              <canvas id="gameCanvas" width="450" height="450"></canvas>
-            </div>
-            <div style="flex:1; min-width:220px;">
-              <div class="control-buttons">
-                <button id="prevMoveView" class="btn">◀ قبلی</button>
-                <button id="playPauseView" class="btn btn-primary">▶ شروع خودکار</button>
-                <button id="nextMoveView" class="btn">بعدی ▶</button>
+            <div class="game-viewer">
+              <div class="viewer-header">
+                <h3>♜ ${game.white} vs ${game.black} (${game.result === "1-0" ? "برد سفید" : game.result === "0-1" ? "برد سیاه" : "مساوی"})</h3>
+                <button class="back-btn" id="exitViewerBtn">↩️ بازگشت به لیست</button>
               </div>
-              <div id="movesListView" class="game-moves"></div>
-              <div class="pgn-actions">
-                <button id="copyPgnView" class="btn">📋 کپی PGN</button>
-                <button id="downloadPgnView" class="btn">📥 دانلود PGN</button>
+              <div class="viewer-board">
+                <div>
+                  <canvas id="gameCanvas" width="450" height="450"></canvas>
+                </div>
+                <div style="flex:1; min-width:220px;">
+                  <div class="control-buttons">
+                    <button id="prevMoveView" class="btn">◀ قبلی</button>
+                    <button id="playPauseView" class="btn btn-primary">▶ شروع خودکار</button>
+                    <button id="nextMoveView" class="btn">بعدی ▶</button>
+                  </div>
+                  <div id="movesListView" class="game-moves"></div>
+                  <div class="pgn-actions">
+                    <button id="copyPgnView" class="btn">📋 کپی PGN</button>
+                    <button id="downloadPgnView" class="btn">📥 دانلود PGN</button>
+                  </div>
+                  <div class="pgn-textarea"><textarea id="pgnTextView" readonly rows="2" dir="ltr" style="text-align:left;"></textarea></div>
+                </div>
               </div>
-              <div class="pgn-textarea"><textarea id="pgnTextView" readonly rows="2" dir="ltr" style="text-align:left;"></textarea></div>
             </div>
-          </div>
-        </div>
-      `;
+          `;
           mainDiv.innerHTML = viewerHtml;
           document.getElementById("pgnTextView").value = game.pgnRaw;
 
