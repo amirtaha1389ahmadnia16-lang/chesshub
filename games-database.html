@@ -6,11 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
-    <meta
-      name="description"
-      content="پایگاه بازی‌های استادان بزرگ شطرنج - بیش از ۳۰ استاد بزرگ و هزاران بازی معروف"
-    />
-    <title>ChessHub | پایگاه بازی‌های شطرنج</title>
+    <title>ChessHub | پایگاه بازی استادان بزرگ</title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
@@ -22,72 +18,65 @@
     <link rel="stylesheet" href="css/style.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
     <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      body {
-        background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
-        font-family: "Vazir", Tahoma, sans-serif;
-      }
-      .container {
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 1rem 1.5rem;
-      }
-      /* header & footer loaded externally, but we keep style consistency */
+      /* ===== استایل اختصاصی صفحه ===== */
       .database-header {
         text-align: center;
-        margin: 2rem 0 2rem;
+        margin-bottom: 2rem;
       }
       .database-header h2 {
-        font-size: clamp(1.6rem, 5vw, 2.2rem);
-        background: linear-gradient(135deg, #1e4b6e, #2a7f9c);
-        background-clip: text;
-        -webkit-background-clip: text;
-        color: transparent;
+        font-size: clamp(1.4rem, 5vw, 2rem);
+        color: #2c7da0;
         margin-bottom: 0.5rem;
       }
       .database-header p {
-        color: #4a627a;
-        font-size: 0.95rem;
+        color: #5f7f9e;
+        font-size: 0.9rem;
       }
-      /* players grid */
       .players-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-        gap: 1.5rem;
+        gap: 1.2rem;
         margin-bottom: 2rem;
       }
+      @media (max-width: 640px) {
+        .players-grid {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 0.8rem;
+        }
+      }
       .player-card {
-        background: rgba(255, 255, 255, 0.85);
-        backdrop-filter: blur(8px);
-        border-radius: 32px;
-        padding: 1.2rem 0.8rem;
+        background: white;
+        border-radius: 28px;
+        padding: 1rem 0.5rem;
         text-align: center;
         cursor: pointer;
-        transition: all 0.3s ease;
-        border: 1px solid rgba(255, 255, 255, 0.5);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+        transition: all 0.25s ease;
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.05);
       }
       .player-card:hover {
-        transform: translateY(-8px);
-        background: white;
-        box-shadow: 0 20px 30px rgba(0, 0, 0, 0.12);
-        border-color: #cde3ef;
+        transform: translateY(-6px);
+        box-shadow: 0 20px 30px rgba(0, 0, 0, 0.1);
       }
       .player-avatar {
-        width: 90px;
-        height: 90px;
-        margin: 0 auto 0.8rem;
-        border-radius: 50%;
-        overflow: hidden;
+        width: 85px;
+        height: 85px;
         background: linear-gradient(145deg, #eef2f5, #e2e8f0);
+        border-radius: 50%;
+        margin: 0 auto 0.6rem;
         display: flex;
         align-items: center;
         justify-content: center;
+        overflow: hidden;
         box-shadow: 0 8px 14px rgba(0, 0, 0, 0.1);
+      }
+      @media (max-width: 640px) {
+        .player-avatar {
+          width: 70px;
+          height: 70px;
+        }
+        .player-name {
+          font-size: 0.8rem;
+        }
       }
       .player-avatar img {
         width: 100%;
@@ -95,42 +84,39 @@
         object-fit: cover;
       }
       .player-name {
-        font-size: 1rem;
-        font-weight: 700;
-        color: #1f6392;
+        font-size: 0.9rem;
+        font-weight: bold;
+        color: #2c7da0;
       }
       .player-title {
-        font-size: 0.7rem;
-        color: #6c8dae;
-        margin-top: 4px;
+        font-size: 0.65rem;
+        color: #5f7f9e;
+        margin-top: 5px;
       }
-      /* games section */
       .games-section {
         background: white;
-        border-radius: 36px;
-        padding: 1.8rem;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
-        margin-top: 0.5rem;
+        border-radius: 32px;
+        padding: 1.5rem;
+        box-shadow: 0 16px 32px rgba(0, 0, 0, 0.06);
       }
       .section-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         flex-wrap: wrap;
-        gap: 1rem;
-        margin-bottom: 1.5rem;
+        gap: 0.8rem;
+        margin-bottom: 1.2rem;
       }
       .back-btn {
         background: #eef2f5;
         border: none;
-        padding: 0.5rem 1.3rem;
+        padding: 0.45rem 1.2rem;
         border-radius: 40px;
         font-family: "Vazir";
         font-weight: bold;
         cursor: pointer;
         transition: 0.2s;
-        font-size: 0.85rem;
-        color: #2c3e50;
+        font-size: 0.8rem;
       }
       .back-btn:hover {
         background: #e2e8f0;
@@ -139,33 +125,26 @@
       .search-container {
         display: flex;
         flex-wrap: wrap;
-        gap: 1rem;
+        gap: 0.8rem;
         align-items: flex-end;
-        margin-bottom: 1.8rem;
+        margin-bottom: 1.5rem;
         background: #f8fafd;
-        padding: 1rem 1.2rem;
-        border-radius: 60px;
+        padding: 1rem;
+        border-radius: 28px;
       }
       .search-field {
         flex: 2;
-        min-width: 140px;
+        min-width: 130px;
       }
       .search-field select,
       .search-field input {
         width: 100%;
         padding: 0.6rem 1rem;
         border-radius: 60px;
-        border: 1px solid #d1dbe8;
-        background: white;
+        border: 1px solid #cbdbe0;
         font-family: "Vazir";
-        font-size: 0.85rem;
-        transition: 0.2s;
-      }
-      .search-field select:focus,
-      .search-field input:focus {
-        outline: none;
-        border-color: #2c7da0;
-        box-shadow: 0 0 0 3px rgba(44, 125, 160, 0.2);
+        font-size: 0.8rem;
+        background: white;
       }
       .btn {
         background: #eef2f5;
@@ -176,7 +155,7 @@
         font-weight: bold;
         cursor: pointer;
         transition: 0.2s;
-        font-size: 0.85rem;
+        font-size: 0.8rem;
       }
       .btn-primary {
         background: #2c7da0;
@@ -195,117 +174,69 @@
       }
       .game-item {
         background: #f9fbfe;
-        border-radius: 28px;
-        padding: 1rem 1.2rem;
+        border-radius: 24px;
+        padding: 0.8rem 1.2rem;
         cursor: pointer;
-        transition: all 0.2s;
+        transition: all 0.18s;
         border: 1px solid #eef2f8;
         display: flex;
         justify-content: space-between;
         align-items: center;
         flex-wrap: wrap;
-        gap: 0.8rem;
+        gap: 0.7rem;
       }
       .game-item:hover {
-        background: white;
+        background: #ffffff;
         border-color: #cde3ef;
-        transform: translateX(-4px);
-        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
       }
       .game-info {
         display: flex;
-        gap: 1rem;
+        gap: 0.7rem;
         flex-wrap: wrap;
-        align-items: baseline;
+        align-items: center;
       }
       .game-info span {
         background: white;
-        padding: 0.25rem 1rem;
+        padding: 0.2rem 0.8rem;
         border-radius: 40px;
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         font-weight: 500;
-        color: #2c3e50;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
       }
-      /* game viewer */
       .game-viewer {
         background: white;
         border-radius: 36px;
-        padding: 1.5rem;
-        margin-top: 1rem;
+        padding: 1.2rem;
+        margin-top: 0.2rem;
       }
       .viewer-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         flex-wrap: wrap;
-        gap: 1rem;
         margin-bottom: 1.2rem;
+        gap: 0.8rem;
       }
       .viewer-board {
         display: flex;
         flex-wrap: wrap;
-        gap: 2rem;
+        gap: 1.8rem;
         justify-content: center;
-      }
-      .board-with-eval {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.8rem;
       }
       canvas {
         width: 100%;
-        max-width: 480px;
+        max-width: 460px;
         height: auto;
         background: #f0d9b5;
-        border-radius: 28px;
+        border-radius: 24px;
         box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
-      }
-      .eval-bar-container {
-        width: 100%;
-        max-width: 420px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        direction: ltr;
-        background: #f1f5f9;
-        padding: 0.4rem 1rem;
-        border-radius: 60px;
-      }
-      .eval-label {
-        font-size: 0.7rem;
-        font-weight: bold;
-        color: #2c3e4e;
-      }
-      .eval-bar-bg {
-        flex: 1;
-        height: 10px;
-        background: #e2e8f0;
-        border-radius: 20px;
-        overflow: hidden;
-      }
-      .eval-fill {
-        width: 50%;
-        height: 100%;
-        background: linear-gradient(90deg, #2c7da0, #52b0d4);
-        transition: width 0.2s;
-      }
-      .eval-num {
-        font-size: 0.7rem;
-        background: white;
-        padding: 0.2rem 0.6rem;
-        border-radius: 30px;
-        font-weight: bold;
-        min-width: 65px;
-        text-align: center;
-        font-family: monospace;
       }
       .control-buttons {
         display: flex;
         justify-content: center;
         gap: 0.8rem;
-        margin: 1rem 0;
+        margin: 0.8rem 0;
         flex-wrap: wrap;
       }
       .game-moves {
@@ -317,6 +248,7 @@
         direction: ltr;
         font-family: monospace;
         font-size: 0.75rem;
+        margin-top: 0.5rem;
       }
       .move-item {
         cursor: pointer;
@@ -326,21 +258,21 @@
         margin: 3px 2px;
         background: white;
         transition: 0.1s;
+        font-size: 0.7rem;
       }
       .move-item:hover {
-        background: #e2e8f0;
+        background: #dce6ef;
       }
       .move-item.current-move {
         background: #2c7da0;
         color: white;
       }
-      /* PGN area: LTR و فاصله مناسب */
       .pgn-actions {
         display: flex;
-        gap: 0.8rem;
+        gap: 0.6rem;
         justify-content: flex-start;
         direction: ltr;
-        margin-top: 0.8rem;
+        margin-top: 0.6rem;
       }
       .pgn-textarea {
         direction: ltr;
@@ -362,29 +294,6 @@
         padding: 3rem;
         color: #4f7a9e;
       }
-      @media (max-width: 768px) {
-        .container {
-          padding: 0.8rem;
-        }
-        .players-grid {
-          gap: 0.8rem;
-          grid-template-columns: repeat(2, 1fr);
-        }
-        .player-avatar {
-          width: 70px;
-          height: 70px;
-        }
-        .game-info span {
-          font-size: 0.7rem;
-          padding: 0.2rem 0.7rem;
-        }
-        .section-header h3 {
-          font-size: 1rem;
-        }
-        .pgn-actions {
-          gap: 0.6rem;
-        }
-      }
     </style>
   </head>
   <body>
@@ -392,8 +301,8 @@
       <div id="header-placeholder"></div>
 
       <div class="database-header">
-        <h2><i class="fas fa-chess-queen"></i> پایگاه بازی‌های استادان بزرگ</h2>
-        <p>۳۰ قهرمان | هزاران بازی کلاسیک | نمایش تعاملی با تخته حرفه‌ای</p>
+        <h2><i class="fas fa-database"></i> پایگاه بازی‌های استادان بزرگ</h2>
+        <p>۳۰ استاد بزرگ برتر | هزاران بازی معروف | نمایش تعاملی حرکات</p>
       </div>
 
       <div id="mainContent"></div>
@@ -406,7 +315,7 @@
       (function () {
         "use strict";
 
-        // ---------- لیست ۳۰ استاد بزرگ (تصاویر در مسیر images/players) ----------
+        // ---------- لیست ۳۰ استاد بزرگ (مطابق با فایل‌های PGN) ----------
         const players = [
           { name: "Magnus Carlsen", title: "قهرمان جهان", file: "Carlsen.pgn" },
           {
@@ -496,14 +405,14 @@
           { name: "Gukesh D", title: "سوپر استاد", file: "Gukesh.pgn" },
         ];
 
-        let currentPlayerGames = []; // [{ white, black, result, date, pgnRaw }]
+        let currentPlayerGames = []; // لیست بازی‌های فعلی
         let filteredGames = [];
         let modalMovesFens = [];
         let modalMoveIndex = 0;
         let autoPlayInterval = null;
         let isPlaying = false;
 
-        // تصاویر مهره‌ها (مسیر pieces/merida)
+        // ---------- تصاویر مهره‌ها ----------
         const pieceImages = {};
         const pieceCodes = {
           wK: "wK.svg",
@@ -535,8 +444,8 @@
           });
         }
 
-        // پارسر سریع فقط هدرهای PGN (بدون استخراج حرکت) – برای سرعت بالا
-        function parseGamesMetadata(pgnText) {
+        // ---------- پارسر سریع متادیتا (فقط هدرها) ----------
+        function parseMetadata(pgnText) {
           const rawGames = pgnText.split(/(?=\[Event ")/);
           const games = [];
           for (let raw of rawGames) {
@@ -549,18 +458,12 @@
             const black = blackMatch ? blackMatch[1] : "نامشخص";
             const result = resultMatch ? resultMatch[1] : "*";
             const date = dateMatch ? dateMatch[1] : "????.??.??";
-            games.push({
-              white,
-              black,
-              result,
-              date,
-              pgnRaw: raw,
-            });
+            games.push({ white, black, result, date, pgnRaw: raw });
           }
           return games;
         }
 
-        // رندر گرید بازیکنان
+        // ---------- رندر گرید بازیکنان ----------
         function renderPlayers() {
           const container = document.getElementById("mainContent");
           container.innerHTML = `<div class="players-grid" id="playersGrid"></div>`;
@@ -588,9 +491,8 @@
             const response = await fetch(`pgn/${fileName}`);
             if (!response.ok) throw new Error("فایل PGN یافت نشد");
             const pgnText = await response.text();
-            // پردازش غیرمسدود
             setTimeout(() => {
-              currentPlayerGames = parseGamesMetadata(pgnText);
+              currentPlayerGames = parseMetadata(pgnText);
               filteredGames = [...currentPlayerGames];
               showGamesList(playerName);
             }, 10);
@@ -613,7 +515,7 @@
         </div>
         <div class="search-container">
           <div class="search-field"><select id="searchField"><option value="white">سفید</option><option value="black">سیاه</option><option value="result">نتیجه</option><option value="date">تاریخ</option></select></div>
-          <div class="search-field"><input type="text" id="searchQuery" placeholder="جستجو..."></div>
+          <div class="search-field"><input type="text" id="searchQuery" placeholder="مقدار جستجو..."></div>
           <div class="search-buttons"><button class="btn" id="searchBtn">🔍 جستجو</button><button class="btn" id="resetSearchBtn">🗑️ پاک کردن</button></div>
         </div>
         <div id="gamesListContainer" class="games-list"></div>
@@ -677,7 +579,7 @@
             return;
           }
           container.innerHTML = "";
-          games.forEach((game, idx) => {
+          games.forEach((game) => {
             const div = document.createElement("div");
             div.className = "game-item";
             const resultText =
@@ -700,7 +602,7 @@
           });
         }
 
-        // نمایشگر بازی (با تخته و نوار ارزیابی استاتیک)
+        // ---------- نمایشگر بازی (بدون موتور تحلیل) ----------
         function openGameViewer(game) {
           if (autoPlayInterval) clearInterval(autoPlayInterval);
           isPlaying = false;
@@ -725,18 +627,12 @@
           const viewerHtml = `
         <div class="game-viewer">
           <div class="viewer-header">
-            <h3>♜ ${game.white} vs ${game.black} | نتیجه: ${game.result === "1-0" ? "برد سفید" : game.result === "0-1" ? "برد سیاه" : "مساوی"}</h3>
+            <h3>♜ ${game.white} vs ${game.black} (${game.result === "1-0" ? "برد سفید" : game.result === "0-1" ? "برد سیاه" : "مساوی"})</h3>
             <button class="back-btn" id="exitViewerBtn">↩️ بازگشت به لیست</button>
           </div>
           <div class="viewer-board">
-            <div class="board-with-eval">
+            <div>
               <canvas id="gameCanvas" width="450" height="450"></canvas>
-              <div class="eval-bar-container">
-                <span class="eval-label">سفید</span>
-                <div class="eval-bar-bg"><div class="eval-fill" id="evalFillBar" style="width:50%"></div></div>
-                <span class="eval-label">سیاه</span>
-                <div id="evalNumberDisplay" class="eval-num">0.00</div>
-              </div>
             </div>
             <div style="flex:1; min-width:220px;">
               <div class="control-buttons">
@@ -775,7 +671,7 @@
                     (piece.color === "w" ? "w" : "b") +
                     piece.type.toUpperCase();
                   const img = pieceImages[code];
-                  if (img && img.complete)
+                  if (img && img.complete) {
                     ctx.drawImage(
                       img,
                       j * cellSize,
@@ -783,7 +679,7 @@
                       cellSize,
                       cellSize,
                     );
-                  else {
+                  } else {
                     ctx.font = `${cellSize * 0.48}px Arial`;
                     ctx.fillStyle = "#1e2a36";
                     ctx.textAlign = "center";
@@ -836,14 +732,13 @@
               const span = document.createElement("span");
               span.className = "move-item";
               const num = Math.floor(i / 2) + 1;
-              const txt =
+              span.textContent =
                 i % 2 === 0 ? `${num}. ${moves[i].san}` : moves[i].san;
-              span.textContent = txt;
               span.addEventListener(
                 "click",
                 (function (idx) {
                   return function () {
-                    stopAuto();
+                    stopAutoPlay();
                     modalMoveIndex = idx + 1;
                     updatePosition();
                   };
@@ -856,19 +751,19 @@
 
           function nextMove() {
             if (modalMoveIndex < modalMovesFens.length - 1) {
-              stopAuto();
+              stopAutoPlay();
               modalMoveIndex++;
               updatePosition();
             }
           }
           function prevMove() {
             if (modalMoveIndex > 0) {
-              stopAuto();
+              stopAutoPlay();
               modalMoveIndex--;
               updatePosition();
             }
           }
-          function startAuto() {
+          function startAutoPlay() {
             if (modalMoveIndex >= modalMovesFens.length - 1) return;
             isPlaying = true;
             document.getElementById("playPauseView").innerHTML = "⏸ توقف";
@@ -876,18 +771,18 @@
               if (modalMoveIndex < modalMovesFens.length - 1) {
                 modalMoveIndex++;
                 updatePosition();
-              } else stopAuto();
+              } else stopAutoPlay();
             }, 1200);
           }
-          function stopAuto() {
+          function stopAutoPlay() {
             if (autoPlayInterval) clearInterval(autoPlayInterval);
             isPlaying = false;
             const btn = document.getElementById("playPauseView");
             if (btn) btn.innerHTML = "▶ شروع خودکار";
           }
-          function toggleAuto() {
-            if (isPlaying) stopAuto();
-            else startAuto();
+          function toggleAutoPlay() {
+            if (isPlaying) stopAutoPlay();
+            else startAutoPlay();
           }
 
           document
@@ -898,16 +793,15 @@
             .addEventListener("click", nextMove);
           document
             .getElementById("playPauseView")
-            .addEventListener("click", toggleAuto);
+            .addEventListener("click", toggleAutoPlay);
           document
             .getElementById("exitViewerBtn")
             .addEventListener("click", () => {
-              stopAuto();
-              const currentPlayer = players.find((p) =>
+              stopAutoPlay();
+              const found = players.find((p) =>
                 game.pgnRaw.includes(p.file.replace(".pgn", "")),
               );
-              const playerName = currentPlayer ? currentPlayer.name : "بازیکن";
-              showGamesList(playerName);
+              showGamesList(found ? found.name : "بازیکن");
             });
           document
             .getElementById("copyPgnView")
