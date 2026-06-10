@@ -6,7 +6,12 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
+    <meta
+      name="description"
+      content="پایگاه بازی‌های استادان بزرگ شطرنج - بیش از ۳۰ استاد بزرگ و هزاران بازی معروف"
+    />
     <title>ChessHub | پایگاه بازی‌ها</title>
+    <!-- استایل اصلی سایت (هدر، فوتر، استایل عمومی) -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
@@ -18,7 +23,7 @@
     <link rel="stylesheet" href="css/style.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
     <style>
-      /* ===== استایل اختصاصی صفحه ===== */
+      /* استایل اختصاصی صفحه – هماهنگ با index */
       .database-header {
         text-align: center;
         margin-bottom: 2rem;
@@ -172,6 +177,18 @@
         flex-direction: column;
         gap: 0.8rem;
       }
+      /* استایل اسکرول بار – مانند index */
+      .games-list::-webkit-scrollbar {
+        width: 5px;
+      }
+      .games-list::-webkit-scrollbar-track {
+        background: #eef2f5;
+        border-radius: 10px;
+      }
+      .games-list::-webkit-scrollbar-thumb {
+        background: #4fa3c7;
+        border-radius: 10px;
+      }
       .game-item {
         background: #f9fbfe;
         border-radius: 24px;
@@ -204,6 +221,7 @@
         font-weight: 500;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
       }
+      /* نمایشگر بازی – فقط تخته و کنترل بدون نوار ارزیابی */
       .game-viewer {
         background: white;
         border-radius: 36px;
@@ -249,6 +267,17 @@
         font-family: monospace;
         font-size: 0.75rem;
         margin-top: 0.5rem;
+      }
+      .game-moves::-webkit-scrollbar {
+        width: 5px;
+      }
+      .game-moves::-webkit-scrollbar-track {
+        background: #eef2f5;
+        border-radius: 10px;
+      }
+      .game-moves::-webkit-scrollbar-thumb {
+        background: #4fa3c7;
+        border-radius: 10px;
       }
       .move-item {
         cursor: pointer;
@@ -315,94 +344,188 @@
       (function () {
         "use strict";
 
-        // ---------- لیست ۳۰ استاد بزرگ (مطابق با فایل‌های PGN) ----------
+        // ---------- لیست ۳۰ استاد بزرگ ----------
         const players = [
-          { name: "Magnus Carlsen", title: "قهرمان جهان", file: "Carlsen.pgn" },
+          {
+            name: "Magnus Carlsen",
+            title: "قهرمان جهان",
+            avatar: "images/players/carlsen.jpg",
+            file: "Carlsen.pgn",
+          },
           {
             name: "Garry Kasparov",
             title: "قهرمان جهان",
+            avatar: "images/players/kasparov.jpg",
             file: "Kasparov.pgn",
           },
-          { name: "Bobby Fischer", title: "قهرمان جهان", file: "Fischer.pgn" },
-          { name: "Anatoly Karpov", title: "قهرمان جهان", file: "Karpov.pgn" },
+          {
+            name: "Bobby Fischer",
+            title: "قهرمان جهان",
+            avatar: "images/players/fischer.jpg",
+            file: "Fischer.pgn",
+          },
+          {
+            name: "Anatoly Karpov",
+            title: "قهرمان جهان",
+            avatar: "images/players/karpov.jpg",
+            file: "Karpov.pgn",
+          },
           {
             name: "José Raúl Capablanca",
             title: "قهرمان جهان",
+            avatar: "images/players/capablanca.jpg",
             file: "Capablanca.pgn",
           },
           {
             name: "Alexander Alekhine",
             title: "قهرمان جهان",
+            avatar: "images/players/alekhine.jpg",
             file: "Alekhine.pgn",
           },
-          { name: "Mikhail Tal", title: "قهرمان جهان", file: "Tal.pgn" },
-          { name: "Emanuel Lasker", title: "قهرمان جهان", file: "Lasker.pgn" },
+          {
+            name: "Mikhail Tal",
+            title: "قهرمان جهان",
+            avatar: "images/players/tal.jpg",
+            file: "Tal.pgn",
+          },
+          {
+            name: "Emanuel Lasker",
+            title: "قهرمان جهان",
+            avatar: "images/players/lasker.jpg",
+            file: "Lasker.pgn",
+          },
           {
             name: "Wilhelm Steinitz",
             title: "قهرمان جهان",
+            avatar: "images/players/steinitz.jpg",
             file: "Steinitz.pgn",
           },
           {
             name: "Viswanathan Anand",
             title: "قهرمان جهان",
+            avatar: "images/players/anand.jpg",
             file: "Anand.pgn",
           },
           {
             name: "Vladimir Kramnik",
             title: "قهرمان جهان",
+            avatar: "images/players/kramnik.jpg",
             file: "Kramnik.pgn",
           },
-          { name: "Vasily Smyslov", title: "قهرمان جهان", file: "Smyslov.pgn" },
+          {
+            name: "Vasily Smyslov",
+            title: "قهرمان جهان",
+            avatar: "images/players/smyslov.jpg",
+            file: "Smyslov.pgn",
+          },
           {
             name: "Tigran Petrosian",
             title: "قهرمان جهان",
+            avatar: "images/players/petrosian.jpg",
             file: "Petrosian.pgn",
           },
-          { name: "Boris Spassky", title: "قهرمان جهان", file: "Spassky.pgn" },
-          { name: "Max Euwe", title: "قهرمان جهان", file: "Euwe.pgn" },
+          {
+            name: "Boris Spassky",
+            title: "قهرمان جهان",
+            avatar: "images/players/spassky.jpg",
+            file: "Spassky.pgn",
+          },
+          {
+            name: "Max Euwe",
+            title: "قهرمان جهان",
+            avatar: "images/players/euwe.jpg",
+            file: "Euwe.pgn",
+          },
           {
             name: "Mikhail Botvinnik",
             title: "قهرمان جهان",
+            avatar: "images/players/botvinnik.jpg",
             file: "Botvinnik.pgn",
           },
-          { name: "Paul Morphy", title: "افسانه", file: "Morphy.pgn" },
+          {
+            name: "Paul Morphy",
+            title: "افسانه",
+            avatar: "images/players/morphy.jpg",
+            file: "Morphy.pgn",
+          },
           {
             name: "Hikaru Nakamura",
             title: "سوپر استاد",
+            avatar: "images/players/nakamura.jpg",
             file: "Nakamura.pgn",
           },
-          { name: "Fabiano Caruana", title: "سوپر استاد", file: "Caruana.pgn" },
-          { name: "Levon Aronian", title: "سوپر استاد", file: "Aronian.pgn" },
-          { name: "Wesley So", title: "سوپر استاد", file: "So.pgn" },
-          { name: "Ding Liren", title: "قهرمان جهان", file: "Ding.pgn" },
+          {
+            name: "Fabiano Caruana",
+            title: "سوپر استاد",
+            avatar: "images/players/caruana.jpg",
+            file: "Caruana.pgn",
+          },
+          {
+            name: "Levon Aronian",
+            title: "سوپر استاد",
+            avatar: "images/players/aronian.jpg",
+            file: "Aronian.pgn",
+          },
+          {
+            name: "Wesley So",
+            title: "سوپر استاد",
+            avatar: "images/players/so.jpg",
+            file: "So.pgn",
+          },
+          {
+            name: "Ding Liren",
+            title: "قهرمان جهان",
+            avatar: "images/players/ding.jpg",
+            file: "Ding.pgn",
+          },
           {
             name: "Ian Nepomniachtchi",
             title: "سوپر استاد",
+            avatar: "images/players/nepomniachtchi.jpg",
             file: "Nepomniachtchi.pgn",
           },
           {
             name: "Alireza Firouzja",
             title: "سوپر استاد",
+            avatar: "images/players/firouzja.jpg",
             file: "Firouzja.pgn",
           },
-          { name: "Richard Réti", title: "استاد بزرگ", file: "Reti.pgn" },
+          {
+            name: "Richard Réti",
+            title: "استاد بزرگ",
+            avatar: "images/players/reti.jpg",
+            file: "Reti.pgn",
+          },
           {
             name: "Aaron Nimzowitsch",
             title: "استاد بزرگ",
+            avatar: "images/players/nimzowitsch.jpg",
             file: "Nimzowitsch.pgn",
           },
-          { name: "Frank Marshall", title: "استاد بزرگ", file: "Marshall.pgn" },
+          {
+            name: "Frank Marshall",
+            title: "استاد بزرگ",
+            avatar: "images/players/marshall.jpg",
+            file: "Marshall.pgn",
+          },
           {
             name: "David Bronstein",
             title: "استاد بزرگ",
+            avatar: "images/players/bronstein.jpg",
             file: "Bronstein.pgn",
           },
           {
             name: "Viktor Korchnoi",
             title: "استاد بزرگ",
+            avatar: "images/players/korchnoi.jpg",
             file: "Korchnoi.pgn",
           },
-          { name: "Gukesh D", title: "سوپر استاد", file: "Gukesh.pgn" },
+          {
+            name: "Gukesh D",
+            title: "سوپر استاد",
+            avatar: "images/players/gukesh.jpg",
+            file: "Gukesh.pgn",
+          },
         ];
 
         let currentPlayerGames = [];
@@ -444,8 +567,8 @@
           });
         }
 
-        // ---------- پارسر سریع متادیتا (فقط هدرها) ----------
-        function parseMetadata(pgnText) {
+        // ---------- پارسر PGN (فقط متادیتا، بدون تعداد حرکت) ----------
+        function parsePGN(pgnText) {
           const rawGames = pgnText.split(/(?=\[Event ")/);
           const games = [];
           for (let raw of rawGames) {
@@ -454,16 +577,18 @@
             const blackMatch = raw.match(/\[Black "([^"]+)"\]/);
             const resultMatch = raw.match(/\[Result "([^"]+)"\]/);
             const dateMatch = raw.match(/\[Date "([^"]+)"\]/);
-            const white = whiteMatch ? whiteMatch[1] : "نامشخص";
-            const black = blackMatch ? blackMatch[1] : "نامشخص";
-            const result = resultMatch ? resultMatch[1] : "*";
-            const date = dateMatch ? dateMatch[1] : "????.??.??";
-            games.push({ white, black, result, date, pgnRaw: raw });
+            games.push({
+              white: whiteMatch ? whiteMatch[1] : "?",
+              black: blackMatch ? blackMatch[1] : "?",
+              result: resultMatch ? resultMatch[1] : "*",
+              date: dateMatch ? dateMatch[1] : "????.??.??",
+              pgn: raw,
+            });
           }
           return games;
         }
 
-        // ---------- رندر گرید بازیکنان ----------
+        // ---------- رندر بازیکنان ----------
         function renderPlayers() {
           const container = document.getElementById("mainContent");
           container.innerHTML = `<div class="players-grid" id="playersGrid"></div>`;
@@ -471,30 +596,27 @@
           players.forEach((p) => {
             const card = document.createElement("div");
             card.className = "player-card";
-            const avatarUrl = `images/players/${p.file.replace(".pgn", ".jpg")}`;
             card.innerHTML = `
-              <div class="player-avatar"><img src="${avatarUrl}" alt="${p.name}" onerror="this.src='https://ui-avatars.com/api/?background=2c7da0&color=fff&name=${encodeURIComponent(p.name)}'"></div>
-              <div class="player-name">${p.name}</div>
-              <div class="player-title">${p.title}</div>
-            `;
-            card.addEventListener("click", () =>
-              loadPlayerGames(p.name, p.file),
-            );
+          <div class="player-avatar"><img src="${p.avatar}" alt="${p.name}" onerror="this.src='https://ui-avatars.com/api/?background=2c7da0&color=fff&name=${encodeURIComponent(p.name)}'"></div>
+          <div class="player-name">${p.name}</div>
+          <div class="player-title">${p.title}</div>
+        `;
+            card.addEventListener("click", () => loadPlayerGames(p));
             grid.appendChild(card);
           });
         }
 
-        async function loadPlayerGames(playerName, fileName) {
+        async function loadPlayerGames(player) {
           const mainDiv = document.getElementById("mainContent");
-          mainDiv.innerHTML = `<div class="loading"><i class="fas fa-spinner fa-pulse"></i> بارگذاری بازی‌های ${playerName} ...</div>`;
+          mainDiv.innerHTML = `<div class="loading"><i class="fas fa-spinner fa-pulse"></i> بارگذاری بازی‌های ${player.name} ...</div>`;
           try {
-            const response = await fetch(`pgn/${fileName}`);
-            if (!response.ok) throw new Error("فایل PGN یافت نشد");
+            const response = await fetch(`pgn/${player.file}`);
+            if (!response.ok) throw new Error("فایل یافت نشد");
             const pgnText = await response.text();
             setTimeout(() => {
-              currentPlayerGames = parseMetadata(pgnText);
+              currentPlayerGames = parsePGN(pgnText);
               filteredGames = [...currentPlayerGames];
-              showGamesList(playerName);
+              showGamesList(player.name);
             }, 10);
           } catch (err) {
             console.error(err);
@@ -509,22 +631,25 @@
           const container = document.createElement("div");
           container.className = "games-section";
           container.innerHTML = `
-            <div class="section-header">
-              <button class="back-btn" id="backToPlayersBtn">↩️ بازگشت به بازیکنان</button>
-              <h3>🎯 بازی‌های ${playerName}</h3>
-            </div>
-            <div class="search-container">
-              <div class="search-field"><select id="searchField"><option value="white">سفید</option><option value="black">سیاه</option><option value="result">نتیجه</option><option value="date">تاریخ</option></select></div>
-              <div class="search-field"><input type="text" id="searchQuery" placeholder="مقدار جستجو..."></div>
-              <div class="search-buttons"><button class="btn" id="searchBtn">🔍 جستجو</button><button class="btn" id="resetSearchBtn">🗑️ پاک کردن</button></div>
-            </div>
-            <div id="gamesListContainer" class="games-list"></div>
-          `;
+        <div class="section-header">
+          <button class="back-btn" id="backToPlayersBtn">↩️ بازگشت به بازیکنان</button>
+          <h3>🎯 بازی‌های ${playerName}</h3>
+        </div>
+        <div class="search-container">
+          <div class="search-field"><select id="searchField"><option value="white">سفید</option><option value="black">سیاه</option><option value="result">نتیجه</option><option value="date">تاریخ</option></select></div>
+          <div class="search-field"><input type="text" id="searchValue" placeholder="جستجو..."></div>
+          <div class="search-buttons"><button class="btn" id="searchBtn">🔍 جستجو</button><button class="btn" id="resetSearchBtn">🗑️ پاک کردن</button></div>
+        </div>
+        <div id="gamesListContainer" class="games-list"></div>
+      `;
           mainDiv.innerHTML = "";
           mainDiv.appendChild(container);
           document
             .getElementById("backToPlayersBtn")
-            .addEventListener("click", () => renderPlayers());
+            .addEventListener("click", () => {
+              mainContent.innerHTML = `<div class="players-grid" id="playersGrid"></div>`;
+              renderPlayers();
+            });
           document
             .getElementById("searchBtn")
             .addEventListener("click", performSearch);
@@ -536,7 +661,7 @@
           function performSearch() {
             const field = document.getElementById("searchField").value;
             const query = document
-              .getElementById("searchQuery")
+              .getElementById("searchValue")
               .value.trim()
               .toLowerCase();
             if (!query) {
@@ -544,27 +669,27 @@
               renderGamesList(filteredGames);
               return;
             }
-            filteredGames = currentPlayerGames.filter((g) => {
+            filteredGames = currentPlayerGames.filter((game) => {
               if (field === "white")
-                return g.white.toLowerCase().includes(query);
+                return game.white.toLowerCase().includes(query);
               if (field === "black")
-                return g.black.toLowerCase().includes(query);
+                return game.black.toLowerCase().includes(query);
               if (field === "result") {
-                let res =
-                  g.result === "1-0"
+                const resultText =
+                  game.result === "1-0"
                     ? "برد سفید"
-                    : g.result === "0-1"
+                    : game.result === "0-1"
                       ? "برد سیاه"
                       : "مساوی";
-                return res.includes(query);
+                return resultText.includes(query);
               }
-              if (field === "date") return g.date.includes(query);
+              if (field === "date") return game.date.includes(query);
               return false;
             });
             renderGamesList(filteredGames);
           }
           function resetSearch() {
-            document.getElementById("searchQuery").value = "";
+            document.getElementById("searchValue").value = "";
             filteredGames = [...currentPlayerGames];
             renderGamesList(filteredGames);
           }
@@ -579,7 +704,7 @@
             return;
           }
           container.innerHTML = "";
-          games.forEach((game) => {
+          games.forEach((game, idx) => {
             const div = document.createElement("div");
             div.className = "game-item";
             const resultText =
@@ -589,69 +714,63 @@
                   ? "برد سیاه"
                   : "مساوی";
             div.innerHTML = `
-              <div class="game-info">
-                <span>⚪ ${game.white}</span>
-                <span>⚫ ${game.black}</span>
-                <span>🏆 ${resultText}</span>
-                <span>📅 ${game.date}</span>
-              </div>
-              <div><i class="fas fa-chevron-left"></i></div>
-            `;
-            div.addEventListener("click", () => openGameViewer(game));
+          <div class="game-info">
+            <span>⚪ ${game.white}</span>
+            <span>⚫ ${game.black}</span>
+            <span>🏆 ${resultText}</span>
+            <span>📅 ${game.date}</span>
+          </div>
+          <div><i class="fas fa-chevron-left"></i></div>
+        `;
+            div.addEventListener("click", () => openGameViewer(idx, games));
             container.appendChild(div);
           });
         }
 
-        // ---------- نمایشگر بازی (بدون موتور تحلیل) ----------
-        function openGameViewer(game) {
-          if (autoPlayInterval) clearInterval(autoPlayInterval);
-          isPlaying = false;
-
+        // ---------- نمایشگر تعاملی (بدون نوار ارزیابی) ----------
+        function openGameViewer(gameIdx, games) {
+          const game = games[gameIdx];
           const tempGame = new Chess();
-          try {
-            tempGame.load_pgn(game.pgnRaw);
-          } catch (e) {
-            console.warn(e);
+          tempGame.load_pgn(game.pgn);
+          const movesFens = [tempGame.fen()];
+          const moveHistory = tempGame.history({ verbose: true });
+          const temp = new Chess();
+          for (let move of moveHistory) {
+            temp.move(move);
+            movesFens.push(temp.fen());
           }
-          const movesVerbose = tempGame.history({ verbose: true });
-          const fens = [tempGame.fen()];
-          const testGame = new Chess();
-          for (let mv of movesVerbose) {
-            testGame.move(mv);
-            fens.push(testGame.fen());
-          }
-          modalMovesFens = fens;
+          modalMovesFens = movesFens;
           modalMoveIndex = 0;
 
-          const mainDiv = document.getElementById("mainContent");
-          const viewerHtml = `
-            <div class="game-viewer">
-              <div class="viewer-header">
-                <h3>♜ ${game.white} vs ${game.black} (${game.result === "1-0" ? "برد سفید" : game.result === "0-1" ? "برد سیاه" : "مساوی"})</h3>
-                <button class="back-btn" id="exitViewerBtn">↩️ بازگشت به لیست</button>
-              </div>
-              <div class="viewer-board">
-                <div>
-                  <canvas id="gameCanvas" width="450" height="450"></canvas>
-                </div>
-                <div style="flex:1; min-width:220px;">
-                  <div class="control-buttons">
-                    <button id="prevMoveView" class="btn">◀ قبلی</button>
-                    <button id="playPauseView" class="btn btn-primary">▶ شروع خودکار</button>
-                    <button id="nextMoveView" class="btn">بعدی ▶</button>
-                  </div>
-                  <div id="movesListView" class="game-moves"></div>
-                  <div class="pgn-actions">
-                    <button id="copyPgnView" class="btn">📋 کپی PGN</button>
-                    <button id="downloadPgnView" class="btn">📥 دانلود PGN</button>
-                  </div>
-                  <div class="pgn-textarea"><textarea id="pgnTextView" readonly rows="2" dir="ltr" style="text-align:left;"></textarea></div>
-                </div>
-              </div>
+          const viewerDiv = document.createElement("div");
+          viewerDiv.className = "game-viewer";
+          viewerDiv.innerHTML = `
+        <div class="viewer-header">
+          <h3>♜ ${game.white} vs ${game.black} (${game.result === "1-0" ? "برد سفید" : game.result === "0-1" ? "برد سیاه" : "مساوی"})</h3>
+          <button class="back-btn" id="backToGamesListBtn">↩️ بازگشت</button>
+        </div>
+        <div class="viewer-board">
+          <div>
+            <canvas id="gameCanvas" width="450" height="450"></canvas>
+          </div>
+          <div style="flex:1; min-width:220px;">
+            <div class="control-buttons">
+              <button id="prevMoveView" class="btn">◀ قبلی</button>
+              <button id="playPauseView" class="btn btn-primary">▶ شروع خودکار</button>
+              <button id="nextMoveView" class="btn">بعدی ▶</button>
             </div>
-          `;
-          mainDiv.innerHTML = viewerHtml;
-          document.getElementById("pgnTextView").value = game.pgnRaw;
+            <div id="movesListView" class="game-moves"></div>
+            <div class="pgn-actions">
+              <button id="copyPgnView" class="btn">📋 کپی PGN</button>
+              <button id="downloadPgnView" class="btn">📥 دانلود PGN</button>
+            </div>
+            <div class="pgn-textarea"><textarea id="pgnTextView" readonly rows="2" dir="ltr" style="text-align:left;"></textarea></div>
+          </div>
+        </div>
+      `;
+          document.getElementById("mainContent").innerHTML = "";
+          document.getElementById("mainContent").appendChild(viewerDiv);
+          document.getElementById("pgnTextView").value = game.pgn;
 
           const canvas = document.getElementById("gameCanvas");
           const ctx = canvas.getContext("2d");
@@ -726,19 +845,20 @@
             const movesDiv = document.getElementById("movesListView");
             movesDiv.innerHTML = "";
             const hist = new Chess();
-            hist.load_pgn(game.pgnRaw);
+            hist.load_pgn(game.pgn);
             const moves = hist.history({ verbose: true });
             for (let i = 0; i < moves.length; i++) {
               const span = document.createElement("span");
               span.className = "move-item";
               const num = Math.floor(i / 2) + 1;
-              span.textContent =
+              const txt =
                 i % 2 === 0 ? `${num}. ${moves[i].san}` : moves[i].san;
+              span.textContent = txt;
               span.addEventListener(
                 "click",
                 (function (idx) {
                   return function () {
-                    stopAutoPlay();
+                    stopAuto();
                     modalMoveIndex = idx + 1;
                     updatePosition();
                   };
@@ -751,19 +871,19 @@
 
           function nextMove() {
             if (modalMoveIndex < modalMovesFens.length - 1) {
-              stopAutoPlay();
+              stopAuto();
               modalMoveIndex++;
               updatePosition();
             }
           }
           function prevMove() {
             if (modalMoveIndex > 0) {
-              stopAutoPlay();
+              stopAuto();
               modalMoveIndex--;
               updatePosition();
             }
           }
-          function startAutoPlay() {
+          function startAuto() {
             if (modalMoveIndex >= modalMovesFens.length - 1) return;
             isPlaying = true;
             document.getElementById("playPauseView").innerHTML = "⏸ توقف";
@@ -771,18 +891,18 @@
               if (modalMoveIndex < modalMovesFens.length - 1) {
                 modalMoveIndex++;
                 updatePosition();
-              } else stopAutoPlay();
+              } else stopAuto();
             }, 1200);
           }
-          function stopAutoPlay() {
+          function stopAuto() {
             if (autoPlayInterval) clearInterval(autoPlayInterval);
             isPlaying = false;
             const btn = document.getElementById("playPauseView");
             if (btn) btn.innerHTML = "▶ شروع خودکار";
           }
-          function toggleAutoPlay() {
-            if (isPlaying) stopAutoPlay();
-            else startAutoPlay();
+          function toggleAuto() {
+            if (isPlaying) stopAuto();
+            else startAuto();
           }
 
           document
@@ -793,26 +913,26 @@
             .addEventListener("click", nextMove);
           document
             .getElementById("playPauseView")
-            .addEventListener("click", toggleAutoPlay);
+            .addEventListener("click", toggleAuto);
           document
-            .getElementById("exitViewerBtn")
+            .getElementById("backToGamesListBtn")
             .addEventListener("click", () => {
-              stopAutoPlay();
-              const found = players.find((p) =>
-                game.pgnRaw.includes(p.file.replace(".pgn", "")),
+              stopAuto();
+              const currentPlayer = players.find((p) =>
+                game.pgn.includes(p.file.replace(".pgn", "")),
               );
-              showGamesList(found ? found.name : "بازیکن");
+              showGamesList(currentPlayer ? currentPlayer.name : "بازیکن");
             });
           document
             .getElementById("copyPgnView")
             .addEventListener("click", () => {
-              navigator.clipboard.writeText(game.pgnRaw);
+              navigator.clipboard.writeText(game.pgn);
               alert("✅ PGN کپی شد");
             });
           document
             .getElementById("downloadPgnView")
             .addEventListener("click", () => {
-              const blob = new Blob([game.pgnRaw], { type: "text/plain" });
+              const blob = new Blob([game.pgn], { type: "text/plain" });
               const a = document.createElement("a");
               const url = URL.createObjectURL(blob);
               a.href = url;
