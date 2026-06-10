@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta
+      name="description"
+      content="دروس آموزشی شطرنج - دسته‌بندی پیشرفته: گشایش، وسط بازی، آخر بازی، تاکتیک، حمله، دفاع، استراتژی در سه سطح مبتدی، متوسط، حرفه‌ای"
+    />
+    <title>ChessHub | دروس آموزشی شطرنج</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <style>
+      /* استایل صفحه دروس – با فیلتر دو سطحی و بهبود اسکرول */
+      .lessons-header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+      .lessons-header h2 {
+        font-size: clamp(1.6rem, 5vw, 2.2rem);
+        background: linear-gradient(135deg, #1e4b6e, #2a7f9c);
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+        margin-bottom: 0.5rem;
+      }
+      .lessons-header p {
+        color: #4a627a;
+        font-size: 0.95rem;
+        max-width: 700px;
+        margin: 0 auto;
+      }
+      /* نوار ابزار دو سطحی */
+      .lessons-toolbar {
+        background: white;
+        border-radius: 32px;
+        padding: 1rem 1.2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      }
+      .filter-section {
+        margin-bottom: 1rem;
+      }
+      .filter-title {
+        font-size: 0.8rem;
+        color: #5f7f9e;
+        margin-bottom: 0.5rem;
+        display: block;
+      }
+      .category-filters,
+      .level-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+      }
+      .filter-chip {
+        background: #eef2f5;
+        border: none;
+        padding: 0.4rem 1rem;
+        border-radius: 40px;
+        font-family: "Vazir";
+        font-size: 0.8rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: 0.2s;
+        color: #1e2f3e;
+      }
+      .filter-chip.active {
+        background: #2c7da0;
+        color: white;
+      }
+      .search-lesson {
+        display: flex;
+        align-items: center;
+        background: #f8fafc;
+        border-radius: 40px;
+        padding: 0.3rem 1rem;
+        gap: 0.5rem;
+        margin-top: 0.8rem;
+      }
+      .search-lesson i {
+        color: #94a3b8;
+      }
+      .search-lesson input {
+        width: 100%;
+        border: none;
+        background: transparent;
+        padding: 0.6rem 0;
+        font-family: "Vazir";
+        font-size: 0.85rem;
+        outline: none;
+      }
+      /* گرید کارت‌ها */
+      .lessons-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 1.8rem;
+        margin-bottom: 2rem;
+      }
+      .lesson-card {
+        background: white;
+        border-radius: 32px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+        display: flex;
+        flex-direction: column;
+      }
+      .lesson-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 30px rgba(0, 0, 0, 0.12);
+      }
+      .lesson-thumb {
+        height: 180px;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .lesson-thumb i {
+        font-size: 3.5rem;
+        color: white;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        background: rgba(0, 0, 0, 0.4);
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .lesson-content {
+        padding: 1.5rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      .lesson-category {
+        display: inline-block;
+        background: #eef2f5;
+        padding: 0.2rem 0.8rem;
+        border-radius: 30px;
+        font-size: 0.7rem;
+        font-weight: bold;
+        color: #2c7da0;
+        margin-bottom: 0.5rem;
+        width: fit-content;
+      }
+      .lesson-level {
+        display: inline-block;
+        background: #e2e8f0;
+        padding: 0.15rem 0.7rem;
+        border-radius: 30px;
+        font-size: 0.65rem;
+        margin-right: 0.5rem;
+        color: #475569;
+      }
+      .lesson-title {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: #1e2f3e;
+        margin: 0.5rem 0;
+      }
+      .lesson-description {
+        font-size: 0.85rem;
+        color: #5f7f9e;
+        line-height: 1.5;
+        margin-bottom: 1.2rem;
+        flex: 1;
+      }
+      .lesson-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.5rem;
+      }
+      .lesson-duration {
+        font-size: 0.7rem;
+        color: #94a3b8;
+        direction: ltr;
+      }
+      .btn-outline {
+        background: transparent;
+        border: 1px solid #2c7da0;
+        color: #2c7da0;
+        padding: 0.3rem 1rem;
+        border-radius: 40px;
+        font-size: 0.75rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+      .btn-outline:hover {
+        background: #2c7da0;
+        color: white;
+      }
+      /* مودال نمایش درس – ریسپانسیو و اسکرول کاملاً داخل کادر */
+      .lesson-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(10px);
+        z-index: 1200;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        visibility: hidden;
+        opacity: 0;
+        transition: all 0.3s ease;
+      }
+      .lesson-modal.active {
+        visibility: visible;
+        opacity: 1;
+      }
+      .modal-container {
+        background: #ffffff;
+        border-radius: 40px;
+        max-width: 900px;
+        width: 90%;
+        max-height: 85vh;
+        overflow-y: auto;
+        direction: rtl;
+        padding: 2rem;
+        box-shadow: 0 30px 50px rgba(0, 0, 0, 0.3);
+        scroll-behavior: smooth;
+        position: relative;
+        box-sizing: border-box;
+      }
+      /* استایل اسکرول بار مودال – داخل کادر سفید */
+      .modal-container::-webkit-scrollbar {
+        width: 6px;
+      }
+      .modal-container::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 10px;
+        margin-block: 8px;
+      }
+      .modal-container::-webkit-scrollbar-thumb {
+        background: #2c7da0;
+        border-radius: 10px;
+      }
+      .modal-container::-webkit-scrollbar-thumb:hover {
+        background: #1f6392;
+      }
+      /* محتوای مودال */
+      .modal-container h3 {
+        color: #2c7da0;
+        font-size: 1.8rem;
+        margin-bottom: 0.7rem;
+        border-right: 5px solid #2c7da0;
+        padding-right: 16px;
+      }
+      .modal-container .lesson-tag {
+        background: #eef2f5;
+        display: inline-block;
+        padding: 0.3rem 1rem;
+        border-radius: 40px;
+        font-size: 0.75rem;
+        margin-bottom: 1.2rem;
+        color: #2c7da0;
+        font-weight: bold;
+      }
+      .modal-container p {
+        color: #334155;
+        line-height: 1.8;
+        margin-bottom: 1.2rem;
+        font-size: 1rem;
+      }
+      .modal-container h4 {
+        color: #1e4b6e;
+        margin: 1.5rem 0 0.8rem;
+        font-size: 1.3rem;
+        border-right: 4px solid #1e4b6e;
+        padding-right: 12px;
+      }
+      .modal-container ul,
+      .modal-container ol {
+        padding-right: 1.8rem;
+        margin-bottom: 1.2rem;
+      }
+      .modal-container li {
+        margin: 0.6rem 0;
+        color: #475569;
+        line-height: 1.7;
+      }
+      .close-modal {
+        background: #e25555;
+        color: white;
+        border: none;
+        padding: 0.6rem 1.8rem;
+        border-radius: 60px;
+        cursor: pointer;
+        font-weight: bold;
+        margin-top: 1.5rem;
+        font-size: 0.9rem;
+        transition: 0.2s;
+        display: block;
+        width: fit-content;
+      }
+      @media (max-width: 768px) {
+        .lessons-grid {
+          grid-template-columns: 1fr;
+        }
+        .modal-container {
+          padding: 1.2rem;
+          width: 94%;
+        }
+        .modal-container h3 {
+          font-size: 1.4rem;
+        }
+        .close-modal {
+          width: 100%;
+          text-align: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div id="header-placeholder"></div>
+
+      <div class="lessons-header">
+        <h2><i class="fas fa-graduation-cap"></i> دروس آموزشی شطرنج</h2>
+        <p>
+          دسته‌بندی پیشرفته: گشایش، وسط بازی، آخر بازی، تاکتیک، حمله، دفاع،
+          استراتژی | سه سطح مبتدی، متوسط، حرفه‌ای
+        </p>
+      </div>
+
+      <div class="lessons-toolbar">
+        <div class="filter-section">
+          <span class="filter-title">دسته اصلی:</span>
+          <div class="category-filters" id="categoryFilters">
+            <button class="filter-chip active" data-cat="all">همه</button>
+            <button class="filter-chip" data-cat="گشایش">گشایش</button>
+            <button class="filter-chip" data-cat="وسط بازی">وسط بازی</button>
+            <button class="filter-chip" data-cat="آخر بازی">آخر بازی</button>
+            <button class="filter-chip" data-cat="تاکتیک">تاکتیک</button>
+            <button class="filter-chip" data-cat="حمله">حمله</button>
+            <button class="filter-chip" data-cat="دفاع">دفاع</button>
+            <button class="filter-chip" data-cat="استراتژی">استراتژی</button>
+          </div>
+        </div>
+        <div class="filter-section">
+          <span class="filter-title">سطح:</span>
+          <div class="level-filters" id="levelFilters">
+            <button class="filter-chip active" data-level="all">
+              همه سطوح
+            </button>
+            <button class="filter-chip" data-level="مبتدی">مبتدی</button>
+            <button class="filter-chip" data-level="متوسط">متوسط</button>
+            <button class="filter-chip" data-level="حرفه‌ای">حرفه‌ای</button>
+          </div>
+        </div>
+        <div class="search-lesson">
+          <i class="fas fa-search"></i>
+          <input
+            type="text"
+            id="searchLessonInput"
+            placeholder="جستجوی درس..."
+          />
+        </div>
+      </div>
+
+      <div id="lessonsGridContainer" class="lessons-grid"></div>
+
+      <div id="footer-placeholder"></div>
+    </div>
+
+    <!-- مودال درس -->
+    <div id="lessonModal" class="lesson-modal">
+      <div class="modal-container">
+        <div id="modalContent"></div>
+        <button class="close-modal" id="closeModalBtn">✖ بستن</button>
+      </div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script src="lessons-data.js"></script>
+    <script>
+      (function () {
+        "use strict";
+
+        let lessonsData = [];
+        let currentCategory = "all";
+        let currentLevel = "all";
+        let searchText = "";
+
+        function renderLessons() {
+          const container = document.getElementById("lessonsGridContainer");
+          if (!container) return;
+
+          let filtered = lessonsData.filter((lesson) => {
+            if (
+              currentCategory !== "all" &&
+              lesson.category !== currentCategory
+            )
+              return false;
+            if (currentLevel !== "all" && lesson.level !== currentLevel)
+              return false;
+            if (
+              searchText &&
+              !lesson.title.includes(searchText) &&
+              !lesson.description.includes(searchText)
+            )
+              return false;
+            return true;
+          });
+
+          if (filtered.length === 0) {
+            container.innerHTML = `<div style="text-align: center; padding: 3rem; color: #5f7f9e;">هیچ درسی با این جستجو یافت نشد.</div>`;
+            return;
+          }
+
+          container.innerHTML = "";
+          filtered.forEach((lesson) => {
+            const card = document.createElement("div");
+            card.className = "lesson-card";
+            const thumbStyle = `background: linear-gradient(135deg, ${lesson.color || "#2c7da0"}, ${lesson.color || "#2c7da0"}cc);`;
+            card.innerHTML = `
+          <div class="lesson-thumb" style="${thumbStyle}">
+            <i class="${lesson.thumbIcon || "fas fa-book"}"></i>
+          </div>
+          <div class="lesson-content">
+            <div>
+              <span class="lesson-category">${lesson.category}</span>
+              <span class="lesson-level">${lesson.level}</span>
+            </div>
+            <h3 class="lesson-title">${lesson.title}</h3>
+            <p class="lesson-description">${lesson.description}</p>
+            <div class="lesson-footer">
+              <span class="lesson-duration"><i class="far fa-clock"></i> ${lesson.duration}</span>
+              <button class="btn-outline" data-id="${lesson.id}">مشاهده درس <i class="fas fa-arrow-left"></i></button>
+            </div>
+          </div>
+        `;
+            container.appendChild(card);
+          });
+
+          document.querySelectorAll(".btn-outline").forEach((btn) => {
+            btn.addEventListener("click", (e) => {
+              const id = parseInt(btn.getAttribute("data-id"));
+              const lesson = lessonsData.find((l) => l.id === id);
+              if (lesson) showLessonModal(lesson);
+            });
+          });
+        }
+
+        function showLessonModal(lesson) {
+          const modal = document.getElementById("lessonModal");
+          const modalContent = document.getElementById("modalContent");
+          modalContent.innerHTML = `<div style="direction: rtl;">${lesson.content}</div>`;
+          modal.classList.add("active");
+          document.body.style.overflow = "hidden";
+        }
+
+        function closeModal() {
+          const modal = document.getElementById("lessonModal");
+          modal.classList.remove("active");
+          document.body.style.overflow = "";
+        }
+
+        function initFilters() {
+          const categoryBtns = document.querySelectorAll(
+            "#categoryFilters .filter-chip",
+          );
+          categoryBtns.forEach((btn) => {
+            btn.addEventListener("click", () => {
+              categoryBtns.forEach((b) => b.classList.remove("active"));
+              btn.classList.add("active");
+              currentCategory = btn.getAttribute("data-cat");
+              renderLessons();
+            });
+          });
+          const levelBtns = document.querySelectorAll(
+            "#levelFilters .filter-chip",
+          );
+          levelBtns.forEach((btn) => {
+            btn.addEventListener("click", () => {
+              levelBtns.forEach((b) => b.classList.remove("active"));
+              btn.classList.add("active");
+              currentLevel = btn.getAttribute("data-level");
+              renderLessons();
+            });
+          });
+          const searchInput = document.getElementById("searchLessonInput");
+          searchInput.addEventListener("input", (e) => {
+            searchText = e.target.value.trim();
+            renderLessons();
+          });
+        }
+
+        function loadLessonsData() {
+          if (typeof window.lessons !== "undefined") {
+            lessonsData = window.lessons;
+            renderLessons();
+            initFilters();
+          } else {
+            console.error("فایل lessons-data.js بارگذاری نشد");
+            document.getElementById("lessonsGridContainer").innerHTML =
+              "<div class='loading'>خطا در بارگذاری دروس</div>";
+          }
+        }
+
+        function init() {
+          loadLessonsData();
+          const modal = document.getElementById("lessonModal");
+          modal.addEventListener("click", (e) => {
+            if (e.target === modal) closeModal();
+          });
+          document
+            .getElementById("closeModalBtn")
+            .addEventListener("click", closeModal);
+        }
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", init);
+        } else {
+          init();
+        }
+      })();
+    </script>
+  </body>
+</html>
