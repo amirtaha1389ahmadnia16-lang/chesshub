@@ -1,0 +1,1033 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>ChessHub | آنالیز</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
+        font-family: "Vazir", Tahoma, sans-serif;
+      }
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 1rem;
+      }
+      .analysis-header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+      .analysis-header h2 {
+        font-size: clamp(1.6rem, 5vw, 2.2rem);
+        background: linear-gradient(135deg, #1e4b6e, #2a7f9c);
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+        margin-bottom: 0.5rem;
+      }
+      .analysis-header p {
+        color: #4a627a;
+        font-size: 0.95rem;
+      }
+      .analysis-card {
+        background: white;
+        border-radius: 32px;
+        padding: 1.5rem;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+      }
+      .main-panel {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2rem;
+        justify-content: center;
+      }
+      .board-container {
+        flex: 2;
+        min-width: 300px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+      }
+      #chessboard {
+        display: grid;
+        grid-template-columns: repeat(8, 1fr);
+        aspect-ratio: 1 / 1;
+        width: 100%;
+        max-width: 520px;
+        border: 2px solid #cbd5e1;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      }
+      .square {
+        aspect-ratio: 1 / 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        position: relative;
+      }
+      .square.light {
+        background-color: #f0d9b5;
+      }
+      .square.dark {
+        background-color: #b58863;
+      }
+      .square.selected {
+        background-color: #b7d968;
+        box-shadow: inset 0 0 0 2px #2c7da0;
+      }
+      .piece-img {
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+      .eval-section {
+        margin-top: 1rem;
+        text-align: center;
+        width: 100%;
+      }
+      .eval-bar-container {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        direction: ltr;
+        background: #f1f5f9;
+        padding: 0.4rem 1rem;
+        border-radius: 60px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .eval-bar-bg {
+        width: 200px;
+        height: 12px;
+        background: #e2e8f0;
+        border-radius: 20px;
+        overflow: hidden;
+      }
+      .eval-fill {
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(90deg, #2c7da0, #52b0d4);
+        transition: width 0.2s;
+      }
+      .eval-num {
+        font-size: 0.75rem;
+        background: white;
+        padding: 0.2rem 0.7rem;
+        border-radius: 30px;
+        font-weight: bold;
+        min-width: 70px;
+        text-align: center;
+        font-family: monospace;
+      }
+      .engine-settings {
+        margin-top: 0.5rem;
+        display: flex;
+        gap: 0.8rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        background: #f8fafc;
+        padding: 0.4rem 1rem;
+        border-radius: 60px;
+      }
+      .control-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 0.8rem;
+        margin: 0.8rem 0;
+        flex-wrap: wrap;
+      }
+      .info-panel {
+        flex: 1.3;
+        min-width: 260px;
+        background: #f8fafc;
+        border-radius: 28px;
+        padding: 1.2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+      .fen-box {
+        background: white;
+        border-radius: 20px;
+        padding: 0.6rem;
+        direction: ltr;
+        font-family: monospace;
+        font-size: 0.7rem;
+        word-break: break-all;
+      }
+      .pgn-area {
+        background: white;
+        border-radius: 20px;
+        padding: 0.5rem;
+      }
+      .pgn-area textarea {
+        width: 100%;
+        padding: 0.5rem;
+        border-radius: 16px;
+        border: 1px solid #cbd5e1;
+        font-family: monospace;
+        font-size: 0.7rem;
+        resize: vertical;
+        background: #fefefe;
+        direction: ltr;
+      }
+      .move-tree {
+        background: white;
+        border-radius: 24px;
+        padding: 0.8rem;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+      .move-tree h4 {
+        color: #2c7da0;
+        margin-bottom: 0.5rem;
+        border-right: 3px solid #2c7da0;
+        padding-right: 10px;
+      }
+      .move-line {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.3rem;
+        align-items: center;
+        margin-bottom: 0.5rem;
+      }
+      .move-node {
+        background: #f1f5f9;
+        padding: 0.2rem 0.7rem;
+        border-radius: 30px;
+        font-size: 0.7rem;
+        font-family: monospace;
+        cursor: pointer;
+        transition: 0.1s;
+        white-space: nowrap;
+      }
+      .move-node:hover {
+        background: #e2e8f0;
+      }
+      .move-node.current {
+        background: #2c7da0;
+        color: white;
+      }
+      .variation-group {
+        margin: 0.3rem 0;
+        padding-right: 1rem;
+        border-right: 2px solid #d1d5db;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.3rem;
+      }
+      .variation-tag {
+        background: #fef3c7;
+        padding: 0.2rem 0.6rem;
+        border-radius: 20px;
+        font-size: 0.65rem;
+        cursor: pointer;
+      }
+      .btn {
+        background: #eef2f5;
+        border: none;
+        padding: 0.5rem 1.2rem;
+        border-radius: 40px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+        font-size: 0.8rem;
+      }
+      .btn-primary {
+        background: #2c7da0;
+        color: white;
+      }
+      .btn-primary:hover {
+        background: #1f6392;
+        transform: translateY(-2px);
+      }
+      .btn:hover {
+        transform: translateY(-2px);
+        background: #e2e8f0;
+      }
+      .progress-bar-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(8px);
+        z-index: 2000;
+        padding: 0.5rem;
+        text-align: center;
+        color: white;
+        direction: ltr;
+        transition: all 0.3s ease;
+      }
+      .progress-bar-container.hidden {
+        display: none;
+      }
+      .progress-text {
+        font-size: 0.8rem;
+        margin-bottom: 4px;
+      }
+      .progress-bar-bg {
+        width: 80%;
+        max-width: 400px;
+        height: 8px;
+        background: #e2e8f0;
+        border-radius: 20px;
+        margin: 0 auto;
+        overflow: hidden;
+      }
+      .progress-fill {
+        width: 0%;
+        height: 100%;
+        background: linear-gradient(90deg, #2c7da0, #52b0d4);
+        transition: width 0.2s;
+      }
+      @media (max-width: 768px) {
+        .analysis-card {
+          padding: 1rem;
+        }
+        .eval-bar-bg {
+          width: 120px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div id="header-placeholder"></div>
+      <div class="analysis-header">
+        <h2><i class="fas fa-chart-line"></i> آنالیز</h2>
+        <p>Stockfish 16.1 | تحلیل لحظه‌ای | مدیریت شاخه‌ها | PGN استاندارد</p>
+      </div>
+      <div class="analysis-card">
+        <div class="main-panel">
+          <div class="board-container" dir="ltr">
+            <div id="chessboard"></div>
+            <div class="eval-section">
+              <div class="eval-bar-container">
+                <span class="eval-label">سفید</span>
+                <div class="eval-bar-bg">
+                  <div class="eval-fill" id="evalFill"></div>
+                </div>
+                <span class="eval-label">سیاه</span>
+                <div id="evalNumber" class="eval-num">0.00</div>
+              </div>
+              <div class="engine-settings">
+                <span
+                  >⚙️ عمق:
+                  <input
+                    type="number"
+                    id="depthInput"
+                    min="12"
+                    max="30"
+                    value="24"
+                    step="1"
+                    style="width: 55px"
+                /></span>
+                <span>🧵 ترد: <span id="threadsCount">2</span></span>
+                <button
+                  id="stopAnalysisBtn"
+                  class="btn"
+                  style="padding: 0.2rem 0.8rem"
+                >
+                  ⏹️ توقف
+                </button>
+              </div>
+            </div>
+            <div class="control-buttons">
+              <button id="undoBtn" class="btn">
+                <i class="fas fa-undo-alt"></i> برگشت
+              </button>
+              <button id="resetBtn" class="btn">
+                <i class="fas fa-sync-alt"></i> موقعیت اولیه
+              </button>
+              <button id="flipBtn" class="btn">
+                <i class="fas fa-exchange-alt"></i> چرخش تخته
+              </button>
+            </div>
+          </div>
+          <div class="info-panel">
+            <div class="fen-box">
+              <strong>FEN:</strong> <span id="fenDisplay"></span>
+            </div>
+            <div class="pgn-area">
+              <textarea
+                id="pgnOutput"
+                rows="4"
+                readonly
+                placeholder="PGN در اینجا نمایش داده می‌شود..."
+              ></textarea>
+              <div
+                style="
+                  display: flex;
+                  gap: 0.5rem;
+                  margin-top: 0.5rem;
+                  flex-wrap: wrap;
+                "
+              >
+                <button id="copyPgnBtn" class="btn">
+                  <i class="fas fa-copy"></i> کپی PGN
+                </button>
+                <button id="loadPgnBtn" class="btn btn-primary">
+                  <i class="fas fa-upload"></i> بارگذاری PGN
+                </button>
+                <input
+                  type="file"
+                  id="pgnFileInput"
+                  accept=".pgn,.txt"
+                  style="display: none"
+                />
+              </div>
+            </div>
+            <div class="move-tree">
+              <h4><i class="fas fa-code-branch"></i> درخت حرکات</h4>
+              <div id="moveTreeContainer"></div>
+            </div>
+            <div style="display: flex; gap: 0.5rem">
+              <button id="prevMoveBtn" class="btn">
+                <i class="fas fa-step-backward"></i> قبلی
+              </button>
+              <button id="nextMoveBtn" class="btn">
+                بعدی <i class="fas fa-step-forward"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="footer-placeholder"></div>
+    </div>
+
+    <div id="engineProgressBar" class="progress-bar-container">
+      <div class="progress-text">
+        ⚙️ در حال بارگذاری موتور Stockfish...
+        <span id="progressPercent">0</span>%
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+      (function () {
+        "use strict";
+
+        // ---------- تصاویر مهره ----------
+        const pieceImages = {};
+        const pieceCodes = {
+          wK: "wK.svg",
+          wQ: "wQ.svg",
+          wR: "wR.svg",
+          wB: "wB.svg",
+          wN: "wN.svg",
+          wP: "wP.svg",
+          bK: "bK.svg",
+          bQ: "bQ.svg",
+          bR: "bR.svg",
+          bB: "bB.svg",
+          bN: "bN.svg",
+          bP: "bP.svg",
+        };
+        function loadPieces() {
+          return new Promise((resolve) => {
+            let loaded = 0;
+            const total = Object.keys(pieceCodes).length;
+            for (const [key, filename] of Object.entries(pieceCodes)) {
+              const img = new Image();
+              img.onload = img.onerror = () => {
+                loaded++;
+                if (loaded === total) resolve();
+              };
+              img.src = `pieces/merida/${filename}`;
+              pieceImages[key] = img;
+            }
+          });
+        }
+
+        // ---------- موتور Stockfish ----------
+        let worker = null;
+        let engineReady = false;
+        let analyzing = false;
+        let currentFen = null;
+        let currentDepth = 24;
+        let evalFill = null,
+          evalNumber = null;
+        let onReadyCallback = null;
+
+        function initEngine(callback) {
+          if (worker) {
+            if (callback) callback(engineReady);
+            return;
+          }
+          onReadyCallback = callback;
+          try {
+            worker = new Worker("js/stockfish.js");
+            worker.onmessage = function (e) {
+              const data = e.data;
+              if (data.includes("uciok")) {
+                const threads = navigator.hardwareConcurrency || 2;
+                worker.postMessage(`setoption name Threads value ${threads}`);
+                worker.postMessage("setoption name Hash value 512");
+                worker.postMessage("setoption name Skill Level value 20");
+                worker.postMessage("setoption name Use NNUE value true");
+                engineReady = true;
+                if (currentFen) analyze(currentFen);
+                if (onReadyCallback) onReadyCallback(true);
+                if (callback) callback(true);
+              }
+              if (data.includes("info") && evalFill) {
+                const cpMatch = data.match(/cp (\-?\d+)/);
+                const mateMatch = data.match(/mate (\d+)/);
+                if (cpMatch) {
+                  let val = parseInt(cpMatch[1]) / 100;
+                  let percent = 50 + Math.min(50, Math.max(-50, val * 5));
+                  percent = Math.min(100, Math.max(0, percent));
+                  evalFill.style.width = percent + "%";
+                  evalNumber.innerText = (val > 0 ? "+" : "") + val.toFixed(2);
+                } else if (mateMatch) {
+                  let mate = parseInt(mateMatch[1]);
+                  let percent = mate > 0 ? 100 : 0;
+                  evalFill.style.width = percent + "%";
+                  evalNumber.innerText = mate > 0 ? "#+" + mate : "#-" + mate;
+                }
+              }
+              if (data.includes("bestmove")) {
+                analyzing = false;
+              }
+            };
+            worker.onerror = function (err) {
+              console.warn("Stockfish worker error", err);
+              engineReady = false;
+              if (onReadyCallback) onReadyCallback(false);
+              if (callback) callback(false);
+            };
+            worker.postMessage("uci");
+          } catch (e) {
+            console.error("Engine init failed", e);
+            if (callback) callback(false);
+          }
+        }
+
+        function analyze(fen, depth = null) {
+          if (!worker || !engineReady) {
+            currentFen = fen;
+            if (!worker) initEngine();
+            return;
+          }
+          if (analyzing) worker.postMessage("stop");
+          analyzing = true;
+          worker.postMessage(`position fen ${fen}`);
+          worker.postMessage(`go depth ${depth || currentDepth}`);
+        }
+
+        function stopAnalysis() {
+          if (worker && analyzing) {
+            worker.postMessage("stop");
+            analyzing = false;
+          }
+        }
+
+        function setDepth(depth) {
+          currentDepth = Math.min(30, Math.max(12, depth));
+          if (engineReady && currentFen) analyze(currentFen);
+        }
+
+        function connectUI(fill, num) {
+          evalFill = fill;
+          evalNumber = num;
+        }
+
+        window.ChessEngine = {
+          init: initEngine,
+          analyze: analyze,
+          stop: stopAnalysis,
+          setDepth: setDepth,
+          connectUI: connectUI,
+        };
+
+        // ---------- مدیریت نوار پیشرفت ----------
+        let progressInterval = null;
+        function startProgressBar() {
+          const container = document.getElementById("engineProgressBar");
+          const fill = document.getElementById("progressFill");
+          const percentSpan = document.getElementById("progressPercent");
+          if (!container) return;
+          container.classList.remove("hidden");
+          let percent = 0;
+          if (progressInterval) clearInterval(progressInterval);
+          progressInterval = setInterval(() => {
+            if (percent >= 100) {
+              clearInterval(progressInterval);
+              progressInterval = null;
+            } else {
+              percent += Math.random() * 12;
+              percent = Math.min(percent, 99);
+              fill.style.width = percent + "%";
+              percentSpan.innerText = Math.floor(percent);
+            }
+          }, 200);
+        }
+        function finishProgressBar() {
+          if (progressInterval) clearInterval(progressInterval);
+          const fill = document.getElementById("progressFill");
+          const percentSpan = document.getElementById("progressPercent");
+          if (fill && percentSpan) {
+            fill.style.width = "100%";
+            percentSpan.innerText = "100";
+          }
+          setTimeout(() => {
+            const container = document.getElementById("engineProgressBar");
+            if (container) container.classList.add("hidden");
+          }, 800);
+        }
+
+        // ---------- مدل شاخه (Node) ----------
+        class Node {
+          constructor(moveSan, parent, fromFen, toFen) {
+            this.move = moveSan;
+            this.parent = parent;
+            this.children = [];
+            this.fromFen = fromFen;
+            this.toFen = toFen;
+          }
+        }
+
+        let root = new Node(null, null, new Chess().fen(), null);
+        let currentNode = root;
+        let game = new Chess();
+        let boardFlipped = false;
+        let selectedSquare = null;
+        let dragStart = null;
+        let dragging = false;
+
+        const boardDiv = document.getElementById("chessboard");
+        const fenSpan = document.getElementById("fenDisplay");
+        const pgnTextarea = document.getElementById("pgnOutput");
+        const moveTreeDiv = document.getElementById("moveTreeContainer");
+        const evalFillEl = document.getElementById("evalFill");
+        const evalNumberEl = document.getElementById("evalNumber");
+
+        let engineConnected = false;
+        function connectEngineUI() {
+          if (!engineConnected && window.ChessEngine) {
+            startProgressBar();
+            window.ChessEngine.connectUI(evalFillEl, evalNumberEl);
+            window.ChessEngine.init((ready) => {
+              if (ready) {
+                engineConnected = true;
+                finishProgressBar();
+                window.ChessEngine.analyze(game.fen());
+                document.getElementById("threadsCount").innerText =
+                  navigator.hardwareConcurrency || 2;
+              } else {
+                finishProgressBar();
+                evalNumberEl.innerText = "خطا";
+              }
+            });
+          }
+        }
+
+        function requestAnalysis() {
+          if (window.ChessEngine && engineConnected) {
+            window.ChessEngine.analyze(game.fen());
+          }
+        }
+
+        function syncBoardFromNode() {
+          if (currentNode && currentNode.toFen) game.load(currentNode.toFen);
+          else game.load(root.fromFen);
+          renderBoard();
+          updateFenDisplay();
+          requestAnalysis();
+        }
+
+        function renderBoard() {
+          const board = game.board();
+          boardDiv.innerHTML = "";
+          boardDiv.style.display = "grid";
+          boardDiv.style.gridTemplateColumns = "repeat(8, 1fr)";
+          for (let i = 0; i < 8; i++) {
+            const row = boardFlipped ? 7 - i : i;
+            for (let j = 0; j < 8; j++) {
+              const col = boardFlipped ? 7 - j : j;
+              const piece = board[row][col];
+              const isLight = (row + col) % 2 === 0;
+              const sq = document.createElement("div");
+              sq.className = `square ${isLight ? "light" : "dark"}`;
+              const file = String.fromCharCode(97 + col);
+              const rank = 8 - row;
+              sq.dataset.square = file + rank;
+              if (piece) {
+                const type = piece.type.toUpperCase();
+                const colorCode = piece.color === "w" ? "w" : "b";
+                const code = { K: "K", Q: "Q", R: "R", B: "B", N: "N", P: "P" }[
+                  type
+                ];
+                const img = document.createElement("img");
+                img.src = `pieces/merida/${colorCode}${code}.svg`;
+                img.classList.add("piece-img");
+                sq.appendChild(img);
+              }
+              boardDiv.appendChild(sq);
+            }
+          }
+          if (selectedSquare) {
+            const sel = document.querySelector(
+              `.square[data-square="${selectedSquare}"]`,
+            );
+            if (sel) sel.classList.add("selected");
+          }
+        }
+
+        function updateFenDisplay() {
+          fenSpan.innerText = game.fen();
+        }
+
+        function generateStandardPGN() {
+          if (!root) return "";
+          const headers = [
+            '[Event "Analysis"]',
+            '[Site "ChessHub"]',
+            '[Date "' +
+              new Date().toISOString().slice(0, 10).replace(/-/g, ".") +
+              '"]',
+            '[Round "?"]',
+            '[White "?"]',
+            '[Black "?"]',
+            '[Result "*"]',
+          ];
+          function gen(node, moveNum = 1, whiteTurn = true, isVar = false) {
+            if (!node || node.children.length === 0) return "";
+            let str = "";
+            const main = node.children[0];
+            if (!isVar && whiteTurn) str += `${moveNum}. `;
+            else if (isVar && whiteTurn) str += `${moveNum}. `;
+            str += main.move + " ";
+            let nxt = moveNum;
+            let nxtTurn = !whiteTurn;
+            if (nxtTurn) nxt++;
+            str += gen(main, nxt, nxtTurn, false);
+            for (let i = 1; i < node.children.length; i++) {
+              const br = node.children[i];
+              let brStr = "";
+              if (whiteTurn) brStr += `${moveNum}. `;
+              brStr += br.move + " ";
+              let brTurn = !whiteTurn;
+              let brNum = moveNum;
+              if (brTurn) brNum++;
+              brStr += gen(br, brNum, brTurn, true);
+              str += `(${brStr.trim()}) `;
+            }
+            return str;
+          }
+          let moves = gen(root, 1, true, false);
+          return headers.join("\n") + "\n\n" + moves.trim();
+        }
+
+        function updatePGN() {
+          pgnTextarea.value = generateStandardPGN();
+        }
+
+        function renderTree() {
+          moveTreeDiv.innerHTML = "";
+          if (!root) return;
+          function buildLine(node, idx = 0, nodes = []) {
+            if (node.children.length) {
+              nodes.push(node.children[0]);
+              buildLine(node.children[0], idx + 1, nodes);
+            }
+            return nodes;
+          }
+          const mainLine = buildLine(root);
+          const mainDiv = document.createElement("div");
+          mainDiv.className = "move-line";
+          let moveNumber = 1;
+          for (let i = 0; i < mainLine.length; i++) {
+            const n = mainLine[i];
+            const moveText = i % 2 === 0 ? `${moveNumber}. ${n.move}` : n.move;
+            const span = document.createElement("span");
+            span.className = "move-node";
+            span.textContent = moveText;
+            span.addEventListener("click", () => goToNode(n));
+            if (currentNode === n) span.classList.add("current");
+            mainDiv.appendChild(span);
+            if (n.parent && n.parent.children.length > 1) {
+              const varDiv = document.createElement("div");
+              varDiv.className = "variation-group";
+              for (let j = 1; j < n.parent.children.length; j++) {
+                const v = n.parent.children[j];
+                const tag = document.createElement("span");
+                tag.className = "variation-tag";
+                const moveIdx = i % 2 === 0 ? moveNumber : "";
+                tag.textContent = `${moveIdx} ${v.move}`;
+                tag.addEventListener("click", () => goToNode(v));
+                varDiv.appendChild(tag);
+              }
+              mainDiv.appendChild(varDiv);
+            }
+            if (i % 2 === 1) moveNumber++;
+          }
+          moveTreeDiv.appendChild(mainDiv);
+        }
+
+        function goToNode(node) {
+          if (!node) return;
+          currentNode = node;
+          syncBoardFromNode();
+          renderTree();
+          updatePGN();
+          selectedSquare = null;
+        }
+
+        function addMove(from, to) {
+          const moveObj = game.move({ from, to, promotion: "q" });
+          if (!moveObj) return false;
+          const beforeFen = currentNode.toFen || root.fromFen;
+          const newFen = game.fen();
+          const existing = currentNode.children.find(
+            (c) => c.move === moveObj.san,
+          );
+          if (!existing) {
+            const newNode = new Node(
+              moveObj.san,
+              currentNode,
+              beforeFen,
+              newFen,
+            );
+            currentNode.children.push(newNode);
+            currentNode = newNode;
+          } else {
+            currentNode = existing;
+          }
+          syncBoardFromNode();
+          renderTree();
+          updatePGN();
+          return true;
+        }
+
+        // ---------- رویدادهای کشیدن ----------
+        function getSquareFromXY(clientX, clientY) {
+          const elem = document.elementFromPoint(clientX, clientY);
+          const sqDiv = elem?.closest(".square");
+          return sqDiv ? sqDiv.dataset.square : null;
+        }
+        function onPointerDown(e) {
+          e.preventDefault();
+          let clientX, clientY;
+          if (e.touches) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+          } else {
+            clientX = e.clientX;
+            clientY = e.clientY;
+          }
+          const sq = getSquareFromXY(clientX, clientY);
+          if (!sq) return;
+          const piece = game.get(sq);
+          if (piece && piece.color === game.turn()) {
+            dragStart = sq;
+            dragging = true;
+            boardDiv.style.cursor = "grabbing";
+          }
+        }
+        function onPointerUp(e) {
+          if (!dragging || !dragStart) {
+            cleanupDrag();
+            return;
+          }
+          let clientX, clientY;
+          if (e.changedTouches) {
+            clientX = e.changedTouches[0].clientX;
+            clientY = e.changedTouches[0].clientY;
+          } else {
+            clientX = e.clientX;
+            clientY = e.clientY;
+          }
+          const target = getSquareFromXY(clientX, clientY);
+          if (target && target !== dragStart) addMove(dragStart, target);
+          cleanupDrag();
+        }
+        function cleanupDrag() {
+          dragStart = null;
+          dragging = false;
+          boardDiv.style.cursor = "grab";
+        }
+        function onClickFallback(e) {
+          if (dragging) return;
+          const sqDiv = e.target.closest(".square");
+          if (!sqDiv) return;
+          const sq = sqDiv.dataset.square;
+          if (!sq) return;
+          if (selectedSquare === null) {
+            const piece = game.get(sq);
+            if (piece && piece.color === game.turn()) {
+              selectedSquare = sq;
+              renderBoard();
+            }
+          } else {
+            addMove(selectedSquare, sq);
+            selectedSquare = null;
+          }
+        }
+
+        // ---------- دکمه‌ها ----------
+        function undo() {
+          if (currentNode.parent) {
+            currentNode = currentNode.parent;
+            syncBoardFromNode();
+            renderTree();
+            updatePGN();
+            selectedSquare = null;
+          }
+        }
+        function next() {
+          if (currentNode.children.length) {
+            currentNode = currentNode.children[0];
+            syncBoardFromNode();
+            renderTree();
+            updatePGN();
+            selectedSquare = null;
+          }
+        }
+        function reset() {
+          if (window.ChessEngine) window.ChessEngine.stop();
+          root = new Node(null, null, new Chess().fen(), null);
+          currentNode = root;
+          syncBoardFromNode();
+          renderTree();
+          updatePGN();
+          selectedSquare = null;
+        }
+        function flip() {
+          boardFlipped = !boardFlipped;
+          renderBoard();
+        }
+        function copyPGN() {
+          navigator.clipboard.writeText(pgnTextarea.value);
+          alert("✅ PGN کپی شد");
+        }
+        function loadFromText() {
+          const txt = prompt("لطفاً PGN را وارد کنید:");
+          if (txt) loadPGN(txt);
+        }
+        function loadPGN(pgn) {
+          try {
+            const tmp = new Chess();
+            if (!tmp.load_pgn(pgn)) throw new Error("PGN نامعتبر");
+            const history = tmp.history({ verbose: true });
+            const newRoot = new Node(null, null, new Chess().fen(), null);
+            let cur = newRoot;
+            let t = new Chess();
+            for (let mv of history) {
+              const fromFen = t.fen();
+              t.move(mv);
+              const toFen = t.fen();
+              const node = new Node(mv.san, cur, fromFen, toFen);
+              cur.children.push(node);
+              cur = node;
+            }
+            root = newRoot;
+            currentNode = root;
+            while (currentNode.children.length)
+              currentNode = currentNode.children[0];
+            syncBoardFromNode();
+            renderTree();
+            updatePGN();
+            selectedSquare = null;
+          } catch (e) {
+            alert("خطا در بارگذاری: " + e.message);
+          }
+        }
+        function handleFile() {
+          const inp = document.getElementById("pgnFileInput");
+          inp.click();
+          inp.onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => loadPGN(ev.target.result);
+            reader.readAsText(file);
+            inp.value = "";
+          };
+        }
+
+        function bindEvents() {
+          boardDiv.addEventListener("mousedown", onPointerDown);
+          window.addEventListener("mouseup", onPointerUp);
+          boardDiv.addEventListener("touchstart", onPointerDown, {
+            passive: false,
+          });
+          window.addEventListener("touchend", onPointerUp);
+          boardDiv.addEventListener("click", onClickFallback);
+          document.getElementById("undoBtn").addEventListener("click", undo);
+          document.getElementById("resetBtn").addEventListener("click", reset);
+          document.getElementById("flipBtn").addEventListener("click", flip);
+          document
+            .getElementById("prevMoveBtn")
+            .addEventListener("click", undo);
+          document
+            .getElementById("nextMoveBtn")
+            .addEventListener("click", next);
+          document
+            .getElementById("copyPgnBtn")
+            .addEventListener("click", copyPGN);
+          document
+            .getElementById("loadPgnBtn")
+            .addEventListener("click", loadFromText);
+          const btnContainer = document.querySelector(".pgn-area div");
+          if (btnContainer) {
+            const uploadBtn = document.createElement("button");
+            uploadBtn.className = "btn";
+            uploadBtn.innerHTML =
+              '<i class="fas fa-file-upload"></i> آپلود فایل';
+            uploadBtn.addEventListener("click", handleFile);
+            btnContainer.appendChild(uploadBtn);
+          }
+          document
+            .getElementById("stopAnalysisBtn")
+            .addEventListener("click", () => {
+              if (window.ChessEngine) window.ChessEngine.stop();
+              evalFillEl.style.width = "50%";
+              evalNumberEl.innerText = "0.00";
+            });
+          const depthInput = document.getElementById("depthInput");
+          depthInput.addEventListener("change", () => {
+            if (window.ChessEngine)
+              window.ChessEngine.setDepth(parseInt(depthInput.value));
+          });
+        }
+
+        function init() {
+          reset();
+          loadPieces().then(() => {
+            bindEvents();
+            renderBoard();
+            connectEngineUI();
+          });
+        }
+        init();
+      })();
+    </script>
+  </body>
+</html>
