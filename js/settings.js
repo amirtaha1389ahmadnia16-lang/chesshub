@@ -433,3 +433,4 @@ function getPieceExtension() {
   if (!window.ChessSettings) return "svg";
   return window.ChessSettings.getPieceFileExtension(getCurrentPieceSet());
 }
+

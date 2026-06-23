@@ -301,3 +301,4 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadComponent("#footer-placeholder", "footer.html");
   initMobileMenu();
 });
+

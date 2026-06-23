@@ -41,18 +41,18 @@
   // ============================================
   const pieceImages = {};
   const pieceCodes = {
-    wK: "wK.png",
-    wQ: "wQ.png",
-    wR: "wR.png",
-    wB: "wB.png",
-    wN: "wN.png",
-    wP: "wP.png",
-    bK: "bK.png",
-    bQ: "bQ.png",
-    bR: "bR.png",
-    bB: "bB.png",
-    bN: "bN.png",
-    bP: "bP.png",
+    wK: "pieces/classic/pieces/classic/wK.png",
+    wQ: "pieces/classic/wQ.png",
+    wR: "pieces/classic/wR.png",
+    wB: "pieces/classic/wB.png",
+    wN: "pieces/classic/wN.png",
+    wP: "pieces/classic/wP.png",
+    bK: "pieces/classic/bK.png",
+    bQ: "pieces/classic/bQ.png",
+    bR: "pieces/classic/bR.png",
+    bB: "pieces/classic/bB.png",
+    bN: "pieces/classic/bN.png",
+    bP: "pieces/classic/bP.png",
   };
 
   function loadPieces() {
@@ -705,3 +705,4 @@
     boardDiv.style.cursor = "grab";
   });
 })();
+
