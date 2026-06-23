@@ -41,7 +41,7 @@
   // ============================================
   const pieceImages = {};
   const pieceCodes = {
-    wK: "pieces/classic/pieces/classic/wK.png",
+    wK: "pieces/classic/wK.png",
     wQ: "pieces/classic/wQ.png",
     wR: "pieces/classic/wR.png",
     wB: "pieces/classic/wB.png",
@@ -705,4 +705,5 @@
     boardDiv.style.cursor = "grab";
   });
 })();
+
 

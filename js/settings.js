@@ -434,3 +434,4 @@ function getPieceExtension() {
   return window.ChessSettings.getPieceFileExtension(getCurrentPieceSet());
 }
 
+
