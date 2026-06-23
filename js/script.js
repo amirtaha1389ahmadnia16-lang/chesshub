@@ -1,3 +1,7 @@
+// ============================================
+// 📦 بارگذاری هدر و فوتر
+// ============================================
+
 async function loadComponent(selector, url) {
   try {
     const response = await fetch(url);
@@ -10,6 +14,10 @@ async function loadComponent(selector, url) {
     console.error(`خطا در بارگذاری ${url}:`, error);
   }
 }
+
+// ============================================
+// 📱 منوی موبایل
+// ============================================
 
 function initMobileMenu() {
   const menuToggle = document.getElementById("menuToggle");
@@ -88,30 +96,69 @@ function initMobileMenu() {
 }
 
 // ============================================
-// ⚙️ سیستم تنظیمات
+// ⚙️ سیستم تنظیمات سراسری
 // ============================================
 
 (function () {
+  "use strict";
+
   const defaultSettings = {
-    pieceSet: "cburnett",
-    theme: "light",
+    pieceSet: "classic",
+    theme: "4",
     sound: true,
   };
 
+  // ✅ ۳۸ مجموعه مهره کامل (هماهنگ با settings.html)
   const pieceSets = [
-    "cburnett",
-    "merida",
+    // سه بعدی
+    "3d_chesskid",
+    "3d_plastic",
+    "3d_staunton",
+    "3d_wood",
+    // کلاسیک
     "alpha",
-    "california",
-    "cardinal",
-    "dubrovny",
-    "gioco",
-    "governor",
-    "icpieces",
-    "maestro",
-    "staunty",
-    "tatiana",
+    "bases",
+    "classic",
+    "club",
+    "condal",
+    "tournament",
+    "vintage",
+    // مدرن
+    "glass",
+    "light",
+    "marble",
+    "metal",
+    "modern",
+    "neo",
+    "neon",
+    // کارتونی
+    "8_bit",
+    "bubblegum",
+    "graffiti",
+    "lolz",
+    "tigers",
+    // طبیعت
+    "icy_sea",
+    "nature",
+    "neo_wood",
+    "ocean",
+    "sky",
+    "wood",
+    // ویژه
+    "blindfold",
+    "book",
+    "cases",
+    "dash",
+    "game_room",
+    "gothic",
+    "maya",
+    "newspaper",
+    "space",
   ];
+
+  // ============================================
+  // 💾 توابع اصلی تنظیمات
+  // ============================================
 
   function loadSettings() {
     try {
@@ -120,15 +167,35 @@ function initMobileMenu() {
         const parsed = JSON.parse(saved);
         return { ...defaultSettings, ...parsed };
       }
-    } catch (e) {}
-    return defaultSettings;
+    } catch (e) {
+      console.warn("خطا در خواندن تنظیمات:", e);
+    }
+    return { ...defaultSettings };
   }
 
   function saveSettings(settings) {
     try {
       localStorage.setItem("chesshub_settings", JSON.stringify(settings));
-    } catch (e) {}
+    } catch (e) {
+      console.warn("خطا در ذخیره تنظیمات:", e);
+    }
   }
+
+  function getCurrentPieceSet() {
+    return loadSettings().pieceSet || "classic";
+  }
+
+  function getCurrentTheme() {
+    return loadSettings().theme || "4";
+  }
+
+  function isSoundEnabled() {
+    return loadSettings().sound !== false;
+  }
+
+  // ============================================
+  // 🎨 پنل تنظیمات (برای استفاده در همه صفحات)
+  // ============================================
 
   function togglePanel(open) {
     const panel = document.getElementById("settingsPanel");
@@ -148,14 +215,22 @@ function initMobileMenu() {
     }
   }
 
+  // ============================================
+  // 🎨 اعمال تم
+  // ============================================
+
   function applyTheme(theme) {
     document.body.className = document.body.className
       .split(" ")
       .filter((cls) => !cls.startsWith("theme-"))
       .join(" ");
 
-    if (theme && theme !== "light") {
+    if (theme && theme !== "light" && theme !== "1") {
       document.body.classList.add(`theme-${theme}`);
+    } else if (theme === "light") {
+      document.body.classList.add("theme-light");
+    } else {
+      document.body.classList.add("theme-4");
     }
 
     const settings = loadSettings();
@@ -165,10 +240,24 @@ function initMobileMenu() {
     document.querySelectorAll(".theme-btn").forEach((btn) => {
       btn.classList.toggle("active", btn.dataset.theme === theme);
     });
+
+    // ارسال رویداد به سایر صفحات
+    document.dispatchEvent(
+      new CustomEvent("themeChanged", {
+        detail: { theme: theme },
+      }),
+    );
   }
 
+  // ============================================
+  // ♟️ تغییر مجموعه مهره‌ها
+  // ============================================
+
   function changePieceSet(setName) {
-    if (!pieceSets.includes(setName)) return;
+    if (!pieceSets.includes(setName)) {
+      console.warn(`مجموعه مهره "${setName}" موجود نیست`);
+      return;
+    }
 
     const settings = loadSettings();
     settings.pieceSet = setName;
@@ -178,11 +267,17 @@ function initMobileMenu() {
       btn.classList.toggle("active", btn.dataset.set === setName);
     });
 
-    const event = new CustomEvent("pieceSetChanged", {
-      detail: { pieceSet: setName },
-    });
-    document.dispatchEvent(event);
+    // ارسال رویداد به سایر صفحات
+    document.dispatchEvent(
+      new CustomEvent("pieceSetChanged", {
+        detail: { pieceSet: setName },
+      }),
+    );
   }
+
+  // ============================================
+  // 🔊 صدا
+  // ============================================
 
   function toggleSound(enabled) {
     const settings = loadSettings();
@@ -191,20 +286,36 @@ function initMobileMenu() {
 
     const label = document.querySelector(".toggle-label");
     if (label) label.textContent = enabled ? "فعال" : "غیرفعال";
+
+    document.dispatchEvent(
+      new CustomEvent("soundChanged", {
+        detail: { sound: enabled },
+      }),
+    );
   }
+
+  // ============================================
+  // 🎨 ساخت دکمه‌های مهره (فقط در صفحات دیگر به‌جز settings.html)
+  // ============================================
 
   function buildPieceSetButtons() {
     const container = document.getElementById("pieceSetsContainer");
     if (!container) return;
 
-    const currentSet = loadSettings().pieceSet || "cburnett";
+    // اگه در صفحه تنظیمات هستیم، کاری نکن (چون خودش مدیریت میکنه)
+    if (window._isSettingsPage) return;
+
+    const currentSet = getCurrentPieceSet();
     container.innerHTML = "";
 
     pieceSets.forEach((setName) => {
       const btn = document.createElement("button");
       btn.className = `piece-set-btn ${setName === currentSet ? "active" : ""}`;
       btn.dataset.set = setName;
-      btn.textContent = setName.charAt(0).toUpperCase() + setName.slice(1);
+      // اسم زیبا برای نمایش
+      const displayName = setName.replace(/_/g, " ");
+      btn.textContent =
+        displayName.charAt(0).toUpperCase() + displayName.slice(1);
       btn.title = setName;
       btn.onclick = () => {
         changePieceSet(setName);
@@ -213,25 +324,29 @@ function initMobileMenu() {
     });
   }
 
+  // ============================================
+  // 🚀 مقداردهی اولیه
+  // ============================================
+
   function initSettings() {
-    // باز کردن از منو
+    // 🔹 باز کردن پنل تنظیمات از منو
     const menuLink = document.getElementById("settingsMenuLink");
     if (menuLink) {
       menuLink.addEventListener("click", (e) => {
         e.preventDefault();
-        // بستن منو
         const nav = document.getElementById("mainNav");
         if (nav) nav.classList.remove("show");
-        // باز کردن پنل تنظیمات
         togglePanel(true);
       });
     }
 
+    // 🔹 دکمه بستن پنل
     const closeBtn = document.getElementById("settingsClose");
     if (closeBtn) {
       closeBtn.addEventListener("click", () => togglePanel(false));
     }
 
+    // 🔹 بستن پنل با کلیک بیرون
     document.addEventListener("click", (e) => {
       const panel = document.getElementById("settingsPanel");
       if (panel && panel.classList.contains("open")) {
@@ -241,12 +356,14 @@ function initMobileMenu() {
       }
     });
 
+    // 🔹 دکمه‌های تم
     document.querySelectorAll(".theme-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
         applyTheme(btn.dataset.theme);
       });
     });
 
+    // 🔹 دکمه صدا
     const soundToggle = document.getElementById("soundToggle");
     if (soundToggle) {
       const settings = loadSettings();
@@ -259,11 +376,19 @@ function initMobileMenu() {
       });
     }
 
-    buildPieceSetButtons();
+    // 🔹 دکمه‌های مهره (فقط در صفحات غیر از settings.html)
+    if (!window._isSettingsPage) {
+      buildPieceSetButtons();
+    }
 
+    // 🔹 اعمال تم ذخیره‌شده
     const settings = loadSettings();
-    applyTheme(settings.theme || "light");
+    applyTheme(settings.theme || "4");
   }
+
+  // ============================================
+  // 📦 صادر کردن توابع به window
+  // ============================================
 
   window.ChessSettings = {
     loadSettings,
@@ -272,10 +397,16 @@ function initMobileMenu() {
     changePieceSet,
     toggleSound,
     togglePanel,
-    getCurrentPieceSet: () => loadSettings().pieceSet || "cburnett",
-    getCurrentTheme: () => loadSettings().theme || "light",
-    isSoundEnabled: () => loadSettings().sound !== false,
+    getCurrentPieceSet,
+    getCurrentTheme,
+    isSoundEnabled,
+    buildPieceSetButtons,
+    pieceSets: pieceSets,
   };
+
+  // ============================================
+  // 🚀 راه‌اندازی در زمان مناسب
+  // ============================================
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initSettings);
@@ -284,20 +415,41 @@ function initMobileMenu() {
   }
 })();
 
+// ============================================
+// 🎯 توابع کمکی برای استفاده در صفحات دیگر
+// ============================================
+
 function getCurrentPieceSet() {
   return window.ChessSettings
     ? window.ChessSettings.getCurrentPieceSet()
-    : "cburnett";
+    : "classic";
 }
 
 function getCurrentTheme() {
-  return window.ChessSettings
-    ? window.ChessSettings.getCurrentTheme()
-    : "light";
+  return window.ChessSettings ? window.ChessSettings.getCurrentTheme() : "4";
 }
 
+function getBoardColors() {
+  const root = document.documentElement;
+  const light =
+    getComputedStyle(root).getPropertyValue("--board-light").trim() ||
+    "#f0d9b5";
+  const dark =
+    getComputedStyle(root).getPropertyValue("--board-dark").trim() || "#b58863";
+  return { light, dark };
+}
+
+// ============================================
+// 🚀 بارگذاری اولیه
+// ============================================
+
 document.addEventListener("DOMContentLoaded", async () => {
+  // بارگذاری هدر و فوتر
   await loadComponent("#header-placeholder", "header.html");
   await loadComponent("#footer-placeholder", "footer.html");
+
+  // راه‌اندازی منوی موبایل
   initMobileMenu();
+
+  console.log("✅ ChessHub script loaded successfully");
 });
