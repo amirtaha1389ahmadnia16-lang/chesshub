@@ -95,18 +95,18 @@
   // ============================================
   const pieceImages = {};
   const pieceCodes = {
-    wK: "wK.png",
-    wQ: "wQ.png",
-    wR: "wR.png",
-    wB: "wB.png",
-    wN: "wN.png",
-    wP: "wP.png",
-    bK: "bK.png",
-    bQ: "bQ.png",
-    bR: "bR.png",
-    bB: "bB.png",
-    bN: "bN.png",
-    bP: "bP.png",
+    wk: "wk.png",
+    wq: "wq.png",
+    wr: "wr.png",
+    wb: "wb.png",
+    wn: "wn.png",
+    wp: "wp.png",
+    bk: "bk.png",
+    bq: "bq.png",
+    br: "br.png",
+    bb: "bb.png",
+    bn: "bn.png",
+    bp: "bp.png",
   };
 
   function loadPieces() {
