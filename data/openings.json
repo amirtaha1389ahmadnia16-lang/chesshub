@@ -1,299 +1,83 @@
 {
   "categories": [
     {
-      "name": "گشایش‌های 1.e4",
+      "name": "گشایش های 1.e4",
       "code": "e4",
       "openings": [
         {
-          "name": "دفاع سیسیلی",
-          "moves": ["e4", "c5"],
+          "name": "گامبی اسمیت مورا",
+          "moves": [
+            "e4",
+            "c5",
+            "d4",
+            "cxd5"
+          ],
           "variants": [
             {
-              "name": "واریانت ناژدورف",
-              "moves": ["e4", "c5", "Nf3", "d6", "d4", "cxd4", "Nxd4", "Nf6", "Nc3", "a6"],
-              "stats": { "whiteWins": 38, "blackWins": 32, "draws": 30 },
+              "name": "شاخه اصلی",
+              "moves": [
+                "e4",
+                "c5",
+                "d4",
+                "cxd5",
+                "Nf3"
+              ],
+              "stats": {
+                "whiteWins": 20,
+                "blackWins": 60,
+                "draws": 20
+              },
               "strengths": [
-                "انعطاف‌پذیری بالا برای سیاه",
-                "فشار روی خانه e4 با ...e5 یا ...b5",
-                "امکان حمله متقابل سریع در جناح وزیر"
+                "حمله ",
+                "حمله",
+                "حمله"
               ],
               "weaknesses": [
-                "توسعه نیافتن سریع فیل وزیر",
-                "خطر حمله مستقیم سفید در جناح شاه"
+                "دفاع",
+                "دفاع",
+                "دفاع"
               ],
               "popularMoves": [
-                { "san": "6.Bg5", "description": "حمله ریشتر-رائوزر", "moves": ["Bg5", "e6", "f4"] },
-                { "san": "6.Be3", "description": "حمله انگلیسی", "moves": ["Be3", "e5", "Nb3"] },
-                { "san": "6.Be2", "description": "واریانت کلاسیک", "moves": ["Be2", "e5", "Nb3"] }
+                {
+                  "san": "3.Bc4",
+                  "description": "لاین الکی",
+                  "moves": [
+                    "Bc4",
+                    "a6"
+                  ]
+                }
               ],
-              "evaluation": { "score": "+0.3", "summary": "سفید برتری اندکی دارد اما سیاه ضدحمله‌های خطرناکی در اختیار دارد." },
+              "evaluation": {
+                "score": "0.25",
+                "summary": "سفید برتری فضا دارد"
+              },
               "ideas": [
-                "سفید: حمله در جناح شاه با g4-h4",
-                "سیاه: ضدحمله در جناح وزیر با b5-b4",
-                "سفید: تثبیت مرکز با f4 و e5"
+                "حمله در جناح شاه ",
+                "حمله در جناح وزیر"
               ],
               "endgames": [
-                "آخر بازی رخ و پیاده – شانس تساوی برای سیاه",
-                "فیل‌های ناهمرنگ – معمولاً تساوی",
-                "وزیر و رخ – پیچیده و پویا"
+                "رخ و شاه و پیاده در مقابل رخ و شاه و پیاده"
               ],
               "traps": [
                 {
-                  "name": "تله مسموم",
-                  "moves": ["e4", "c5", "Nf3", "d6", "d4", "cxd4", "Nxd4", "Nf6", "Nc3", "a6", "Bg5", "e6", "f4", "Qb6", "Qd2", "Qxb2", "Rb1"]
+                  "name": "تله الکی",
+                  "moves": [
+                    "e4",
+                    "c5",
+                    "d4",
+                    "c4"
+                  ]
                 }
               ],
               "sampleGames": [
-                { "white": "Fischer", "black": "Spassky", "year": 1972, "result": "1-0", "pgn": "1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. Bg5 e6 7. f4 Be7 8. Qf3 Qc7 9. O-O-O Nbd7 10. g4 b5 11. Bxf6 Nxf6 12. g5 Nd7 13. f5" },
-                { "white": "Kasparov", "black": "Topalov", "year": 1999, "result": "1-0", "pgn": "1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. Be3 e6 7. f3 b5 8. g4 h6 9. Qd2 b4 10. Nce2 Bb7 11. Ng3 d5 12. e5 Nfd7 13. f4" }
-              ]
-            },
-            {
-              "name": "واریانت دراگون",
-              "moves": ["e4", "c5", "Nf3", "d6", "d4", "cxd4", "Nxd4", "Nf6", "Nc3", "g6"],
-              "stats": { "whiteWins": 40, "blackWins": 30, "draws": 30 },
-              "strengths": [
-                "فیانچتو فیل شاه برای سیاه",
-                "کنترل قطر بزرگ h8-a1",
-                "بازی پویا و ضدحمله‌های سریع"
-              ],
-              "weaknesses": [
-                "ضعف در خانه h6 و g6",
-                "حمله یوگسلاو سفید بسیار خطرناک است"
-              ],
-              "popularMoves": [
-                { "san": "6.Be3", "description": "حمله یوگسلاو", "moves": ["Be3", "Bg7", "f3", "O-O", "Qd2"] },
-                { "san": "6.Be2", "description": "واریانت کلاسیک", "moves": ["Be2", "Bg7", "O-O", "O-O"] }
-              ],
-              "evaluation": { "score": "+0.4", "summary": "سفید در حمله یوگسلاو برتری محسوسی دارد اما بازی بسیار تیز است." },
-              "ideas": [
-                "سفید: حمله یوگسلاو با f3 و g4-h4",
-                "سیاه: ضدحمله در مرکز با ...d5 یا ...e5"
-              ],
-              "endgames": [
-                "فیل‌های همرنگ – برتری سفید",
-                "رخ و پیاده – معمولاً تساوی"
-              ],
-              "traps": [
                 {
-                  "name": "تله فیانچتو",
-                  "moves": ["e4", "c5", "Nf3", "d6", "d4", "cxd4", "Nxd4", "Nf6", "Nc3", "g6", "Be3", "Bg7", "f3", "O-O", "Qd2", "Nc6", "O-O-O", "d5", "Nxc6", "bxc6", "e5"]
+                  "white": "بابی فیشر",
+                  "black": "بابی",
+                  "year": 1996,
+                  "result": "0-1",
+                  "pgn": "1.e4 c5 2.d4 c4 3.d5 e6 4.d6 Be7 5.dxe7 *"
                 }
-              ],
-              "sampleGames": [
-                { "white": "Carlsen", "black": "Anand", "year": 2013, "result": "1-0", "pgn": "1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 g6 6. Be3 Bg7 7. f3 O-O 8. Qd2 Nc6 9. O-O-O d5 10. exd5 Nxd5 11. Nxc6 bxc6 12. Bd4 e5 13. Bc5 Re8 14. Ne4" }
               ]
-            }
-          ]
-        },
-        {
-          "name": "دفاع روسی",
-          "moves": ["e4", "e5", "Nf3", "Nf6"],
-          "variants": [
-            {
-              "name": "واریانت کلاسیک",
-              "moves": ["e4", "e5", "Nf3", "Nf6", "Nxe5", "d6", "Nf3", "Nxe4"],
-              "stats": { "whiteWins": 35, "blackWins": 30, "draws": 35 },
-              "strengths": [
-                "سیاه بلافاصله به پیاده e4 حمله می‌کند",
-                "ساختار متقارن و ساده"
-              ],
-              "weaknesses": [
-                "سفید می‌تواند با d4 برتری فضایی بگیرد"
-              ],
-              "popularMoves": [
-                { "san": "4.d4", "description": "پیشروی مرکزی سفید", "moves": ["d4", "d5", "Bd3"] }
-              ],
-              "evaluation": { "score": "+0.2", "summary": "پوزیسیون متوازن با برتری جزئی سفید." },
-              "ideas": [
-                "سفید: توسعه سریع و کنترل مرکز",
-                "سیاه: مبادله و رسیدن به آخر بازی مساوی"
-              ],
-              "endgames": [
-                "آخر بازی متقارن – معمولاً مساوی"
-              ],
-              "traps": [],
-              "sampleGames": []
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "گشایش‌های 1.d4",
-      "code": "d4",
-      "openings": [
-        {
-          "name": "گامبی وزیر رد شده",
-          "moves": ["d4", "d5", "c4", "e6"],
-          "variants": [
-            {
-              "name": "دفاع ارتدکس",
-              "moves": ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Bg5", "Be7", "e3", "O-O", "Nf3", "Nbd7"],
-              "stats": { "whiteWins": 35, "blackWins": 25, "draws": 40 },
-              "strengths": [
-                "ساختار پیاده‌ای محکم برای سیاه",
-                "امکان ضدحمله در مرکز با ...c5"
-              ],
-              "weaknesses": [
-                "فیل c8 سیاه تا مدت‌ها غیرفعال می‌ماند",
-                "فضای کمتر برای سیاه"
-              ],
-              "popularMoves": [
-                { "san": "10.Rc1", "description": "فشار بر ستون c", "moves": ["Rc1", "c6", "Bd3"] },
-                { "san": "11.Bxf6", "description": "مبادله فیل", "moves": ["Bxf6", "Nxf6", "Ne5"] }
-              ],
-              "evaluation": { "score": "+0.5", "summary": "سفید برتری فضایی و ابتکار عمل دارد." },
-              "ideas": [
-                "سفید: پیشروی در جناح وزیر با b4-b5",
-                "سیاه: آزادسازی با ...c5 یا ...e5",
-                "سفید: حمله با Ne5 و f4"
-              ],
-              "endgames": [
-                "آخر بازی وزیر و رخ – پیچیده و پویا",
-                "آخر بازی فیل‌های همرنگ – برتری اندک سفید"
-              ],
-              "traps": [
-                {
-                  "name": "تله ویناور",
-                  "moves": ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Bg5", "Be7", "e3", "O-O", "Nf3", "Nbd7", "Rc1", "c6", "Bd3", "dxc4"]
-                }
-              ],
-              "sampleGames": [
-                { "white": "Kasparov", "black": "Karpov", "year": 1985, "result": "1-0", "pgn": "1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 Be7 5. e3 O-O 6. Nf3 Nbd7 7. Rc1 c6 8. Bd3 dxc4 9. Bxc4 Nd5 10. Bxe7 Qxe7 11. O-O Nxc3 12. Rxc3 e5 13. dxe5 Nxe5 14. Nxe5 Qxe5 15. f4 Qf6 16. Qd5 Be6 17. Qxb7 Rfb8 18. Qa6 Bxc4 19. Rxc4 Qb6 20. Qxb6 axb6 21. b3" }
-              ]
-            },
-            {
-              "name": "دفاع اسلاو",
-              "moves": ["d4", "d5", "c4", "c6"],
-              "stats": { "whiteWins": 32, "blackWins": 30, "draws": 38 },
-              "strengths": [
-                "ساختار پیاده‌ای بسیار محکم",
-                "فیل c8 باز می‌ماند"
-              ],
-              "weaknesses": [
-                "فضای کمتر برای سیاه",
-                "خانه c6 ممکن است هدف حملات شود"
-              ],
-              "popularMoves": [
-                { "san": "5.e3", "description": "واریانت کلاسیک", "moves": ["e3", "Nf6", "Nf3"] }
-              ],
-              "evaluation": { "score": "+0.3", "summary": "سفید برتری فضایی دارد اما شکستن ساختار سیاه دشوار است." },
-              "ideas": [
-                "سفید: پیشروی در جناح وزیر",
-                "سیاه: ...e5 یا ...b5 برای ضدحمله"
-              ],
-              "endgames": [
-                "آخر بازی رخ و پیاده – معمولاً تساوی"
-              ],
-              "traps": [],
-              "sampleGames": []
-            }
-          ]
-        },
-        {
-          "name": "دفاع هندی شاه",
-          "moves": ["d4", "Nf6", "c4", "g6"],
-          "variants": [
-            {
-              "name": "واریانت کلاسیک",
-              "moves": ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7", "e4", "d6", "Nf3", "O-O"],
-              "stats": { "whiteWins": 40, "blackWins": 30, "draws": 30 },
-              "strengths": [
-                "بازی پویا و تهاجمی برای سیاه",
-                "فیانچتو فیل شاه بسیار قدرتمند"
-              ],
-              "weaknesses": [
-                "سفید می‌تواند با e4-d4 مرکز را مستحکم کند",
-                "ضعف در خانه d6"
-              ],
-              "popularMoves": [
-                { "san": "7.Be3", "description": "توسعه فیل", "moves": ["Be3", "e5", "d5"] }
-              ],
-              "evaluation": { "score": "+0.4", "summary": "سفید برتری فضایی دارد اما سیاه پتانسیل حمله بالایی دارد." },
-              "ideas": [
-                "سفید: ساختار مرکزی محکم",
-                "سیاه: حمله در جناح شاه با ...f5"
-              ],
-              "endgames": [
-                "آخر بازی پویا – هر دو طرف شانس دارند"
-              ],
-              "traps": [],
-              "sampleGames": [
-                { "white": "Fischer", "black": "Reshevsky", "year": 1963, "result": "1-0", "pgn": "1. d4 Nf6 2. c4 g6 3. Nc3 Bg7 4. e4 d6 5. Nf3 O-O 6. Be2 e5 7. O-O Nc6 8. d5 Ne7 9. b4 a5 10. bxa5 Rxa5 11. a4 c6 12. dxc6 bxc6 13. Bb2" }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "گشایش‌های 1.c4",
-      "code": "c4",
-      "openings": [
-        {
-          "name": "گشایش انگلیسی",
-          "moves": ["c4"],
-          "variants": [
-            {
-              "name": "واریانت متقارن",
-              "moves": ["c4", "c5", "Nf3", "Nf6", "Nc3", "Nc6"],
-              "stats": { "whiteWins": 34, "blackWins": 28, "draws": 38 },
-              "strengths": [
-                "انعطاف ساختاری برای هر دو طرف",
-                "کنترل بلندمدت مرکز"
-              ],
-              "weaknesses": [
-                "عدم تعهد زودهنگام ممکن است به برتری قطعی منجر نشود"
-              ],
-              "popularMoves": [
-                { "san": "4.g3", "description": "فیانچتو فیل شاه", "moves": ["g3", "g6", "Bg2"] }
-              ],
-              "evaluation": { "score": "+0.2", "summary": "موضع متقارن با برتری جزئی سفید." },
-              "ideas": [
-                "سفید: پیشروی d4 یا b4",
-                "سیاه: ...d5 یا ...e5 برای ضدحمله"
-              ],
-              "endgames": [
-                "رخ و پیاده – اغلب تساوی"
-              ],
-              "traps": [],
-              "sampleGames": []
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "گشایش‌های 1.Nf3",
-      "code": "Nf3",
-      "openings": [
-        {
-          "name": "گشایش رتی",
-          "moves": ["Nf3"],
-          "variants": [
-            {
-              "name": "دفاع کینگ‌ز ایش",
-              "moves": ["Nf3", "d5", "g3", "Nf6", "Bg2", "c5", "O-O", "Nc6"],
-              "stats": { "whiteWins": 36, "blackWins": 28, "draws": 36 },
-              "strengths": [
-                "انعطاف‌پذیری بالا",
-                "فیانچتو فیل شاه قدرتمند"
-              ],
-              "weaknesses": [
-                "توسعه کند ممکن است به سیاه فرصت دهد"
-              ],
-              "popularMoves": [],
-              "evaluation": { "score": "+0.2", "summary": "پوزیسیون متوازن با برتری جزئی سفید." },
-              "ideas": [
-                "سفید: فیانچتو و کنترل مرکز",
-                "سیاه: حمله در مرکز با ...d4"
-              ],
-              "endgames": [
-                "آخر بازی متوازن"
-              ],
-              "traps": [],
-              "sampleGames": []
             }
           ]
         }
