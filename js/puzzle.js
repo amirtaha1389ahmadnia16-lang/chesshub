@@ -1,4 +1,5 @@
 // puzzle.js - پازل روزانه با تشخیص خودکار رنگ کاربر و نمایش آن
+// ✅ تنظیم شده برای استفاده از مهره‌های "neo" به‌عنوان پیش‌فرض
 (function () {
   // ----- متغیرها -----
   let game = null;
@@ -28,6 +29,7 @@
   // 🎨 لیست ست‌های معتبر (همون پوشه‌های موجود در پروژه)
   // ============================================
   const validSets = [
+    "neo", // <-- پیش‌فرض جدید
     "classic",
     "3d_chesskid",
     "3d_plastic",
@@ -55,7 +57,6 @@
     "metal",
     "modern",
     "nature",
-    "neo",
     "neon",
     "neo_wood",
     "newspaper",
@@ -69,29 +70,29 @@
   ];
 
   // ============================================
-  // 🎨 دریافت مهره از تنظیمات (با fallback به classic)
+  // 🎨 دریافت مهره از تنظیمات (پیش‌فرض: neo)
   // ============================================
   function getCurrentPieceSet() {
     try {
       const settings = JSON.parse(localStorage.getItem("chesshub_settings"));
-      let set = settings?.pieceSet || "classic";
-      // اگه ست انتخاب‌شده معتبر نبود، به classic برگرد
+      let set = settings?.pieceSet || "neo"; // <-- پیش‌فرض neo
+      // اگه ست انتخاب‌شده معتبر نبود، به neo برگرد
       if (!validSets.includes(set)) {
-        console.warn(`ست "${set}" معتبر نیست، استفاده از classic`);
-        set = "classic";
+        console.warn(`ست "${set}" معتبر نیست، استفاده از neo`);
+        set = "neo";
         if (settings) {
-          settings.pieceSet = "classic";
+          settings.pieceSet = "neo";
           localStorage.setItem("chesshub_settings", JSON.stringify(settings));
         }
       }
       return set;
     } catch {
-      return "classic";
+      return "neo";
     }
   }
 
   // ============================================
-  // 🖼️ بارگذاری تصاویر مهره‌ها (با نام‌های بزرگ)
+  // 🖼️ بارگذاری تصاویر مهره‌ها (با حروف کوچک)
   // ============================================
   const pieceImages = {};
   const pieceCodes = {
@@ -156,10 +157,10 @@
     const optionsDiv = document.getElementById("promotionOptions");
     optionsDiv.innerHTML = "";
     const pieces = [
-      { type: "n", name: "اسب", file: "wN.png" },
-      { type: "b", name: "فیل", file: "wB.png" },
-      { type: "r", name: "رخ", file: "wR.png" },
-      { type: "q", name: "وزیر", file: "wQ.png" },
+      { type: "n", name: "اسب", file: "wn.png" },
+      { type: "b", name: "فیل", file: "wb.png" },
+      { type: "r", name: "رخ", file: "wr.png" },
+      { type: "q", name: "وزیر", file: "wq.png" },
     ];
     const pieceSet = getCurrentPieceSet();
     pieces.forEach((piece) => {
@@ -187,7 +188,7 @@
   }
 
   // ============================================
-  // 🎨 رسم تخته (با کلیدهای بزرگ)
+  // 🎨 رسم تخته (با کلیدهای کوچک)
   // ============================================
   function renderBoard() {
     if (!game) return;
@@ -214,7 +215,7 @@
         squareDiv.style.touchAction = "none";
         if (piece) {
           const key =
-            (piece.color === "w" ? "w" : "b") + piece.type.toUpperCase();
+            (piece.color === "w" ? "w" : "b") + piece.type.toLowerCase();
           const img = document.createElement("img");
           img.src = `pieces/${pieceSet}/${pieceCodes[key]}`;
           img.classList.add("piece-img");
