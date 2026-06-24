@@ -40,19 +40,19 @@
   const recordDisplayDiv = document.getElementById("recordDisplay");
 
   // ============================================
-  // 🎨 دریافت مهره از تنظیمات
+  // 🎨 دریافت مهره از تنظیمات (پیش‌فرض: neo)
   // ============================================
   function getCurrentPieceSet() {
     try {
       const settings = JSON.parse(localStorage.getItem("chesshub_settings"));
-      return settings?.pieceSet || "classic";
+      return settings?.pieceSet || "neo"; // <-- تغییر به neo
     } catch {
-      return "classic";
+      return "neo"; // <-- تغییر به neo
     }
   }
 
   // ============================================
-  // 🖼️ بارگذاری تصاویر مهره‌ها (اصلاح شده)
+  // 🖼️ بارگذاری تصاویر مهره‌ها (با حروف کوچک)
   // ============================================
   const pieceImages = {};
   const pieceCodes = {
@@ -175,7 +175,7 @@
   }
 
   // ============================================
-  // 🎨 رسم تخته (با چرخش و هایلایت) - اصلاح شده
+  // 🎨 رسم تخته (با چرخش و هایلایت)
   // ============================================
   function renderBoard(highlightFrom = null, highlightTo = null) {
     if (!game) return;
@@ -640,7 +640,6 @@
     if (puzzleFinished) return;
     if (game.turn() !== userColor) return;
 
-    // دریافت المان دقیق‌تر با useCapture
     const elem = document.elementFromPoint(clientX, clientY);
     const squareDiv = elem?.closest?.(".square");
     if (!squareDiv) return;
@@ -676,7 +675,6 @@
     }
     removeDragClone();
 
-    // دریافت المان دقیق‌تر
     const elem = document.elementFromPoint(clientX, clientY);
     const targetSquareDiv = elem?.closest?.(".square");
     let targetSquare = targetSquareDiv ? targetSquareDiv.dataset.square : null;
@@ -713,7 +711,7 @@
     handleDragEnd(e.clientX, e.clientY);
   }
 
-  // رویدادهای لمسی (بهینه‌شده برای موبایل)
+  // رویدادهای لمسی
   function onTouchStart(e) {
     e.preventDefault();
     const touch = e.touches[0];
@@ -880,23 +878,19 @@
         .querySelector('.mode-btn[data-mode="unlimited"]')
         .classList.add("active");
 
-      // رویدادهای ماوس
       boardDiv.addEventListener("mousedown", onMouseDown);
       window.addEventListener("mousemove", onMouseMove);
       window.addEventListener("mouseup", onMouseUp);
 
-      // رویدادهای لمسی (با passive: false برای preventDefault)
       boardDiv.addEventListener("touchstart", onTouchStart, { passive: false });
       boardDiv.addEventListener("touchmove", onTouchMove, { passive: false });
       boardDiv.addEventListener("touchend", onTouchEnd, { passive: false });
 
-      // کلیک جایگزین
       boardDiv.addEventListener("click", onClickFallback);
 
       resetBtn.addEventListener("click", resetGame);
       boardDiv.style.cursor = "grab";
 
-      // اعمال تم اولیه
       resetGame();
     }
   });

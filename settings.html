@@ -599,6 +599,9 @@
                 .filter((cls) => !cls.startsWith("theme-"))
                 .join(" ");
               document.body.classList.add(`theme-${settings.theme}`);
+            } else {
+              // اگر تمی ذخیره نشده، theme-1 رو اعمال کن
+              document.body.classList.add("theme-1");
             }
           } catch (e) {}
         })();
@@ -639,9 +642,10 @@
         ];
 
         // ============================================
-        // 📦 لیست ۳۸ مهره
+        // 📦 لیست مهره‌ها (با neo به‌عنوان پیش‌فرض)
         // ============================================
         const pieceSets = {
+          پیش‌فرض: ["neo"], // <-- اضافه شد
           "سه بعدی": ["3d_chesskid", "3d_plastic", "3d_staunton", "3d_wood"],
           کلاسیک: [
             "alpha",
@@ -652,7 +656,7 @@
             "tournament",
             "vintage",
           ],
-          مدرن: ["glass", "light", "marble", "metal", "modern", "neo", "neon"],
+          مدرن: ["glass", "light", "marble", "metal", "modern", "neon"],
           کارتونی: ["8_bit", "bubblegum", "graffiti", "lolz", "tigers"],
           طبیعت: ["icy_sea", "nature", "neo_wood", "ocean", "sky", "wood"],
           ویژه: [
@@ -669,7 +673,7 @@
         };
 
         // ============================================
-        // 💾 ذخیره و بازیابی تنظیمات
+        // 💾 ذخیره و بازیابی تنظیمات (پیش‌فرض neo و theme-1)
         // ============================================
         function loadSettings() {
           try {
@@ -679,7 +683,7 @@
               return parsed;
             }
           } catch (e) {}
-          return { pieceSet: "classic", theme: "4" };
+          return { pieceSet: "neo", theme: "1" }; // <-- پیش‌فرض جدید
         }
 
         function saveSettings(settings) {
@@ -695,7 +699,7 @@
           const container = document.getElementById("themeGrid");
           if (!container) return;
 
-          const currentTheme = loadSettings().theme || "4";
+          const currentTheme = loadSettings().theme || "1";
 
           container.innerHTML = "";
           themes.forEach((theme) => {
@@ -724,13 +728,13 @@
         }
 
         // ============================================
-        // 🎨 ساخت دکمه‌های مهره (بدون اسم) - اصلاح شده
+        // 🎨 ساخت دکمه‌های مهره (با neo به‌عنوان پیش‌فرض)
         // ============================================
         function buildPieceButtons() {
           const container = document.getElementById("pieceSetsContainer");
           if (!container) return;
 
-          const currentPieceSet = loadSettings().pieceSet || "classic";
+          const currentPieceSet = loadSettings().pieceSet || "neo";
 
           container.innerHTML = "";
 
@@ -753,7 +757,7 @@
               btn.className = `piece-btn${setName === currentPieceSet ? " active" : ""}`;
               btn.dataset.set = setName;
 
-              // مسیرهای اصلاح شده با حروف کوچک
+              // مسیرهای با حروف کوچک
               const wKPath = `pieces/${setName}/wk.png`;
               const bKPath = `pieces/${setName}/bk.png`;
 
@@ -793,9 +797,9 @@
         // ============================================
         function saveAllSettings() {
           const settings = loadSettings();
-          const newTheme = window._tempTheme || settings.theme || "4";
+          const newTheme = window._tempTheme || settings.theme || "1";
           const newPieceSet =
-            window._tempPieceSet || settings.pieceSet || "classic";
+            window._tempPieceSet || settings.pieceSet || "neo";
 
           settings.theme = newTheme;
           settings.pieceSet = newPieceSet;
@@ -829,38 +833,38 @@
         }
 
         // ============================================
-        // 🔄 بازنشانی به پیش‌فرض
+        // 🔄 بازنشانی به پیش‌فرض (neo و theme-1)
         // ============================================
         function resetToDefault() {
           if (!confirm("آیا مطمئنی؟ تنظیمات به حالت پیش‌فرض برمی‌گردد."))
             return;
 
-          const settings = { pieceSet: "classic", theme: "4" };
+          const settings = { pieceSet: "neo", theme: "1" };
           saveSettings(settings);
 
           document.body.className = document.body.className
             .split(" ")
             .filter((cls) => !cls.startsWith("theme-"))
             .join(" ");
-          document.body.classList.add("theme-4");
+          document.body.classList.add("theme-1");
 
-          window._tempTheme = "4";
-          window._tempPieceSet = "classic";
+          window._tempTheme = "1";
+          window._tempPieceSet = "neo";
 
           document.querySelectorAll(".theme-btn").forEach((btn) => {
-            btn.classList.toggle("active", btn.dataset.theme === "4");
+            btn.classList.toggle("active", btn.dataset.theme === "1");
           });
           document.querySelectorAll(".piece-btn").forEach((btn) => {
-            btn.classList.toggle("active", btn.dataset.set === "classic");
+            btn.classList.toggle("active", btn.dataset.set === "neo");
           });
 
           document.dispatchEvent(
             new CustomEvent("pieceSetChanged", {
-              detail: { pieceSet: "classic" },
+              detail: { pieceSet: "neo" },
             }),
           );
           document.dispatchEvent(
-            new CustomEvent("themeChanged", { detail: { theme: "4" } }),
+            new CustomEvent("themeChanged", { detail: { theme: "1" } }),
           );
 
           showToast("✅ تنظیمات به پیش‌فرض بازگشت");
@@ -887,8 +891,8 @@
         // ============================================
         function init() {
           const settings = loadSettings();
-          window._tempTheme = settings.theme || "4";
-          window._tempPieceSet = settings.pieceSet || "classic";
+          window._tempTheme = settings.theme || "1";
+          window._tempPieceSet = settings.pieceSet || "neo";
 
           buildThemeButtons();
           buildPieceButtons();

@@ -92,13 +92,16 @@ function initMobileMenu() {
 // ============================================
 
 (function () {
+  // ✅ تغییر ۱: مهره‌ی پیش‌فرض = "neo" و تم پیش‌فرض = "1"
   const defaultSettings = {
-    pieceSet: "cburnett",
-    theme: "light",
+    pieceSet: "neo", // <-- قبلاً "cburnett" بود
+    theme: "1", // <-- قبلاً "light" بود
     sound: true,
   };
 
+  // ✅ تغییر ۲: اضافه کردن "neo" به لیست ست‌های معتبر
   const pieceSets = [
+    "neo", // <-- اضافه شد
     "cburnett",
     "merida",
     "alpha",
@@ -197,7 +200,7 @@ function initMobileMenu() {
     const container = document.getElementById("pieceSetsContainer");
     if (!container) return;
 
-    const currentSet = loadSettings().pieceSet || "cburnett";
+    const currentSet = loadSettings().pieceSet || "neo";
     container.innerHTML = "";
 
     pieceSets.forEach((setName) => {
@@ -214,15 +217,12 @@ function initMobileMenu() {
   }
 
   function initSettings() {
-    // باز کردن از منو
     const menuLink = document.getElementById("settingsMenuLink");
     if (menuLink) {
       menuLink.addEventListener("click", (e) => {
         e.preventDefault();
-        // بستن منو
         const nav = document.getElementById("mainNav");
         if (nav) nav.classList.remove("show");
-        // باز کردن پنل تنظیمات
         togglePanel(true);
       });
     }
@@ -262,7 +262,7 @@ function initMobileMenu() {
     buildPieceSetButtons();
 
     const settings = loadSettings();
-    applyTheme(settings.theme || "light");
+    applyTheme(settings.theme || "1");
   }
 
   window.ChessSettings = {
@@ -272,8 +272,8 @@ function initMobileMenu() {
     changePieceSet,
     toggleSound,
     togglePanel,
-    getCurrentPieceSet: () => loadSettings().pieceSet || "cburnett",
-    getCurrentTheme: () => loadSettings().theme || "light",
+    getCurrentPieceSet: () => loadSettings().pieceSet || "neo",
+    getCurrentTheme: () => loadSettings().theme || "1",
     isSoundEnabled: () => loadSettings().sound !== false,
   };
 
@@ -284,16 +284,15 @@ function initMobileMenu() {
   }
 })();
 
+// ✅ تغییر ۳: توابع کمکی با پیش‌فرض neo و theme-1
 function getCurrentPieceSet() {
   return window.ChessSettings
     ? window.ChessSettings.getCurrentPieceSet()
-    : "cburnett";
+    : "neo";
 }
 
 function getCurrentTheme() {
-  return window.ChessSettings
-    ? window.ChessSettings.getCurrentTheme()
-    : "light";
+  return window.ChessSettings ? window.ChessSettings.getCurrentTheme() : "1";
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
