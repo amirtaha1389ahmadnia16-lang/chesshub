@@ -793,181 +793,181 @@ a {
 }
 
 /* ============================================
-   🎨 تم‌های رنگی (فقط روی تخته شطرنج)
+   🎨 تم‌های رنگی (اصلاح شده - خانه روشن و تیره به‌درستی)
    ============================================ */
 
 /* ----- تم ۱ ----- */
 .theme-1 {
-  --board-light: #6a9b41;
-  --board-dark: #f3f3f4;
+  --board-light: #f3f3f4;
+  --board-dark: #6a9b41;
 }
 
 /* ----- تم ۲ ----- */
 .theme-2 {
-  --board-light: #c7703c;
-  --board-dark: #ecc79b;
+  --board-light: #ecc79b;
+  --board-dark: #c7703c;
 }
 
 /* ----- تم ۳ ----- */
 .theme-3 {
-  --board-light: #4b7399;
-  --board-dark: #eae9d2;
+  --board-light: #eae9d2;
+  --board-dark: #4b7399;
 }
 
 /* ----- تم ۴ (پیش‌فرض) ----- */
 .theme-4 {
-  --board-light: #b58863;
-  --board-dark: #f0d9b5;
+  --board-light: #f0d9b5;
+  --board-dark: #b58863;
 }
 
 /* ----- تم ۵ ----- */
 .theme-5 {
-  --board-light: #fcd8dd;
-  --board-dark: #ffffff;
+  --board-light: #ffffff;
+  --board-dark: #fcd8dd;
 }
 
 /* ----- تم ۶ ----- */
 .theme-6 {
-  --board-light: #854d2d;
-  --board-dark: #e0b88f;
+  --board-light: #e0b88f;
+  --board-dark: #854d2d;
 }
 
 /* ----- تم ۷ ----- */
 .theme-7 {
-  --board-light: #6f3b29;
-  --board-dark: #ba8d51;
+  --board-light: #ba8d51;
+  --board-dark: #6f3b29;
 }
 
 /* ----- تم ۸ ----- */
 .theme-8 {
-  --board-light: #2b323f;
-  --board-dark: #717b8e;
+  --board-light: #717b8e;
+  --board-dark: #2b323f;
 }
 
 /* ----- تم ۹ ----- */
 .theme-9 {
-  --board-light: #769656;
-  --board-dark: #eeeed2;
+  --board-light: #eeeed2;
+  --board-dark: #769656;
 }
 
 /* ----- تم ۱۰ ----- */
 .theme-10 {
-  --board-light: #7b9eb3;
-  --board-dark: #cddbe2;
+  --board-light: #cddbe2;
+  --board-dark: #7b9eb3;
 }
 
 /* ----- تم ۱۱ ----- */
 .theme-11 {
-  --board-light: #ababab;
-  --board-dark: #dcdcdc;
+  --board-light: #dcdcdc;
+  --board-dark: #ababab;
 }
 
 /* ----- تم ۱۲ ----- */
 .theme-12 {
-  --board-light: #9ea6a1;
-  --board-dark: #dce6e6;
+  --board-light: #dce6e6;
+  --board-dark: #9ea6a1;
 }
 
 /* ----- تم ۱۳ ----- */
 .theme-13 {
-  --board-light: #726d68;
-  --board-dark: #beb7a0;
+  --board-light: #beb7a0;
+  --board-dark: #726d68;
 }
 
 /* ----- تم ۱۴ ----- */
 .theme-14 {
-  --board-light: #6e6f6f;
-  --board-dark: #e0e0e0;
+  --board-light: #e0e0e0;
+  --board-dark: #6e6f6f;
 }
 
 /* ----- تم ۱۵ ----- */
 .theme-15 {
-  --board-light: #6c625f;
-  --board-dark: #cccccc;
+  --board-light: #cccccc;
+  --board-dark: #6c625f;
 }
 
 /* ----- تم ۱۶ ----- */
 .theme-16 {
-  --board-light: #d08b18;
-  --board-dark: #fce4b2;
+  --board-light: #fce4b2;
+  --board-dark: #d08b18;
 }
 
 /* ----- تم ۱۷ ----- */
 .theme-17 {
-  --board-light: #52514e;
-  --board-dark: #cac8bf;
+  --board-light: #cac8bf;
+  --board-dark: #52514e;
 }
 
 /* ----- تم ۱۸ ----- */
 .theme-18 {
-  --board-light: #8877b7;
-  --board-dark: #efefef;
+  --board-light: #efefef;
+  --board-dark: #8877b7;
 }
 
 /* ----- تم ۱۹ ----- */
 .theme-19 {
-  --board-light: #ba5546;
-  --board-dark: #f0d8bf;
+  --board-light: #f0d8bf;
+  --board-dark: #ba5546;
 }
 
 /* ----- تم ۲۰ ----- */
 .theme-20 {
-  --board-light: #4f4d4b;
-  --board-dark: #aca8a1;
+  --board-light: #aca8a1;
+  --board-dark: #4f4d4b;
 }
 
 /* ----- تم ۲۱ ----- */
 .theme-21 {
-  --board-light: #d3a36a;
-  --board-dark: #edc9a2;
+  --board-light: #edc9a2;
+  --board-dark: #d3a36a;
 }
 
 /* ----- تم ۲۲ ----- */
 .theme-22 {
-  --board-light: #c2d7e2;
-  --board-dark: #efefef;
+  --board-light: #efefef;
+  --board-dark: #c2d7e2;
 }
 
 /* ----- تم ۲۳ ----- */
 .theme-23 {
-  --board-light: #6e4e37;
-  --board-dark: #b89a75;
+  --board-light: #b89a75;
+  --board-dark: #6e4e37;
 }
 
 /* ----- تم ۲۴ ----- */
 .theme-24 {
-  --board-light: #33684b;
-  --board-dark: #efefec;
+  --board-light: #efefec;
+  --board-dark: #33684b;
 }
 
 /* ----- تم ۲۵ ----- */
 .theme-25 {
-  --board-light: #ababab;
-  --board-dark: #efefef;
+  --board-light: #efefef;
+  --board-dark: #ababab;
 }
 
 /* ----- تم ۲۶ ----- */
 .theme-26 {
-  --board-light: #845c3a;
-  --board-dark: #c09d65;
+  --board-light: #c09d65;
+  --board-dark: #845c3a;
 }
 
 /* ----- تم ۲۷ ----- */
 .theme-27 {
-  --board-light: #a6865f;
-  --board-dark: #a9a9a9;
+  --board-light: #a9a9a9;
+  --board-dark: #a6865f;
 }
 
 /* ----- تم ۲۸ ----- */
 .theme-28 {
-  --board-light: #b8a671;
-  --board-dark: #e3e0c5;
+  --board-light: #e3e0c5;
+  --board-dark: #b8a671;
 }
 
 /* ----- تم ۲۹ ----- */
 .theme-29 {
-  --board-light: #c6b19d;
-  --board-dark: #d0bbaf;
+  --board-light: #d0bbaf;
+  --board-dark: #c6b19d;
 }
 
 /* ============================================
@@ -1345,4 +1345,22 @@ a {
     font-size: 0.85rem;
     padding: 0.4rem 0.6rem;
   }
+}
+
+/* ============================================
+   ♟️ چرخش صفحه (Flip) — اضافه شده در انتها
+   ============================================ */
+
+/* کلاس برای چرخش کل صفحه */
+.board-flipped {
+  transform: rotate(180deg);
+  transition: transform 0.3s ease;
+}
+
+/* جبران چرخش برای مهره‌ها (تا وارونه نشن) */
+.board-flipped .piece,
+.board-flipped .chess-piece,
+.board-flipped .piece-img,
+.board-flipped img {
+  transform: rotate(-180deg);
 }
