@@ -1364,3 +1364,33 @@ a {
 .board-flipped img {
   transform: rotate(-180deg);
 }
+/* ============================================
+   ♟️ اصلاح جهت تخته شطرنج (LTR)
+   ============================================ */
+
+/* تمام المان‌های مرتبط با تخته */
+#chessboard,
+.chessboard,
+.board-wrapper .chessboard,
+.game-viewer .chessboard,
+.viewer-body .board-wrapper .chessboard,
+#gameBoard,
+#variantBoard,
+#trapBoard,
+.board-wrapper .chessboard .square,
+#gameBoard .square,
+#variantBoard .square,
+#trapBoard .square {
+  direction: ltr !important;
+  unicode-bidi: embed !important;
+}
+
+/* اطمینان از اینکه گرید تخته درست کار کنه */
+#chessboard,
+.chessboard,
+#gameBoard,
+#variantBoard,
+#trapBoard {
+  display: grid !important;
+  grid-template-columns: repeat(8, 1fr) !important;
+}
