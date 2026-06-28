@@ -1,0 +1,310 @@
+{
+  "categories": [
+    {
+      "name": "گشایش‌های 1.e4",
+      "code": "e4",
+      "openings": [
+        {
+          "name": "گشایش اسکاچ",
+          "moves": ["e4", "e5", "Nf3", "Nc6", "d4"],
+          "variants": [
+            {
+              "name": "واریانت کلاسیک",
+              "moves": [
+                "e4", "e5", "Nf3", "Nc6", "d4", "e×d4", "N×d4", "Bc5", "Be3", "Qf6", "c3", "Ne7", "Bc4", "d6", "o-o", "o-o", "N×c6", "N×c6", "B×c5", "d×c5", "Nd2", "Ne5", "f4"
+              ],
+              "stats": {
+                "whiteWins": 0,
+                "blackWins": 0,
+                "draws": 0
+              },
+              "strengths": [
+                "سفید مرکز رو تحت کنترل داره",
+                "سفید ساختار پیاده ای سالمی داره",
+                "سفید ساختار پیاده ای سیاه را خراب کرده"
+              ],
+              "weaknesses": [
+                "سفید باید سریعا رخ هارو فعال کنه چون رخ هایش غیر فعال هستند و ستون باز ندارند"
+              ],
+              "popularMoves": [],
+              "evaluation": {
+                "score": "+0.22",
+                "summary": "سفید از نظر فضا برتری دارد و سوار های خوبی دارد برای همین برتری اندکی دارد"
+              },
+              "ideas": [
+                "سفید : حمله در جناح شاه یا بازی در مرکز",
+                "سیاه:جلوگیری و دفاع و یا ضد حمله در موقع لازم"
+              ],
+              "endgames": [
+                "آخر بازی رخ و اسب یا رخ و یا اسب"
+              ],
+              "traps": [
+                {
+                  "name": "تله ی خراب کردن ساختار پیاده ای",
+                  "moves": [
+                    "e4", "e5", "Nf3", "Nc6", "d4", "e×d4", "N×d4", "Bc5", "Be3", "d6", "N×c6", "b×c6", "B×c5", "d×c5", "Q×d8", "K×d8"
+                  ]
+                },
+                {
+                  "name": "تله ی گرفتن سوار",
+                  "moves": [
+                    "e4", "e5", "Nf3", "Nc6", "d4", "e×d4", "N×d4", "Bc5", "Be3", "Nf6", "N×c6", "b×c6", "B×c5"
+                  ]
+                }
+              ],
+              "sampleGames": [
+                {
+                  "white": "Lu, Shanglei",
+                  "black": "Liang, Awonder",
+                  "year": 0,
+                  "result": "1-0",
+                  "pgn": "1. e4 e5 2. Nf3 Nc6 3. d4 exd4 4. Nxd4 Qf6 5. Be3 Bc5 6. c3 Nge7 7. Bc4 d6 8. O-O O-O 9. Nxc6 Nxc6 10. Bxc5 dxc5 11. f4 Be6 12. Bb5 Rad8 13. Qe2 Bc8 14. Nd2 a6 15. Ba4 Nd4 16. Qe3 b5 17. Bd1 Ne6 18. Bc2 c4 19. Rae1 Nc5 20. Qxc5 Rxd2 21. Rf2 Qd6 22. Qe3 Rxf2 23. Kxf2 f6 24. Rd1 Qe7 25. a3 Bb7 26. Re1 Bc6 27. Kg1 Re8 28. h3 Qe6 29. Kf2 Qe7 30. Kg3 Rd8 31. Re2 Re8 32. e5 fxe5 33. fxe5 Qe6 34. Kh2 Bd5 35. Qg5 Rf8 36. Qh5 g6 37. Qg5 Kg7 38. h4 h6 39. Qg3 c6 40. Re1 Rf7 41. Bd1 Qf5 42. Bg4 Qf2 43. Re2 Qxg3+ 44. Kxg3 h5 45. Bf3 Kf8 46. Rd2 Rd7 47. Kf4 Ke7 48. Kg5 Kf7 49. Rf2 Kg7 50. Kf4 Kf7 51. Re2 Ke6 52. Kg5 Bxf3 53. gxf3 Rg7 54. f4 Rf7 55. Re4 Rg7 56. Rd4 Rg8 57. Rd6+ Ke7 58. Rxg6 1-0"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "دفاع کاروکان",
+          "moves": ["e4", "c6", "d4", "d5"],
+          "variants": [
+            {
+              "name": "واریانت تعویضی",
+              "moves": [
+                "e4", "c6", "d4", "d5", "e×d", "c×d", "Nc3", "Nc6", "Nf3", "Bg4", "Be2", "e6", "o-o", "Nf6", "h3", "B×f3", "B×f3", "Be7"
+              ],
+              "stats": {
+                "whiteWins": 0,
+                "blackWins": 0,
+                "draws": 0
+              },
+              "strengths": [
+                "گرفتن تعادل در شروع بازی برای سیاه",
+                "خطر حمله ی مستقیم سیاه در جناح وزیر"
+              ],
+              "weaknesses": [
+                "سفید برتری دو فیل دارد اما بازی متعادل است"
+              ],
+              "popularMoves": [
+                {
+                  "san": "Ne2",
+                  "description": "حمله ی اقلیت",
+                  "moves": ["b5", "c3", "a5", "Qd3", "Rb8"]
+                }
+              ],
+              "evaluation": {
+                "score": "0.0",
+                "summary": "بازی مساوی است"
+              },
+              "ideas": [
+                "سیاه:حمله در جناح وزیر و انجام حمله ی اقلیت",
+                "سفید:دفاع و جلوگیری از خراب شدن ساختار پیاده ای در جناح وزیر"
+              ],
+              "endgames": [
+                "هر آخر بازی ای ممکن است"
+              ],
+              "traps": [],
+              "sampleGames": [
+                {
+                  "white": "Gschwendter ,Klaus",
+                  "black": "Pleelen ,piet",
+                  "year": 0,
+                  "result": "0-1",
+                  "pgn": "1. e4 c6 2. Nc3 d5 3. Nf3 Bg4 4. Be2 Nf6 5. exd5 cxd5 6. d4 Nc6 7. O-O e6 8. h3 Bxf3 9. Bxf3 Be7 10. Ne2 O-O 11. c3 b5 12. a3 Qb6 13. Be3 Ne8 14. Nf4 Nd6 15. g4 a5 16. Be2 Nc4 17. Bd3 Nxb2 18. Bxh7+ Kxh7 19. Qc2+ Kg8 20. Qxb2 Rab8 21. Rfe1 Qc7 22. Nd3 Bd6 23. Qe2 Qe7 24. Bf4 Rfc8 25. Qe3 b4 26. Bxd6 Qxd6 27. cxb4 axb4 28. axb4 Nxb4 29. Nxb4 Rxb4 30. Ra7 Qb6 31. Rea1 Qxd4 32. Qf3 Qf4 33. Qa3 Rbc4 34. Ra8 Rxa8 35. Qxa8+ Kh7 36. Qd8 g5 37. Qb6 Rc1+ 38. Rxc1 Qxc1+ 39. Kg2 Qf4 40. Qd8 Kg7 41. f3 Qd2+ 42. Kf1 Qe3 43. Kg2 Qe2+ 44. Kg3 Qe3 45. Kg2 d4 46. h4 Qe2+ 47. Kg1 Qe3+ 48. Kg2 Qd2+ 49. Kf1 gxh4 50. Qxh4 Qf4 0-1"
+                }
+              ]
+            },
+            {
+              "name": "واریانت تعویضی شاخه ی اصلی",
+              "moves": [
+                "e4", "c6", "d4", "d5", "e×d", "c×d", "Bd3", "Nc6", "c3", "Qc7", "h3", "e5"
+              ],
+              "stats": {
+                "whiteWins": 0,
+                "blackWins": 0,
+                "draws": 0
+              },
+              "strengths": [
+                "سیاه به مرکز حمله می‌کند و در مرکز بازی می‌کند",
+                "بازی برای سیاه به تعادل رسیده در شروع بازی"
+              ],
+              "weaknesses": [
+                "سیاه در حرکات اول وزیرش رو بیرون آورد"
+              ],
+              "popularMoves": [],
+              "evaluation": {
+                "score": "+0.3",
+                "summary": "بازی مساوی است اما از نظر کامپیوتر سفید اندکی برتری دارد"
+              },
+              "ideas": [
+                "سیاه :می‌تواند دو رخش را در ستون های مرکزی بزارد و قلعه کوچک هم برود و در مرکز بازی کند",
+                "سفید :می‌تواند قلعه کوچک برود و رخش را در ستون e بزارد و سوار هایش را عادی گسترش دهد"
+              ],
+              "endgames": [
+                "هر آخر بازی ای ممکن است"
+              ],
+              "traps": [],
+              "sampleGames": [
+                {
+                  "white": "Aronian ,levon",
+                  "black": "Mamedyarov ,shakhriyar",
+                  "year": 0,
+                  "result": "1/2-1/2",
+                  "pgn": "1. e4 c6 2. d4 d5 3. exd5 cxd5 4. Bd3 Nc6 5. c3 Qc7 6. h3 e5 7. dxe5 Nxe5 8. Nf3 Nxd3+ 9. Qxd3 Bd6 10. O-O Ne7 11. Nd4 a6 12. Nd2 O-O 13. N2f3 h6 14. Bd2 Bd7 15. Nh4 Rad8 16. Rad1 Rfe8 17. Qf3 Be5 18. Be3"
+                }
+              ]
+            },
+            {
+              "name": "دفاع کاروکان شاخه ی پیشرفته",
+              "moves": ["e4", "c6", "d4", "d5", "e5"],
+              "variants": [
+                {
+                  "name": "واریانت اصلی",
+                  "moves": [
+                    "e4", "c6", "d4", "d5", "e5", "Bf5", "Nf3", "e6", "Be2", "c5", "o-o", "Nc6"
+                  ],
+                  "stats": {
+                    "whiteWins": 0,
+                    "blackWins": 0,
+                    "draws": 0
+                  },
+                  "strengths": [
+                    "سیاه سوار های خوبی دارد",
+                    "سیاه روی پیاده ی d4 فشار می‌آورد"
+                  ],
+                  "weaknesses": [
+                    "سیاه فضای کمتری دارد"
+                  ],
+                  "popularMoves": [
+                    {
+                      "san": "C3",
+                      "description": "",
+                      "moves": []
+                    }
+                  ],
+                  "evaluation": {
+                    "score": "+0.4",
+                    "summary": "سفید برای اینکه فضای بیشتری دارد برتری اندکی دارد"
+                  },
+                  "ideas": [
+                    "سیاه: سیاه بعد ها می‌تواند فیلش را به g4 و یا g6 حرکت دهد و بعد اسب g8 رو f5 بگزارد"
+                  ],
+                  "endgames": [
+                    "هر آخر بازی ای ممکن است"
+                  ],
+                  "traps": [],
+                  "sampleGames": [
+                    {
+                      "white": "Harikrishna, Pentala",
+                      "black": "Anton Guijarro, David",
+                      "year": 0,
+                      "result": "1/2-1/2",
+                      "pgn": "1. e4 c6 2. d4 d5 3. e5 Bf5 4. Nf3 e6 5. Be2 c5 6. c3 Nc6 7. O-O a6 8. Nbd2 cxd4 9. Nxd4 Nxd4 10. cxd4 Ne7 11. Nb3 Nc6 12. Bd3 Bg6 13. Bxg6 hxg6 14. g3 a5 15. a4 Qb6 16. Be3 Be7 17. Kg2 Rc8 18. Rc1 Qb4 19. Nc5 Qxb2 20. Rb1 Qa2 21. Ra1 Qb2 22. Rb1 Qa2 23. Ra1 Qb2 24. Rb1 *"
+                    }
+                  ]
+                },
+                {
+                  "name": "واریانت وندر ویل",
+                  "moves": [
+                    "e4", "c6", "d4", "d5", "e5", "Bf5", "Nc3", "e6", "g4", "Bg6", "h4", "h5"
+                  ],
+                  "stats": {
+                    "whiteWins": 0,
+                    "blackWins": 0,
+                    "draws": 0
+                  },
+                  "strengths": [
+                    "سیاه ساختار مستحکمی دارد"
+                  ],
+                  "weaknesses": [
+                    "سیاه فضای کمی دارد"
+                  ],
+                  "popularMoves": [
+                    {
+                      "san": "g5",
+                      "description": "",
+                      "moves": []
+                    }
+                  ],
+                  "evaluation": {
+                    "score": "-1.2",
+                    "summary": "سیاه برتری خیلی خوبی کسب کرده است"
+                  },
+                  "ideas": [
+                    "سیاه: در ادامه می‌تواند با c5 به مرکز ضربه بزند",
+                    "سفید: در ادامه باید سوار هایش را بیرون بیاورد چون زیاد با پیاده بازی کرده"
+                  ],
+                  "endgames": [
+                    "هر آخر بازی ای ممکن است"
+                  ],
+                  "traps": [],
+                  "sampleGames": [
+                    {
+                      "white": "Rathanvel, V S",
+                      "black": "Schitco, Ivan",
+                      "year": 0,
+                      "result": "0-1",
+                      "pgn": "1. e4 c6 2. d4 d5 3. e5 Bf5 4. Nc3 e6 5. g4 Bg6 6. h4 h5 7. g5 c5 8. Nf3 Nc6 9. Bb5 Qb6 10. Be3 c4 11. a3 a6 12. Bxc6+ Qxc6 13. Ne2 Ne7 14. Qd2 Be4 15. Rh3 Bf5 16. Rh2 Be4 17. Nfg1 b5 18. Ng3 Bg6 19. N1e2 Nf5 20. Nxf5 Bxf5 21. Ng3 Bg4 22. Kf1 Be7 23. Kg2 g6 24. Qe1 a5 25. Bd2 Qb6 26. c3 O-O 27. Rh1 Rfb8 28. f3 Bf5 29. Nxf5 exf5 30. Kg3 Ra7 31. Qe3 Rab7 32. Rhe1 Qe6 33. Ra2 b4 34. axb4 axb4 35. Rea1 bxc3 36. Bxc3 Rb3 37. Ra6 R8b6 38. Ra8+ Kg7 39. Re8 Rb8 40. Rxb8 Rxb8 41. Ra7 Rb3 42. Qc1 Bb4 43. Rb7 Bxc3 44. Rxb3 Bxd4 45. Ra3 Qxe5+ 46. f4 Qe2 47. Rf3 Bxb2 48. Qg1 d4 49. Qb1 c3 50. Qa2 d3 51. Rf2 Qe3+ 52. Rf3 Qe1+ 53. Kg2 d2 54. Rf1 Qe2+ 55. Rf2 Qe4+ 56. Rf3 d1=Q 0-1"
+                    }
+                  ]
+                },
+                {
+                  "name": "واریانت تال",
+                  "moves": [
+                    "e4", "c6", "d4", "d5", "e5", "Bf5", "h4", "h5"
+                  ],
+                  "stats": {
+                    "whiteWins": 0,
+                    "blackWins": 0,
+                    "draws": 0
+                  },
+                  "strengths": [
+                    "سیاه وضیعت انعطاف پذیری دارد"
+                  ],
+                  "weaknesses": [
+                    "سیاه مجبور شد یک پیاده را در جناح شاه حرکت دهد"
+                  ],
+                  "popularMoves": [
+                    {
+                      "san": "Bd3",
+                      "description": "",
+                      "moves": []
+                    }
+                  ],
+                  "evaluation": {
+                    "score": "+0.3",
+                    "summary": "سفید اندکی برتری دارد ولی از نظر کامپیوتر از نظر انسانی بازی مساوی است"
+                  },
+                  "ideas": [
+                    "سیاه: می‌تواند طرح های کلی مانند e6 و بعد c5 را تکرار کند",
+                    "سفید :می‌تواند به گسترش طبیعی خود ادامه دهد"
+                  ],
+                  "endgames": [
+                    "هر آخر بازی ای ممکن است"
+                  ],
+                  "traps": [
+                    {
+                      "name": "تله ی گرفتن فیل سیاه",
+                      "moves": [
+                        "e4", "c6", "d4", "d5", "e5", "Bf5", "h4", "e6", "g4", "Bg6", "h5", "Be4", "f3"
+                      ]
+                    }
+                  ],
+                  "sampleGames": [
+                    {
+                      "white": "\"Praggnanandhaa R",
+                      "black": "Artemiev, Vladislav",
+                      "year": 0,
+                      "result": "0-1",
+                      "pgn": "1. e4 c6 2. d4 d5 3. e5 Bf5 4. h4 h5 5. Bd3 Bxd3 6. Qxd3 e6 7. Nf3 c5 8. Bg5 Be7 9. dxc5 Na6 10. b4 Nxb4 11. Qb5+ Nc6 12. Qxb7 Qc8 13. Qb3 Bxc5 14. O-O Nge7 15. Nbd2 O-O 16. Qa4 Ng6 17. Rfe1 Qd7 18. Nb3 Bb6 19. Qa3 Qc7 20. Qd6 Ncxe5 21. Qxc7 Nxf3+ 22. gxf3 Bxc7 23. Rac1 Rac8 24. c4 dxc4 25. Nd2 Ba5 26. Re2 Bxd2 27. Rxd2 f6 28. Be3 Nxh4 29. Rd7 Rf7 30. Rxa7 Rxa7 31. Bxa7 Ra8 0-1"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
