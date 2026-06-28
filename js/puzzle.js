@@ -1,7 +1,10 @@
-// puzzle.js - پازل روزانه با تشخیص خودکار رنگ کاربر و نمایش آن
-// ✅ تنظیم شده برای استفاده از مهره‌های "neo" به‌عنوان پیش‌فرض
+// puzzle.js - پازل روزانه با چرخش صحیح تخته بر اساس رنگ کاربر
 (function () {
-  // ----- متغیرها -----
+  "use strict";
+
+  // ============================================
+  // 📦 متغیرها
+  // ============================================
   let game = null;
   let selectedSquare = null;
   let currentMoveIndex = 0;
@@ -26,10 +29,10 @@
   const descriptionP = document.querySelector(".puzzle-card p");
 
   // ============================================
-  // 🎨 لیست ست‌های معتبر (همون پوشه‌های موجود در پروژه)
+  // 🎨 لیست ست‌های معتبر و توابع مربوط به مهره
   // ============================================
   const validSets = [
-    "neo", // <-- پیش‌فرض جدید
+    "neo",
     "classic",
     "3d_chesskid",
     "3d_plastic",
@@ -69,14 +72,10 @@
     "wood",
   ];
 
-  // ============================================
-  // 🎨 دریافت مهره از تنظیمات (پیش‌فرض: neo)
-  // ============================================
   function getCurrentPieceSet() {
     try {
       const settings = JSON.parse(localStorage.getItem("chesshub_settings"));
-      let set = settings?.pieceSet || "neo"; // <-- پیش‌فرض neo
-      // اگه ست انتخاب‌شده معتبر نبود، به neo برگرد
+      let set = settings?.pieceSet || "neo";
       if (!validSets.includes(set)) {
         console.warn(`ست "${set}" معتبر نیست، استفاده از neo`);
         set = "neo";
@@ -91,10 +90,6 @@
     }
   }
 
-  // ============================================
-  // 🖼️ بارگذاری تصاویر مهره‌ها (با حروف کوچک)
-  // ============================================
-  const pieceImages = {};
   const pieceCodes = {
     wk: "wk.png",
     wq: "wq.png",
@@ -109,6 +104,8 @@
     bn: "bn.png",
     bp: "bp.png",
   };
+
+  const pieceImages = {};
 
   function loadPieces() {
     return new Promise((resolve) => {
@@ -127,7 +124,7 @@
     });
   }
 
-  document.addEventListener("pieceSetChanged", function (e) {
+  document.addEventListener("pieceSetChanged", function () {
     loadPieces().then(() => {
       if (game) renderBoard();
     });
@@ -188,7 +185,7 @@
   }
 
   // ============================================
-  // 🎨 رسم تخته (با کلیدهای کوچک)
+  // 🎨 رسم تخته (با چرخش صحیح)
   // ============================================
   function renderBoard() {
     if (!game) return;
@@ -201,18 +198,29 @@
     boardDiv.style.webkitUserSelect = "none";
 
     const pieceSet = getCurrentPieceSet();
+    // چرخش تخته برای کاربر سیاه (اگر کاربر سیاه باشد، تخته را ۱۸۰ درجه می‌چرخانیم)
+    const flipped = userColor === "b";
 
-    for (let i = 7; i >= 0; i--) {
+    for (let i = 0; i < 8; i++) {
       for (let j = 0; j < 8; j++) {
-        const piece = board[i][j];
-        const isLight = (i + j) % 2 === 0;
+        // محاسبه ردیف و ستون واقعی بر اساس flipped
+        const row = flipped ? 7 - i : i;
+        const col = flipped ? 7 - j : j;
+        const piece = board[row][col];
+        const isLight = (row + col) % 2 === 0;
         const squareDiv = document.createElement("div");
         squareDiv.className = `square ${isLight ? "light" : "dark"}`;
-        const file = String.fromCharCode(97 + j);
-        const rank = 8 - i;
+        // نام مربع با توجه به مختصات واقعی
+        const file = String.fromCharCode(97 + col);
+        const rank = 8 - row;
         const squareName = file + rank;
         squareDiv.dataset.square = squareName;
         squareDiv.style.touchAction = "none";
+
+        if (selectedSquare === squareName) {
+          squareDiv.classList.add("selected");
+        }
+
         if (piece) {
           const key =
             (piece.color === "w" ? "w" : "b") + piece.type.toLowerCase();
@@ -270,9 +278,6 @@
     return firstMoveColor === "w" ? "b" : "w";
   }
 
-  // ============================================
-  // 🎨 بروزرسانی متن رنگ کاربر
-  // ============================================
   function updateUserColorText() {
     if (!descriptionP) return;
     const colorName = userColor === "w" ? "سفید" : "سیاه";
@@ -280,7 +285,7 @@
   }
 
   // ============================================
-  // 📦 بارگذاری پازل‌ها
+  // 📦 بارگذاری پازل‌ها (با fallback)
   // ============================================
   async function loadAllPuzzles() {
     try {
@@ -290,11 +295,10 @@
       const lines = text.split("\n").filter((line) => line.trim() !== "");
       if (lines.length === 0) throw new Error("فایل خالی است");
 
-      allPuzzles = [];
+      const puzzles = [];
       for (const line of lines) {
         const parts = line.split(",");
         if (parts.length < 3) continue;
-
         const fen = parts[1].trim();
         const movesStr = parts[2].trim();
         const moveArray = movesStr.split(/\s+/);
@@ -305,18 +309,27 @@
           movesWithColor.push({ color: currentColor, uci: moveArray[i] });
           currentColor = currentColor === "w" ? "b" : "w";
         }
-
-        allPuzzles.push({
+        puzzles.push({
           fen: fen,
           movesWithColor: movesWithColor,
         });
       }
-
-      return allPuzzles.length > 0;
+      if (puzzles.length === 0) throw new Error("هیچ پازل معتبری یافت نشد");
+      allPuzzles = puzzles;
+      return true;
     } catch (err) {
-      console.error(err);
-      showMessage("خطا در بارگذاری پازل‌ها", "error");
-      return false;
+      console.warn(
+        "⚠️ خطا در بارگذاری daily-puzzle.txt، استفاده از پازل پیش‌فرض:",
+        err.message,
+      );
+      // ===== پازل پیش‌فرض (مات در یک حرکت با وزیر) =====
+      allPuzzles = [
+        {
+          fen: "7k/5Q2/8/8/8/8/8/7K w - - 0 1",
+          movesWithColor: [{ color: "w", uci: "f7f8" }],
+        },
+      ];
+      return true;
     }
   }
 
@@ -364,7 +377,7 @@
   }
 
   // ============================================
-  // ⏭️ رفتن به پازل بعدی
+  // ⏭️ رفتن به پازل بعدی (با تأخیر ۲۴ ساعت)
   // ============================================
   function goToNextPuzzle() {
     if (nextPuzzleTimer) {
@@ -617,12 +630,8 @@
     if (piece && piece.color === userColor) {
       dragStartSquare = square;
       isDragging = true;
-
       dragClone = createDragClone(square);
-      if (dragClone) {
-        updateDragClone(clientX, clientY);
-      }
-
+      if (dragClone) updateDragClone(clientX, clientY);
       boardDiv.style.cursor = "grabbing";
       document.body.style.userSelect = "none";
       boardDiv.style.touchAction = "none";
@@ -631,9 +640,7 @@
 
   function handleDragMove(clientX, clientY) {
     if (!isDragging) return;
-    if (dragClone) {
-      updateDragClone(clientX, clientY);
-    }
+    if (dragClone) updateDragClone(clientX, clientY);
   }
 
   function handleDragEnd(clientX, clientY) {
@@ -652,7 +659,7 @@
   }
 
   // ============================================
-  // 🖱️ رویدادهای ماوس
+  // 🖱️ رویدادهای ماوس و لمسی
   // ============================================
   function onMouseDown(e) {
     e.preventDefault();
@@ -670,9 +677,6 @@
     handleDragEnd(e.clientX, e.clientY);
   }
 
-  // ============================================
-  // 📱 رویدادهای لمسی
-  // ============================================
   function onTouchStart(e) {
     e.preventDefault();
     const touch = e.touches[0];
@@ -793,6 +797,8 @@
     if (loaded) {
       currentPuzzleIndex = 0;
       loadPuzzleByIndex(currentPuzzleIndex);
+    } else {
+      showMessage("خطا در بارگذاری پازل‌ها", "error");
     }
   }
 })();
