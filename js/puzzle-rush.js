@@ -1,8 +1,25 @@
-// puzzle-rush.js - پازل عجله‌ای با پشتیبانی کامل از تم‌ها و ریسپانسیو
+// puzzle-rush.js - پازل عجله‌ای با استفاده از ChessUtils
+
 (function () {
   "use strict";
 
-  // ----- متغیرها -----
+  // ============================================
+  // 📦 استفاده از ChessUtils (نسخه bound شده)
+  // ============================================
+
+  const {
+    pieceCodes,
+    getCurrentPieceSet,
+    loadPieces,
+    getBoardColors,
+    showPromotion,
+    computeUserColor,
+  } = window.ChessUtilsBound;
+
+  // ============================================
+  // 📦 متغیرها
+  // ============================================
+
   let game = null;
   let selectedSquare = null;
   let currentMoveIndex = 0;
@@ -40,143 +57,9 @@
   const recordDisplayDiv = document.getElementById("recordDisplay");
 
   // ============================================
-  // 🎨 دریافت مهره از تنظیمات (پیش‌فرض: neo)
-  // ============================================
-  function getCurrentPieceSet() {
-    try {
-      const settings = JSON.parse(localStorage.getItem("chesshub_settings"));
-      return settings?.pieceSet || "neo"; // <-- تغییر به neo
-    } catch {
-      return "neo"; // <-- تغییر به neo
-    }
-  }
-
-  // ============================================
-  // 🖼️ بارگذاری تصاویر مهره‌ها (با حروف کوچک)
-  // ============================================
-  const pieceImages = {};
-  const pieceCodes = {
-    wk: "wk.png",
-    wq: "wq.png",
-    wr: "wr.png",
-    wb: "wb.png",
-    wn: "wn.png",
-    wp: "wp.png",
-    bk: "bk.png",
-    bq: "bq.png",
-    br: "br.png",
-    bb: "bb.png",
-    bn: "bn.png",
-    bp: "bp.png",
-  };
-
-  function loadPieces() {
-    return new Promise((resolve) => {
-      const pieceSet = getCurrentPieceSet();
-      let loaded = 0;
-      const total = Object.keys(pieceCodes).length;
-      for (const [key, filename] of Object.entries(pieceCodes)) {
-        const img = new Image();
-        img.onload = img.onerror = () => {
-          loaded++;
-          if (loaded === total) resolve();
-        };
-        img.src = `pieces/${pieceSet}/${filename}`;
-        pieceImages[key] = img;
-      }
-    });
-  }
-
-  // گوش‌دادن به تغییرات مهره‌ها
-  document.addEventListener("pieceSetChanged", function (e) {
-    loadPieces().then(() => {
-      if (game) renderBoard();
-    });
-  });
-
-  // گوش‌دادن به تغییرات تم
-  document.addEventListener("themeChanged", function (e) {
-    if (game) renderBoard();
-  });
-
-  // ============================================
-  // 🎨 پنجره ترفیع
-  // ============================================
-  const promotionModal = document.createElement("div");
-  promotionModal.id = "promotionModal";
-  promotionModal.style.cssText = `
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.7); display: none; justify-content: center;
-    align-items: center; z-index: 2000; backdrop-filter: blur(4px);
-  `;
-  const modalContent = document.createElement("div");
-  modalContent.style.cssText = `
-    background: white; border-radius: 32px; padding: 20px; text-align: center;
-    box-shadow: 0 20px 35px rgba(0,0,0,0.3); direction: rtl;
-    max-width: 90vw;
-  `;
-  modalContent.innerHTML =
-    "<h3 style='margin-bottom:15px;'>ترفیع پیاده</h3><div id='promotionOptions' style='display:flex; gap:15px; justify-content:center; flex-wrap:wrap;'></div>";
-  promotionModal.appendChild(modalContent);
-  document.body.appendChild(promotionModal);
-
-  function showPromotion(from, to, color, callback) {
-    const optionsDiv = document.getElementById("promotionOptions");
-    optionsDiv.innerHTML = "";
-    const pieces = [
-      { type: "n", name: "اسب", file: "wn.png" },
-      { type: "b", name: "فیل", file: "wb.png" },
-      { type: "r", name: "رخ", file: "wr.png" },
-      { type: "q", name: "وزیر", file: "wq.png" },
-    ];
-    const pieceSet = getCurrentPieceSet();
-    pieces.forEach((piece) => {
-      const btn = document.createElement("div");
-      btn.style.cssText = `
-        cursor: pointer; padding: 10px; background: #f0f0f0;
-        border-radius: 20px; transition: 0.2s; margin: 5px;
-        text-align: center; min-width: 60px;
-      `;
-      btn.onmouseover = () => (btn.style.transform = "scale(1.05)");
-      btn.onmouseout = () => (btn.style.transform = "scale(1)");
-      btn.ontouchstart = () => (btn.style.transform = "scale(0.95)");
-      btn.ontouchend = () => (btn.style.transform = "scale(1)");
-
-      const img = document.createElement("img");
-      img.src = `pieces/${pieceSet}/${piece.file}`;
-      img.style.width = "60px";
-      img.style.height = "60px";
-      img.style.maxWidth = "50px";
-      img.style.maxHeight = "50px";
-
-      const label = document.createElement("div");
-      label.textContent = piece.name;
-      label.style.fontSize = "0.8rem";
-      label.style.marginTop = "4px";
-
-      btn.appendChild(img);
-      btn.appendChild(label);
-      btn.onclick = () => {
-        promotionModal.style.display = "none";
-        callback(piece.type);
-      };
-      optionsDiv.appendChild(btn);
-    });
-    promotionModal.style.display = "flex";
-  }
-
-  // ============================================
-  // 🎨 تشخیص رنگ کاربر
-  // ============================================
-  function computeUserColor(moves) {
-    if (!moves || moves.length === 0) return "w";
-    const firstMoveColor = moves[0].color;
-    return firstMoveColor === "w" ? "b" : "w";
-  }
-
-  // ============================================
   // 🎨 رسم تخته (با چرخش و هایلایت)
   // ============================================
+
   function renderBoard(highlightFrom = null, highlightTo = null) {
     if (!game) return;
     const board = game.board();
@@ -188,6 +71,7 @@
     boardDiv.style.webkitUserSelect = "none";
 
     const pieceSet = getCurrentPieceSet();
+    const colors = getBoardColors();
     const flipped = userColor === "b";
     isFlipped = flipped;
     computerMoveHighlight = { from: highlightFrom, to: highlightTo };
@@ -238,6 +122,7 @@
   // ============================================
   // 💬 پیام‌ها
   // ============================================
+
   function showMessage(text, type) {
     msgDiv.textContent = text;
     msgDiv.className = `message ${type}`;
@@ -249,6 +134,7 @@
   // ============================================
   // 📦 بارگذاری پازل‌ها
   // ============================================
+
   async function loadAllPuzzles() {
     try {
       const response = await fetch("data/puzzles.txt");
@@ -291,6 +177,7 @@
   // ============================================
   // 🎲 انتخاب پازل تصادفی
   // ============================================
+
   function getRandomPuzzleIndex() {
     if (allPuzzles.length === 0) return -1;
     if (usedPuzzleIndices.size >= allPuzzles.length) {
@@ -312,6 +199,7 @@
   // ============================================
   // 🎯 بارگذاری پازل تصادفی
   // ============================================
+
   function loadRandomPuzzle() {
     if (!allPuzzles.length) {
       showMessage("هیچ پازلی وجود ندارد!", "error");
@@ -358,6 +246,7 @@
   // ============================================
   // 🤖 حرکت کامپیوتر
   // ============================================
+
   async function autoComputerMove() {
     if (puzzleFinished) return;
     if (currentMoveIndex >= puzzleMoves.length) return;
@@ -424,6 +313,7 @@
   // ============================================
   // 🏆 حل پازل
   // ============================================
+
   async function handlePuzzleSolved() {
     solvedCount++;
     streak++;
@@ -458,6 +348,7 @@
   // ============================================
   // 🎯 حرکت کاربر
   // ============================================
+
   async function tryMove(from, to) {
     if (puzzleFinished) {
       showMessage("پازل تمام شده", "info");
@@ -484,6 +375,7 @@
       piece.type === "p" &&
       ((piece.color === "w" && to[1] === "8") ||
         (piece.color === "b" && to[1] === "1"));
+
     let promotion = "q";
     if (isPawnPromotion) {
       if (expected.uci.length === 5) {
@@ -494,7 +386,7 @@
         else promotion = "q";
       } else {
         promotion = await new Promise((resolve) => {
-          showPromotion(from, to, game.turn(), resolve);
+          showPromotion(game.turn(), resolve);
         });
       }
     }
@@ -597,6 +489,7 @@
   // ============================================
   // 🖱️ رویدادهای کشیدن (بهینه‌شده برای موبایل)
   // ============================================
+
   function createDragClone(square) {
     const squareEl = document.querySelector(`.square[data-square="${square}"]`);
     if (!squareEl) return null;
@@ -767,6 +660,7 @@
   // ============================================
   // 📊 آمار و تایمر
   // ============================================
+
   function updateStats() {
     if (currentMode === "unlimited") {
       mistakeDisplaySpan.textContent = `❌ خطا: ${mistakes}/3`;
@@ -808,6 +702,7 @@
   // ============================================
   // 🎮 مدیریت بازی
   // ============================================
+
   function resetGame() {
     stopTimer();
     if (autoMoveTimeout) clearTimeout(autoMoveTimeout);
@@ -852,6 +747,7 @@
   // ============================================
   // 💾 بارگذاری رکورد
   // ============================================
+
   function loadRecords() {
     const stored = localStorage.getItem("chesshub_puzzle_records");
     if (stored) {
@@ -867,6 +763,7 @@
   // ============================================
   // 🚀 راه‌اندازی
   // ============================================
+
   loadPieces().then(async () => {
     loadRecords();
     const loaded = await loadAllPuzzles();

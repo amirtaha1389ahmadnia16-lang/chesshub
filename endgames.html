@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
     <title>ChessHub | تمرین آخربازی‌ها</title>
     <link
@@ -19,103 +19,18 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
     <style>
       /* ============================================
-         🎯 ریست اولیه برای جلوگیری از اسکرول
-         ============================================ */
-      html,
-      body {
-        overflow-x: hidden;
-        overflow-y: auto;
-        height: 100%;
-        margin: 0;
-        padding: 0;
-      }
-
-      .container {
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 0.8rem;
-        padding-bottom: 1.5rem;
-        min-height: 100vh;
-        overflow-x: hidden;
-      }
-
-      /* ============================================
          🎯 استایل‌های اختصاصی آخربازی‌ها
          ============================================ */
 
-      .endgame-hero {
-        background: linear-gradient(
-          135deg,
-          #0f2b3f 0%,
-          #1a4b6e 60%,
-          #2a7f9c 100%
-        );
-        border-radius: var(--radius-lg);
-        padding: 1.5rem 1.2rem;
-        margin-bottom: 1rem;
-        text-align: center;
-        color: #fff;
-        position: relative;
-        overflow: hidden;
-        min-height: 90px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-      }
-
-      .endgame-hero::before {
-        content: "\265A";
-        position: absolute;
-        font-size: 80px;
-        right: -10px;
-        bottom: -20px;
-        opacity: 0.06;
-        font-family: "Vazir", serif;
-      }
-
-      .endgame-hero::after {
-        content: "\265B";
-        position: absolute;
-        font-size: 60px;
-        left: -10px;
-        top: -20px;
-        opacity: 0.06;
-        font-family: "Vazir", serif;
-      }
-
-      .endgame-hero h1 {
-        font-size: clamp(1.4rem, 3.5vw, 2rem);
-        font-weight: 800;
-        margin-bottom: 0.2rem;
-        position: relative;
-        z-index: 1;
-      }
-
-      .endgame-hero h1 .highlight {
-        color: #ffb347;
-      }
-
-      .endgame-hero p {
-        font-size: clamp(0.8rem, 1.5vw, 0.95rem);
-        opacity: 0.85;
-        max-width: 560px;
-        margin: 0 auto;
-        position: relative;
-        z-index: 1;
-      }
-
+      /* ----- بخش بازی ----- */
       .game-area {
-        background: var(--bg-card, #ffffff);
+        background: #ffffff;
         border-radius: var(--radius-lg);
-        padding: 16px;
+        padding: 25px;
         box-shadow: var(--shadow-md);
-        max-width: 780px;
+        max-width: 800px;
         margin: 0 auto;
-        transition:
-          background 0.3s ease,
-          border-color 0.3s ease;
-        border: 1px solid var(--border-color, transparent);
-        overflow: hidden;
+        border: 1px solid #eef2f5;
       }
 
       .position-selector {
@@ -153,25 +68,19 @@
         color: var(--text-dark);
       }
 
-      /* ============================================
-         🎯 استایل آمار با عرض ثابت
-         ============================================ */
       .stats {
         display: flex;
         justify-content: center;
         align-items: center;
         background: var(--secondary);
-        padding: 8px 14px;
+        padding: 12px 20px;
         border-radius: 60px;
-        margin-bottom: 12px;
+        margin-bottom: 20px;
         font-weight: bold;
         flex-wrap: wrap;
-        gap: 6px;
+        gap: 10px;
         color: var(--text-dark);
-        transition: background 0.3s ease;
-        min-height: 42px;
-        width: 100%;
-        box-sizing: border-box;
+        min-height: 48px;
       }
 
       .stat-item {
@@ -195,17 +104,14 @@
       }
 
       .turn-indicator {
-        background: var(--border-color, #e2e8f0);
-        padding: 3px 12px;
+        background: #e2e8f0;
+        padding: 4px 12px;
         border-radius: 30px;
         font-size: 0.7rem;
         font-weight: 600;
         min-width: 60px;
         text-align: center;
         color: var(--text-dark);
-        transition:
-          background 0.3s ease,
-          color 0.3s ease;
         display: inline-block;
         flex-shrink: 0;
       }
@@ -213,7 +119,7 @@
       .user-color-badge {
         background: var(--primary);
         color: white;
-        padding: 3px 12px;
+        padding: 4px 12px;
         border-radius: 30px;
         font-size: 0.7rem;
         font-weight: 700;
@@ -228,7 +134,7 @@
       .result-badge {
         background: #f59e0b;
         color: white;
-        padding: 3px 12px;
+        padding: 4px 12px;
         border-radius: 30px;
         font-size: 0.7rem;
         font-weight: 700;
@@ -251,7 +157,7 @@
       .timer-badge {
         background: #1e293b;
         color: #facc15;
-        padding: 3px 12px;
+        padding: 4px 12px;
         border-radius: 30px;
         font-size: 0.7rem;
         font-weight: 700;
@@ -287,13 +193,14 @@
         }
       }
 
+      /* ----- تخته ----- */
       #chessboard {
         display: grid;
         grid-template-columns: repeat(8, 1fr);
         aspect-ratio: 1 / 1;
-        max-width: 480px;
-        margin: 10px auto;
-        border: 2px solid var(--border-color, #cbd5e1);
+        max-width: 500px;
+        margin: 20px auto;
+        border: 2px solid #cbd5e1;
         border-radius: 12px;
         overflow: hidden;
         box-shadow: var(--shadow-md);
@@ -335,11 +242,20 @@
         draggable: false;
       }
 
+      /* ----- دکمه‌ها ----- */
+      .btn-group {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 12px;
+      }
+
       .btn {
         background: var(--secondary);
         border: none;
-        padding: 6px 16px;
-        margin: 3px;
+        padding: 8px 20px;
+        margin: 0;
         border-radius: 40px;
         font-family: "Vazir";
         font-weight: bold;
@@ -349,7 +265,7 @@
         display: inline-flex;
         align-items: center;
         gap: 4px;
-        font-size: 0.75rem;
+        font-size: 0.85rem;
       }
 
       .btn-primary {
@@ -368,19 +284,12 @@
         transform: none !important;
       }
 
-      .btn-group {
-        display: flex;
-        justify-content: center;
-        flex-wrap: wrap;
-        gap: 4px;
-        margin-top: 8px;
-      }
-
+      /* ----- پیام‌ها ----- */
       .message {
-        margin-top: 10px;
-        padding: 8px 14px;
+        margin-top: 15px;
+        padding: 10px;
         border-radius: 60px;
-        font-size: 0.8rem;
+        font-size: 0.9rem;
         animation: fadeIn 0.3s;
         min-height: 40px;
         display: flex;
@@ -436,6 +345,7 @@
         border: 2px solid #f59e0b;
       }
 
+      /* ----- نوار ترفیع ----- */
       .promotion-bar {
         position: fixed;
         top: 50%;
@@ -499,90 +409,81 @@
       }
 
       /* ============================================
-         📱 واکنش‌گرایی - سایزهای بزرگتر برای موبایل
+         📱 واکنش‌گرایی (مطابق پازل عجله‌ای)
          ============================================ */
-
-      /* تبلت و موبایل بزرگ */
       @media (max-width: 768px) {
-        .container {
-          padding: 0.6rem;
-          padding-bottom: 1rem;
+        .game-area {
+          max-width: 100%;
+          margin: 0 10px;
+          padding: 18px;
         }
 
-        .endgame-hero {
-          padding: 1.2rem 1rem;
-          min-height: 70px;
-        }
-        .endgame-hero h1 {
-          font-size: 1.3rem;
-        }
-        .endgame-hero p {
-          font-size: 0.8rem;
-        }
-        .game-area {
-          padding: 14px;
-          margin: 0 4px;
-        }
         #chessboard {
           max-width: 100%;
         }
+
         .stats {
-          padding: 6px 10px;
-          gap: 5px;
-          min-height: 36px;
-          border-radius: 40px;
+          font-size: 0.75rem;
+          padding: 10px 14px;
+          gap: 6px;
         }
-        .stat-item {
-          font-size: 0.65rem;
-        }
-        .stat-item-fixed {
-          font-size: 0.65rem;
-          min-width: 38px;
-        }
+
         .position-selector select {
           font-size: 0.75rem;
           padding: 6px 14px;
           min-width: 150px;
         }
+
+        .stat-item {
+          font-size: 0.7rem;
+        }
+
+        .stat-item-fixed {
+          font-size: 0.7rem;
+          min-width: 38px;
+        }
+
         .turn-indicator {
-          font-size: 0.6rem;
+          font-size: 0.65rem;
           min-width: 50px;
-          padding: 2px 8px;
+          padding: 3px 8px;
         }
+
         .user-color-badge {
-          font-size: 0.6rem;
+          font-size: 0.65rem;
           min-width: 48px;
-          padding: 2px 8px;
+          padding: 3px 8px;
         }
+
         .result-badge {
-          font-size: 0.6rem;
+          font-size: 0.65rem;
           min-width: 60px;
-          padding: 2px 8px;
+          padding: 3px 8px;
         }
+
         .timer-badge {
-          font-size: 0.6rem;
+          font-size: 0.65rem;
           min-width: 60px;
-          padding: 2px 8px;
+          padding: 3px 8px;
         }
+
         .timer-badge .timer-number {
           min-width: 16px;
           font-size: 0.7rem;
         }
+
         .btn {
-          font-size: 0.65rem;
-          padding: 5px 12px;
-          margin: 3px;
+          padding: 6px 14px;
+          font-size: 0.8rem;
+          margin: 0;
         }
+
         .message {
-          font-size: 0.7rem;
-          min-height: 34px;
-          padding: 6px 10px;
+          font-size: 0.8rem;
+          padding: 8px 12px;
+          min-height: 36px;
         }
-        .message .timer-text {
-          font-size: 0.85rem;
-          padding: 0 5px;
-          min-width: 16px;
-        }
+
         .promotion-bar {
           padding: 0.6rem 0.8rem;
           gap: 0.5rem;
@@ -596,95 +497,78 @@
         }
       }
 
-      /* موبایل */
       @media (max-width: 480px) {
-        .container {
-          padding: 0.4rem;
-          padding-bottom: 0.8rem;
+        .game-area {
+          padding: 12px;
+          margin: 0 4px;
         }
 
-        .endgame-hero {
-          padding: 1rem 0.8rem;
-          min-height: 60px;
-          border-radius: 16px;
-        }
-        .endgame-hero h1 {
-          font-size: 1.1rem;
-        }
-        .endgame-hero p {
-          font-size: 0.7rem;
-        }
-        .game-area {
-          padding: 10px;
-          margin: 0 2px;
-          border-radius: 16px;
-        }
         #chessboard {
           max-width: 320px;
-          margin: 8px auto;
         }
+
         .stats {
-          padding: 5px 8px;
+          font-size: 0.65rem;
+          padding: 8px 10px;
           gap: 4px;
-          min-height: 32px;
-          border-radius: 30px;
-          flex-wrap: wrap;
+          min-height: 40px;
         }
-        .stat-item {
-          font-size: 0.55rem;
-        }
-        .stat-item-fixed {
-          font-size: 0.55rem;
-          min-width: 32px;
-        }
+
         .position-selector select {
           font-size: 0.65rem;
           padding: 5px 12px;
           min-width: 120px;
         }
+
+        .stat-item {
+          font-size: 0.6rem;
+        }
+
+        .stat-item-fixed {
+          font-size: 0.6rem;
+          min-width: 32px;
+        }
+
         .turn-indicator {
-          font-size: 0.5rem;
-          min-width: 40px;
+          font-size: 0.55rem;
+          min-width: 42px;
           padding: 2px 6px;
         }
+
         .user-color-badge {
-          font-size: 0.5rem;
+          font-size: 0.55rem;
           min-width: 40px;
           padding: 2px 6px;
         }
+
         .result-badge {
-          font-size: 0.5rem;
+          font-size: 0.55rem;
           min-width: 48px;
           padding: 2px 6px;
         }
+
         .timer-badge {
-          font-size: 0.5rem;
+          font-size: 0.55rem;
           min-width: 48px;
           padding: 2px 6px;
         }
+
         .timer-badge .timer-number {
           min-width: 14px;
           font-size: 0.6rem;
         }
+
         .btn {
-          font-size: 0.55rem;
-          padding: 4px 10px;
-          margin: 2px;
+          font-size: 0.7rem;
+          padding: 5px 10px;
         }
-        .btn i {
-          font-size: 0.55rem;
-        }
+
         .message {
-          font-size: 0.6rem;
-          min-height: 30px;
-          padding: 5px 8px;
-          border-radius: 30px;
+          font-size: 0.7rem;
+          padding: 6px 10px;
+          min-height: 32px;
         }
-        .message .timer-text {
-          font-size: 0.75rem;
-          padding: 0 4px;
-          min-width: 14px;
-        }
+
         .promotion-bar {
           padding: 0.4rem 0.6rem;
           gap: 0.4rem;
@@ -702,114 +586,48 @@
         }
       }
 
-      /* موبایل خیلی کوچک */
-      @media (max-width: 380px) {
-        .container {
-          padding: 0.3rem;
-          padding-bottom: 0.5rem;
+      @media (max-width: 360px) {
+        .mode-selector {
+          gap: 8px;
         }
 
-        .endgame-hero {
-          padding: 0.8rem 0.6rem;
-          min-height: 50px;
+        .mode-btn {
+          font-size: 0.55rem;
+          padding: 3px 8px;
         }
-        .endgame-hero h1 {
-          font-size: 1rem;
-        }
-        .endgame-hero p {
-          font-size: 0.6rem;
-        }
-        .game-area {
-          padding: 8px;
-        }
-        #chessboard {
-          max-width: 260px;
-        }
+
         .stats {
-          padding: 4px 6px;
-          gap: 3px;
-          min-height: 28px;
+          font-size: 0.55rem;
+          padding: 6px 8px;
         }
-        .stat-item {
-          font-size: 0.45rem;
+
+        #chessboard {
+          max-width: 240px;
         }
-        .stat-item-fixed {
-          font-size: 0.45rem;
-          min-width: 28px;
-        }
+
         .position-selector select {
           font-size: 0.55rem;
           padding: 4px 10px;
           min-width: 100px;
-        }
-        .turn-indicator {
-          font-size: 0.45rem;
-          min-width: 34px;
-          padding: 1px 5px;
-        }
-        .user-color-badge {
-          font-size: 0.45rem;
-          min-width: 34px;
-          padding: 1px 5px;
-        }
-        .result-badge {
-          font-size: 0.45rem;
-          min-width: 40px;
-          padding: 1px 5px;
-        }
-        .timer-badge {
-          font-size: 0.45rem;
-          min-width: 40px;
-          padding: 1px 5px;
-        }
-        .timer-badge .timer-number {
-          min-width: 12px;
-          font-size: 0.5rem;
-        }
-        .btn {
-          font-size: 0.45rem;
-          padding: 3px 8px;
-        }
-        .btn i {
-          font-size: 0.45rem;
-        }
-        .message {
-          font-size: 0.5rem;
-          min-height: 26px;
-          padding: 4px 6px;
-        }
-        .message .timer-text {
-          font-size: 0.65rem;
-          padding: 0 3px;
-          min-width: 12px;
-        }
-        .promotion-bar {
-          padding: 0.3rem 0.5rem;
-          gap: 0.3rem;
-        }
-        .promo-piece {
-          min-width: 30px;
-          padding: 0.2rem;
-        }
-        .promo-piece img {
-          width: 22px;
-          height: 22px;
-        }
-        .promo-piece span {
-          font-size: 0.4rem;
         }
       }
     </style>
   </head>
   <body>
     <div class="container">
+      <!-- هدر -->
       <div id="header-placeholder"></div>
 
-      <section class="endgame-hero">
-        <h1>🎯 تمرین <span class="highlight">آخربازی‌ها</span></h1>
+      <!-- بنر (با کلاس hero-section برای یکدستی) -->
+      <section class="hero-section">
+        <h1>
+          <span class="highlight"><i class="fas fa-flag-checkered"></i></span>
+          <span class="highlight">آخربازی‌ها</span>
+        </h1>
         <p>۱ موقعیت آخربازی | بازی کامل با Stockfish</p>
       </section>
 
+      <!-- بخش بازی -->
       <div class="game-area">
         <div class="position-selector">
           <select id="endgameSelect"></select>
@@ -854,6 +672,7 @@
         <div id="promotionBar" class="promotion-bar hidden"></div>
       </div>
 
+      <!-- فوتر -->
       <div id="footer-placeholder"></div>
     </div>
 
@@ -881,36 +700,19 @@
         })();
 
         // ============================================
-        // 🚫 جلوگیری از اسکرول در حین بازی
-        // ============================================
-        let isGameActive = true;
-
-        function preventScroll(e) {
-          if (isGameActive) {
-            e.preventDefault();
-            return false;
-          }
-        }
-
-        document.addEventListener("wheel", preventScroll, { passive: false });
-        document.addEventListener("touchmove", preventScroll, {
-          passive: false,
-        });
-
-        // ============================================
-        // 🎨 دریافت مهره از تنظیمات (اصلاح شده)
+        // 🎨 دریافت مهره از تنظیمات
         // ============================================
         function getCurrentPieceSet() {
           try {
             const s = JSON.parse(localStorage.getItem("chesshub_settings"));
-            return s?.pieceSet || "classic";
+            return s?.pieceSet || "neo";
           } catch {
-            return "classic";
+            return "neo";
           }
         }
 
         // ============================================
-        // 🖼️ بارگذاری تصاویر مهره‌ها (اصلاح شده)
+        // 🖼️ بارگذاری تصاویر مهره‌ها
         // ============================================
         const pieceImages = {};
         const pieceCodes = {
@@ -1000,7 +802,7 @@
         const promotionBar = document.getElementById("promotionBar");
 
         // ============================================
-        // 🎨 رسم تخته (اصلاح شده)
+        // 🎨 رسم تخته
         // ============================================
         function renderBoard() {
           if (!game) return;
@@ -1509,7 +1311,7 @@
         }
 
         // ============================================
-        // 🎨 نوار ترفیع (اصلاح شده)
+        // 🎨 نوار ترفیع
         // ============================================
         function showPromotionBar(callback) {
           promotionBar.classList.remove("hidden");
@@ -1899,10 +1701,6 @@
           document.addEventListener("themeChanged", function () {
             if (game) renderBoard();
           });
-
-          setTimeout(() => {
-            isGameActive = false;
-          }, 1000);
 
           console.log("✅ ChessHub Endgames loaded successfully");
         });

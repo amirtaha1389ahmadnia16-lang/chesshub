@@ -4,11 +4,11 @@
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
     <meta
       name="description"
-      content="دروس آموزشی شطرنج – از مبتدی تا حرفه‌ای با دسته‌بندی گشایش، وسط بازی، آخر بازی، تاکتیک، حمله، دفاع و استراتژی"
+      content="دروس آموزشی شطرنج – از مبتدی تا حرفه‌ای"
     />
     <title>ChessHub | دروس آموزشی شطرنج</title>
     <link
@@ -25,69 +25,25 @@
          🎯 استایل‌های اختصاصی صفحه دروس
          ============================================ */
 
-      /* ----- بخش معرفی (Hero) ----- */
-      .lessons-hero {
-        background: linear-gradient(
-          135deg,
-          #0f2b3f 0%,
-          #1a4b6e 60%,
-          #2a7f9c 100%
-        );
-        border-radius: var(--radius-lg);
-        padding: 2.2rem 1.5rem;
-        margin-bottom: 2rem;
-        text-align: center;
-        color: #fff;
-        position: relative;
-        overflow: hidden;
+      .hero-section {
+        padding: 1.8rem 1.5rem !important;
+        min-height: 110px !important;
+        margin-bottom: 1.5rem !important;
       }
 
-      .lessons-hero::before {
-        content: "\265A";
-        position: absolute;
-        font-size: 130px;
-        right: -20px;
-        bottom: -40px;
-        opacity: 0.06;
-        font-family: "Vazir", serif;
+      .hero-section h1 {
+        font-size: clamp(1.6rem, 3.5vw, 2.2rem) !important;
       }
 
-      .lessons-hero::after {
-        content: "\265B";
-        position: absolute;
-        font-size: 100px;
-        left: -20px;
-        top: -30px;
-        opacity: 0.06;
-        font-family: "Vazir", serif;
+      .hero-section p {
+        font-size: clamp(0.9rem, 1.4vw, 1rem) !important;
       }
 
-      .lessons-hero h1 {
-        font-size: clamp(1.8rem, 5vw, 2.6rem);
-        font-weight: 900;
-        position: relative;
-        z-index: 1;
-      }
-
-      .lessons-hero h1 i {
-        color: #ffb347;
-      }
-
-      .lessons-hero p {
-        opacity: 0.9;
-        font-size: 1rem;
-        max-width: 650px;
-        margin: 0.5rem auto 0;
-        position: relative;
-        z-index: 1;
-      }
-
-      /* ----- نوار ابزار (با پشتیبانی از تم) ----- */
       .lessons-toolbar {
         background: var(--bg-card, #ffffff);
         border-radius: var(--radius-md);
-        padding: 1rem 1.2rem;
-        margin-bottom: 2rem;
+        padding: 0.8rem 1.2rem;
+        margin-bottom: 1.5rem;
         box-shadow: var(--shadow-sm);
         border: 1px solid var(--border-color, transparent);
         transition:
@@ -98,7 +54,7 @@
       .filter-row {
         display: flex;
         flex-wrap: wrap;
-        gap: 1.2rem;
+        gap: 1rem;
         align-items: center;
       }
 
@@ -110,7 +66,7 @@
       }
 
       .filter-label {
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         font-weight: 600;
         color: var(--text-secondary, #5f7f9e);
         white-space: nowrap;
@@ -125,10 +81,10 @@
       .chip {
         background: var(--secondary);
         border: none;
-        padding: 0.35rem 1rem;
+        padding: 0.3rem 0.9rem;
         border-radius: 40px;
         font-family: "Vazir";
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         font-weight: 500;
         cursor: pointer;
         transition: 0.2s;
@@ -149,10 +105,10 @@
         align-items: center;
         background: var(--secondary);
         border-radius: 40px;
-        padding: 0.2rem 1rem;
+        padding: 0.1rem 1rem;
         gap: 0.5rem;
         flex: 1;
-        min-width: 180px;
+        min-width: 160px;
         border: 1px solid var(--border-color, transparent);
         transition:
           background 0.3s ease,
@@ -161,16 +117,16 @@
 
       .search-box i {
         color: #94a3b8;
-        font-size: 0.9rem;
+        font-size: 0.8rem;
       }
 
       .search-box input {
         width: 100%;
         border: none;
         background: transparent;
-        padding: 0.6rem 0;
+        padding: 0.5rem 0;
         font-family: "Vazir";
-        font-size: 0.85rem;
+        font-size: 0.8rem;
         outline: none;
         color: var(--text-dark);
       }
@@ -179,15 +135,13 @@
         color: var(--text-secondary, #94a3b8);
       }
 
-      /* ----- گرید درس‌ها ----- */
       .lessons-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-        gap: 1.5rem;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.2rem;
         margin-bottom: 2rem;
       }
 
-      /* ----- کارت درس (با پشتیبانی از تم) ----- */
       .lesson-card {
         background: var(--bg-card, #ffffff);
         border-radius: var(--radius-lg);
@@ -197,32 +151,30 @@
         display: flex;
         flex-direction: column;
         border: 1px solid var(--border-color, transparent);
+        cursor: pointer;
       }
 
       .lesson-card:hover {
-        transform: translateY(-6px);
+        transform: translateY(-5px);
         box-shadow: var(--shadow-lg);
+        border-color: var(--primary);
       }
 
       .lesson-thumb {
-        height: 160px;
+        height: 130px;
         display: flex;
         align-items: center;
         justify-content: center;
         position: relative;
-        background: linear-gradient(
-          135deg,
-          var(--primary),
-          var(--primary-dark)
-        );
+        flex-shrink: 0;
       }
 
       .lesson-thumb i {
-        font-size: 3rem;
+        font-size: 2.8rem;
         color: white;
-        background: rgba(0, 0, 0, 0.25);
-        width: 75px;
-        height: 75px;
+        background: rgba(0, 0, 0, 0.2);
+        width: 65px;
+        height: 65px;
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -230,7 +182,7 @@
       }
 
       .lesson-content {
-        padding: 1.2rem 1.4rem 1.4rem;
+        padding: 1rem 1.2rem 1.2rem;
         flex: 1;
         display: flex;
         flex-direction: column;
@@ -238,41 +190,58 @@
 
       .lesson-meta {
         display: flex;
-        gap: 0.5rem;
-        margin-bottom: 0.6rem;
+        gap: 0.4rem;
+        margin-bottom: 0.4rem;
         flex-wrap: wrap;
       }
 
       .lesson-tag {
-        background: var(--secondary);
-        padding: 0.2rem 0.8rem;
+        padding: 0.15rem 0.7rem;
         border-radius: 30px;
-        font-size: 0.7rem;
+        font-size: 0.65rem;
         font-weight: bold;
-        color: var(--primary);
+        color: white;
+      }
+
+      .lesson-tag.tag-opening {
+        background: #10b981;
+      }
+      .lesson-tag.tag-middlegame {
+        background: #3b82f6;
+      }
+      .lesson-tag.tag-endgame {
+        background: #8b5cf6;
       }
 
       .lesson-level {
         background: var(--secondary);
-        padding: 0.2rem 0.8rem;
+        padding: 0.15rem 0.7rem;
         border-radius: 30px;
-        font-size: 0.65rem;
+        font-size: 0.6rem;
         color: var(--text-secondary);
       }
 
       .lesson-title {
-        font-size: 1.15rem;
+        font-size: 1rem;
         font-weight: 800;
         color: var(--text-dark);
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.3rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
       }
 
       .lesson-description {
-        font-size: 0.85rem;
+        font-size: 0.78rem;
         color: var(--text-secondary);
         line-height: 1.5;
-        margin-bottom: 1rem;
+        margin-bottom: 0.6rem;
         flex: 1;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
       }
 
       .lesson-footer {
@@ -280,85 +249,145 @@
         justify-content: space-between;
         align-items: center;
         margin-top: auto;
+        border-top: 1px solid var(--border-color, #eef2f5);
+        padding-top: 0.5rem;
       }
 
       .lesson-duration {
-        font-size: 0.7rem;
+        font-size: 0.65rem;
         color: var(--text-secondary);
         direction: ltr;
       }
 
-      .btn-outline {
-        background: transparent;
-        border: 1.5px solid var(--primary);
-        color: var(--primary);
-        padding: 0.3rem 1rem;
-        border-radius: 40px;
-        font-size: 0.75rem;
-        font-weight: bold;
+      .lesson-footer .btn-view {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 0.2rem 1rem;
+        border-radius: 30px;
+        font-size: 0.65rem;
+        font-weight: 600;
         cursor: pointer;
         transition: 0.2s;
         font-family: "Vazir";
       }
 
-      .btn-outline:hover {
-        background: var(--primary);
-        color: #fff;
+      .lesson-footer .btn-view:hover {
+        background: var(--primary-dark);
         transform: translateY(-2px);
       }
 
-      /* ----- مودال (با پشتیبانی از تم) ----- */
-      .lesson-modal {
+      .no-result {
+        text-align: center;
+        padding: 2.5rem;
+        color: var(--text-secondary, #5f7f9e);
+        font-size: 0.9rem;
+        grid-column: 1 / -1;
+      }
+
+      /* ============================================
+         📂 Overlay تمام‌صفحه (عرض محتوا ۷۰۰px)
+         ============================================ */
+      .page-overlay {
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.8);
-        backdrop-filter: blur(12px);
-        z-index: 1200;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(8px);
+        z-index: 1000;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 1rem;
+        transform: translateX(100%);
+        transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        direction: rtl;
+      }
+
+      .page-overlay.open {
+        transform: translateX(0);
+      }
+
+      .overlay-inner {
+        max-width: 700px;
+        margin: 0 auto;
+        width: 100%;
+      }
+
+      .overlay-header {
+        position: sticky;
+        top: 0;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 0.6rem 1.2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 10;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        margin-bottom: 1rem;
+        border-radius: 16px 16px 0 0;
+      }
+
+      .overlay-header h2 {
+        font-size: 1.1rem;
+        color: var(--primary);
         display: flex;
         align-items: center;
-        justify-content: center;
-        visibility: hidden;
-        opacity: 0;
-        transition: all 0.3s ease;
+        gap: 0.5rem;
+        margin: 0;
       }
 
-      .lesson-modal.active {
-        visibility: visible;
-        opacity: 1;
+      .overlay-header h2 i {
+        color: #ffb347;
       }
 
-      .modal-container {
-        background: var(--bg-card, #ffffff);
-        border-radius: var(--radius-lg);
-        max-width: 850px;
-        width: 92%;
-        max-height: 85vh;
-        overflow-y: auto;
-        direction: rtl;
-        padding: 2rem;
-        box-shadow: 0 30px 50px rgba(0, 0, 0, 0.3);
-        position: relative;
-      }
-
-      .modal-container::-webkit-scrollbar {
-        width: 6px;
-      }
-
-      .modal-container::-webkit-scrollbar-track {
+      .overlay-header .close-btn {
         background: var(--secondary);
-        border-radius: 10px;
-        margin-block: 8px;
+        border: none;
+        padding: 0.3rem 1rem;
+        border-radius: 40px;
+        font-family: "Vazir";
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s;
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        color: var(--text-dark);
       }
 
-      .modal-container::-webkit-scrollbar-thumb {
-        background: var(--primary);
-        border-radius: 10px;
+      .overlay-header .close-btn:hover {
+        background: #e25555;
+        color: white;
+        transform: scale(0.96);
       }
 
-      .modal-container h3 {
+      .lesson-viewer {
+        background: var(--bg-card, #ffffff);
+        border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+        padding: 1.8rem 2rem 2rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color, transparent);
+        animation: fadeSlideIn 0.3s ease;
+        width: 100%;
+        margin: 0 auto;
+      }
+
+      @keyframes fadeSlideIn {
+        from {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .lesson-viewer h3 {
         font-size: 1.6rem;
         color: var(--primary);
         border-right: 5px solid var(--primary);
@@ -366,108 +395,116 @@
         margin-bottom: 0.8rem;
       }
 
-      .modal-container .tag {
-        background: var(--secondary);
+      .lesson-viewer .tag {
         display: inline-block;
-        padding: 0.3rem 1rem;
+        padding: 0.2rem 1rem;
         border-radius: 40px;
         font-size: 0.75rem;
-        color: var(--primary);
         font-weight: bold;
-        margin-bottom: 1.2rem;
+        color: white;
+        margin-bottom: 1rem;
       }
 
-      .modal-container p,
-      .modal-container li {
+      .lesson-viewer p,
+      .lesson-viewer li {
         color: var(--text-primary);
         line-height: 1.8;
         font-size: 0.95rem;
       }
 
-      .modal-container h4 {
+      .lesson-viewer h4 {
         color: var(--primary-dark);
-        margin: 1.5rem 0 0.6rem;
-        font-size: 1.2rem;
+        margin: 1.2rem 0 0.5rem;
+        font-size: 1.15rem;
         border-right: 4px solid var(--primary);
         padding-right: 10px;
       }
 
-      .modal-container ul,
-      .modal-container ol {
+      .lesson-viewer ul,
+      .lesson-viewer ol {
         padding-right: 1.5rem;
         margin-bottom: 0.8rem;
       }
 
-      .modal-container li {
+      .lesson-viewer li {
         margin-bottom: 0.3rem;
       }
 
-      .modal-container code {
-        font-family: monospace;
-        background: var(--secondary);
+      .lesson-viewer code {
+        font-family: "Courier New", monospace;
+        background: #f1f5f9;
         padding: 0.1rem 0.4rem;
         border-radius: 6px;
         font-size: 0.85rem;
-        color: var(--primary);
+        color: #d63384;
         direction: ltr;
+        display: inline-block;
       }
 
-      .modal-container blockquote {
-        background: var(--secondary);
+      .lesson-viewer blockquote {
+        background: #f1f5f9;
         border-right: 4px solid var(--primary);
-        padding: 0.8rem 1.2rem;
-        margin: 1rem 0;
+        padding: 0.6rem 1.2rem;
+        margin: 0.8rem 0;
         border-radius: 8px;
         color: var(--text-secondary);
+        font-style: italic;
       }
 
-      .modal-container table {
+      .lesson-viewer table {
         width: 100%;
         border-collapse: collapse;
-        margin: 1rem 0;
+        margin: 0.8rem 0;
         font-size: 0.85rem;
+        border-radius: 12px;
+        overflow: hidden;
       }
 
-      .modal-container th,
-      .modal-container td {
+      .lesson-viewer th,
+      .lesson-viewer td {
         border: 1px solid var(--border-color, #e2e8f0);
-        padding: 0.5rem 0.8rem;
+        padding: 0.4rem 0.8rem;
         text-align: center;
       }
 
-      .modal-container th {
+      .lesson-viewer th {
         background: var(--primary);
         color: white;
+        font-weight: 700;
       }
 
-      .modal-container td {
+      .lesson-viewer td {
         background: var(--bg-card);
         color: var(--text-primary);
       }
 
-      .modal-container hr {
-        border: none;
-        border-top: 1px solid var(--border-color, #e2e8f0);
-        margin: 1rem 0;
+      .lesson-viewer tr:nth-child(even) td {
+        background: var(--secondary);
       }
 
-      .close-modal {
+      .lesson-viewer hr {
+        border: none;
+        border-top: 1px solid var(--border-color, #e2e8f0);
+        margin: 0.8rem 0;
+      }
+
+      .lesson-viewer .close-modal-btn {
         background: #e25555;
         color: white;
         border: none;
-        padding: 0.6rem 1.8rem;
+        padding: 0.4rem 1.5rem;
         border-radius: 60px;
         cursor: pointer;
         font-weight: bold;
-        margin-top: 1.5rem;
-        font-size: 0.9rem;
+        margin-top: 1.2rem;
+        font-size: 0.85rem;
         transition: 0.2s;
         display: block;
         width: fit-content;
         font-family: "Vazir";
       }
 
-      .close-modal:hover {
+      .lesson-viewer .close-modal-btn:hover {
         background: #c03939;
         transform: translateY(-2px);
       }
@@ -476,110 +513,81 @@
          📱 واکنش‌گرایی
          ============================================ */
       @media (max-width: 768px) {
-        .lessons-hero {
-          padding: 1.8rem 1.2rem;
+        .hero-section {
+          padding: 1.2rem 1rem !important;
+          min-height: 80px !important;
         }
 
-        .lessons-hero h1 {
-          font-size: 1.8rem;
+        .hero-section h1 {
+          font-size: 1.4rem !important;
         }
 
         .lessons-toolbar {
-          padding: 0.8rem 1rem;
+          padding: 0.6rem 0.8rem;
         }
 
         .filter-row {
           flex-direction: column;
           align-items: stretch;
-          gap: 0.8rem;
-        }
-
-        .filter-group {
-          flex-wrap: wrap;
+          gap: 0.6rem;
         }
 
         .search-box {
           min-width: unset;
         }
-      }
 
-      @media (max-width: 640px) {
-        .lessons-grid {
-          grid-template-columns: 1fr;
-        }
-      }
-
-      @media (max-width: 480px) {
-        .lessons-hero {
-          padding: 1.2rem 1rem;
+        .page-overlay {
+          padding: 0.5rem;
         }
 
-        .lessons-hero h1 {
-          font-size: 1.4rem;
+        .overlay-header {
+          padding: 0.5rem 0.8rem;
         }
 
-        .lessons-hero p {
-          font-size: 0.85rem;
+        .overlay-header h2 {
+          font-size: 0.95rem;
         }
 
-        .lesson-thumb {
-          height: 120px;
-        }
-
-        .lesson-thumb i {
-          font-size: 2.5rem;
-          width: 60px;
-          height: 60px;
-        }
-
-        .lesson-title {
-          font-size: 1rem;
-        }
-
-        .modal-container {
-          padding: 1.2rem;
-          width: 95%;
-        }
-
-        .modal-container h3 {
-          font-size: 1.3rem;
-        }
-
-        .modal-container p,
-        .modal-container li {
-          font-size: 0.85rem;
-        }
-
-        .modal-container h4 {
-          font-size: 1rem;
-        }
-
-        .close-modal {
-          font-size: 0.8rem;
-          padding: 0.5rem 1.2rem;
-        }
-
-        .chip {
-          font-size: 0.65rem;
+        .overlay-header .close-btn {
+          font-size: 0.7rem;
           padding: 0.25rem 0.7rem;
         }
 
-        .filter-label {
-          font-size: 0.7rem;
+        .lesson-viewer {
+          padding: 1.2rem;
         }
-      }
 
-      @media (max-width: 360px) {
+        .lesson-viewer h3 {
+          font-size: 1.3rem;
+        }
+
+        .lesson-viewer p,
+        .lesson-viewer li {
+          font-size: 0.85rem;
+        }
+
+        .lesson-viewer table {
+          font-size: 0.75rem;
+        }
+
+        .lesson-viewer th,
+        .lesson-viewer td {
+          padding: 0.3rem 0.5rem;
+        }
+
         .lessons-grid {
-          gap: 1rem;
+          grid-template-columns: 1fr 1fr;
+          gap: 0.8rem;
         }
 
-        .lesson-card {
-          border-radius: 16px;
+        .lesson-thumb {
+          height: 100px;
         }
 
-        .lesson-content {
-          padding: 0.8rem 1rem 1rem;
+        .lesson-thumb i {
+          font-size: 2.2rem;
+          width: 50px;
+          height: 50px;
         }
 
         .lesson-title {
@@ -587,55 +595,147 @@
         }
 
         .lesson-description {
-          font-size: 0.75rem;
+          font-size: 0.7rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .hero-section {
+          padding: 0.8rem 0.6rem !important;
+          min-height: 60px !important;
         }
 
-        .btn-outline {
+        .hero-section h1 {
+          font-size: 1.1rem !important;
+        }
+
+        .hero-section p {
+          font-size: 0.7rem !important;
+        }
+
+        .page-overlay {
+          padding: 0.3rem;
+        }
+
+        .overlay-header {
+          padding: 0.4rem 0.6rem;
+        }
+
+        .overlay-header h2 {
+          font-size: 0.8rem;
+        }
+
+        .overlay-header .close-btn {
+          font-size: 0.6rem;
+          padding: 0.2rem 0.5rem;
+        }
+
+        .lesson-viewer {
+          padding: 0.8rem;
+          border-radius: 0 0 16px 16px;
+        }
+
+        .lesson-viewer h3 {
+          font-size: 1.1rem;
+        }
+
+        .lesson-viewer p,
+        .lesson-viewer li {
+          font-size: 0.8rem;
+        }
+
+        .lesson-viewer table {
           font-size: 0.65rem;
-          padding: 0.2rem 0.7rem;
+        }
+
+        .lesson-viewer th,
+        .lesson-viewer td {
+          padding: 0.2rem 0.3rem;
+        }
+
+        .lessons-grid {
+          grid-template-columns: 1fr;
         }
 
         .chip {
-          font-size: 0.55rem;
-          padding: 0.2rem 0.5rem;
+          font-size: 0.6rem;
+          padding: 0.2rem 0.6rem;
+        }
+
+        .filter-label {
+          font-size: 0.65rem;
+        }
+
+        .lesson-thumb {
+          height: 80px;
+        }
+
+        .lesson-thumb i {
+          font-size: 1.8rem;
+          width: 42px;
+          height: 42px;
+        }
+
+        .lesson-title {
+          font-size: 0.85rem;
+        }
+
+        .lesson-content {
+          padding: 0.6rem 0.8rem 0.8rem;
+        }
+      }
+
+      @media (max-width: 360px) {
+        .lessons-grid {
+          gap: 0.6rem;
+        }
+
+        .lesson-thumb {
+          height: 70px;
+        }
+
+        .lesson-thumb i {
+          font-size: 1.5rem;
+          width: 36px;
+          height: 36px;
+        }
+
+        .lesson-title {
+          font-size: 0.75rem;
+        }
+
+        .chip {
+          font-size: 0.5rem;
+          padding: 0.15rem 0.4rem;
+        }
+
+        .search-box input {
+          font-size: 0.65rem;
         }
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <!-- هدر -->
       <div id="header-placeholder"></div>
 
-      <!-- بخش معرفی (Hero) -->
-      <div class="lessons-hero">
-        <h1><i class="fas fa-graduation-cap"></i> دروس آموزشی شطرنج</h1>
-        <p>از اصول گشایش تا آخر بازی‌های پیچیده – دسته‌بندی در ۷ بخش و ۳ سطح</p>
-      </div>
+      <section class="hero-section">
+        <h1>
+          <span class="highlight"><i class="fas fa-graduation-cap"></i></span>
+          <span class="highlight">دروس</span> آموزشی شطرنج
+        </h1>
+        <p>از مبتدی تا حرفه‌ای، هر آنچه برای پیشرفت نیاز داری اینجاست</p>
+      </section>
 
-      <!-- نوار ابزار -->
       <div class="lessons-toolbar">
         <div class="filter-row">
           <div class="filter-group">
             <span class="filter-label">دسته:</span>
             <div class="chips" id="categoryFilters">
               <button class="chip active" data-cat="all">همه</button>
-              <button class="chip" data-cat="گشایش">گشایش</button>
+              <button class="chip" data-cat="شروع بازی">شروع بازی</button>
               <button class="chip" data-cat="وسط بازی">وسط بازی</button>
               <button class="chip" data-cat="آخر بازی">آخر بازی</button>
-              <button class="chip" data-cat="تاکتیک">تاکتیک</button>
-              <button class="chip" data-cat="حمله">حمله</button>
-              <button class="chip" data-cat="دفاع">دفاع</button>
-              <button class="chip" data-cat="استراتژی">استراتژی</button>
-            </div>
-          </div>
-          <div class="filter-group">
-            <span class="filter-label">سطح:</span>
-            <div class="chips" id="levelFilters">
-              <button class="chip active" data-level="all">همه</button>
-              <button class="chip" data-level="مبتدی">مبتدی</button>
-              <button class="chip" data-level="متوسط">متوسط</button>
-              <button class="chip" data-level="حرفه‌ای">حرفه‌ای</button>
             </div>
           </div>
           <div class="search-box">
@@ -649,18 +749,24 @@
         </div>
       </div>
 
-      <!-- گرید درس‌ها -->
       <div id="lessonsGridContainer" class="lessons-grid"></div>
 
-      <!-- فوتر -->
       <div id="footer-placeholder"></div>
     </div>
 
-    <!-- مودال -->
-    <div id="lessonModal" class="lesson-modal">
-      <div class="modal-container">
-        <div id="modalContent"></div>
-        <button class="close-modal" id="closeModalBtn">✖ بستن</button>
+    <!-- Overlay -->
+    <div class="page-overlay" id="lessonOverlay">
+      <div class="overlay-inner">
+        <div class="overlay-header">
+          <h2>
+            <i class="fas fa-graduation-cap"></i>
+            <span id="overlayTitle">درس</span>
+          </h2>
+          <button class="close-btn" id="closeOverlay">
+            <i class="fas fa-times"></i> بستن
+          </button>
+        </div>
+        <div id="lessonViewerContainer" class="lesson-viewer"></div>
       </div>
     </div>
 
@@ -670,9 +776,6 @@
       (function () {
         "use strict";
 
-        // ============================================
-        // 🎨 اعمال تم ذخیره‌شده
-        // ============================================
         (function applySavedTheme() {
           try {
             const settings = JSON.parse(
@@ -688,25 +791,58 @@
           } catch (e) {}
         })();
 
-        // ============================================
-        // 📚 متغیرهای فیلتر
-        // ============================================
         let currentCategory = "all";
-        let currentLevel = "all";
         let searchText = "";
 
-        // ============================================
-        // 🎨 رندر درس‌ها
-        // ============================================
-        function renderLessons() {
-          const container = document.getElementById("lessonsGridContainer");
-          if (!container) return;
+        const gridContainer = document.getElementById("lessonsGridContainer");
+        const overlay = document.getElementById("lessonOverlay");
+        const overlayTitle = document.getElementById("overlayTitle");
+        const viewerContainer = document.getElementById(
+          "lessonViewerContainer",
+        );
+        const closeBtn = document.getElementById("closeOverlay");
 
+        const categoryColors = {
+          "شروع بازی": "#10b981",
+          "وسط بازی": "#3b82f6",
+          "آخر بازی": "#8b5cf6",
+        };
+
+        const categoryClasses = {
+          "شروع بازی": "tag-opening",
+          "وسط بازی": "tag-middlegame",
+          "آخر بازی": "tag-endgame",
+        };
+
+        function openLesson(lesson) {
+          if (!lesson) return;
+          overlayTitle.textContent = lesson.title;
+          const color = categoryColors[lesson.category] || "#2c7da0";
+
+          viewerContainer.innerHTML = `
+            <h3>${lesson.title}</h3>
+            <div class="tag" style="background:${color}">${lesson.category} – ${lesson.level}</div>
+            ${lesson.content}
+            <button class="close-modal-btn" id="closeLessonBtn">✖ بستن</button>
+          `;
+
+          overlay.classList.add("open");
+          document.body.style.overflow = "hidden";
+
+          document
+            .getElementById("closeLessonBtn")
+            .addEventListener("click", closeLessonOverlay);
+        }
+
+        function closeLessonOverlay() {
+          overlay.classList.remove("open");
+          document.body.style.overflow = "";
+        }
+
+        function renderLessons() {
           const lessonsData = window.lessons || [];
           let filtered = lessonsData.filter((l) => {
             if (currentCategory !== "all" && l.category !== currentCategory)
-              return false;
-            if (currentLevel !== "all" && l.level !== currentLevel)
               return false;
             if (
               searchText &&
@@ -718,81 +854,56 @@
           });
 
           if (filtered.length === 0) {
-            container.innerHTML = `
-              <div style="text-align:center;padding:3rem;color:var(--text-secondary, #5f7f9e);">
-                درسی با این مشخصات پیدا نشد.
-              </div>
-            `;
+            gridContainer.innerHTML = `<div class="no-result">درسی با این مشخصات پیدا نشد.</div>`;
             return;
           }
 
-          container.innerHTML = "";
-          filtered.forEach((l) => {
+          gridContainer.innerHTML = "";
+
+          filtered.forEach((lesson) => {
+            const color = categoryColors[lesson.category] || "#2c7da0";
+            const cls = categoryClasses[lesson.category] || "";
+
             const card = document.createElement("div");
             card.className = "lesson-card";
             card.innerHTML = `
-              <div class="lesson-thumb" style="background:linear-gradient(135deg, ${l.color}, ${l.color}cc)">
-                <i class="${l.thumbIcon}"></i>
+              <div class="lesson-thumb" style="background:linear-gradient(135deg, ${color}, ${color}cc)">
+                <i class="${lesson.thumbIcon}"></i>
               </div>
               <div class="lesson-content">
                 <div class="lesson-meta">
-                  <span class="lesson-tag">${l.category}</span>
-                  <span class="lesson-level">${l.level}</span>
+                  <span class="lesson-tag ${cls}">${lesson.category}</span>
+                  <span class="lesson-level">${lesson.level}</span>
                 </div>
-                <div class="lesson-title">${l.title}</div>
-                <p class="lesson-description">${l.description}</p>
+                <div class="lesson-title">${lesson.title}</div>
+                <p class="lesson-description">${lesson.description}</p>
                 <div class="lesson-footer">
-                  <span class="lesson-duration"><i class="far fa-clock"></i> ${l.duration}</span>
-                  <button class="btn-outline" data-id="${l.id}">مشاهده <i class="fas fa-arrow-left"></i></button>
+                  <span class="lesson-duration"><i class="far fa-clock"></i> ${lesson.duration}</span>
+                  <button class="btn-view" data-id="${lesson.id}">مشاهده</button>
                 </div>
               </div>
             `;
-            container.appendChild(card);
+            gridContainer.appendChild(card);
           });
 
-          // رویداد دکمه‌های مشاهده
-          document.querySelectorAll(".btn-outline").forEach((btn) => {
-            btn.onclick = () => {
-              const lesson = window.lessons.find((l) => l.id == btn.dataset.id);
-              if (lesson) showLessonModal(lesson);
-            };
+          document.querySelectorAll(".btn-view").forEach((btn) => {
+            btn.addEventListener("click", function (e) {
+              e.stopPropagation();
+              const lesson = window.lessons.find(
+                (l) => l.id == this.dataset.id,
+              );
+              if (lesson) openLesson(lesson);
+            });
+          });
+
+          document.querySelectorAll(".lesson-card").forEach((card) => {
+            card.addEventListener("click", function () {
+              const btn = this.querySelector(".btn-view");
+              if (btn) btn.click();
+            });
           });
         }
 
-        // ============================================
-        // 📖 نمایش مودال
-        // ============================================
-        function showLessonModal(lesson) {
-          const modal = document.getElementById("lessonModal");
-          const content = document.getElementById("modalContent");
-
-          // اعمال تم به مودال
-          const themeClass = document.body.className
-            .split(" ")
-            .find((cls) => cls.startsWith("theme-"));
-          if (themeClass) {
-            modal.querySelector(".modal-container").className =
-              "modal-container " + themeClass;
-          }
-
-          content.innerHTML = `
-            <h3>${lesson.title}</h3>
-            <div class="tag">${lesson.category} – ${lesson.level}</div>
-            ${lesson.content}
-          `;
-
-          modal.classList.add("active");
-          document.body.style.overflow = "hidden";
-        }
-
-        function closeModal() {
-          document.getElementById("lessonModal").classList.remove("active");
-          document.body.style.overflow = "";
-        }
-
-        // ============================================
-        // 🎛️ تنظیم فیلترها
-        // ============================================
         function setupFilters() {
           const setActive = (container, activeBtn) => {
             container
@@ -801,25 +912,14 @@
             activeBtn.classList.add("active");
           };
 
-          // فیلتر دسته
           document.querySelectorAll("#categoryFilters .chip").forEach((btn) => {
-            btn.onclick = () => {
-              setActive(document.getElementById("categoryFilters"), btn);
-              currentCategory = btn.dataset.cat;
+            btn.addEventListener("click", function () {
+              setActive(document.getElementById("categoryFilters"), this);
+              currentCategory = this.dataset.cat;
               renderLessons();
-            };
+            });
           });
 
-          // فیلتر سطح
-          document.querySelectorAll("#levelFilters .chip").forEach((btn) => {
-            btn.onclick = () => {
-              setActive(document.getElementById("levelFilters"), btn);
-              currentLevel = btn.dataset.level;
-              renderLessons();
-            };
-          });
-
-          // جستجو
           document
             .getElementById("searchLessonInput")
             .addEventListener("input", (e) => {
@@ -828,30 +928,19 @@
             });
         }
 
-        // ============================================
-        // 🚀 راه‌اندازی
-        // ============================================
+        closeBtn.addEventListener("click", closeLessonOverlay);
+
+        overlay.addEventListener("click", function (e) {
+          if (e.target === this) closeLessonOverlay();
+        });
+
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape") closeLessonOverlay();
+        });
+
         function init() {
           renderLessons();
           setupFilters();
-
-          // بستن مودال با کلیک روی پس‌زمینه
-          document
-            .getElementById("lessonModal")
-            .addEventListener("click", (e) => {
-              if (e.target === e.currentTarget) closeModal();
-            });
-
-          // دکمه بستن
-          document
-            .getElementById("closeModalBtn")
-            .addEventListener("click", closeModal);
-
-          // بستن با دکمه ESC
-          document.addEventListener("keydown", (e) => {
-            if (e.key === "Escape") closeModal();
-          });
-
           console.log("✅ ChessHub Lessons loaded successfully");
         }
 

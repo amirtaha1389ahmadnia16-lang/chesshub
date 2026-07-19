@@ -1,0 +1,1061 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <title>ChessHub | همکاری در گشایش‌ها</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+      /* ===== استایل‌های اختصاصی ===== */
+      .coop-form {
+        background: var(--bg-card, #ffffff);
+        border-radius: var(--radius-lg);
+        padding: 1.8rem 2rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color, #e2e8f0);
+        max-width: 1000px;
+        margin: 0 auto;
+      }
+
+      .coop-form .form-group {
+        margin-bottom: 1.2rem;
+      }
+
+      .coop-form .form-group label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.3rem;
+      }
+
+      .coop-form .form-group label .required {
+        color: #e25555;
+        margin-right: 2px;
+      }
+
+      .coop-form .form-group label .hint {
+        font-size: 0.7rem;
+        color: var(--text-secondary, #64748b);
+        font-weight: 400;
+      }
+
+      .coop-form .form-group input,
+      .coop-form .form-group select,
+      .coop-form .form-group textarea {
+        width: 100%;
+        padding: 0.6rem 0.8rem;
+        border: 1.5px solid var(--border-color, #e2e8f0);
+        border-radius: 12px;
+        font-family: "Vazir";
+        font-size: 0.85rem;
+        transition: 0.2s;
+        background: var(--secondary, #f8fafc);
+        color: var(--text-dark);
+        outline: none;
+        box-sizing: border-box;
+      }
+
+      .coop-form .form-group input:focus,
+      .coop-form .form-group select:focus,
+      .coop-form .form-group textarea:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(44, 125, 160, 0.08);
+        background: #fff;
+      }
+
+      .coop-form .form-group textarea {
+        min-height: 70px;
+        resize: vertical;
+      }
+
+      .coop-form .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+
+      .coop-form .form-row.single {
+        grid-template-columns: 1fr;
+      }
+
+      .coop-form .form-row.three {
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+
+      /* ===== واریانت‌ها ===== */
+      .variant-entry {
+        background: var(--secondary, #f8fafc);
+        border-radius: 16px;
+        padding: 1.2rem;
+        margin-bottom: 1rem;
+        border: 1px solid var(--border-color, #eef2f5);
+        position: relative;
+        transition: 0.2s;
+      }
+
+      .variant-entry:hover {
+        border-color: var(--primary);
+      }
+
+      .variant-entry .remove-variant {
+        position: absolute;
+        top: 0.5rem;
+        left: 0.5rem;
+        background: #fee2e2;
+        color: #991b1b;
+        border: none;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.2s;
+        z-index: 5;
+      }
+
+      .variant-entry .remove-variant:hover {
+        background: #fecaca;
+        transform: scale(1.1);
+      }
+
+      .variant-entry .variant-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        padding-left: 2.5rem;
+      }
+
+      .variant-entry .variant-header .num-badge {
+        background: var(--primary);
+        color: #fff;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 700;
+      }
+
+      .variant-entry .variant-header .title {
+        font-weight: 700;
+        color: var(--text-dark);
+        font-size: 0.95rem;
+      }
+
+      /* زیرورودی‌ها */
+      .sub-entry {
+        background: var(--bg-card, #ffffff);
+        border-radius: 12px;
+        padding: 0.8rem;
+        margin-bottom: 0.6rem;
+        border: 1px solid var(--border-color, #eef2f5);
+        position: relative;
+        transition: 0.2s;
+      }
+
+      .sub-entry:hover {
+        border-color: #cbd5e1;
+      }
+
+      .sub-entry .remove-sub {
+        position: absolute;
+        top: 0.3rem;
+        left: 0.3rem;
+        background: #fee2e2;
+        color: #991b1b;
+        border: none;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+        font-size: 0.7rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.2s;
+      }
+
+      .sub-entry .remove-sub:hover {
+        background: #fecaca;
+        transform: scale(1.1);
+      }
+
+      /* دکمه‌های افزودن */
+      .add-btn {
+        background: #dbeafe;
+        color: #1e40af;
+        border: none;
+        padding: 0.3rem 1.2rem;
+        border-radius: 40px;
+        font-family: "Vazir";
+        font-size: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+      }
+
+      .add-btn:hover {
+        background: #bfdbfe;
+        transform: translateY(-2px);
+      }
+
+      .add-btn.green {
+        background: #d1fae5;
+        color: #065f46;
+      }
+
+      .add-btn.green:hover {
+        background: #a7f3d0;
+      }
+
+      .add-btn.amber {
+        background: #fef3c7;
+        color: #92400e;
+      }
+
+      .add-btn.amber:hover {
+        background: #fde68a;
+      }
+
+      .add-btn.purple {
+        background: #ede9fe;
+        color: #5b21b6;
+      }
+
+      .add-btn.purple:hover {
+        background: #ddd6fe;
+      }
+
+      /* ===== دکمه‌های اصلی ===== */
+      .btn-group {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-top: 1.5rem;
+        justify-content: center;
+      }
+
+      .btn {
+        padding: 0.6rem 1.8rem;
+        border-radius: 40px;
+        border: none;
+        font-family: "Vazir";
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .btn-primary {
+        background: var(--primary);
+        color: #fff;
+      }
+
+      .btn-primary:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(44, 125, 160, 0.3);
+      }
+
+      .btn-success {
+        background: #10b981;
+        color: #fff;
+      }
+
+      .btn-success:hover {
+        background: #059669;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+      }
+
+      .btn-secondary {
+        background: #e2e8f0;
+        color: var(--text-dark);
+      }
+
+      .btn-secondary:hover {
+        background: #cbd5e1;
+        transform: translateY(-2px);
+      }
+
+      /* ===== Toast ===== */
+      .toast-container {
+        position: fixed;
+        bottom: 2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 9999;
+        direction: rtl;
+        width: 90%;
+        max-width: 500px;
+      }
+
+      .toast {
+        background: #1a2a3a;
+        color: #fff;
+        padding: 0.7rem 1.5rem;
+        border-radius: 60px;
+        font-size: 0.85rem;
+        font-family: "Vazir", sans-serif;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        opacity: 0;
+        transition:
+          opacity 0.3s ease,
+          transform 0.3s ease;
+        transform: translateY(20px);
+        text-align: center;
+        pointer-events: none;
+      }
+
+      .toast.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .toast.success {
+        background: #10b981;
+      }
+
+      .toast.error {
+        background: #e25555;
+      }
+
+      .toast.warning {
+        background: #f59e0b;
+        color: #1a2a3a;
+      }
+
+      /* ===== واکنش‌گرایی ===== */
+      @media (max-width: 768px) {
+        .coop-form {
+          padding: 1.2rem;
+        }
+
+        .coop-form .form-row {
+          grid-template-columns: 1fr;
+        }
+
+        .coop-form .form-row.three {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .btn-group {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .btn {
+          justify-content: center;
+          font-size: 0.8rem;
+        }
+
+        .variant-entry {
+          padding: 0.8rem;
+        }
+
+        .variant-entry .variant-header {
+          padding-left: 2rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .coop-form {
+          padding: 0.8rem;
+        }
+
+        .coop-form .form-group label {
+          font-size: 0.75rem;
+        }
+
+        .coop-form .form-group input,
+        .coop-form .form-group select,
+        .coop-form .form-group textarea {
+          font-size: 0.75rem;
+          padding: 0.45rem 0.6rem;
+        }
+
+        .btn {
+          font-size: 0.75rem;
+          padding: 0.45rem 1rem;
+        }
+
+        .variant-entry {
+          padding: 0.6rem;
+        }
+
+        .sub-entry {
+          padding: 0.6rem;
+        }
+
+        .add-btn {
+          font-size: 0.65rem;
+          padding: 0.2rem 0.8rem;
+        }
+
+        .coop-form .form-row.three {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 360px) {
+        .coop-form .btn {
+          font-size: 0.7rem;
+          padding: 0.3rem 0.6rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div id="header-placeholder"></div>
+
+      <!-- بنر یکدست -->
+      <section class="hero-section">
+        <h1>
+          <span class="highlight"><i class="fas fa-handshake"></i></span>
+          <span class="highlight">همکاری</span> در گشایش‌ها
+        </h1>
+        <p>
+          گشایش‌های جدید، واریانت‌های ناشناخته یا تحلیل‌های خود را با جامعه‌ی
+          شطرنج به اشتراک بگذارید.
+        </p>
+      </section>
+
+      <div class="coop-form" id="coopForm">
+        <!-- ===== اطلاعات اصلی گشایش ===== -->
+        <div class="form-row">
+          <div class="form-group">
+            <label>نام گشایش <span class="required">*</span></label>
+            <input
+              type="text"
+              id="openingName"
+              placeholder="مثلاً: دفاع سیسیلی"
+            />
+          </div>
+          <div class="form-group">
+            <label>دسته‌بندی <span class="required">*</span></label>
+            <select id="categoryCode">
+              <option value="e4">1.e4</option>
+              <option value="d4">1.d4</option>
+              <option value="c4">1.c4</option>
+              <option value="Nf3">1.Nf3</option>
+              <option value="other">سایر</option>
+            </select>
+            <span class="hint">حرکت اول سفید</span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>نام دسته‌بندی <span class="hint">(اختیاری)</span></label>
+            <input
+              type="text"
+              id="categoryName"
+              placeholder="مثلاً: گشایش‌های 1.e4"
+            />
+            <span class="hint"
+              >در صورت خالی ماندن، به‌طور خودکار پر می‌شود</span
+            >
+          </div>
+          <div class="form-group">
+            <label>حرکات اصلی <span class="required">*</span></label>
+            <input type="text" id="openingMoves" placeholder="مثلاً: e4 c5" />
+            <span class="hint">حرکات را با فاصله جدا کنید</span>
+          </div>
+        </div>
+
+        <!-- ===== واریانت‌ها ===== -->
+        <div class="form-group">
+          <label
+            style="
+              font-size: 1rem;
+              border-bottom: 2px solid var(--primary);
+              padding-bottom: 0.3rem;
+            "
+          >
+            <i class="fas fa-code-branch"></i> واریانت‌ها
+            <span class="hint">– حداقل یک واریانت وارد کنید</span>
+          </label>
+          <div id="variantsContainer"></div>
+          <button class="add-btn" id="addVariantBtn">
+            <i class="fas fa-plus"></i> افزودن واریانت جدید
+          </button>
+        </div>
+
+        <!-- ===== دکمه‌ها ===== -->
+        <div class="btn-group">
+          <button class="btn btn-secondary" id="resetBtn">
+            <i class="fas fa-undo"></i> پاک کردن
+          </button>
+          <button class="btn btn-success" id="exportBtn">
+            <i class="fas fa-download"></i> خروجی JSON
+          </button>
+        </div>
+      </div>
+
+      <div id="footer-placeholder"></div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast-container" id="toastContainer">
+      <div class="toast" id="toast"></div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+      (function () {
+        "use strict";
+
+        // ===== اعمال تم =====
+        (function applySavedTheme() {
+          try {
+            const settings = JSON.parse(
+              localStorage.getItem("chesshub_settings"),
+            );
+            if (settings && settings.theme) {
+              document.body.className = document.body.className
+                .split(" ")
+                .filter((c) => !c.startsWith("theme-"))
+                .join(" ");
+              document.body.classList.add(`theme-${settings.theme}`);
+            }
+          } catch (e) {}
+        })();
+
+        // ===== DOM refs =====
+        const variantsContainer = document.getElementById("variantsContainer");
+        let variantCounter = 0;
+
+        // ===== توابع واریانت‌ها =====
+        function createVariantHTML(index) {
+          const num = index + 1;
+          return `
+      <div class="variant-entry" data-index="${index}">
+        <button class="remove-variant" data-index="${index}" title="حذف واریانت">✕</button>
+        <div class="variant-header">
+          <span class="num-badge">${num}</span>
+          <span class="title">واریانت ${num}</span>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>نام واریانت <span class="required">*</span></label>
+            <input type="text" class="variant-name" placeholder="مثلاً: واریانت ناژدورف" />
+          </div>
+          <div class="form-group">
+            <label>حرکات واریانت <span class="required">*</span></label>
+            <input type="text" class="variant-moves" placeholder="مثلاً: e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 a6" />
+          </div>
+        </div>
+        <div class="form-row three">
+          <div class="form-group">
+            <label>برد سفید (%)</label>
+            <input type="number" class="variant-white-wins" placeholder="مثلاً: 38" min="0" max="100" />
+          </div>
+          <div class="form-group">
+            <label>برد سیاه (%)</label>
+            <input type="number" class="variant-black-wins" placeholder="مثلاً: 32" min="0" max="100" />
+          </div>
+          <div class="form-group">
+            <label>مساوی (%)</label>
+            <input type="number" class="variant-draws" placeholder="مثلاً: 30" min="0" max="100" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>نقاط قوت</label>
+            <textarea class="variant-strengths" placeholder="هر خط یک مورد&#10;مثلاً: انعطاف‌پذیری بالا" rows="2"></textarea>
+          </div>
+          <div class="form-group">
+            <label>نقاط ضعف</label>
+            <textarea class="variant-weaknesses" placeholder="هر خط یک مورد&#10;مثلاً: توسعه نیافتن سریع فیل" rows="2"></textarea>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>حرکات پرتکرار</label>
+          <div class="popular-moves-container"></div>
+          <button class="add-btn green" onclick="addPopularMove(this)">➕ افزودن حرکت پرتکرار</button>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>ارزیابی (امتیاز)</label>
+            <input type="text" class="variant-score" placeholder="مثلاً: +0.3" />
+          </div>
+          <div class="form-group">
+            <label>ارزیابی (توضیح)</label>
+            <input type="text" class="variant-summary" placeholder="مثلاً: سفید برتری اندکی دارد" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>ایده‌ها و طرح‌ها</label>
+            <textarea class="variant-ideas" placeholder="هر خط یک مورد&#10;مثلاً: سفید: حمله در جناح شاه" rows="2"></textarea>
+          </div>
+          <div class="form-group">
+            <label>آخر بازی‌های احتمالی</label>
+            <textarea class="variant-endgames" placeholder="هر خط یک مورد&#10;مثلاً: آخر بازی رخ و پیاده" rows="2"></textarea>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>تله‌ها</label>
+          <div class="traps-container"></div>
+          <button class="add-btn amber" onclick="addTrap(this)">➕ افزودن تله</button>
+        </div>
+        <div class="form-group">
+          <label>نمونه بازی‌ها</label>
+          <div class="games-container"></div>
+          <button class="add-btn purple" onclick="addGame(this)">➕ افزودن نمونه بازی</button>
+        </div>
+      </div>
+    `;
+        }
+
+        function addVariant() {
+          variantCounter++;
+          const wrapper = document.createElement("div");
+          wrapper.innerHTML = createVariantHTML(variantCounter - 1);
+          const entry = wrapper.firstElementChild;
+          variantsContainer.appendChild(entry);
+
+          // افزودن موارد پیش‌فرض
+          const popContainer = entry.querySelector(".popular-moves-container");
+          if (popContainer) {
+            const sub = createPopularMoveEntry();
+            popContainer.appendChild(sub);
+          }
+          const trapContainer = entry.querySelector(".traps-container");
+          if (trapContainer) {
+            const sub = createTrapEntry();
+            trapContainer.appendChild(sub);
+          }
+          const gameContainer = entry.querySelector(".games-container");
+          if (gameContainer) {
+            const sub = createGameEntry();
+            gameContainer.appendChild(sub);
+          }
+
+          entry
+            .querySelector(".remove-variant")
+            .addEventListener("click", function () {
+              removeVariant(this);
+            });
+
+          showToast("✅ واریانت جدید اضافه شد", "success");
+        }
+
+        function removeVariant(btn) {
+          if (variantsContainer.children.length <= 1) {
+            showToast("❌ حداقل یک واریانت باید وجود داشته باشد", "error");
+            return;
+          }
+          const entry = btn.closest(".variant-entry");
+          entry.remove();
+          // به‌روزرسانی شماره‌ها
+          variantsContainer
+            .querySelectorAll(".variant-entry")
+            .forEach((el, i) => {
+              const num = el.querySelector(".num-badge");
+              const title = el.querySelector(".variant-header .title");
+              if (num) num.textContent = i + 1;
+              if (title) title.textContent = `واریانت ${i + 1}`;
+              el.dataset.index = i;
+            });
+          showToast("🗑️ واریانت حذف شد", "warning");
+        }
+
+        // ===== زیر-ورودی‌ها =====
+        function createPopularMoveEntry() {
+          const div = document.createElement("div");
+          div.className = "sub-entry";
+          div.innerHTML = `
+      <button class="remove-sub" title="حذف">✕</button>
+      <div class="form-row">
+        <div class="form-group">
+          <label>حرکت (SAN)</label>
+          <input type="text" class="pop-move-san" placeholder="مثلاً: 6.Bg5" />
+        </div>
+        <div class="form-group">
+          <label>توضیح</label>
+          <input type="text" class="pop-move-desc" placeholder="مثلاً: حمله ریشتر-رائوزر" />
+        </div>
+        <div class="form-group">
+          <label>حرکات</label>
+          <input type="text" class="pop-move-moves" placeholder="مثلاً: Bg5 e6 f4" />
+        </div>
+      </div>
+    `;
+          div
+            .querySelector(".remove-sub")
+            .addEventListener("click", function () {
+              removeSubEntry(this);
+            });
+          return div;
+        }
+
+        function createTrapEntry() {
+          const div = document.createElement("div");
+          div.className = "sub-entry";
+          div.innerHTML = `
+      <button class="remove-sub" title="حذف">✕</button>
+      <div class="form-row">
+        <div class="form-group">
+          <label>نام تله</label>
+          <input type="text" class="trap-name" placeholder="مثلاً: تله مسموم" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>حرکات تله</label>
+          <input type="text" class="trap-moves" placeholder="مثلاً: e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 a6 Bg5 e6 f4 Qb6 Qd2 Qxb2 Rb1" />
+        </div>
+      </div>
+    `;
+          div
+            .querySelector(".remove-sub")
+            .addEventListener("click", function () {
+              removeSubEntry(this);
+            });
+          return div;
+        }
+
+        function createGameEntry() {
+          const div = document.createElement("div");
+          div.className = "sub-entry";
+          div.innerHTML = `
+      <button class="remove-sub" title="حذف">✕</button>
+      <div class="form-row">
+        <div class="form-group">
+          <label>سفید</label>
+          <input type="text" class="game-white" placeholder="نام بازیکن سفید" />
+        </div>
+        <div class="form-group">
+          <label>سیاه</label>
+          <input type="text" class="game-black" placeholder="نام بازیکن سیاه" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>سال</label>
+          <input type="number" class="game-year" placeholder="مثلاً: 1972" />
+        </div>
+        <div class="form-group">
+          <label>نتیجه</label>
+          <select class="game-result">
+            <option value="1-0">برد سفید</option>
+            <option value="0-1">برد سیاه</option>
+            <option value="1/2-1/2">مساوی</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row single">
+        <div class="form-group">
+          <label>حرکات PGN</label>
+          <textarea class="game-pgn" placeholder="حرکات بازی به فرمت PGN&#10;مثلاً: 1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6" rows="2"></textarea>
+        </div>
+      </div>
+    `;
+          div
+            .querySelector(".remove-sub")
+            .addEventListener("click", function () {
+              removeSubEntry(this);
+            });
+          return div;
+        }
+
+        function addPopularMove(btn) {
+          const container = btn.previousElementSibling;
+          const entry = createPopularMoveEntry();
+          container.appendChild(entry);
+          showToast("✅ حرکت پرتکرار اضافه شد", "success");
+        }
+
+        function addTrap(btn) {
+          const container = btn.previousElementSibling;
+          const entry = createTrapEntry();
+          container.appendChild(entry);
+          showToast("✅ تله اضافه شد", "success");
+        }
+
+        function addGame(btn) {
+          const container = btn.previousElementSibling;
+          const entry = createGameEntry();
+          container.appendChild(entry);
+          showToast("✅ نمونه بازی اضافه شد", "success");
+        }
+
+        function removeSubEntry(btn) {
+          const container = btn.closest(".sub-entry").parentElement;
+          if (container.children.length <= 1) {
+            showToast("❌ حداقل یک آیتم باید وجود داشته باشد", "error");
+            return;
+          }
+          btn.closest(".sub-entry").remove();
+          showToast("🗑️ آیتم حذف شد", "warning");
+        }
+
+        // ===== Toast =====
+        function showToast(text, type = "success") {
+          const toast = document.getElementById("toast");
+          if (!toast) return;
+          toast.textContent = text;
+          toast.className = "toast show " + type;
+          clearTimeout(toast._timeout);
+          toast._timeout = setTimeout(
+            () => toast.classList.remove("show"),
+            4000,
+          );
+        }
+
+        // ===== ریست فرم =====
+        function resetForm() {
+          if (!confirm("آیا مطمئنی؟ تمام اطلاعات فرم پاک می‌شود.")) return;
+          document
+            .querySelectorAll(
+              "#coopForm input, #coopForm textarea, #coopForm select",
+            )
+            .forEach((el) => {
+              if (el.type === "checkbox" || el.type === "radio")
+                el.checked = false;
+              else if (el.tagName === "SELECT") el.selectedIndex = 0;
+              else el.value = "";
+            });
+          // ریست واریانت‌ها
+          variantsContainer.innerHTML = "";
+          variantCounter = 0;
+          addVariant();
+          showToast("🔄 فرم پاک شد", "warning");
+        }
+
+        // ===== خروجی JSON =====
+        function exportJSON() {
+          const openingName = document
+            .getElementById("openingName")
+            .value.trim();
+          const categoryCode = document.getElementById("categoryCode").value;
+          let categoryName = document
+            .getElementById("categoryName")
+            .value.trim();
+          const openingMoves = document
+            .getElementById("openingMoves")
+            .value.trim();
+
+          if (!openingName) {
+            showToast("❌ لطفاً نام گشایش را وارد کنید", "error");
+            return;
+          }
+          if (!openingMoves) {
+            showToast("❌ لطفاً حرکات اصلی گشایش را وارد کنید", "error");
+            return;
+          }
+
+          if (!categoryName) {
+            const names = {
+              e4: "گشایش‌های 1.e4",
+              d4: "گشایش‌های 1.d4",
+              c4: "گشایش‌های 1.c4",
+              Nf3: "گشایش‌های 1.Nf3",
+              other: "سایر گشایش‌ها",
+            };
+            categoryName = names[categoryCode] || "سایر گشایش‌ها";
+          }
+
+          const variantElements = document.querySelectorAll(".variant-entry");
+          const variants = [];
+
+          for (const el of variantElements) {
+            const name = el.querySelector(".variant-name").value.trim();
+            const moves = el.querySelector(".variant-moves").value.trim();
+
+            if (!name || !moves) {
+              showToast(
+                "❌ لطفاً نام و حرکات همه واریانت‌ها را کامل کنید",
+                "error",
+              );
+              return;
+            }
+
+            const whiteWins =
+              parseInt(el.querySelector(".variant-white-wins").value) || 0;
+            const blackWins =
+              parseInt(el.querySelector(".variant-black-wins").value) || 0;
+            const draws =
+              parseInt(el.querySelector(".variant-draws").value) || 0;
+
+            const strengths = el
+              .querySelector(".variant-strengths")
+              .value.split("\n")
+              .filter((s) => s.trim());
+            const weaknesses = el
+              .querySelector(".variant-weaknesses")
+              .value.split("\n")
+              .filter((s) => s.trim());
+
+            const popularMoves = [];
+            el.querySelectorAll(".popular-moves-container .sub-entry").forEach(
+              (sub) => {
+                const san = sub.querySelector(".pop-move-san").value.trim();
+                if (san) {
+                  popularMoves.push({
+                    san: san,
+                    description:
+                      sub.querySelector(".pop-move-desc").value.trim() || "",
+                    moves: sub
+                      .querySelector(".pop-move-moves")
+                      .value.trim()
+                      .split(/\s+/)
+                      .filter(Boolean),
+                  });
+                }
+              },
+            );
+
+            const score =
+              el.querySelector(".variant-score").value.trim() || "0.0";
+            const summary =
+              el.querySelector(".variant-summary").value.trim() || "";
+
+            const ideas = el
+              .querySelector(".variant-ideas")
+              .value.split("\n")
+              .filter((s) => s.trim());
+            const endgames = el
+              .querySelector(".variant-endgames")
+              .value.split("\n")
+              .filter((s) => s.trim());
+
+            const traps = [];
+            el.querySelectorAll(".traps-container .sub-entry").forEach(
+              (sub) => {
+                const nameTrap = sub.querySelector(".trap-name").value.trim();
+                const movesTrap = sub.querySelector(".trap-moves").value.trim();
+                if (nameTrap && movesTrap) {
+                  traps.push({ name: nameTrap, moves: movesTrap.split(/\s+/) });
+                }
+              },
+            );
+
+            const sampleGames = [];
+            el.querySelectorAll(".games-container .sub-entry").forEach(
+              (sub) => {
+                const white = sub.querySelector(".game-white").value.trim();
+                const black = sub.querySelector(".game-black").value.trim();
+                if (white && black) {
+                  const year =
+                    parseInt(sub.querySelector(".game-year").value) || 0;
+                  const result = sub.querySelector(".game-result").value;
+                  const pgn = sub.querySelector(".game-pgn").value.trim();
+                  const gameObj = { white, black, year, result };
+                  if (pgn) gameObj.pgn = pgn;
+                  sampleGames.push(gameObj);
+                }
+              },
+            );
+
+            variants.push({
+              name,
+              moves: moves.split(/\s+/),
+              stats: { whiteWins, blackWins, draws },
+              strengths,
+              weaknesses,
+              popularMoves,
+              evaluation: { score, summary },
+              ideas,
+              endgames,
+              traps,
+              sampleGames,
+            });
+          }
+
+          if (variants.length === 0) {
+            showToast("❌ حداقل یک واریانت معتبر وارد کنید", "error");
+            return;
+          }
+
+          // آیکن و رنگ ثابت برای همه گشایش‌ها
+          const fixedIcon = "fas fa-chess-queen";
+          const fixedColor = "#2c7da0";
+
+          const output = {
+            categories: [
+              {
+                name: categoryName,
+                code: categoryCode,
+                openings: [
+                  {
+                    name: openingName,
+                    moves: openingMoves.split(/\s+/),
+                    thumbIcon: fixedIcon,
+                    color: fixedColor,
+                    variants: variants,
+                  },
+                ],
+              },
+            ],
+          };
+
+          const json = JSON.stringify(output, null, 2);
+          const blob = new Blob([json], {
+            type: "application/json;charset=utf-8",
+          });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `opening_${openingName.replace(/\s+/g, "_")}.json`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+
+          showToast(
+            `✅ فایل JSON با موفقیت دانلود شد! (${variants.length} واریانت)`,
+            "success",
+          );
+        }
+
+        // ===== راه‌اندازی =====
+        document.addEventListener("DOMContentLoaded", function () {
+          // واریانت اولیه
+          variantsContainer.innerHTML = "";
+          variantCounter = 0;
+          addVariant();
+
+          // رویدادها
+          document
+            .getElementById("addVariantBtn")
+            .addEventListener("click", addVariant);
+          document
+            .getElementById("resetBtn")
+            .addEventListener("click", resetForm);
+          document
+            .getElementById("exportBtn")
+            .addEventListener("click", exportJSON);
+
+          console.log("✅ ChessHub Cooperation - Openings loaded successfully");
+        });
+      })();
+    </script>
+  </body>
+</html>

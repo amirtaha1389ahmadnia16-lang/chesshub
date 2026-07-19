@@ -27,19 +27,19 @@
       <!-- هدر -->
       <div id="header-placeholder"></div>
 
-      <!-- بخش معرفی -->
+      <!-- بخش معرفی (بنر) -->
       <section class="hero-section">
         <h1>جایی که شطرنجت <span class="highlight">پیشرفت</span> میکنه</h1>
         <p>از مبتدی تا استاد بزرگ، هر آنچه برای یادگیری نیاز داری اینجاست</p>
         <div class="hero-buttons">
-          <a href="puzzle-rush.html" class="btn btn-primary">
-            <i class="fas fa-bolt"></i> شروع پازل
+          <a href="index.html" class="btn btn-primary">
+            <i class="fas fa-puzzle-piece"></i> پازل روزانه
           </a>
-          <a href="analysis.html" class="btn btn-outline">
-            <i class="fas fa-chart-line"></i> آنالیز
+          <a href="endgames.html" class="btn btn-outline">
+            <i class="fas fa-flag-checkered"></i> آخربازی‌ها
           </a>
           <a href="games-database.html" class="btn btn-outline">
-            <i class="fas fa-database"></i> بانک بازی‌ها
+            <i class="fas fa-database"></i> پایگاه بازی‌ها
           </a>
         </div>
       </section>
@@ -47,24 +47,32 @@
       <!-- آمار -->
       <section class="stats-row">
         <div class="stat-card">
-          <div class="icon"><i class="fas fa-puzzle-piece"></i></div>
-          <div class="number">۴,۲۰۰+</div>
-          <div class="label">پازل تاکتیکی</div>
+          <div class="icon">
+            <i class="fas fa-puzzle-piece" style="color: #e67e22"></i>
+          </div>
+          <div class="stat-number">+۱۰۰۰</div>
+          <div class="stat-label">پازل تاکتیکی</div>
         </div>
         <div class="stat-card">
-          <div class="icon"><i class="fas fa-chess-queen"></i></div>
-          <div class="number">۳۰+</div>
-          <div class="label">استاد بزرگ</div>
+          <div class="icon">
+            <i class="fas fa-chess-queen" style="color: #000000"></i>
+          </div>
+          <div class="stat-number">+۱۰</div>
+          <div class="stat-label">بازی‌های استادان</div>
         </div>
         <div class="stat-card">
-          <div class="icon"><i class="fas fa-book-open"></i></div>
-          <div class="number">۳۲</div>
-          <div class="label">گشایش تخصصی</div>
+          <div class="icon">
+            <i class="fas fa-flag-checkered" style="color: #27ae60"></i>
+          </div>
+          <div class="stat-number">+۱۰۰</div>
+          <div class="stat-label">آخر بازی</div>
         </div>
         <div class="stat-card">
-          <div class="icon"><i class="fas fa-flag-checkered"></i></div>
-          <div class="number">۱۴۹</div>
-          <div class="label">آخربازی عملی</div>
+          <div class="icon">
+            <i class="fas fa-book-open" style="color: #521600cd"></i>
+          </div>
+          <div class="stat-number">+۱۰</div>
+          <div class="stat-label">تعداد دروس</div>
         </div>
       </section>
 
@@ -89,34 +97,34 @@
           <h3><i class="fas fa-crown"></i> امکانات ChessHub</h3>
           <div class="features-grid">
             <div class="feature">
-              <i class="fas fa-brain"></i>
-              <h4>آنالیز Stockfish</h4>
-              <a href="analysis.html">شروع</a>
+              <i class="fas fa-puzzle-piece"></i>
+              <h4>پازل روزانه</h4>
+              <a href="index.html">حل کن</a>
             </div>
             <div class="feature">
-              <i class="fas fa-clock"></i>
-              <h4>پازل عجله‌ای</h4>
+              <i class="fas fa-bolt"></i>
+              <h4>پازل راش</h4>
               <a href="puzzle-rush.html">بزن بریم</a>
             </div>
             <div class="feature">
-              <i class="fas fa-book"></i>
-              <h4>دروس آموزشی</h4>
+              <i class="fas fa-book-open"></i>
+              <h4>دروس</h4>
               <a href="lessons.html">مشاهده</a>
-            </div>
-            <div class="feature">
-              <i class="fas fa-chess-board"></i>
-              <h4>گشایش‌ها</h4>
-              <a href="openings.html">۳۲ واریانت</a>
             </div>
             <div class="feature">
               <i class="fas fa-flag-checkered"></i>
               <h4>آخربازی‌ها</h4>
-              <a href="endgames.html">۱۴۹ موقعیت</a>
+              <a href="endgames.html">تمرین کن</a>
+            </div>
+            <div class="feature">
+              <i class="fas fa-database"></i>
+              <h4>پایگاه بازی‌ها</h4>
+              <a href="games-database.html">ببین</a>
             </div>
             <div class="feature">
               <i class="fas fa-download"></i>
               <h4>دانلود PGN</h4>
-              <a href="downloads.html">بازی‌های کلاسیک</a>
+              <a href="downloads.html">دریافت</a>
             </div>
           </div>
         </div>
@@ -129,68 +137,36 @@
           <div class="path-step">
             <div class="step-num">۱</div>
             <h4>اصول پایه</h4>
-            <p>قوانین، حرکت مهره‌ها و اصول اولیه</p>
+            <p>
+              با <strong>دروس آموزشی</strong> شروع کن و قوانین، حرکت مهره‌ها و
+              اصول اولیه رو یاد بگیر.
+            </p>
           </div>
           <div class="path-step">
             <div class="step-num">۲</div>
             <h4>تاکتیک‌ها</h4>
-            <p>چنگال، سنجاق، کیش دوگانه</p>
+            <p>
+              با <strong>پازل روزانه</strong> و <strong>پازل راش</strong> چنگال،
+              سنجاق، کیش دوگانه و ترکیب‌ها رو تمرین کن.
+            </p>
           </div>
           <div class="path-step">
             <div class="step-num">۳</div>
             <h4>گشایش‌ها</h4>
-            <p>یادگیری واریانت‌های اصلی</p>
+            <p>
+              در <strong>دانشنامه گشایش‌ها</strong> واریانت‌های اصلی رو با تحلیل
+              کامل مطالعه کن.
+            </p>
           </div>
           <div class="path-step">
             <div class="step-num">۴</div>
             <h4>آخربازی</h4>
-            <p>تکنیک‌های پایان بازی</p>
+            <p>
+              با <strong>۱۰۰+ موقعیت عملی</strong> در بخش آخربازی‌ها، تکنیک‌های
+              پایان بازی رو مسلط شو.
+            </p>
           </div>
         </div>
-      </section>
-
-      <!-- مطالب آموزشی -->
-      <section class="blog-section">
-        <h2><i class="fas fa-newspaper"></i> مطالب آموزشی</h2>
-        <div class="blog-grid">
-          <a href="lessons.html" class="blog-item">
-            <span class="tag">استراتژی</span>
-            <h4>چطور ریتینگ شطرنج رو بالا ببریم؟</h4>
-            <p>۱۰ نکته عملی برای پیشرفت سریع</p>
-          </a>
-          <a href="openings.html" class="blog-item">
-            <span class="tag">گشایش</span>
-            <h4>بهترین گشایش برای مبتدیان</h4>
-            <p>چرا گشایش ایتالیایی عالیه؟</p>
-          </a>
-          <a href="endgames.html" class="blog-item">
-            <span class="tag">آخربازی</span>
-            <h4>تکنیک شاه و سرباز</h4>
-            <p>مربی کلیدی در آخربازی‌ها</p>
-          </a>
-        </div>
-      </section>
-
-      <!-- لینک‌های سریع -->
-      <section class="quick-links">
-        <a href="openings.html" class="quick-link"
-          ><i class="fas fa-chess-board"></i><span>گشایش‌ها</span></a
-        >
-        <a href="endgames.html" class="quick-link"
-          ><i class="fas fa-flag-checkered"></i><span>آخربازی‌ها</span></a
-        >
-        <a href="lessons.html" class="quick-link"
-          ><i class="fas fa-book-open"></i><span>دروس</span></a
-        >
-        <a href="downloads.html" class="quick-link"
-          ><i class="fas fa-download"></i><span>دانلود PGN</span></a
-        >
-        <a href="analysis.html" class="quick-link"
-          ><i class="fas fa-chart-bar"></i><span>آنالیز</span></a
-        >
-        <a href="puzzle-rush.html" class="quick-link"
-          ><i class="fas fa-bolt"></i><span>پازل عجله‌ای</span></a
-        >
       </section>
 
       <!-- فوتر -->
@@ -218,17 +194,6 @@
         } catch (e) {}
       })();
 
-      // ============================================
-      // 🎯 اعمال تم به تخته شطرنج
-      // ============================================
-      document.addEventListener("pieceSetChanged", function (e) {
-        // این رویداد توسط script.js ارسال میشه
-        // فقط برای به‌روزرسانی تخته در صورت نیاز
-      });
-
-      // ============================================
-      // ♟️ اطمینان از بارگذاری puzzle.js
-      // ============================================
       console.log("✅ ChessHub index.html loaded successfully");
     </script>
   </body>

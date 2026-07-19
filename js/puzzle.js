@@ -1,10 +1,25 @@
-// puzzle.js - پازل روزانه با چرخش صحیح تخته بر اساس رنگ کاربر
+// puzzle.js - پازل روزانه با استفاده از ChessUtils
+
 (function () {
   "use strict";
 
   // ============================================
+  // 📦 استفاده از ChessUtils (نسخه bound شده)
+  // ============================================
+
+  const {
+    pieceCodes,
+    getCurrentPieceSet,
+    loadPieces,
+    getBoardColors,
+    showPromotion,
+    computeUserColor,
+  } = window.ChessUtilsBound;
+
+  // ============================================
   // 📦 متغیرها
   // ============================================
+
   let game = null;
   let selectedSquare = null;
   let currentMoveIndex = 0;
@@ -29,164 +44,9 @@
   const descriptionP = document.querySelector(".puzzle-card p");
 
   // ============================================
-  // 🎨 لیست ست‌های معتبر و توابع مربوط به مهره
-  // ============================================
-  const validSets = [
-    "neo",
-    "classic",
-    "3d_chesskid",
-    "3d_plastic",
-    "3d_staunton",
-    "3d_wood",
-    "8_bit",
-    "alpha",
-    "bases",
-    "blindfold",
-    "book",
-    "bubblegum",
-    "cases",
-    "club",
-    "condal",
-    "dash",
-    "game_room",
-    "glass",
-    "gothic",
-    "graffiti",
-    "icy_sea",
-    "light",
-    "lolz",
-    "marble",
-    "maya",
-    "metal",
-    "modern",
-    "nature",
-    "neon",
-    "neo_wood",
-    "newspaper",
-    "ocean",
-    "sky",
-    "space",
-    "tigers",
-    "tournament",
-    "vintage",
-    "wood",
-  ];
-
-  function getCurrentPieceSet() {
-    try {
-      const settings = JSON.parse(localStorage.getItem("chesshub_settings"));
-      let set = settings?.pieceSet || "neo";
-      if (!validSets.includes(set)) {
-        console.warn(`ست "${set}" معتبر نیست، استفاده از neo`);
-        set = "neo";
-        if (settings) {
-          settings.pieceSet = "neo";
-          localStorage.setItem("chesshub_settings", JSON.stringify(settings));
-        }
-      }
-      return set;
-    } catch {
-      return "neo";
-    }
-  }
-
-  const pieceCodes = {
-    wk: "wk.png",
-    wq: "wq.png",
-    wr: "wr.png",
-    wb: "wb.png",
-    wn: "wn.png",
-    wp: "wp.png",
-    bk: "bk.png",
-    bq: "bq.png",
-    br: "br.png",
-    bb: "bb.png",
-    bn: "bn.png",
-    bp: "bp.png",
-  };
-
-  const pieceImages = {};
-
-  function loadPieces() {
-    return new Promise((resolve) => {
-      const pieceSet = getCurrentPieceSet();
-      let loaded = 0;
-      const total = Object.keys(pieceCodes).length;
-      for (const [key, filename] of Object.entries(pieceCodes)) {
-        const img = new Image();
-        img.onload = img.onerror = () => {
-          loaded++;
-          if (loaded === total) resolve();
-        };
-        img.src = `pieces/${pieceSet}/${filename}`;
-        pieceImages[key] = img;
-      }
-    });
-  }
-
-  document.addEventListener("pieceSetChanged", function () {
-    loadPieces().then(() => {
-      if (game) renderBoard();
-    });
-  });
-
-  // ============================================
-  // 🎨 پنجره ترفیع
-  // ============================================
-  const promotionModal = document.createElement("div");
-  promotionModal.id = "promotionModal";
-  promotionModal.style.cssText = `
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.7); display: none; justify-content: center;
-    align-items: center; z-index: 2000; backdrop-filter: blur(4px);
-  `;
-  const modalContent = document.createElement("div");
-  modalContent.style.cssText = `
-    background: white; border-radius: 32px; padding: 20px; text-align: center;
-    box-shadow: 0 20px 35px rgba(0,0,0,0.3); direction: rtl;
-  `;
-  modalContent.innerHTML =
-    "<h3 style='margin-bottom:15px;'>ترفیع پیاده</h3><div id='promotionOptions' style='display:flex; gap:15px; justify-content:center; flex-wrap:wrap;'></div>";
-  promotionModal.appendChild(modalContent);
-  document.body.appendChild(promotionModal);
-
-  function showPromotion(from, to, color, callback) {
-    const optionsDiv = document.getElementById("promotionOptions");
-    optionsDiv.innerHTML = "";
-    const pieces = [
-      { type: "n", name: "اسب", file: "wn.png" },
-      { type: "b", name: "فیل", file: "wb.png" },
-      { type: "r", name: "رخ", file: "wr.png" },
-      { type: "q", name: "وزیر", file: "wq.png" },
-    ];
-    const pieceSet = getCurrentPieceSet();
-    pieces.forEach((piece) => {
-      const btn = document.createElement("div");
-      btn.style.cssText =
-        "cursor:pointer; padding:10px; background:#f0f0f0; border-radius:20px; transition:0.2s; margin:5px;";
-      btn.onmouseover = () => (btn.style.transform = "scale(1.05)");
-      btn.onmouseout = () => (btn.style.transform = "scale(1)");
-      const img = document.createElement("img");
-      img.src = `pieces/${pieceSet}/${piece.file}`;
-      img.style.width = "60px";
-      img.style.height = "60px";
-      const label = document.createElement("div");
-      label.textContent = piece.name;
-      label.style.fontSize = "0.8rem";
-      btn.appendChild(img);
-      btn.appendChild(label);
-      btn.onclick = () => {
-        promotionModal.style.display = "none";
-        callback(piece.type);
-      };
-      optionsDiv.appendChild(btn);
-    });
-    promotionModal.style.display = "flex";
-  }
-
-  // ============================================
   // 🎨 رسم تخته (با چرخش صحیح)
   // ============================================
+
   function renderBoard() {
     if (!game) return;
     const board = game.board();
@@ -198,19 +58,17 @@
     boardDiv.style.webkitUserSelect = "none";
 
     const pieceSet = getCurrentPieceSet();
-    // چرخش تخته برای کاربر سیاه (اگر کاربر سیاه باشد، تخته را ۱۸۰ درجه می‌چرخانیم)
+    const colors = getBoardColors();
     const flipped = userColor === "b";
 
     for (let i = 0; i < 8; i++) {
       for (let j = 0; j < 8; j++) {
-        // محاسبه ردیف و ستون واقعی بر اساس flipped
         const row = flipped ? 7 - i : i;
         const col = flipped ? 7 - j : j;
         const piece = board[row][col];
         const isLight = (row + col) % 2 === 0;
         const squareDiv = document.createElement("div");
         squareDiv.className = `square ${isLight ? "light" : "dark"}`;
-        // نام مربع با توجه به مختصات واقعی
         const file = String.fromCharCode(97 + col);
         const rank = 8 - row;
         const squareName = file + rank;
@@ -239,6 +97,7 @@
   // ============================================
   // 💬 پیام‌ها
   // ============================================
+
   function showMessage(text, type) {
     msgDiv.textContent = text;
     msgDiv.className = `message ${type}`;
@@ -250,6 +109,7 @@
   // ============================================
   // 🔒 قفل موقت تخته
   // ============================================
+
   function lockBoardTemp() {
     if (isLocked) return;
     isLocked = true;
@@ -270,13 +130,8 @@
   }
 
   // ============================================
-  // 🎨 تشخیص رنگ کاربر
+  // 🎨 تشخیص و به‌روزرسانی رنگ کاربر
   // ============================================
-  function computeUserColor(moves) {
-    if (!moves || moves.length === 0) return "w";
-    const firstMoveColor = moves[0].color;
-    return firstMoveColor === "w" ? "b" : "w";
-  }
 
   function updateUserColorText() {
     if (!descriptionP) return;
@@ -287,6 +142,7 @@
   // ============================================
   // 📦 بارگذاری پازل‌ها (با fallback)
   // ============================================
+
   async function loadAllPuzzles() {
     try {
       const response = await fetch("data/daily-puzzle.txt");
@@ -322,7 +178,6 @@
         "⚠️ خطا در بارگذاری daily-puzzle.txt، استفاده از پازل پیش‌فرض:",
         err.message,
       );
-      // ===== پازل پیش‌فرض (مات در یک حرکت با وزیر) =====
       allPuzzles = [
         {
           fen: "7k/5Q2/8/8/8/8/8/7K w - - 0 1",
@@ -336,6 +191,7 @@
   // ============================================
   // 📥 بارگذاری پازل بر اساس ایندکس
   // ============================================
+
   function loadPuzzleByIndex(index) {
     if (!allPuzzles.length || index >= allPuzzles.length) {
       if (allPuzzles.length) {
@@ -379,6 +235,7 @@
   // ============================================
   // ⏭️ رفتن به پازل بعدی (با تأخیر ۲۴ ساعت)
   // ============================================
+
   function goToNextPuzzle() {
     if (nextPuzzleTimer) {
       clearTimeout(nextPuzzleTimer);
@@ -402,6 +259,7 @@
   // ============================================
   // 🤖 حرکت کامپیوتر
   // ============================================
+
   async function autoComputerMove() {
     if (puzzleFinished) return;
     if (currentMoveIndex >= puzzleMoves.length) return;
@@ -462,6 +320,7 @@
   // ============================================
   // 🎯 حرکت کاربر
   // ============================================
+
   async function tryMove(from, to) {
     if (puzzleFinished) {
       showMessage("پازل تمام شده", "info");
@@ -492,6 +351,7 @@
       piece.type === "p" &&
       ((piece.color === "w" && to[1] === "8") ||
         (piece.color === "b" && to[1] === "1"));
+
     let promotion = "q";
     if (isPawnPromotion) {
       if (expected.uci.length === 5) {
@@ -502,7 +362,7 @@
         else promotion = "q";
       } else {
         promotion = await new Promise((resolve) => {
-          showPromotion(from, to, userColor, resolve);
+          showPromotion(userColor, resolve);
         });
       }
     }
@@ -571,6 +431,7 @@
   // ============================================
   // 🖱️ رویدادهای کشیدن (Drag & Drop)
   // ============================================
+
   function createDragClone(square) {
     const squareEl = document.querySelector(`.square[data-square="${square}"]`);
     if (!squareEl) return null;
@@ -661,6 +522,7 @@
   // ============================================
   // 🖱️ رویدادهای ماوس و لمسی
   // ============================================
+
   function onMouseDown(e) {
     e.preventDefault();
     handleDragStart(e.clientX, e.clientY);
@@ -700,6 +562,7 @@
   // ============================================
   // 🖱️ کلیک جایگزین (برای موبایل‌های قدیمی)
   // ============================================
+
   function onClickFallback(e) {
     if (isDragging) return;
     if (puzzleFinished || isLocked) return;
@@ -728,6 +591,7 @@
   // ============================================
   // 💡 راهنمایی
   // ============================================
+
   function showHint() {
     if (puzzleFinished) {
       showMessage("پازل حل شده", "info");
@@ -762,6 +626,7 @@
   // ============================================
   // 🔄 ریست پازل
   // ============================================
+
   function resetPuzzle() {
     if (autoMoveTimeout) clearTimeout(autoMoveTimeout);
     if (lockTimer) clearTimeout(lockTimer);
@@ -776,21 +641,8 @@
   }
 
   // ============================================
-  // 🚀 راه‌اندازی
+  // 🚀 راه‌اندازی پازل
   // ============================================
-  loadPieces().then(() => {
-    initPuzzle();
-    boardDiv.addEventListener("mousedown", onMouseDown);
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("mouseup", onMouseUp);
-    boardDiv.addEventListener("touchstart", onTouchStart, { passive: false });
-    boardDiv.addEventListener("touchmove", onTouchMove, { passive: false });
-    boardDiv.addEventListener("touchend", onTouchEnd);
-    boardDiv.addEventListener("click", onClickFallback);
-    resetBtn.addEventListener("click", resetPuzzle);
-    hintBtn.addEventListener("click", showHint);
-    boardDiv.style.cursor = "grab";
-  });
 
   async function initPuzzle() {
     const loaded = await loadAllPuzzles();
@@ -801,4 +653,24 @@
       showMessage("خطا در بارگذاری پازل‌ها", "error");
     }
   }
+
+  // ============================================
+  // 🎯 ثبت رویدادها و شروع
+  // ============================================
+
+  loadPieces().then(() => {
+    initPuzzle();
+
+    boardDiv.addEventListener("mousedown", onMouseDown);
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+    boardDiv.addEventListener("touchstart", onTouchStart, { passive: false });
+    boardDiv.addEventListener("touchmove", onTouchMove, { passive: false });
+    boardDiv.addEventListener("touchend", onTouchEnd);
+    boardDiv.addEventListener("click", onClickFallback);
+
+    resetBtn.addEventListener("click", resetPuzzle);
+    hintBtn.addEventListener("click", showHint);
+    boardDiv.style.cursor = "grab";
+  });
 })();
