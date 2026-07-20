@@ -74,6 +74,73 @@
                   "pgn": "1. e4 c5 2. Nf3 e6 3. c3 Nf6 4. e5 Nd5 5. Bc4 Nc6 6. d4 cxd4 7. cxd4 d6 8. O-O Be7 9. Qe2 O-O 10. Rd1 Qc7 11. Bd2 dxe5 12. dxe5 b6 13. Bxd5 exd5 14. Nc3 Be6 15. Bg5 Bxg5 16. Nxg5 h6 17. Nf3 Rad8 18. Nb5 Qe7 19. Rac1 Rc8 20. Nfd4 Nxd4 21. Nxd4 Rxc1 22. Rxc1 Qg5 23. Rc7 Rc8 24. h4 Qd8 25. Rxc8 Bxc8 26. g3 Qe7 27. Qe3 Bd7 28. Kg2 Qc5 29. a3 Be6 30. f3 Kh7 31. h5 Bd7 32. g4 Kg8 33. Kg3 Kh7 34. f4 Bb5 35. g5 hxg5 36. fxg5 Bd7 37. Qf4 Qe7 38. Nf3 Qe6 39. g6+ Kg8 40. Ng5 Qe7 41. gxf7+ 1-0"
                 }
               ]
+            },
+            {
+              "name": "واریانت آلاپین شاخه ی d5",
+              "moves": [
+                "e4",
+                "c5",
+                "c3",
+                "d5",
+                "exd5",
+                "Qxd5",
+                "Nf3",
+                "Bg4",
+                "Be2",
+                "Nf6",
+                "Na3",
+                "Nc6",
+                "O-O",
+                "e6",
+                "h3",
+                "Bh5",
+                "d4",
+                "cxd4",
+                "Nb5",
+                "Qd7",
+                "Nfxd4"
+              ],
+              "stats": {
+                "whiteWins": 0,
+                "blackWins": 0,
+                "draws": 0
+              },
+              "strengths": [
+                "سفید وضیعت انعطاف پذیری دارد ",
+                "سفید اسب خوبی دارد "
+              ],
+              "weaknesses": [
+                "سیاه قلعه نرفته است و باید سریعا قلعه برود ",
+                "سیاه باید سریعا فیلش را گسترش دهد "
+              ],
+              "popularMoves": [
+                {
+                  "san": "B×e2",
+                  "description": "",
+                  "moves": []
+                }
+              ],
+              "evaluation": {
+                "score": "0.0",
+                "summary": "وضیعت کاملا مساوی است و هیچ طرف برتری ای ندارد"
+              },
+              "ideas": [
+                "سفید :  اگر فیل e2 را سیاه بزند سفید با وزیر پس می‌گیرد و در ادامه اگر اسب d4 هم بزند سفید با اسب b5 خود پس می‌گیرد و بعد Bf4 می کند و دو رخ خود را در ستون های d و c می‌گذارد.",
+                "سیاه : می تواند پس از تعویض ها فیل خود را در e7 بزارد و بعد قلعه برود."
+              ],
+              "endgames": [
+                "هر آخر بازی ای ممکن است "
+              ],
+              "traps": [],
+              "sampleGames": [
+                {
+                  "white": "Phan, Hung Chi",
+                  "black": "Nguyen, Phu",
+                  "year": 0,
+                  "result": "1-0",
+                  "pgn": "1. e4 c5 2. Nf3 Nc6 3. c3 d5 4. exd5 Qxd5 5. Na3 Bg4 6. Be2 e6 7. O-O Nf6 8. d4 cxd4 9. Nb5 Qd7 10. Nfxd4 Bxe2 11. Qxe2 a6 12. Nxc6 Qxc6 13. Nd4 Qe4 14. Re1 Qxe2 15. Rxe2 Rc8 16. Bg5 h6 17. Bxf6 gxf6 18. Rd1 Rd8 19. Red2 Rg8 20. g3 h5 21. Nb3 Rxd2 22. Rxd2 Rg5 23. h4 Re5 24. Kf1 f5 25. c4 Re4 26. Rc2 Kd7 27. Nd2 Rg4 28. Nf3 f6 29. Rd2+ Ke7 30. b3 Bh6 31. Rd3 e5 32. Nh2 Rg8 33. Ke2 Ke6 34. Nf1 f4 35. c5 Rc8 36. Rd6+ Kf5 37. b4 a5 38. gxf4 Bxf4 39. a3 axb4 40. axb4 Ra8 41. Ne3+ Bxe3 42. Kxe3 Ra3+ 43. Ke2 Rh3 44. Rb6 Rxh4 45. Rxb7 Rc4 46. Kd3 Rc1 47. Rc7 h4 48. b5 h3 49. c6 h2 50. Rh7 Rc5 51. Rxh2 Rxb5 52. Kc4 Rb2 53. Kd5 Rd2+ 54. Kc5 Kg4 55. f3+ 1-0"
+                }
+              ]
             }
           ]
         },
