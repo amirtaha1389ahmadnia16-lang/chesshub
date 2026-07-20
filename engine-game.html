@@ -1,0 +1,925 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <title>ChessHub | بازی با بات‌ها</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="js/chess.min.js"></script>
+    <script src="js/stockfish.js"></script>
+    <style>
+      /* ============================================
+         🎯 استایل‌های اختصاصی بازی با بات
+         ============================================ */
+
+      .engine-layout {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        justify-content: center;
+        align-items: stretch;
+      }
+
+      /* ===== کادر چپ: تخته ===== */
+      .board-wrapper {
+        flex: 1 1 480px;
+        min-width: 280px;
+        max-width: 560px;
+        background: var(--bg-card, #ffffff);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color, transparent);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .board-wrapper .board-title {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        justify-content: center;
+      }
+
+      #chessboard {
+        display: grid;
+        grid-template-columns: repeat(8, 1fr);
+        aspect-ratio: 1 / 1;
+        width: 100%;
+        max-width: 480px;
+        margin: 0 auto;
+        border: 2px solid var(--border-color, #cbd5e1);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+        touch-action: none;
+        user-select: none;
+        -webkit-user-select: none;
+        position: relative;
+      }
+
+      .square {
+        aspect-ratio: 1 / 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        touch-action: none;
+        position: relative;
+      }
+      .square.light {
+        background-color: var(--board-light, #f0d9b5);
+      }
+      .square.dark {
+        background-color: var(--board-dark, #b58863);
+      }
+      .square.selected {
+        background-color: #b7d968 !important;
+        box-shadow: inset 0 0 0 3px var(--primary) !important;
+      }
+      .square.computer-from {
+        background-color: #7fc97f !important;
+        box-shadow: inset 0 0 0 3px #2d8f2d !important;
+      }
+      .square.computer-to {
+        background-color: #7fc97f !important;
+        box-shadow: inset 0 0 0 3px #2d8f2d !important;
+        animation: glowGreen 0.8s ease-in-out 3;
+      }
+      @keyframes glowGreen {
+        0%,
+        100% {
+          box-shadow: inset 0 0 0 3px #2d8f2d;
+        }
+        50% {
+          box-shadow:
+            inset 0 0 0 6px #2d8f2d,
+            0 0 20px rgba(45, 143, 45, 0.3);
+        }
+      }
+
+      .piece-img {
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        user-select: none;
+        -webkit-user-drag: none;
+        draggable: false;
+        z-index: 1;
+        position: relative;
+      }
+
+      /* ===== فقط دکمه‌ی بازی ===== */
+      .board-controls {
+        display: flex;
+        justify-content: center;
+        margin-top: 10px;
+      }
+      .board-controls .btn-sm {
+        background: var(--secondary);
+        border: none;
+        padding: 0.5rem 1.5rem;
+        border-radius: 30px;
+        font-family: "Vazir";
+        font-size: 0.8rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.2s;
+        color: var(--text-dark);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+      .board-controls .btn-sm.primary {
+        background: var(--primary);
+        color: white;
+      }
+      .board-controls .btn-sm.primary:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+      }
+      .board-controls .btn-sm:hover {
+        background: var(--border-color, #e2e8f0);
+        transform: translateY(-2px);
+      }
+
+      /* ===== تایمرهای مستطیلی ===== */
+      .timer-row {
+        display: flex;
+        gap: 0.8rem;
+        margin-top: 10px;
+        direction: ltr;
+      }
+      .timer-box {
+        flex: 1;
+        background: var(--secondary);
+        border-radius: 12px;
+        padding: 6px 12px;
+        border: 2px solid var(--border-color, #eef2f5);
+        text-align: center;
+        min-height: 44px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        transition: border-color 0.3s;
+      }
+      .timer-box.active-timer {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(44, 125, 160, 0.15);
+      }
+      .timer-box .timer-label {
+        font-size: 0.55rem;
+        color: var(--text-secondary);
+        font-weight: 600;
+        font-family: "Vazir";
+        direction: rtl;
+      }
+      .timer-box .timer-value {
+        font-family: monospace;
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        direction: ltr;
+        letter-spacing: 1px;
+      }
+      .timer-box .timer-value.low {
+        color: #e25555;
+        animation: blinkTimer 0.8s infinite;
+      }
+      @keyframes blinkTimer {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.3;
+        }
+      }
+
+      /* ===== تاریخچه ===== */
+      .history-box {
+        background: var(--bg-card, #ffffff);
+        border-radius: var(--radius-md);
+        padding: 0.3rem 0.6rem;
+        max-height: 50px;
+        overflow-y: auto;
+        border: 1px solid var(--border-color, #eef2f5);
+        font-size: 0.6rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.1rem 0.25rem;
+        align-items: center;
+        direction: ltr;
+        font-family: monospace;
+        min-height: 28px;
+        margin-top: 8px;
+      }
+      .history-box::-webkit-scrollbar {
+        width: 4px;
+      }
+      .history-box::-webkit-scrollbar-thumb {
+        background: var(--primary);
+        border-radius: 10px;
+      }
+      .history-box .move-item {
+        background: var(--secondary);
+        padding: 0.05rem 0.25rem;
+        border-radius: 8px;
+        white-space: nowrap;
+        font-size: 0.55rem;
+      }
+      .history-box .move-item .move-num {
+        color: var(--text-secondary, #5f7f9e);
+        font-weight: 400;
+        font-size: 0.5rem;
+        margin-left: 0.1rem;
+      }
+
+      /* ============================================
+         📦 کادر راست: انتخاب بات
+         ============================================ */
+      .bots-wrapper {
+        flex: 1 1 320px;
+        min-width: 260px;
+        max-width: 420px;
+        background: var(--bg-card, #ffffff);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color, transparent);
+        display: flex;
+        flex-direction: column;
+        order: -1;
+      }
+      @media (min-width: 769px) {
+        .bots-wrapper {
+          order: 0;
+        }
+      }
+
+      .bots-wrapper .bots-title {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        justify-content: center;
+        border-bottom: 2px solid var(--secondary);
+        padding-bottom: 6px;
+      }
+
+      /* ===== پیش‌نمایش بات ===== */
+      .bot-preview {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background: var(--secondary);
+        border-radius: 16px;
+        padding: 0.7rem 1rem;
+        margin-bottom: 12px;
+        border: 2px solid var(--border-color, transparent);
+        transition: border-color 0.3s;
+        min-height: 76px;
+      }
+      .bot-preview.has-bot {
+        border-color: var(--primary);
+      }
+      .bot-preview .preview-avatar {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 3px solid var(--primary);
+        flex-shrink: 0;
+        background: var(--bg-card);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .bot-preview .preview-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .bot-preview .preview-avatar .fallback {
+        font-size: 2.2rem;
+        color: var(--text-secondary);
+      }
+      .bot-preview .preview-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      .bot-preview .preview-info .pname {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: var(--text-dark);
+      }
+      .bot-preview .preview-info .prating {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        font-weight: 600;
+      }
+      .bot-preview .preview-info .pempty {
+        font-size: 0.7rem;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+      }
+
+      /* ===== گرید بات‌ها ===== */
+      .bots-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.6rem;
+        margin-bottom: 10px;
+      }
+      .bot-item {
+        background: var(--secondary);
+        border: 2px solid var(--border-color, transparent);
+        border-radius: 14px;
+        padding: 0.6rem 0.3rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.25s;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.2rem;
+      }
+      .bot-item:hover {
+        transform: translateY(-4px);
+        border-color: var(--primary);
+        box-shadow: var(--shadow-sm);
+      }
+      .bot-item.active {
+        border-color: var(--primary);
+        background: var(--primary);
+        color: white;
+      }
+      .bot-item .mini-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 2px solid var(--border-color, #e2e8f0);
+        flex-shrink: 0;
+        background: var(--bg-card);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: border-color 0.3s;
+      }
+      .bot-item.active .mini-avatar {
+        border-color: white;
+      }
+      .bot-item .mini-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .bot-item .mini-avatar .fallback {
+        font-size: 1.6rem;
+        color: var(--text-secondary);
+      }
+      .bot-item .bname {
+        font-weight: 700;
+        font-size: 0.85rem;
+        line-height: 1.2;
+      }
+      .bot-item .brating {
+        font-size: 0.6rem;
+        color: var(--text-secondary);
+        direction: ltr;
+        font-weight: 600;
+        opacity: 0.7;
+      }
+      .bot-item.active .brating {
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      /* ===== تنظیمات ===== */
+      .game-settings {
+        background: var(--secondary);
+        border-radius: 16px;
+        padding: 12px 14px;
+        margin-top: auto;
+        border: 1px solid var(--border-color, #eef2f5);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .game-settings .settings-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        align-items: center;
+        justify-content: center;
+      }
+      .game-settings .settings-row .setting-group {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .game-settings .settings-row .setting-group .sg-label {
+        font-size: 0.65rem;
+        color: var(--text-secondary);
+        font-weight: 700;
+        white-space: nowrap;
+      }
+
+      .color-btn,
+      .time-btn {
+        background: var(--bg-card);
+        border: 2px solid var(--border-color, #dde4ec);
+        padding: 0.35rem 0.9rem;
+        border-radius: 30px;
+        font-family: "Vazir";
+        font-size: 0.65rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s;
+        color: var(--text-dark);
+        white-space: nowrap;
+        min-height: 36px;
+        min-width: 55px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+      .color-btn:hover,
+      .time-btn:hover {
+        border-color: var(--primary);
+        transform: translateY(-2px);
+      }
+      .color-btn.active,
+      .time-btn.active {
+        border-color: var(--primary);
+        background: var(--primary);
+        color: white;
+      }
+
+      .color-btn .color-dot {
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        border: 1.5px solid rgba(0, 0, 0, 0.1);
+        flex-shrink: 0;
+      }
+      .color-btn .color-dot.white {
+        background: #ffffff;
+        border-color: #ccc;
+      }
+      .color-btn .color-dot.black {
+        background: #1a1a2e;
+        border-color: #444;
+      }
+      .color-btn .color-dot.random {
+        background: conic-gradient(#ffffff 0% 50%, #1a1a2e 50% 100%);
+        border-color: #999;
+      }
+      .color-btn .color-label {
+        font-size: 0.6rem;
+      }
+
+      /* ===== پنل نتیجه ===== */
+      .result-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(8px);
+        z-index: 2000;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        direction: rtl;
+        padding: 20px;
+      }
+      .result-overlay.open {
+        display: flex;
+      }
+      .result-panel {
+        background: var(--bg-card, #ffffff);
+        border-radius: 28px;
+        padding: 30px 32px;
+        max-width: 480px;
+        width: 100%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: slideUp 0.4s ease;
+        text-align: center;
+        border: 1px solid var(--border-color, transparent);
+      }
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(40px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .result-panel .result-icon {
+        font-size: 3.5rem;
+        margin-bottom: 8px;
+      }
+      .result-panel .result-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--text-dark);
+        margin-bottom: 4px;
+      }
+      .result-panel .result-sub {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-bottom: 16px;
+        direction: ltr;
+      }
+      .result-panel .result-details {
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+        margin-bottom: 18px;
+        flex-wrap: wrap;
+      }
+      .result-panel .result-details .rd-item {
+        text-align: center;
+        background: var(--secondary);
+        padding: 6px 14px;
+        border-radius: 12px;
+        min-width: 70px;
+      }
+      .result-panel .result-details .rd-item .rd-label {
+        font-size: 0.55rem;
+        color: var(--text-secondary);
+        font-weight: 600;
+      }
+      .result-panel .result-details .rd-item .rd-value {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        direction: ltr;
+      }
+      .result-panel .result-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        justify-content: center;
+      }
+      .result-panel .result-actions .btn-result {
+        padding: 0.5rem 1.2rem;
+        border-radius: 40px;
+        border: none;
+        font-family: "Vazir";
+        font-size: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+      .result-panel .result-actions .btn-result:hover {
+        transform: translateY(-2px);
+      }
+      .btn-result.primary {
+        background: var(--primary);
+        color: white;
+      }
+      .btn-result.primary:hover {
+        background: var(--primary-dark);
+      }
+      .btn-result.secondary {
+        background: var(--secondary);
+        color: var(--text-dark);
+      }
+      .btn-result.secondary:hover {
+        background: var(--border-color, #e2e8f0);
+      }
+      .btn-result.success {
+        background: #10b981;
+        color: white;
+      }
+      .btn-result.success:hover {
+        background: #059669;
+      }
+      .btn-result.warning {
+        background: #f59e0b;
+        color: #1a2a3a;
+      }
+      .btn-result.warning:hover {
+        background: #d97706;
+      }
+
+      /* ===== پیام وضعیت ===== */
+      .status-message {
+        text-align: center;
+        font-size: 0.7rem;
+        color: var(--text-secondary, #5f7f9e);
+        padding: 0.2rem;
+        min-height: 24px;
+        border-top: 1px solid var(--border-color, #eef2f5);
+        padding-top: 8px;
+        margin-top: 2px;
+      }
+
+      /* ============================================
+         📱 واکنش‌گرایی
+         ============================================ */
+      @media (max-width: 768px) {
+        .engine-layout {
+          flex-direction: column;
+          align-items: center;
+        }
+        .board-wrapper,
+        .bots-wrapper {
+          flex: unset;
+          width: 100%;
+          max-width: 560px;
+        }
+        .bots-wrapper {
+          order: -1;
+        }
+        #chessboard {
+          max-width: 100%;
+        }
+        .bots-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+        .timer-row {
+          flex-direction: row;
+        }
+        .timer-box .timer-value {
+          font-size: 1.1rem;
+        }
+        .result-panel {
+          padding: 24px 20px;
+        }
+        .result-panel .result-title {
+          font-size: 1.3rem;
+        }
+      }
+      @media (max-width: 480px) {
+        .bots-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .board-wrapper,
+        .bots-wrapper {
+          padding: 12px;
+        }
+        .timer-box {
+          padding: 4px 8px;
+          min-height: 36px;
+        }
+        .timer-box .timer-value {
+          font-size: 0.95rem;
+        }
+        .timer-box .timer-label {
+          font-size: 0.5rem;
+        }
+        .color-btn,
+        .time-btn {
+          font-size: 0.55rem;
+          padding: 0.2rem 0.5rem;
+          min-height: 30px;
+          min-width: 40px;
+        }
+        .color-btn .color-dot {
+          width: 14px;
+          height: 14px;
+        }
+        .board-controls .btn-sm {
+          font-size: 0.7rem;
+          padding: 0.3rem 1rem;
+        }
+        .result-panel {
+          padding: 18px 16px;
+        }
+        .result-panel .result-title {
+          font-size: 1.1rem;
+        }
+        .result-panel .result-icon {
+          font-size: 2.8rem;
+        }
+        .result-panel .result-actions .btn-result {
+          font-size: 0.65rem;
+          padding: 0.35rem 0.8rem;
+        }
+        .bot-item .mini-avatar {
+          width: 48px;
+          height: 48px;
+        }
+        .bot-preview .preview-avatar {
+          width: 48px;
+          height: 48px;
+        }
+        .bot-preview .preview-info .pname {
+          font-size: 0.9rem;
+        }
+        .history-box {
+          font-size: 0.5rem;
+          max-height: 40px;
+        }
+      }
+      @media (max-width: 360px) {
+        .bots-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+        .timer-box .timer-value {
+          font-size: 0.8rem;
+        }
+        .color-btn,
+        .time-btn {
+          font-size: 0.5rem;
+          padding: 0.15rem 0.4rem;
+          min-height: 26px;
+          min-width: 34px;
+        }
+        .result-panel .result-title {
+          font-size: 0.95rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div id="header-placeholder"></div>
+
+      <section class="hero-section">
+        <h1>
+          <span class="highlight"><i class="fas fa-robot"></i></span>
+          <span class="highlight">بازی با</span> بات‌ها
+        </h1>
+        <p>مقابل بات‌های هوشمند با شخصیت‌های منحصربه‌فرد بازی کن</p>
+      </section>
+
+      <div class="engine-layout">
+        <!-- کادر چپ: تخته -->
+        <div class="board-wrapper">
+          <div class="board-title">
+            <i class="fas fa-chess-board"></i> تخته بازی
+          </div>
+          <div id="chessboard" dir="ltr"></div>
+
+          <!-- فقط دکمه‌ی بازی -->
+          <div class="board-controls">
+            <button class="btn-sm primary" id="playBtn">
+              <i class="fas fa-play"></i> بازی
+            </button>
+          </div>
+
+          <!-- تایمرهای مستطیلی -->
+          <div class="timer-row">
+            <div class="timer-box" id="userTimerBox">
+              <div class="timer-label">👤 شما</div>
+              <div class="timer-value" id="userTimer">--:--</div>
+            </div>
+            <div class="timer-box bot-timer" id="botTimerBox">
+              <div class="timer-label">🤖 بات</div>
+              <div class="timer-value" id="botTimer">--:--</div>
+            </div>
+          </div>
+
+          <!-- تاریخچه -->
+          <div class="history-box" id="historyList">
+            <span style="color: var(--text-secondary); font-size: 0.6rem"
+              >هیچ حرکتی ثبت نشده</span
+            >
+          </div>
+
+          <!-- پیام وضعیت -->
+          <div class="status-message" id="statusMessage">
+            🧠 یک بات انتخاب کن و دکمه‌ی «بازی» رو بزن
+          </div>
+        </div>
+
+        <!-- کادر راست: انتخاب بات -->
+        <div class="bots-wrapper">
+          <div class="bots-title"><i class="fas fa-robot"></i> انتخاب بات</div>
+
+          <div class="bot-preview" id="botPreview">
+            <div class="preview-avatar" id="previewAvatar">
+              <span class="fallback">🤖</span>
+            </div>
+            <div class="preview-info">
+              <div class="pempty" id="previewEmpty">
+                <i class="fas fa-hand-pointer"></i> یک بات انتخاب کن
+              </div>
+              <div class="pname" id="previewName" style="display: none"></div>
+              <div
+                class="prating"
+                id="previewRating"
+                style="display: none"
+              ></div>
+            </div>
+          </div>
+
+          <div class="bots-grid" id="botsGrid"></div>
+
+          <!-- تنظیمات بازی -->
+          <div class="game-settings">
+            <div class="settings-row">
+              <div class="setting-group">
+                <span class="sg-label">🎨 رنگ:</span>
+                <button class="color-btn" data-color="random">
+                  <span class="color-dot random"></span>
+                  <span class="color-label">تصادفی</span>
+                </button>
+                <button class="color-btn active" data-color="white">
+                  <span class="color-dot white"></span>
+                  <span class="color-label">سفید</span>
+                </button>
+                <button class="color-btn" data-color="black">
+                  <span class="color-dot black"></span>
+                  <span class="color-label">سیاه</span>
+                </button>
+              </div>
+            </div>
+            <div class="settings-row">
+              <div class="setting-group">
+                <span class="sg-label">⏱️ زمان:</span>
+                <button class="time-btn" data-time="0">∞</button>
+                <button class="time-btn active" data-time="3+2">۳+۲</button>
+                <button class="time-btn" data-time="5+3">۵+۳</button>
+                <button class="time-btn" data-time="8+3">۸+۳</button>
+                <button class="time-btn" data-time="10+2">۱۰+۲</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="footer-placeholder"></div>
+    </div>
+
+    <!-- ===== پنل نتیجه ===== -->
+    <div class="result-overlay" id="resultOverlay">
+      <div class="result-panel" id="resultPanel">
+        <div class="result-icon" id="resultIcon">🏆</div>
+        <div class="result-title" id="resultTitle">بازی تمام شد!</div>
+        <div class="result-sub" id="resultSub">نتیجه: —</div>
+        <div class="result-details">
+          <div class="rd-item">
+            <div class="rd-label">حرکات</div>
+            <div class="rd-value" id="resultMoves">۰</div>
+          </div>
+          <div class="rd-item">
+            <div class="rd-label">⏱️ زمان شما</div>
+            <div class="rd-value" id="resultUserTime">--:--</div>
+          </div>
+          <div class="rd-item">
+            <div class="rd-label">⏱️ زمان بات</div>
+            <div class="rd-value" id="resultBotTime">--:--</div>
+          </div>
+        </div>
+        <div class="result-actions">
+          <button class="btn-result primary" id="resultRematch">
+            <i class="fas fa-redo"></i> بازی دوباره
+          </button>
+          <button class="btn-result secondary" id="resultChangeBot">
+            <i class="fas fa-robot"></i> بات دیگر
+          </button>
+          <button class="btn-result success" id="resultDownloadPgn">
+            <i class="fas fa-download"></i> دانلود PGN
+          </button>
+          <button class="btn-result warning" id="resultCopyPgn">
+            <i class="fas fa-copy"></i> کپی PGN
+          </button>
+          <button class="btn-result secondary" id="resultCancel">
+            <i class="fas fa-times"></i> انصراف
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/bots/bot-louis.js"></script>
+    <script src="js/bots/bot-maria.js"></script>
+    <script src="js/bots/bot-monkey.js"></script>
+    <script src="js/engine-game.js"></script>
+  </body>
+</html>
