@@ -115,7 +115,7 @@
               ],
               "popularMoves": [
                 {
-                  "san": "B×e2",
+                  "san": "Bxe2",
                   "description": "",
                   "moves": []
                 }
@@ -145,8 +145,8 @@
           ]
         },
         {
-          "name": "دفاع کاروکان (شاخه تعویضی و تعویضی شاخه اصلی)",
-          "moves": ["e4", "c6", "d4", "d5"],
+          "name": "دفاع کاروکان",
+          "moves": ["e4", "c6"],
           "variants": [
             {
               "name": "واریانت تعویضی",
@@ -201,13 +201,7 @@
                   "pgn": "1. e4 c6 2. d4 d5 3. exd5 cxd5 4. Bd3 Nc6 5. c3 Qc7 6. h3 e5 7. dxe5 Nxe5 8. Nf3 Nxd3+ 9. Qxd3 Bd6 10. O-O Ne7 11. Nd4 a6 12. Nd2 O-O 13. N2f3 h6 14. Bd2 Bd7 15. Nh4 Rad8 16. Rad1 Rfe8 17. Qf3 Be5 18. Be3"
                 }
               ]
-            }
-          ]
-        },
-        {
-          "name": "دفاع کاروکان شاخه ی Ne2",
-          "moves": ["e4", "c6", "Ne2"],
-          "variants": [
+            },
             {
               "name": "واریانت Ne2 شاخه ی اصلی",
               "moves": [
@@ -279,13 +273,7 @@
                   "pgn": "1. e4 c6 2. Ne2 d5 3. e5 c5 4. c3 Nc6 5. d4 cxd4 6. cxd4 Bf5 7. Nbc3 e6 8. Ng3 Bg6 9. Be3 Nge7 10. h4 h5 11. Be2 Nf5 12. Nxf5 Bxf5 13. g3 Be7 14. a3 g6 15. Bd3 Bxd3 16. Qxd3 Rc8 17. Kf1 Kf8 18. Kg2 Na5 19. Ne2 Qb6 20. Nf4 Kg7 21. b4 Nc4 22. Bc1 Qc6 23. Qf3 Nb6 24. Ra2 Qc4 25. Rd2 Na4 26. g4 hxg4 27. Qxg4 Bxh4 28. Rxh4 Qxc1 29. Rd3 Qe1 30. Re3 Qb1 31. Rf3 Qe4 32. Qg5 Rxh4 33. Qxh4 Kg8 34. Kg3 Nc3 35. Qe7 Qf5 36. Kh2 Qg4 37. Qxb7 Rf8 38. Rxc3 Qxf4+ 39. Kg2 Qg4+ 40. Rg3 Qxd4 41. Qc7 Kg7 42. Rf3 a6 43. Rg3 Rh8 44. Rf3 Qg4+ 45. Rg3 Qd1 46. Rh3 Rxh3 47. Kxh3 Qf3+ 48. Kh2 Qxf2+ 49. Kh3 Qf3+ 50. Kh2 Qxa3 51. Qd6 Qd3 0-1"
                 }
               ]
-            }
-          ]
-        },
-        {
-          "name": "دفاع کاروکان شاخه ی Nf3 Ne5",
-          "moves": ["e4", "c6", "Nf3", "d5", "exd5", "cxd5", "Ne5"],
-          "variants": [
+            },
             {
               "name": "واریانت Nf3 Ne5",
               "moves": [
@@ -313,13 +301,7 @@
                   "pgn": "1. e4 c6 2. d4 d5 3. exd5 cxd5 4. Nf3 Nc6 5. Ne5 Nf6 6. Bb5 Bd7 7. Nxd7 Qxd7 8. O-O e6 9. c3 Bd6 10. Nd2 O-O 11. Nf3 Ne4 12. Bd3 f5 13. Ng5 Qe7 14. Qh5 g6 15. Qh6 Rae8 16. f3 Nxg5 17. Bxg5 Qc7 18. Rae1 e5 19. dxe5 Nxe5 20. Bc2 Nf7 21. Qh4 Nxg5 22. Qxg5 Bxh2+ 23. Kh1 Bf4 24. Qh4 Bg3 25. Qd4 Rxe1 0-1"
                 }
               ]
-            }
-          ]
-        },
-        {
-          "name": "دفاع کاروکان شاخه ی استاندارد (کلاسیک)",
-          "moves": ["e4", "c6", "d4", "d5", "Nc3", "dxe4", "Nxe4"],
-          "variants": [
+            },
             {
               "name": "واریانت اسب",
               "moves": [
@@ -408,13 +390,7 @@
                   "pgn": "1. e4 c6 2. d4 d5 3. Nd2 dxe4 4. Nxe4 Bf5 5. Ng3 Bg6 6. h4 h6 7. Nf3 Nd7 8. Bd3 Bxd3 9. Qxd3 e6 10. Bd2 Ngf6 11. Qe2 Be7 12. O-O-O a5 13. Kb1 a4 14. a3 Qb6 15. Ka1 Qa6 16. Qxa6 Rxa6 17. Rhe1 Ng4 18. Re2 O-O 19. Nf5 Bf6 20. Nd6 b5 21. Bb4 Nb6 22. g3 Nd5 23. Bc5 Rb8 24. c3 Be7 25. Ne4 Bxc5 26. Nxc5 Ra7 27. Ne1 Ngf6 28. Ned3 Nd7 29. Nxd7 Rxd7 30. Nc5 Rdd8 31. Rde1 Nb6 32. Rg1 Nc4 33. g4 Rd5 34. Nd3 Rbd8 35. Nb4 R5d6 36. Nd3 Rd5 37. Nb4 R5d6 38. Nd3 Rd5"
                 }
               ]
-            }
-          ]
-        },
-        {
-          "name": "دفاع کاروکان شاخه ی بریر",
-          "moves": ["e4", "c6", "d3", "d5", "Nd2"],
-          "variants": [
+            },
             {
               "name": "واریانت بریر",
               "moves": [
@@ -442,13 +418,7 @@
                   "pgn": "1. e4 c6 2. d3 d5 3. Nd2 e5 4. Ngf3 Nd7 5. g3 Ngf6 6. Bg2 Bd6 7. O-O O-O 8. Re1 Re8 9. c3 a5 10. Qc2 a4 11. b3 axb3 12. Nxb3 h6 13. h3 Bf8 14. Nh4 g6 15. exd5 cxd5 16. d4 e4 17. c4 dxc4 18. Qxc4 Nb6 19. Qc2 g5 20. Bxe4 Nxe4 21. Rxe4 Rxe4 22. Qxe4 gxh4 23. g4 Qd5 24. Qf4 Bd7 25. Bd2 Bc6 26. f3 Qxf3 27. Qxf3 Bxf3 28. Kf2 Bd5 29. Nc5 Nc4 30. Bf4 Bg7 31. Nb3 Nb2 32. Nc5 Bxd4+ 33. Be3 Bxc5 34. Bxc5 Nd3+ 35. Ke3 Nxc5 36. Kd4 Nb3+ 0-1"
                 }
               ]
-            }
-          ]
-        },
-        {
-          "name": "دفاع کاروکان شاخه ی پیشرفته",
-          "moves": ["e4", "c6", "d4", "d5", "e5"],
-          "variants": [
+            },
             {
               "name": "واریانت اصلی",
               "moves": [
@@ -533,13 +503,7 @@
                   "pgn": "1. e4 c6 2. d4 d5 3. e5 Bf5 4. h4 h5 5. Bd3 Bxd3 6. Qxd3 e6 7. Nf3 c5 8. Bg5 Be7 9. dxc5 Na6 10. b4 Nxb4 11. Qb5+ Nc6 12. Qxb7 Qc8 13. Qb3 Bxc5 14. O-O Nge7 15. Nbd2 O-O 16. Qa4 Ng6 17. Rfe1 Qd7 18. Nb3 Bb6 19. Qa3 Qc7 20. Qd6 Ncxe5 21. Qxc7 Nxf3+ 22. gxf3 Bxc7 23. Rac1 Rac8 24. c4 dxc4 25. Nd2 Ba5 26. Re2 Bxd2 27. Rxd2 f6 28. Be3 Nxh4 29. Rd7 Rf7 30. Rxa7 Rxa7 31. Bxa7 Ra8 0-1"
                 }
               ]
-            }
-          ]
-        },
-        {
-          "name": "دفاع کاروکان شاخه ی پیشرفته – کارلس باتوینیک",
-          "moves": ["e4", "c6", "d4", "d5", "e5", "c5"],
-          "variants": [
+            },
             {
               "name": "شاخه ی پذیرفته شده",
               "moves": [
@@ -613,13 +577,7 @@
                   "pgn": "1. e4 c6 2. d4 d5 3. e5 c5 4. Nf3 Bg4 5. dxc5 Nc6 6. Bb5 Qa5+ 7. Nc3 e6 8. Bd2 Qc7 9. Be3 Ne7 10. h3 Bxf3 11. Qxf3 O-O-O 12. O-O-O Nxe5 13. Qe2 a6 14. Ba4 Nc4 15. Bg5 h6 16. Bxe7 Bxe7 17. Qg4 Bg5+ 18. Kb1 Qxc5 19. Bb3 Nd2+ 20. Ka1 Nxb3+ 21. cxb3 Kb8 22. Ne2 Bf6 0-1"
                 }
               ]
-            }
-          ]
-        },
-        {
-          "name": "دفاع کاروکان شاخه ی حمله ی پانوو",
-          "moves": ["e4", "c6", "c4", "d5"],
-          "variants": [
+            },
             {
               "name": "واریانت حمله ی پانوو",
               "moves": [
@@ -648,13 +606,7 @@
                   "pgn": "1. e4 c6 2. c4 d5 3. cxd5 cxd5 4. exd5 Nf6 5. Qa4+ Nbd7 6. Nc3 g6 7. Bc4 Bg7 8. d3 O-O 9. Nf3 a6 10. Qa3 b6 11. O-O Bb7 12. Re1 b5 13. Bb3 Re8 14. Be3 Nb6 15. Bxb6 Qxb6 16. Qb4 Qd6 17. Qxd6 exd6 18. a3 Kf8 19. Kf1 Nd7 20. d4 Nb6 21. Rxe8+ Rxe8 22. Re1 Rc8 23. Rd1 h6 24. Ke1 Rc7 25. Rd3 Bc8 26. Nd2 Bf5 27. Nce4 Bxe4 28. Nxe4 Re7 29. Re3 Bxd4 30. Re2 Bxb2 31. Rxb2 Rxe4+ 32. Kf1 Nd7 33. g3 Nc5 34. Ba2 Ra4 35. h4 Rxa3 36. Kg2 b4 37. Bc4 a5 38. Re2 Rc3 39. Bb5 b3 40. Re8+ Kg7 0-1"
                 }
               ]
-            }
-          ]
-        },
-        {
-          "name": "دفاع کاروکان شاخه ی حمله ی دو اسب",
-          "moves": ["e4", "c6", "Nc3", "d5", "Nf3"],
-          "variants": [
+            },
             {
               "name": "واریانت Nd7",
               "moves": [
@@ -730,13 +682,7 @@
                   "pgn": "1. e4 c6 2. Nc3 d5 3. Nf3 Bg4 4. Be2 Nf6 5. h3 Bxf3 6. Bxf3 e6 7. O-O Be7 8. d4 dxe4 9. Nxe4 Nxe4 10. Bxe4 Nd7 11. c4 Nf6 12. Bc2 O-O 13. b3 Qa5 14. a3 Rfd8 15. Bb2 Rd7 16. Re1 Rad8 17. Qf3 Ne8 18. Re5 Qc7 19. Rh5 h6 20. Re1 Bf6 21. Qe4 Bxd4 22. Bxd4 Rxd4 23. Qh7+ Kf8 24. Rhe5 Rd2 25. Bf5 Rd1 26. Re3 Rxe1+ 27. Rxe1 Qa5 0-1"
                 }
               ]
-            }
-          ]
-        },
-        {
-          "name": "دفاع کاروکان شاخه ی فانتزی",
-          "moves": ["e4", "c6", "d4", "d5", "f3"],
-          "variants": [
+            },
             {
               "name": "شاخه ی dxe4",
               "moves": [
@@ -778,13 +724,7 @@
                   "pgn": "1. e4 c6 2. d4 d5 3. f3 dxe4 4. fxe4 e5 5. dxe5 Qh4+ 6. Ke2 Qxe4+ 7. Kd2 Bc5 8. Qe2 Qd4+ 9. Ke1 Bg4 10. Nf3 Bxf3 11. gxf3 Qh4+ 12. Kd1 Ne7 13. c3 O-O 14. Be3 Rd8+ 15. Kc2 Bxe3 16. Qxe3 Nd5 17. Qe4 Qxe4+ 18. fxe4 Ne3+ 19. Kb3 Nd7 20. Na3 Nc5+ 21. Kb4 b6 22. Nc4 Nc2# 0-1"
                 }
               ]
-            }
-          ]
-        },
-        {
-          "name": "دفاع کاروکان شاخه ی گامبی آدم فضایی",
-          "moves": ["e4", "c6", "d4", "d5", "Nc3", "dxe4", "Nxe4", "Nf6", "Ng5", "h6", "Nxf7"],
-          "variants": [
+            },
             {
               "name": "گامبی آدم فضایی",
               "moves": [
@@ -812,13 +752,7 @@
                   "pgn": "1. e4 c6 2. d4 d5 3. Nc3 dxe4 4. Nxe4 Nd7 5. Ng5 Ngf6 6. Bd3 e6 7. N1f3 Bd6 8. O-O h6 9. Nxf7 Kxf7 10. Re1 Qc7 11. Qe2 Re8 12. Ne5+ Kg8 13. Qe3 c5 14. c3 Nf8 15. Qg3 cxd4 16. cxd4 Kh8 17. Bf4 Bxe5 18. Bxe5 Qf7 19. Rac1 Nd5 20. Re4 Nd7 21. Rh4 Nxe5 22. Qxe5 Qf6 23. Qe4 Qf5 24. Qe2 Qg5 25. f4 Qxh4 26. Rc7 Nxc7 27. Qe4 Kg8 28. Qh7+ Kf8 0-1"
                 }
               ]
-            }
-          ]
-        },
-        {
-          "name": "دفاع کاروکان شاخه ی مرد طلایی",
-          "moves": ["e4", "c6", "Nc3", "d5", "Qf3", "d4", "Bc4", "Nf6", "e5", "Nd7", "exf6", "Ne5", "Qe2", "Nxc4", "Qxc4", "dxc3", "dxc3", "exf6"],
-          "variants": [
+            },
             {
               "name": "واریانت مرد طلایی",
               "moves": [
@@ -844,6 +778,71 @@
                   "year": 0,
                   "result": "0-1",
                   "pgn": "1. e4 c6 2. Nc3 d5 3. Qf3 d4 4. Bc4 Nf6 5. e5 Nbd7 6. exf6 Ne5 7. Qe2 Nxc4 8. fxg7 Bxg7 9. Qxc4 dxc3 10. dxc3 Bf5 11. Qe2 Qa5 12. Nf3 Bxc3+ 13. Bd2 Bxd2+ 14. Qxd2 Qxd2+ 15. Kxd2 O-O-O+ 16. Kc3 Rhg8 17. Nh4 Rd5 18. g3 Rgd8 19. Rhe1 Be6 20. Re2 Rc5+ 21. Kb4 Rd4+ 22. c4 Rdxc4+ 0-1"
+                }
+              ]
+            },
+            {
+              "name": "واریانت e6",
+              "moves": [
+                "e4",
+                "c6",
+                "d4",
+                "d5",
+                "e5",
+                "c5",
+                "dxc5",
+                "e6",
+                "a3",
+                "Bxc5",
+                "b4",
+                "Be7",
+                "Nf3",
+                "f6",
+                "Bb2",
+                "a5",
+                "b5",
+                "Nd7",
+                "Bd3",
+                "Nh6"
+              ],
+              "stats": {
+                "whiteWins": 0,
+                "blackWins": 0,
+                "draws": 0
+              },
+              "strengths": [
+                "سیاه به خوبی سوار هایش را روی پیاده ی e5 هماهنگ کرده است",
+                "سیاه بیشتر سوار هایش را به خوبی گسترش داده است "
+              ],
+              "weaknesses": [
+                "سیاه یک فیل بد در c8 دارد "
+              ],
+              "popularMoves": [
+                {
+                  "san": "O-O",
+                  "description": "",
+                  "moves": []
+                }
+              ],
+              "evaluation": {
+                "score": "+0.2",
+                "summary": "سفید برتری اندکی دارد"
+              },
+              "ideas": [
+                "سیاه: می‌تواند در ادامه اسبش را در f7 بزارد و روی پیاده ی e5 فشار می‌آورد و اگر هم تعویض در f6 رخ داد ما به فیل پس میگیریم و پس از تعویض فیل ها با وزیر پس میگیریم و بعد در ادامه  می‌تواند e5 بازی کند ",
+                "سفید: می‌تواند قبل از قلعه کوچک وزیر e2 کند و بعد می‌تواند در موقع مناسب و یا بعد قلعه کوچک سیاه c4 کند و به ساختار پیاده ای سیاه ضربه بزند "
+              ],
+              "endgames": [
+                "هر آخر بازی ممکن است "
+              ],
+              "traps": [],
+              "sampleGames": [
+                {
+                  "white": "Nagare Kaivalya Sandip",
+                  "black": "Maghsoodloo, Parham",
+                  "year": 0,
+                  "result": "0-1",
+                  "pgn": "1. e4 c6 2. d4 d5 3. e5 c5 4. dxc5 e6 5. a3 Bxc5 6. b4 Be7 7. Nf3 a5 8. b5 f6 9. Bb2 Nh6 10. Bd3 Nd7 11. O-O O-O 12. Qe2 Nf7 13. exf6 Bxf6 14. Bxf6 Qxf6 15. c3 e5 16. Bc2 Nc5 17. Qe3 b6 18. Nbd2 a4 19. Rfe1 Re8 20. Rad1 Bg4 21. h3 Bh5 22. g4 Bg6 23. Bxg6 hxg6 24. Nf1 Rad8 25. Ng3 e4 26. Nd4 Ne5 27. Nc6 Nxc6 28. bxc6 Qxc6 29. Rd4 Nd3 30. Rb1 Ne5 31. Kg2 Rf8 32. Rdb4 Nc4 33. Qd4 Rde8 34. Rxb6 Nxb6 35. Rxb6 Qc4 36. Rxg6 Qxd4 37. cxd4 Kh7 38. Ra6 Ra8 39. Rd6 Rf3 40. Rxd5 Rxa3 41. Nxe4 Rb3 42. Nc5 Rb5 43. Rh5+ Kg8 0-1"
                 }
               ]
             }
@@ -925,13 +924,7 @@
                   "pgn": "1. e4 e5 2. Nf3 Nc6 3. Nc3 Nf6 4. d4 exd4 5. Nxd4 Nxd4 6. Qxd4 d6 7. Bf4 Be7 8. O-O-O O-O 9. e5 dxe5 10. Qxe5 Bd6 11. Qd4 Bxf4+ 12. Qxf4 Qe7 13. Bc4 Be6 14. Rhe1 c6 15. Bxe6 fxe6 16. f3 Nd5 17. Nxd5 cxd5 18. Qe5 Rae8 19. Rxd5 Qh4 20. Rd7 Qh6+ 21. Kb1 Rf5 22. Qxf5 1-0"
                 }
               ]
-            }
-          ]
-        },
-        {
-          "name": "گشایش اسکاچ (واریانت کلاسیک)",
-          "moves": ["e4", "e5", "Nf3", "Nc6", "d4"],
-          "variants": [
+            },
             {
               "name": "واریانت کلاسیک",
               "moves": [
@@ -981,6 +974,215 @@
                   "year": 0,
                   "result": "1-0",
                   "pgn": "1. e4 e5 2. Nf3 Nc6 3. d4 exd4 4. Nxd4 Qf6 5. Be3 Bc5 6. c3 Nge7 7. Bc4 d6 8. O-O O-O 9. Nxc6 Nxc6 10. Bxc5 dxc5 11. f4 Be6 12. Bb5 Rad8 13. Qe2 Bc8 14. Nd2 a6 15. Ba4 Nd4 16. Qe3 b5 17. Bd1 Ne6 18. Bc2 c4 19. Rae1 Nc5 20. Qxc5 Rxd2 21. Rf2 Qd6 22. Qe3 Rxf2 23. Kxf2 f6 24. Rd1 Qe7 25. a3 Bb7 26. Re1 Bc6 27. Kg1 Re8 28. h3 Qe6 29. Kf2 Qe7 30. Kg3 Rd8 31. Re2 Re8 32. e5 fxe5 33. fxe5 Qe6 34. Kh2 Bd5 35. Qg5 Rf8 36. Qh5 g6 37. Qg5 Kg7 38. h4 h6 39. Qg3 c6 40. Re1 Rf7 41. Bd1 Qf5 42. Bg4 Qf2 43. Re2 Qxg3+ 44. Kxg3 h5 45. Bf3 Kf8 46. Rd2 Rd7 47. Kf4 Ke7 48. Kg5 Kf7 49. Rf2 Kg7 50. Kf4 Kf7 51. Re2 Ke6 52. Kg5 Bxf3 53. gxf3 Rg7 54. f4 Rf7 55. Re4 Rg7 56. Rd4 Rg8 57. Rd6+ Ke7 58. Rxg6 1-0"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "دفاع فرانسه شاخه ی تعویضی",
+          "moves": [
+            "e4",
+            "e6",
+            "d4",
+            "d5",
+            "exd5",
+            "exd5"
+          ],
+          "variants": [
+            {
+              "name": "واریانت Bd3",
+              "moves": [
+                "e4",
+                "e6",
+                "d4",
+                "d5",
+                "exd5",
+                "exd5",
+                "Bd3",
+                "c5",
+                "dxc5",
+                "Bxc5",
+                "Nf3",
+                "Nf6",
+                "O-O",
+                "Nc6",
+                "h3",
+                "O-O",
+                "c3",
+                "Qd6",
+                "Bg5",
+                "Re8"
+              ],
+              "stats": {
+                "whiteWins": 0,
+                "blackWins": 0,
+                "draws": 0
+              },
+              "strengths": [
+                "سیاه سوار های کاملا فعالی دارد ",
+                "سیاه وضیعت انعطاف پذیری دارد "
+              ],
+              "weaknesses": [
+                "سفید نمی تواند اسبش را از c3 در حال حاضر گسترش دهد ",
+                "سفید در گسترش عقب است "
+              ],
+              "popularMoves": [],
+              "evaluation": {
+                "score": "-0.5",
+                "summary": "سیاه برتری اندکی دارد"
+              },
+              "ideas": [
+                "سیاه: می‌تواند در ادامه عادی بازی کند اما در هر حرکت خود باید فیل در h3 را برسی کند ولی اگر سفید عادی بازی کرد و حرکتی مثل Nd2 بازی کرد ما می‌توانیم h6 کنیم و در ادامه عادی بازی کنیم.",
+                "سفید: می‌تواند عادی بازی کند و سریعا باید سوار هایش را گسترش دهد ولی سفید هم در هر حرکت خود باید فیل در h3 را تحلیل کند و باید گسترشی بازی کند اما همچنين باید منطقی هم منطقی بازی کند."
+              ],
+              "endgames": [
+                "هر آخر بازی ای ممکن است "
+              ],
+              "traps": [
+                {
+                  "name": "تله ی Bxh3",
+                  "moves": [
+                    "e4",
+                    "e6",
+                    "d4",
+                    "d5",
+                    "exd5",
+                    "exd5",
+                    "Bd3",
+                    "c5",
+                    "dxc5",
+                    "Bxc5",
+                    "Nf3",
+                    "Nf6",
+                    "O-O",
+                    "Nc6",
+                    "h3",
+                    "O-O",
+                    "c3",
+                    "Qd6",
+                    "Nbd2",
+                    "Bxh3",
+                    "gxh3",
+                    "Qg3+",
+                    "Kh1",
+                    "Qxh3+",
+                    "Kg1",
+                    "Ng4",
+                    "Bf5",
+                    "Ne4",
+                    "Bxg4",
+                    "Nxg4"
+                  ]
+                }
+              ],
+              "sampleGames": [
+                {
+                  "white": "Govedarica, Radovan",
+                  "black": "Gusain, Himal",
+                  "year": 0,
+                  "result": "0-1",
+                  "pgn": "1. e4 e6 2. d4 d5 3. exd5 exd5 4. Bd3 c5 5. dxc5 Bxc5 6. Nf3 Nf6 7. O-O O-O 8. h3 Nc6 9. c3 Qd6 10. Re1 Bxh3 11. gxh3 Qg3+ 12. Kh1 Bxf2 13. Rf1 Qxh3+ 14. Nh2 Bg3 15. Qe2 Bxh2 16. Bf5 Rae8 0-1"
+                }
+              ]
+            },
+            {
+              "name": "واریانت Bd3 c3",
+              "moves": [
+                "e4",
+                "e6",
+                "d4",
+                "d5",
+                "exd5",
+                "exd5",
+                "Bd3",
+                "c5",
+                "c3",
+                "Nc6",
+                "Nf3",
+                "Bd6",
+                "dxc5",
+                "Bxc5",
+                "O-O",
+                "Nf6",
+                "Re1+",
+                "Be6",
+                "Bf5",
+                "O-O",
+                "Bxe6",
+                "fxe6",
+                "Be3",
+                "Bxe3",
+                "Rxe3",
+                "Qd6"
+              ],
+              "stats": {
+                "whiteWins": 0,
+                "blackWins": 0,
+                "draws": 0
+              },
+              "strengths": [
+                "سیاه سوار های خوبی دارد "
+              ],
+              "weaknesses": [
+                "سیاه نقطه ضعف خاصی ندارد "
+              ],
+              "popularMoves": [
+                {
+                  "san": "Nd2",
+                  "description": "",
+                  "moves": []
+                }
+              ],
+              "evaluation": {
+                "score": "-0.3",
+                "summary": "سیاه برتری اندکی دارد"
+              },
+              "ideas": [
+                "سیاه: می‌تواند در ادامه رخ هایش را فعال کند و e5 را آماده کند و بعد مرکز را دست بگیرد و عادی بازی کند.",
+                "سفید: می‌تواند عادی بازی کند و گسترشی بازی کند اما باید مراقب تهدیدات سیاه باشد."
+              ],
+              "endgames": [
+                "هر آخر بازی ای ممکن است "
+              ],
+              "traps": [
+                {
+                  "name": "تله ی پیاده ی سمی",
+                  "moves": [
+                    "e4",
+                    "e6",
+                    "d4",
+                    "d5",
+                    "exd5",
+                    "exd5",
+                    "Bd3",
+                    "c5",
+                    "c3",
+                    "Nc6",
+                    "Nf3",
+                    "Bd6",
+                    "dxc5",
+                    "Bxc5",
+                    "O-O",
+                    "Nf6",
+                    "Re1+",
+                    "Be6",
+                    "Bf5",
+                    "O-O",
+                    "Bxe6",
+                    "fxe6",
+                    "Rxe6",
+                    "Ne4"
+                  ]
+                }
+              ],
+              "sampleGames": [
+                {
+                  "white": "Tabatabaei, M. Amin",
+                  "black": ".Vakhlamov, Igor L",
+                  "year": 0,
+                  "result": "0-1",
+                  "pgn": "1. e4 c5 2. Nf3 e6 3. c3 d5 4. exd5 exd5 5. d4 Nf6 6. Bd3 Nc6 7. O-O Be7 8. dxc5 Bxc5 9. Re1+ Be6 10. Nbd2 O-O 11. Nb3 Bb6 12. Be3 Bg4 13. h3 Bh5 14. Bxb6 Qxb6 15. Be2 Rfe8 16. Qc2 Rac8 17. Rad1 Re7 18. Nfd4 Nxd4 19. Nxd4 Rce8 20. Kf1 Bg6 21. Qb3 Qc7 22. Nf3 Be4 23. g3 Qc8 24. Ng1 Qf5 25. Qb4 Bc2 26. Rc1 Ne4 27. Nf3 Bd3 28. Kg2 a5 29. Qa3 Ng5 30. g4 Qf4 31. Nxg5 Bxe2 32. h4 Qxg4+ 33. Kh2 Qxh4+ 34. Nh3 Bg4 35. Rxe7 Rxe7 36. c4 h5 37. cxd5 Re2 38. Qg3 Qxh3+ 39. Qxh3 Bxh3 40. Kg3 Bf5 41. d6 Rd2 42. Rc5 g6 43. Rb5 Rxd6 44. Rxb7 Rd3+ 45. Kf4 Kg7 46. b4 Rd4+ 47. Kg5 Rxb4 48. f4 0-1"
                 }
               ]
             }
