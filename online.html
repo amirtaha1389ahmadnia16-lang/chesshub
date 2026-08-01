@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <title>ChessHub | بازی آنلاین</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/gh/rastikerdardar/vazir-font@v30.1.0/dist/font-face.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
+    <style>
+      .online-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 2rem;
+      }
+      .game-card {
+        background: #fff;
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        box-shadow: var(--shadow-md);
+        width: 100%;
+        max-width: 600px;
+      }
+
+      .status-bar {
+        background: var(--primary-dark);
+        color: #fff;
+        padding: 1rem;
+        border-radius: var(--radius-md);
+        text-align: center;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+      }
+      .status-bar.waiting {
+        background: var(--warning);
+        color: #000;
+      }
+
+      #chessboard {
+        width: 100%;
+        aspect-ratio: 1/1;
+        display: grid;
+        grid-template-columns: repeat(8, 1fr);
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+        border: 2px solid var(--primary-dark);
+      }
+      .square {
+        aspect-ratio: 1/1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        position: relative;
+      }
+      .square.light {
+        background-color: #f0d9b5;
+      }
+      .square.dark {
+        background-color: #b58863;
+      }
+      .square.selected {
+        background-color: #f6e05e !important;
+      }
+      .piece-img {
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        user-select: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1;
+      }
+
+      .message-box {
+        margin-top: 1rem;
+        padding: 1rem;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: var(--radius-sm);
+        text-align: center;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div id="header-placeholder"></div>
+
+      <section class="app-hero">
+        <h1><i class="fas fa-globe"></i> بازی آنلاین</h1>
+        <p>با بازیکنان دیگر از سراسر جهان رقابت کنید!</p>
+      </section>
+
+      <div class="online-wrapper">
+        <div class="game-card">
+          <div class="status-bar waiting" id="statusBar">
+            در حال جستجوی حریف...
+          </div>
+          <div id="chessboard"></div>
+          <div class="message-box" id="msgBox">
+            لطفاً صبر کنید تا یک حریف پیدا شود.
+          </div>
+        </div>
+      </div>
+
+      <div id="footer-placeholder"></div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+      (function () {
+        "use strict";
+
+        // اتصال به سرور
+        const socket = io("http://localhost:3000");
+        let game = new Chess();
+        let boardSquares = {};
+        let selectedSquare = null;
+        let myColor = "w";
+        let isFlipped = false;
+        const pieceCodes = {
+          wk: "wk.png",
+          wq: "wq.png",
+          wr: "wr.png",
+          wb: "wb.png",
+          wn: "wn.png",
+          wp: "wp.png",
+          bk: "bk.png",
+          bq: "bq.png",
+          br: "br.png",
+          bb: "bb.png",
+          bn: "bn.png",
+          bp: "bp.png",
+        };
+        const boardDiv = document.getElementById("chessboard");
+
+        function buildBoard() {
+          boardDiv.innerHTML = "";
+          boardSquares = {};
+          for (let i = 0; i < 8; i++) {
+            for (let j = 0; j < 8; j++) {
+              const row = isFlipped ? 7 - i : i,
+                col = isFlipped ? 7 - j : j;
+              const sqName = String.fromCharCode(97 + col) + (8 - row);
+              const sq = document.createElement("div");
+              sq.className = `square ${(row + col) % 2 === 0 ? "light" : "dark"}`;
+              sq.dataset.square = sqName;
+              boardDiv.appendChild(sq);
+              boardSquares[sqName] = sq;
+            }
+          }
+          updateBoard();
+        }
+
+        function updateBoard() {
+          const b = game.board();
+          for (let i = 0; i < 8; i++) {
+            for (let j = 0; j < 8; j++) {
+              const row = isFlipped ? 7 - i : i,
+                col = isFlipped ? 7 - j : j;
+              const p = b[row][col];
+              const sqName = String.fromCharCode(97 + col) + (8 - row);
+              const sqData = boardSquares[sqName];
+              sqData.innerHTML = "";
+              sqData.classList.remove("selected");
+              if (p) {
+                const key =
+                  (p.color === "w" ? "w" : "b") + p.type.toLowerCase();
+                const img = document.createElement("img");
+                img.src = `pieces/neo/${pieceCodes[key]}`;
+                img.classList.add("piece-img");
+                sqData.appendChild(img);
+              }
+            }
+          }
+          if (selectedSquare)
+            boardSquares[selectedSquare].classList.add("selected");
+        }
+
+        function makeMove(from, to, promo = "q") {
+          if (game.turn() !== myColor) return false;
+          const move = game.move({ from, to, promotion: promo });
+          if (move) {
+            selectedSquare = null;
+            updateBoard();
+            socket.emit("move", {
+              from: move.from,
+              to: move.to,
+              promotion: move.promotion,
+            });
+            checkGameOver();
+            return true;
+          }
+          return false;
+        }
+
+        function checkGameOver() {
+          if (game.game_over()) {
+            document.getElementById("statusBar").textContent = "بازی تمام شد!";
+          }
+        }
+
+        // --- منطق درگ‌اند‌دراپ (مشابه پازل عجله‌ای) ---
+        let dragStart = null,
+          isDragging = false,
+          dragClone = null,
+          rafId = null,
+          lastX = 0,
+          lastY = 0,
+          cloneSize = 0;
+
+        function createDragClone(sq, cx, cy) {
+          const d = boardSquares[sq];
+          if (!d) return null;
+          const img = d.querySelector("img");
+          if (!img) return null;
+          const r = d.getBoundingClientRect();
+          cloneSize = r.width;
+          const c = img.cloneNode(true);
+          c.style.cssText = `position:fixed;pointer-events:none;z-index:9999;width:${cloneSize}px;height:${cloneSize}px;left:0;top:0;transform:translate3d(${cx - cloneSize / 2}px,${cy - cloneSize / 2}px,0) scale(1.05);`;
+          document.body.appendChild(c);
+          img.style.opacity = "0";
+          return c;
+        }
+
+        function updDrag() {
+          if (dragClone)
+            dragClone.style.transform = `translate3d(${lastX - cloneSize / 2}px,${lastY - cloneSize / 2}px,0) scale(1.05)`;
+          rafId = null;
+        }
+
+        function onDown(e) {
+          if (game.turn() !== myColor || game.game_over()) return;
+          const cx = e.touches ? e.touches[0].clientX : e.clientX,
+            cy = e.touches ? e.touches[0].clientY : e.clientY;
+          const el = document.elementFromPoint(cx, cy);
+          const sq = el?.closest?.(".square");
+          if (!sq) return;
+          const s = sq.dataset.square;
+          const p = game.get(s);
+          if (p && p.color === myColor) {
+            e.preventDefault();
+            dragStart = s;
+            isDragging = true;
+            dragClone = createDragClone(s, cx, cy);
+          } else if (selectedSquare) {
+            makeMove(selectedSquare, s);
+            selectedSquare = null;
+            updateBoard();
+          }
+        }
+
+        function onMove(e) {
+          if (!isDragging) return;
+          e.preventDefault();
+          lastX = e.touches ? e.touches[0].clientX : e.clientX;
+          lastY = e.touches ? e.touches[0].clientY : e.clientY;
+          if (!rafId) rafId = requestAnimationFrame(updDrag);
+        }
+
+        function onUp(e) {
+          if (!isDragging || !dragStart) {
+            cleanup();
+            return;
+          }
+          const cx = e.changedTouches ? e.changedTouches[0].clientX : e.clientX,
+            cy = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+          if (dragClone) {
+            dragClone.remove();
+            dragClone = null;
+          }
+          if (boardSquares[dragStart]) {
+            const img = boardSquares[dragStart].querySelector("img");
+            if (img) img.style.opacity = "1";
+          }
+          const el = document.elementFromPoint(cx, cy);
+          const t = el?.closest?.(".square");
+          const to = t ? t.dataset.square : null;
+          if (to && to !== dragStart) {
+            makeMove(dragStart, to);
+          } else if (to === dragStart) {
+            selectedSquare = selectedSquare === dragStart ? null : dragStart;
+            updateBoard();
+          }
+          cleanup();
+        }
+
+        function cleanup() {
+          if (dragClone) {
+            dragClone.remove();
+            dragClone = null;
+          }
+          if (rafId) {
+            cancelAnimationFrame(rafId);
+            rafId = null;
+          }
+          dragStart = null;
+          isDragging = false;
+        }
+
+        function onClick(e) {
+          if (isDragging) return;
+          if (game.turn() !== myColor || game.game_over()) return;
+          const sq = e.target.closest?.(".square");
+          if (!sq) return;
+          const s = sq.dataset.square;
+          if (selectedSquare === null) {
+            const p = game.get(s);
+            if (p && p.color === myColor) {
+              selectedSquare = s;
+              updateBoard();
+            }
+          } else {
+            makeMove(selectedSquare, s);
+            selectedSquare = null;
+            updateBoard();
+          }
+        }
+
+        // --- رویدادهای Socket.io ---
+        socket.on("gameStart", (data) => {
+          myColor = data.color;
+          isFlipped = myColor === "b";
+          buildBoard();
+          document.getElementById("statusBar").className = "status-bar";
+          document.getElementById("statusBar").textContent =
+            `بازی شروع شد! شما ${myColor === "w" ? "سفید" : "سیاه"} هستید.`;
+          document.getElementById("msgBox").textContent =
+            "بازی در حال انجام است.";
+
+          // اضافه کردن رویدادهای موس و لمسی به تخته
+          boardDiv.addEventListener("mousedown", onDown);
+          window.addEventListener("mousemove", onMove);
+          window.addEventListener("mouseup", onUp);
+          boardDiv.addEventListener("touchstart", onDown, { passive: false });
+          boardDiv.addEventListener("touchmove", onMove, { passive: false });
+          boardDiv.addEventListener("touchend", onUp, { passive: false });
+          boardDiv.addEventListener("click", onClick);
+        });
+
+        socket.on("opponentMove", (data) => {
+          game.move({
+            from: data.from,
+            to: data.to,
+            promotion: data.promotion || "q",
+          });
+          updateBoard();
+          checkGameOver();
+        });
+
+        buildBoard(); // ساخت تخته خالی تا قبل از اتصال
+      })();
+    </script>
+  </body>
+</html>

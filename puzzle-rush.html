@@ -4,7 +4,11 @@
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta
+      name="description"
+      content="پازل عجله‌ای شطرنج - حل سریع پازل‌ها در زمان محدود"
     />
     <title>ChessHub | پازل عجله‌ای</title>
     <link
@@ -16,336 +20,51 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/puzzle-rush.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
-    <style>
-      /* ============================================
-         🎯 استایل‌های اختصاصی پازل عجله‌ای
-         ============================================ */
-
-      /* ----- بخش بازی ----- */
-      .game-area {
-        background: #ffffff;
-        border-radius: var(--radius-lg);
-        padding: 25px;
-        box-shadow: var(--shadow-md);
-        max-width: 800px;
-        margin: 0 auto;
-        border: 1px solid #eef2f5;
-      }
-
-      .mode-selector {
-        display: flex;
-        justify-content: center;
-        gap: 15px;
-        margin-bottom: 20px;
-        flex-wrap: wrap;
-      }
-
-      .mode-btn {
-        background: var(--secondary);
-        border: none;
-        padding: 8px 24px;
-        border-radius: 40px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: 0.2s;
-        font-size: 1rem;
-        font-family: "Vazir";
-        color: var(--text-dark);
-      }
-
-      .mode-btn.active {
-        background: var(--primary);
-        color: white;
-      }
-
-      .mode-btn:hover:not(.active) {
-        background: #e2e8f0;
-        transform: translateY(-2px);
-      }
-
-      .stats {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background: var(--secondary);
-        padding: 12px 20px;
-        border-radius: 60px;
-        margin-bottom: 20px;
-        font-weight: bold;
-        flex-wrap: wrap;
-        gap: 10px;
-        color: var(--text-dark);
-      }
-
-      .turn-indicator {
-        background: #e2e8f0;
-        padding: 4px 12px;
-        border-radius: 30px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        min-width: 80px;
-        text-align: center;
-        color: var(--text-dark);
-      }
-
-      /* ----- تخته ----- */
-      #chessboard {
-        display: grid;
-        grid-template-columns: repeat(8, 1fr);
-        aspect-ratio: 1 / 1;
-        max-width: 500px;
-        margin: 20px auto;
-        border: 2px solid #cbd5e1;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: var(--shadow-md);
-        touch-action: none;
-        user-select: none;
-        -webkit-user-select: none;
-      }
-
-      .square {
-        aspect-ratio: 1 / 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        touch-action: none;
-      }
-
-      .square.light {
-        background-color: var(--board-light, #f0d9b5);
-      }
-
-      .square.dark {
-        background-color: var(--board-dark, #b58863);
-      }
-
-      .square.computer-from,
-      .square.computer-to {
-        background-color: #7fc97f !important;
-        box-shadow: inset 0 0 0 4px #2d8f2d !important;
-        transition: all 0.3s ease;
-      }
-
-      .square.selected {
-        background-color: #b7d968 !important;
-        box-shadow: inset 0 0 0 3px var(--primary) !important;
-      }
-
-      .piece-img {
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-        user-select: none;
-        -webkit-user-select: none;
-        -webkit-user-drag: none;
-        draggable: false;
-      }
-
-      /* ----- دکمه‌ها ----- */
-      .btn {
-        background: var(--secondary);
-        border: none;
-        padding: 8px 20px;
-        margin: 8px;
-        border-radius: 40px;
-        font-family: "Vazir";
-        font-weight: bold;
-        cursor: pointer;
-        transition: 0.2s;
-        color: var(--text-dark);
-      }
-
-      .btn-primary {
-        background: var(--primary);
-        color: white;
-      }
-
-      .btn-primary:hover {
-        background: var(--primary-dark);
-        transform: translateY(-2px);
-      }
-
-      /* ----- پیام‌ها ----- */
-      .message {
-        margin-top: 15px;
-        padding: 10px;
-        border-radius: 60px;
-        font-size: 0.9rem;
-        animation: fadeIn 0.3s;
-      }
-
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-        }
-        to {
-          opacity: 1;
-        }
-      }
-
-      .success {
-        background: #d1fae5;
-        color: #065f46;
-      }
-      .error {
-        background: #fee2e2;
-        color: #991b1b;
-      }
-      .info {
-        background: #dbeafe;
-        color: #1e40af;
-      }
-      .warning {
-        background: #fef3c7;
-        color: #92400e;
-      }
-      .record {
-        background: #fef9c3;
-        color: #854d0e;
-      }
-
-      /* ============================================
-         📱 واکنش‌گرایی
-         ============================================ */
-      @media (max-width: 768px) {
-        .game-area {
-          max-width: 100%;
-          margin: 0 10px;
-          padding: 18px;
-        }
-
-        #chessboard {
-          max-width: 100%;
-        }
-
-        .stats {
-          font-size: 0.75rem;
-          padding: 10px 14px;
-          gap: 6px;
-        }
-
-        .mode-btn {
-          padding: 6px 14px;
-          font-size: 0.75rem;
-        }
-
-        .turn-indicator {
-          font-size: 0.7rem;
-          min-width: 60px;
-          padding: 2px 8px;
-        }
-
-        .btn {
-          padding: 6px 14px;
-          font-size: 0.8rem;
-          margin: 6px;
-        }
-      }
-
-      @media (max-width: 480px) {
-        .game-area {
-          padding: 12px;
-          margin: 0 4px;
-        }
-
-        #chessboard {
-          max-width: 320px;
-        }
-
-        .stats {
-          font-size: 0.65rem;
-          padding: 8px 10px;
-        }
-
-        .mode-btn {
-          font-size: 0.65rem;
-          padding: 4px 10px;
-        }
-
-        .btn {
-          font-size: 0.7rem;
-          padding: 5px 10px;
-          margin: 4px;
-        }
-
-        .turn-indicator {
-          font-size: 0.6rem;
-          min-width: 50px;
-        }
-
-        .message {
-          font-size: 0.75rem;
-        }
-      }
-
-      @media (max-width: 360px) {
-        .mode-selector {
-          gap: 8px;
-        }
-
-        .mode-btn {
-          font-size: 0.55rem;
-          padding: 3px 8px;
-        }
-
-        .stats {
-          font-size: 0.55rem;
-          padding: 6px 8px;
-        }
-
-        #chessboard {
-          max-width: 240px;
-        }
-      }
-    </style>
   </head>
   <body>
     <div class="container">
-      <!-- هدر -->
       <div id="header-placeholder"></div>
 
-      <!-- بنر (با کلاس hero-section برای یکدستی) -->
-      <section class="hero-section">
-        <h1>
-          <span class="highlight"><i class="fas fa-bolt"></i></span> پازل
-          <span class="highlight">عجله‌ای</span>
-        </h1>
-        <p>هرچه سریع‌تر پازل‌ها رو حل کن و رکورد بزن!</p>
+      <!-- بنر یکپارچه -->
+      <section class="app-hero">
+        <h1><i class="fas fa-bolt"></i> پازل عجله‌ای</h1>
+        <p>حداکثر تعداد پازل‌ها را در زمان محدوده حل کن!</p>
       </section>
 
-      <!-- بخش بازی -->
       <div class="game-area">
-        <!-- انتخاب حالت -->
         <div class="mode-selector">
-          <button class="mode-btn" data-mode="3">⏱️ ۳ دقیقه</button>
-          <button class="mode-btn" data-mode="5">⏱️ ۵ دقیقه</button>
-          <button class="mode-btn active" data-mode="unlimited">
-            ♾️ بی‌زمان (۳ خطا)
+          <button class="mode-btn active" data-mode="3">
+            <i class="fas fa-stopwatch"></i> ۳ دقیقه
+          </button>
+          <button class="mode-btn" data-mode="5">
+            <i class="fas fa-stopwatch"></i> ۵ دقیقه
+          </button>
+          <button class="mode-btn" data-mode="unlimited">
+            <i class="fas fa-infinity"></i> بی‌زمان
           </button>
         </div>
 
-        <!-- آمار -->
         <div class="stats">
-          <span>🎯 پازل: <span id="puzzleCounter">0</span></span>
-          <span id="timerDisplay">⏱️ ∞</span>
-          <span id="mistakeDisplay">❌ خطا: 0</span>
-          <span class="turn-indicator" id="turnDisplay">⏳ شروع</span>
+          <span id="puzzleCounter"><i class="fas fa-check-circle"></i> 0</span>
+          <span id="timerDisplay"><i class="far fa-clock"></i> ۳:۰۰</span>
+          <span id="mistakeDisplay"
+            ><i class="fas fa-times-circle"></i> خطا: 0</span
+          >
+          <span id="turnDisplay" class="turn-indicator"
+            ><i class="fas fa-hourglass-start"></i> شروع</span
+          >
         </div>
 
-        <!-- تخته -->
-        <div id="chessboard" dir="ltr"></div>
+        <div id="chessboard"></div>
 
-        <!-- دکمه‌ها -->
-        <div style="text-align: center">
+        <div class="button-group-center">
           <button id="resetGameBtn" class="btn btn-primary">
-            🔄 شروع مجدد
+            <i class="fas fa-redo"></i> شروع مجدد
           </button>
         </div>
 
-        <!-- پیام‌ها -->
         <div id="message" class="message"></div>
         <div
           id="recordDisplay"
@@ -354,32 +73,10 @@
         ></div>
       </div>
 
-      <!-- فوتر -->
       <div id="footer-placeholder"></div>
     </div>
 
     <script src="js/script.js"></script>
     <script src="js/puzzle-rush.js"></script>
-    <script>
-      // ============================================
-      // 🎨 اعمال تم ذخیره‌شده
-      // ============================================
-      (function applySavedTheme() {
-        try {
-          const settings = JSON.parse(
-            localStorage.getItem("chesshub_settings"),
-          );
-          if (settings && settings.theme) {
-            document.body.className = document.body.className
-              .split(" ")
-              .filter((cls) => !cls.startsWith("theme-"))
-              .join(" ");
-            document.body.classList.add(`theme-${settings.theme}`);
-          }
-        } catch (e) {}
-      })();
-
-      console.log("✅ ChessHub Puzzle-Rush loaded successfully");
-    </script>
   </body>
 </html>

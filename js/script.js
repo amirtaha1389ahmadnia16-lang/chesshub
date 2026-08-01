@@ -38,7 +38,6 @@
       }
     },
 
-    // 🔥 اصلاح: استفاده از تابع معمولی با bind در زمان صدا زدن
     loadPieces() {
       return new Promise((resolve) => {
         if (this._loadedPieces) {
@@ -88,7 +87,6 @@
       return { light, dark };
     },
 
-    // ===== ترفیع =====
     _promotionModal: null,
     _promotionCallback: null,
 
@@ -179,7 +177,6 @@
       this._promotionCallback = null;
     },
 
-    // ===== تشخیص رنگ کاربر =====
     computeUserColor(moves) {
       if (!moves || moves.length === 0) return "w";
       const firstMoveColor = moves[0].color;
@@ -187,14 +184,8 @@
     },
   };
 
-  // ============================================
-  // 📦 ذخیره در window برای دسترسی سایر فایل‌ها
-  // ============================================
-
   window.ChessUtils = ChessUtils;
 
-  // 🔥 اصلاح: ایجاد نسخه‌های bound از متدها برای استفاده در destructure
-  // این کار باعث میشه وقتی کاربر از { loadPieces } = ChessUtils استفاده کنه، this درست باشه
   window.ChessUtilsBound = {
     loadPieces: ChessUtils.loadPieces.bind(ChessUtils),
     getCurrentPieceSet: ChessUtils.getCurrentPieceSet.bind(ChessUtils),
@@ -206,7 +197,6 @@
     pieceCodes: ChessUtils.pieceCodes,
   };
 
-  // گوش‌دادن به تغییرات مهره‌ها برای بارگذاری مجدد
   document.addEventListener("pieceSetChanged", function () {
     ChessUtils._loadedPieces = false;
     ChessUtils._pieceImages = {};
@@ -231,26 +221,28 @@
   }
 
   // ============================================
-  // 📱 منوی موبایل
+  // 📱 منوی موبایل (اصلاح شده - مطابق تصویر)
   // ============================================
 
   function initMobileMenu() {
     const menuToggle = document.getElementById("menuToggle");
     const mainNav = document.getElementById("mainNav");
 
-    if (menuToggle && mainNav) {
-      menuToggle.addEventListener("click", function (e) {
-        e.stopPropagation();
-        mainNav.classList.toggle("show");
-        const icon = this.querySelector("i");
-        if (icon) {
-          icon.style.transform = mainNav.classList.contains("show")
-            ? "rotate(90deg)"
-            : "rotate(0deg)";
-        }
-      });
-    }
+    if (!menuToggle || !mainNav) return;
 
+    // باز و بسته کردن منو
+    menuToggle.addEventListener("click", function (e) {
+      e.stopPropagation();
+      mainNav.classList.toggle("show");
+      const icon = this.querySelector("i");
+      if (icon) {
+        icon.style.transform = mainNav.classList.contains("show")
+          ? "rotate(90deg)"
+          : "rotate(0deg)";
+      }
+    });
+
+    // مدیریت منوهای کشویی در موبایل
     function initMobileDropdowns() {
       if (window.innerWidth <= 768) {
         const dropdowns = document.querySelectorAll(".dropdown");
@@ -258,27 +250,35 @@
           const toggle = drop.querySelector(".dropdown-toggle");
           const menu = drop.querySelector(".dropdown-menu");
           if (toggle && menu) {
-            toggle.removeEventListener("click", toggle._clickHandler);
-            const handler = (e) => {
+            // حذف رویداد قبلی
+            toggle.removeEventListener("click", toggle._mobileHandler);
+
+            const handler = function (e) {
               e.preventDefault();
               e.stopPropagation();
+
+              // بستن سایر منوهای کشویی
               dropdowns.forEach((d) => {
                 if (d !== drop) {
                   const otherMenu = d.querySelector(".dropdown-menu");
                   if (otherMenu) {
                     otherMenu.classList.remove("show-mobile");
-                    d.classList.remove("open");
                   }
+                  d.classList.remove("open");
                 }
               });
+
+              // باز/بسته کردن منوی فعلی
               menu.classList.toggle("show-mobile");
               drop.classList.toggle("open");
             };
-            toggle._clickHandler = handler;
+
+            toggle._mobileHandler = handler;
             toggle.addEventListener("click", handler);
           }
         });
       } else {
+        // در دسکتاپ، منوهای کشویی را ریست کن
         document.querySelectorAll(".dropdown-menu").forEach((menu) => {
           menu.classList.remove("show-mobile");
         });
@@ -288,6 +288,7 @@
       }
     }
 
+    // بستن منو با کلیک خارج از آن
     document.addEventListener("click", function (e) {
       const nav = document.getElementById("mainNav");
       const toggle = document.getElementById("menuToggle");
@@ -296,6 +297,8 @@
           nav.classList.remove("show");
           const icon = toggle.querySelector("i");
           if (icon) icon.style.transform = "rotate(0deg)";
+
+          // بستن منوهای کشویی
           document.querySelectorAll(".dropdown-menu").forEach((menu) => {
             menu.classList.remove("show-mobile");
           });
@@ -306,8 +309,32 @@
       }
     });
 
+    // بستن منو با کلیک روی لینک‌ها (در موبایل)
+    document
+      .querySelectorAll(".nav-list > li > a:not(.dropdown-toggle)")
+      .forEach((link) => {
+        link.addEventListener("click", function () {
+          if (window.innerWidth <= 768) {
+            const nav = document.getElementById("mainNav");
+            const toggle = document.getElementById("menuToggle");
+            if (nav) nav.classList.remove("show");
+            if (toggle) {
+              const icon = toggle.querySelector("i");
+              if (icon) icon.style.transform = "rotate(0deg)";
+            }
+          }
+        });
+      });
+
+    // مقداردهی اولیه
     initMobileDropdowns();
-    window.addEventListener("resize", initMobileDropdowns);
+
+    // مقداردهی مجدد هنگام تغییر سایز
+    let resizeTimer;
+    window.addEventListener("resize", function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(initMobileDropdowns, 200);
+    });
   }
 
   // ============================================
@@ -447,14 +474,10 @@
   }
 
   // ============================================
-  // 🧹 پاک‌سازی لاگ‌های اضافی (اختیاری)
+  // 🚀 اجرا پس از بارگذاری کامل DOM
   // ============================================
 
   console.log("✅ ChessHub script.js loaded successfully");
-
-  // ============================================
-  // 🚀 اجرا پس از بارگذاری کامل DOM
-  // ============================================
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", async () => {
@@ -464,7 +487,6 @@
       initSettings();
     });
   } else {
-    // اگر DOM از قبل بارگذاری شده
     (async () => {
       await loadComponent("#header-placeholder", "header.html");
       await loadComponent("#footer-placeholder", "footer.html");

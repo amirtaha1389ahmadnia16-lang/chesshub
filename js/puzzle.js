@@ -1,12 +1,9 @@
-// puzzle.js - پازل روزانه با استفاده از ChessUtils
+// puzzle.js - پازل روزانه
 
 (function () {
   "use strict";
 
-  // ============================================
-  // 📦 استفاده از ChessUtils (نسخه bound شده)
-  // ============================================
-
+  const ChessUtils = window.ChessUtilsBound || window.ChessUtils;
   const {
     pieceCodes,
     getCurrentPieceSet,
@@ -14,11 +11,7 @@
     getBoardColors,
     showPromotion,
     computeUserColor,
-  } = window.ChessUtilsBound;
-
-  // ============================================
-  // 📦 متغیرها
-  // ============================================
+  } = ChessUtils;
 
   let game = null;
   let selectedSquare = null;
@@ -36,16 +29,176 @@
   let allPuzzles = [];
   let currentPuzzleIndex = 0;
   let nextPuzzleTimer = null;
+  let lastPuzzleDate = null;
 
   const boardDiv = document.getElementById("chessboard");
   const msgDiv = document.getElementById("message");
   const resetBtn = document.getElementById("resetBtn");
   const hintBtn = document.getElementById("hintBtn");
-  const descriptionP = document.querySelector(".puzzle-card p");
+  const userColorLabel = document.getElementById("userColorLabel");
 
-  // ============================================
-  // 🎨 رسم تخته (با چرخش صحیح)
-  // ============================================
+  async function loadAllPuzzles() {
+    try {
+      const response = await fetch("data/daily-puzzle.txt");
+      if (!response.ok) throw new Error("فایل یافت نشد");
+      const text = await response.text();
+      const lines = text.split("\n").filter((line) => line.trim() !== "");
+      if (lines.length === 0) throw new Error("فایل خالی است");
+
+      const puzzles = [];
+      for (const line of lines) {
+        const parts = line.split(",");
+        if (parts.length < 3) continue;
+        const fen = parts[1].trim();
+        const movesStr = parts[2].trim();
+        const moveArray = movesStr.split(/\s+/);
+        const turn = fen.split(" ")[1];
+        const movesWithColor = [];
+        let currentColor = turn;
+        for (let i = 0; i < moveArray.length; i++) {
+          movesWithColor.push({ color: currentColor, uci: moveArray[i] });
+          currentColor = currentColor === "w" ? "b" : "w";
+        }
+        puzzles.push({ fen, movesWithColor });
+      }
+      if (puzzles.length === 0) throw new Error("هیچ پازل معتبری یافت نشد");
+      allPuzzles = puzzles;
+      return true;
+    } catch (err) {
+      console.warn("⚠️ استفاده از پازل پیش‌فرض:", err.message);
+      allPuzzles = [
+        {
+          fen: "7k/5Q2/8/8/8/8/8/7K w - - 0 1",
+          movesWithColor: [{ color: "w", uci: "f7f8" }],
+        },
+      ];
+      return true;
+    }
+  }
+
+  function getPuzzleIndexForToday() {
+    const today = new Date();
+    const dateStr =
+      today.getFullYear() +
+      "-" +
+      String(today.getMonth() + 1).padStart(2, "0") +
+      "-" +
+      String(today.getDate()).padStart(2, "0");
+    if (lastPuzzleDate === dateStr && currentPuzzleIndex < allPuzzles.length) {
+      return currentPuzzleIndex;
+    }
+    const savedIndex = localStorage.getItem("chesshub_puzzle_index");
+    let index = savedIndex ? parseInt(savedIndex) : 0;
+    if (isNaN(index) || index < 0) index = 0;
+    if (index >= allPuzzles.length) index = 0;
+    lastPuzzleDate = dateStr;
+    localStorage.setItem("chesshub_puzzle_date", dateStr);
+    localStorage.setItem("chesshub_puzzle_index", String(index));
+    return index;
+  }
+
+  function loadPuzzleByIndex(index) {
+    if (!allPuzzles.length || index >= allPuzzles.length) {
+      if (allPuzzles.length) {
+        showMessage("🎉 همه پازل‌ها حل شد! تبریک!", "success");
+      }
+      return;
+    }
+
+    const puzzle = allPuzzles[index];
+    game = new Chess(puzzle.fen);
+    puzzleMoves = puzzle.movesWithColor;
+    userColor = computeUserColor(puzzleMoves);
+
+    if (userColorLabel) {
+      const colorName = userColor === "w" ? "سفید" : "سیاه";
+      userColorLabel.textContent = colorName;
+    }
+
+    selectedSquare = null;
+    currentMoveIndex = 0;
+    puzzleFinished = false;
+    wrongAttempts = 0;
+    if (lockTimer) clearTimeout(lockTimer);
+    isLocked = false;
+    boardDiv.classList.remove("board-locked");
+    hintBtn.disabled = false;
+    renderBoard();
+    msgDiv.textContent = "";
+
+    if (nextPuzzleTimer) {
+      clearTimeout(nextPuzzleTimer);
+      nextPuzzleTimer = null;
+    }
+
+    if (currentMoveIndex < puzzleMoves.length) {
+      const firstMove = puzzleMoves[0];
+      if (firstMove.color !== userColor) {
+        autoComputerMove();
+      } else {
+        showMessage("✨ نوبت شماست. حرکت کنید.", "info");
+      }
+    }
+  }
+
+  async function loadDailyPuzzle() {
+    const loaded = await loadAllPuzzles();
+    if (!loaded) {
+      showMessage("خطا در بارگذاری پازل‌ها", "error");
+      return;
+    }
+    const savedDate = localStorage.getItem("chesshub_puzzle_date");
+    const today = new Date();
+    const dateStr =
+      today.getFullYear() +
+      "-" +
+      String(today.getMonth() + 1).padStart(2, "0") +
+      "-" +
+      String(today.getDate()).padStart(2, "0");
+    let index = 0;
+    if (savedDate === dateStr) {
+      const savedIndex = localStorage.getItem("chesshub_puzzle_index");
+      index = savedIndex ? parseInt(savedIndex) : 0;
+      if (isNaN(index) || index < 0) index = 0;
+    } else {
+      const savedIndex = localStorage.getItem("chesshub_puzzle_index");
+      index = savedIndex ? parseInt(savedIndex) : 0;
+      if (isNaN(index) || index < 0) index = 0;
+      if (index >= allPuzzles.length) index = 0;
+      localStorage.setItem("chesshub_puzzle_date", dateStr);
+      localStorage.setItem("chesshub_puzzle_index", String(index));
+    }
+    currentPuzzleIndex = index;
+    lastPuzzleDate = dateStr;
+    loadPuzzleByIndex(index);
+  }
+
+  function goToNextPuzzle() {
+    if (nextPuzzleTimer) {
+      clearTimeout(nextPuzzleTimer);
+      nextPuzzleTimer = null;
+    }
+    const nextIndex = currentPuzzleIndex + 1;
+    if (nextIndex < allPuzzles.length) {
+      showMessage(`⏳ پازل بعدی در ۲۴ ساعت...`, "info");
+      nextPuzzleTimer = setTimeout(() => {
+        nextPuzzleTimer = null;
+        currentPuzzleIndex = nextIndex;
+        localStorage.setItem("chesshub_puzzle_index", String(nextIndex));
+        const today = new Date();
+        const dateStr =
+          today.getFullYear() +
+          "-" +
+          String(today.getMonth() + 1).padStart(2, "0") +
+          "-" +
+          String(today.getDate()).padStart(2, "0");
+        localStorage.setItem("chesshub_puzzle_date", dateStr);
+        loadPuzzleByIndex(nextIndex);
+      }, 86400000);
+    } else {
+      showMessage("🎉 همه پازل‌ها حل شد! تبریک!", "success");
+    }
+  }
 
   function renderBoard() {
     if (!game) return;
@@ -58,7 +211,6 @@
     boardDiv.style.webkitUserSelect = "none";
 
     const pieceSet = getCurrentPieceSet();
-    const colors = getBoardColors();
     const flipped = userColor === "b";
 
     for (let i = 0; i < 8; i++) {
@@ -94,172 +246,6 @@
     }
   }
 
-  // ============================================
-  // 💬 پیام‌ها
-  // ============================================
-
-  function showMessage(text, type) {
-    msgDiv.textContent = text;
-    msgDiv.className = `message ${type}`;
-    setTimeout(() => {
-      if (msgDiv.textContent === text) msgDiv.className = "message";
-    }, 3000);
-  }
-
-  // ============================================
-  // 🔒 قفل موقت تخته
-  // ============================================
-
-  function lockBoardTemp() {
-    if (isLocked) return;
-    isLocked = true;
-    boardDiv.classList.add("board-locked");
-    hintBtn.disabled = true;
-    showMessage("⏳ سه خطا! ۳۰ ثانیه صبر کن...", "lock");
-    lockTimer = setTimeout(() => {
-      isLocked = false;
-      boardDiv.classList.remove("board-locked");
-      hintBtn.disabled = false;
-      wrongAttempts = 0;
-      showMessage(
-        "✅ زمان قفل تمام شد، دوباره حرکت کن (سه فرصت جدید)",
-        "success",
-      );
-      lockTimer = null;
-    }, 30000);
-  }
-
-  // ============================================
-  // 🎨 تشخیص و به‌روزرسانی رنگ کاربر
-  // ============================================
-
-  function updateUserColorText() {
-    if (!descriptionP) return;
-    const colorName = userColor === "w" ? "سفید" : "سیاه";
-    descriptionP.innerHTML = `با مهره‌های <strong>${colorName}</strong> بازی می‌کنی. بهترین حرکت رو پیدا کن.`;
-  }
-
-  // ============================================
-  // 📦 بارگذاری پازل‌ها (با fallback)
-  // ============================================
-
-  async function loadAllPuzzles() {
-    try {
-      const response = await fetch("data/daily-puzzle.txt");
-      if (!response.ok) throw new Error("فایل یافت نشد");
-      const text = await response.text();
-      const lines = text.split("\n").filter((line) => line.trim() !== "");
-      if (lines.length === 0) throw new Error("فایل خالی است");
-
-      const puzzles = [];
-      for (const line of lines) {
-        const parts = line.split(",");
-        if (parts.length < 3) continue;
-        const fen = parts[1].trim();
-        const movesStr = parts[2].trim();
-        const moveArray = movesStr.split(/\s+/);
-        const turn = fen.split(" ")[1];
-        const movesWithColor = [];
-        let currentColor = turn;
-        for (let i = 0; i < moveArray.length; i++) {
-          movesWithColor.push({ color: currentColor, uci: moveArray[i] });
-          currentColor = currentColor === "w" ? "b" : "w";
-        }
-        puzzles.push({
-          fen: fen,
-          movesWithColor: movesWithColor,
-        });
-      }
-      if (puzzles.length === 0) throw new Error("هیچ پازل معتبری یافت نشد");
-      allPuzzles = puzzles;
-      return true;
-    } catch (err) {
-      console.warn(
-        "⚠️ خطا در بارگذاری daily-puzzle.txt، استفاده از پازل پیش‌فرض:",
-        err.message,
-      );
-      allPuzzles = [
-        {
-          fen: "7k/5Q2/8/8/8/8/8/7K w - - 0 1",
-          movesWithColor: [{ color: "w", uci: "f7f8" }],
-        },
-      ];
-      return true;
-    }
-  }
-
-  // ============================================
-  // 📥 بارگذاری پازل بر اساس ایندکس
-  // ============================================
-
-  function loadPuzzleByIndex(index) {
-    if (!allPuzzles.length || index >= allPuzzles.length) {
-      if (allPuzzles.length) {
-        showMessage("🎉 همه پازل‌ها حل شد! تبریک!", "success");
-      }
-      return;
-    }
-
-    const puzzle = allPuzzles[index];
-    game = new Chess(puzzle.fen);
-    puzzleMoves = puzzle.movesWithColor;
-    userColor = computeUserColor(puzzleMoves);
-
-    updateUserColorText();
-    selectedSquare = null;
-    currentMoveIndex = 0;
-    puzzleFinished = false;
-    wrongAttempts = 0;
-    if (lockTimer) clearTimeout(lockTimer);
-    isLocked = false;
-    boardDiv.classList.remove("board-locked");
-    hintBtn.disabled = false;
-    renderBoard();
-    msgDiv.textContent = "";
-
-    if (nextPuzzleTimer) {
-      clearTimeout(nextPuzzleTimer);
-      nextPuzzleTimer = null;
-    }
-
-    if (currentMoveIndex < puzzleMoves.length) {
-      const firstMove = puzzleMoves[0];
-      if (firstMove.color !== userColor) {
-        autoComputerMove();
-      } else {
-        showMessage("✨ نوبت شماست. حرکت کنید.", "info");
-      }
-    }
-  }
-
-  // ============================================
-  // ⏭️ رفتن به پازل بعدی (با تأخیر ۲۴ ساعت)
-  // ============================================
-
-  function goToNextPuzzle() {
-    if (nextPuzzleTimer) {
-      clearTimeout(nextPuzzleTimer);
-      nextPuzzleTimer = null;
-    }
-
-    const nextIndex = currentPuzzleIndex + 1;
-
-    if (nextIndex < allPuzzles.length) {
-      showMessage(`⏳ پازل بعدی در ۲۴ ساعت...`, "info");
-      nextPuzzleTimer = setTimeout(() => {
-        nextPuzzleTimer = null;
-        currentPuzzleIndex = nextIndex;
-        loadPuzzleByIndex(currentPuzzleIndex);
-      }, 86400000);
-    } else {
-      showMessage("🎉 همه پازل‌ها حل شد! تبریک!", "success");
-    }
-  }
-
-  // ============================================
-  // 🤖 حرکت کامپیوتر
-  // ============================================
-
   async function autoComputerMove() {
     if (puzzleFinished) return;
     if (currentMoveIndex >= puzzleMoves.length) return;
@@ -279,11 +265,12 @@
       else promotionPiece = "q";
     }
 
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     try {
       const from = expected.uci.slice(0, 2);
       const to = expected.uci.slice(2, 4);
       const result = game.move({ from, to, promotion: promotionPiece });
-
       if (result) {
         renderBoard();
         currentMoveIndex++;
@@ -309,17 +296,12 @@
           goToNextPuzzle();
         }
       } else {
-        console.error("Auto move failed:", expected.uci);
         showMessage("خطا در دنباله پازل. ریست کنید.", "error");
       }
     } catch (e) {
       console.error(e);
     }
   }
-
-  // ============================================
-  // 🎯 حرکت کاربر
-  // ============================================
 
   async function tryMove(from, to) {
     if (puzzleFinished) {
@@ -371,7 +353,9 @@
       const result = game.move({ from, to, promotion });
       if (result) {
         const playedUCI = result.from + result.to + (result.promotion || "");
-        if (playedUCI === expected.uci) {
+        const isCorrect = playedUCI === expected.uci;
+
+        if (isCorrect) {
           showMessage(`✅ حرکت صحیح: ${result.san}`, "success");
           wrongAttempts = 0;
           currentMoveIndex++;
@@ -402,13 +386,11 @@
           wrongAttempts++;
           if (wrongAttempts >= 3) {
             lockBoardTemp();
-            game.undo();
-            renderBoard();
           } else {
             showMessage(`❌ حرکت اشتباه (${wrongAttempts}/3)`, "error");
-            game.undo();
-            renderBoard();
           }
+          game.undo();
+          renderBoard();
           return false;
         }
       } else {
@@ -428,169 +410,21 @@
     }
   }
 
-  // ============================================
-  // 🖱️ رویدادهای کشیدن (Drag & Drop)
-  // ============================================
-
-  function createDragClone(square) {
-    const squareEl = document.querySelector(`.square[data-square="${square}"]`);
-    if (!squareEl) return null;
-    const img = squareEl.querySelector(".piece-img");
-    if (!img) return null;
-    const rect = squareEl.getBoundingClientRect();
-    const clone = img.cloneNode(true);
-    const size = Math.min(rect.width, rect.height);
-    clone.style.cssText = `
-      position: fixed;
-      pointer-events: none;
-      z-index: 9999;
-      width: ${size}px;
-      height: ${size}px;
-      transform: translate(-50%, -50%) scale(1.08);
-      filter: drop-shadow(0 8px 25px rgba(0,0,0,0.3));
-      transition: none;
-      touch-action: none;
-      user-select: none;
-      -webkit-user-select: none;
-    `;
-    document.body.appendChild(clone);
-    return clone;
+  function lockBoardTemp() {
+    if (isLocked) return;
+    isLocked = true;
+    boardDiv.classList.add("board-locked");
+    hintBtn.disabled = true;
+    showMessage("⏳ سه خطا! ۳۰ ثانیه صبر کن...", "lock");
+    lockTimer = setTimeout(() => {
+      isLocked = false;
+      boardDiv.classList.remove("board-locked");
+      hintBtn.disabled = false;
+      wrongAttempts = 0;
+      showMessage("✅ زمان قفل تمام شد، دوباره حرکت کن", "success");
+      lockTimer = null;
+    }, 30000);
   }
-
-  function updateDragClone(clientX, clientY) {
-    if (!dragClone) return;
-    dragClone.style.left = clientX + "px";
-    dragClone.style.top = clientY + "px";
-  }
-
-  function removeDragClone() {
-    if (dragClone) {
-      dragClone.remove();
-      dragClone = null;
-    }
-  }
-
-  function cleanupDrag() {
-    dragStartSquare = null;
-    isDragging = false;
-    boardDiv.style.cursor = "grab";
-    document.body.style.userSelect = "";
-    boardDiv.style.touchAction = "";
-    removeDragClone();
-  }
-
-  function handleDragStart(clientX, clientY) {
-    if (puzzleFinished || isLocked) return;
-    if (game.turn() !== userColor) return;
-    const elem = document.elementFromPoint(clientX, clientY);
-    const squareDiv = elem?.closest(".square");
-    if (!squareDiv) return;
-    const square = squareDiv.dataset.square;
-    if (!square) return;
-    const piece = game.get(square);
-    if (piece && piece.color === userColor) {
-      dragStartSquare = square;
-      isDragging = true;
-      dragClone = createDragClone(square);
-      if (dragClone) updateDragClone(clientX, clientY);
-      boardDiv.style.cursor = "grabbing";
-      document.body.style.userSelect = "none";
-      boardDiv.style.touchAction = "none";
-    }
-  }
-
-  function handleDragMove(clientX, clientY) {
-    if (!isDragging) return;
-    if (dragClone) updateDragClone(clientX, clientY);
-  }
-
-  function handleDragEnd(clientX, clientY) {
-    if (!isDragging || !dragStartSquare) {
-      cleanupDrag();
-      return;
-    }
-    removeDragClone();
-    const elem = document.elementFromPoint(clientX, clientY);
-    const targetSquareDiv = elem?.closest(".square");
-    let targetSquare = targetSquareDiv ? targetSquareDiv.dataset.square : null;
-    if (targetSquare && targetSquare !== dragStartSquare) {
-      tryMove(dragStartSquare, targetSquare);
-    }
-    cleanupDrag();
-  }
-
-  // ============================================
-  // 🖱️ رویدادهای ماوس و لمسی
-  // ============================================
-
-  function onMouseDown(e) {
-    e.preventDefault();
-    handleDragStart(e.clientX, e.clientY);
-  }
-
-  function onMouseMove(e) {
-    if (!isDragging) return;
-    e.preventDefault();
-    handleDragMove(e.clientX, e.clientY);
-  }
-
-  function onMouseUp(e) {
-    if (!isDragging) return;
-    handleDragEnd(e.clientX, e.clientY);
-  }
-
-  function onTouchStart(e) {
-    e.preventDefault();
-    const touch = e.touches[0];
-    handleDragStart(touch.clientX, touch.clientY);
-  }
-
-  function onTouchMove(e) {
-    if (!isDragging) return;
-    e.preventDefault();
-    const touch = e.touches[0];
-    handleDragMove(touch.clientX, touch.clientY);
-  }
-
-  function onTouchEnd(e) {
-    if (!isDragging) return;
-    e.preventDefault();
-    const changed = e.changedTouches[0];
-    handleDragEnd(changed.clientX, changed.clientY);
-  }
-
-  // ============================================
-  // 🖱️ کلیک جایگزین (برای موبایل‌های قدیمی)
-  // ============================================
-
-  function onClickFallback(e) {
-    if (isDragging) return;
-    if (puzzleFinished || isLocked) return;
-    if (game.turn() !== userColor) return;
-    const squareDiv = e.target.closest(".square");
-    if (!squareDiv) return;
-    const square = squareDiv.dataset.square;
-    if (!square) return;
-    if (selectedSquare === null) {
-      const piece = game.get(square);
-      if (piece && piece.color === userColor) {
-        selectedSquare = square;
-        renderBoard();
-      } else {
-        showMessage(
-          `مهره ${userColor === "w" ? "سفید" : "سیاه"} خود را انتخاب کنید`,
-          "error",
-        );
-      }
-    } else {
-      tryMove(selectedSquare, square);
-      selectedSquare = null;
-    }
-  }
-
-  // ============================================
-  // 💡 راهنمایی
-  // ============================================
 
   function showHint() {
     if (puzzleFinished) {
@@ -623,10 +457,6 @@
     }
   }
 
-  // ============================================
-  // 🔄 ریست پازل
-  // ============================================
-
   function resetPuzzle() {
     if (autoMoveTimeout) clearTimeout(autoMoveTimeout);
     if (lockTimer) clearTimeout(lockTimer);
@@ -640,26 +470,155 @@
     loadPuzzleByIndex(currentPuzzleIndex);
   }
 
-  // ============================================
-  // 🚀 راه‌اندازی پازل
-  // ============================================
+  function showMessage(text, type) {
+    msgDiv.textContent = text;
+    msgDiv.className = `message ${type}`;
+    setTimeout(() => {
+      if (msgDiv.textContent === text) msgDiv.className = "message";
+    }, 3500);
+  }
 
-  async function initPuzzle() {
-    const loaded = await loadAllPuzzles();
-    if (loaded) {
-      currentPuzzleIndex = 0;
-      loadPuzzleByIndex(currentPuzzleIndex);
+  // ===== درگ و دراپ =====
+  function createDragClone(square) {
+    const squareEl = document.querySelector(`.square[data-square="${square}"]`);
+    if (!squareEl) return null;
+    const img = squareEl.querySelector(".piece-img");
+    if (!img) return null;
+    const rect = squareEl.getBoundingClientRect();
+    const clone = img.cloneNode(true);
+    const size = Math.min(rect.width, rect.height);
+    clone.style.cssText = `
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      width: ${size}px;
+      height: ${size}px;
+      transform: translate(-50%, -50%) scale(1.08);
+      filter: drop-shadow(0 8px 25px rgba(0,0,0,0.3));
+      transition: none;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    `;
+    document.body.appendChild(clone);
+    return clone;
+  }
+  function updateDragClone(cx, cy) {
+    if (dragClone) {
+      dragClone.style.left = cx + "px";
+      dragClone.style.top = cy + "px";
+    }
+  }
+  function removeDragClone() {
+    if (dragClone) {
+      dragClone.remove();
+      dragClone = null;
+    }
+  }
+  function cleanupDrag() {
+    dragStartSquare = null;
+    isDragging = false;
+    boardDiv.style.cursor = "grab";
+    document.body.style.userSelect = "";
+    boardDiv.style.touchAction = "";
+    removeDragClone();
+  }
+
+  function handleDragStart(cx, cy) {
+    if (puzzleFinished || isLocked) return;
+    if (game.turn() !== userColor) return;
+    const elem = document.elementFromPoint(cx, cy);
+    const squareDiv = elem?.closest(".square");
+    if (!squareDiv) return;
+    const square = squareDiv.dataset.square;
+    if (!square) return;
+    const piece = game.get(square);
+    if (piece && piece.color === userColor) {
+      dragStartSquare = square;
+      isDragging = true;
+      dragClone = createDragClone(square);
+      if (dragClone) updateDragClone(cx, cy);
+      boardDiv.style.cursor = "grabbing";
+      document.body.style.userSelect = "none";
+      boardDiv.style.touchAction = "none";
+    }
+  }
+  function handleDragMove(cx, cy) {
+    if (!isDragging) return;
+    if (dragClone) updateDragClone(cx, cy);
+  }
+  function handleDragEnd(cx, cy) {
+    if (!isDragging || !dragStartSquare) {
+      cleanupDrag();
+      return;
+    }
+    removeDragClone();
+    const elem = document.elementFromPoint(cx, cy);
+    const targetSquareDiv = elem?.closest(".square");
+    let targetSquare = targetSquareDiv ? targetSquareDiv.dataset.square : null;
+    if (targetSquare && targetSquare !== dragStartSquare) {
+      tryMove(dragStartSquare, targetSquare);
+    }
+    cleanupDrag();
+  }
+
+  function onMouseDown(e) {
+    e.preventDefault();
+    handleDragStart(e.clientX, e.clientY);
+  }
+  function onMouseMove(e) {
+    if (!isDragging) return;
+    e.preventDefault();
+    handleDragMove(e.clientX, e.clientY);
+  }
+  function onMouseUp(e) {
+    if (!isDragging) return;
+    handleDragEnd(e.clientX, e.clientY);
+  }
+  function onTouchStart(e) {
+    e.preventDefault();
+    const t = e.touches[0];
+    handleDragStart(t.clientX, t.clientY);
+  }
+  function onTouchMove(e) {
+    if (!isDragging) return;
+    e.preventDefault();
+    const t = e.touches[0];
+    handleDragMove(t.clientX, t.clientY);
+  }
+  function onTouchEnd(e) {
+    if (!isDragging) return;
+    e.preventDefault();
+    const t = e.changedTouches[0];
+    handleDragEnd(t.clientX, t.clientY);
+  }
+  function onClickFallback(e) {
+    if (isDragging) return;
+    if (puzzleFinished || isLocked) return;
+    if (game.turn() !== userColor) return;
+    const squareDiv = e.target.closest(".square");
+    if (!squareDiv) return;
+    const square = squareDiv.dataset.square;
+    if (!square) return;
+    if (selectedSquare === null) {
+      const piece = game.get(square);
+      if (piece && piece.color === userColor) {
+        selectedSquare = square;
+        renderBoard();
+      } else {
+        showMessage(
+          `مهره ${userColor === "w" ? "سفید" : "سیاه"} خود را انتخاب کنید`,
+          "error",
+        );
+      }
     } else {
-      showMessage("خطا در بارگذاری پازل‌ها", "error");
+      tryMove(selectedSquare, square);
+      selectedSquare = null;
     }
   }
 
-  // ============================================
-  // 🎯 ثبت رویدادها و شروع
-  // ============================================
-
   loadPieces().then(() => {
-    initPuzzle();
+    loadDailyPuzzle();
 
     boardDiv.addEventListener("mousedown", onMouseDown);
     window.addEventListener("mousemove", onMouseMove);

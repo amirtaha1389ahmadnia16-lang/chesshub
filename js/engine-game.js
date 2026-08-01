@@ -180,6 +180,13 @@
       skillLevel: 15,
       depth: 12,
     },
+    window.BotMagnus || {
+      name: "مگنوس کارلسن",
+      rating: "۲۸۸۲",
+      avatar: "images/bots/Magnus_Carlsen.png",
+      skillLevel: 20,
+      depth: 20,
+    },
   ];
 
   // ============================================

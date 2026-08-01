@@ -17,261 +17,153 @@
     />
     <link rel="stylesheet" href="css/style.css" />
     <style>
-      /* ============================================
-         🚫 جلوگیری از اسکرول کلی صفحه
-         ============================================ */
-      html,
-      body {
-        overflow: hidden;
-        height: 100%;
-        margin: 0;
-        padding: 0;
-      }
-
-      .container {
-        height: 100vh;
-        overflow-y: auto;
-        padding: 0.8rem;
-        padding-bottom: 1.5rem;
-        scroll-behavior: smooth;
-      }
-
-      .settings-hero {
-        background: linear-gradient(
-          135deg,
-          #0f2b3f 0%,
-          #1a4b6e 60%,
-          #2a7f9c 100%
-        );
-        border-radius: var(--radius-lg);
-        padding: 1.5rem 1.2rem;
-        margin-bottom: 1.2rem;
-        text-align: center;
-        color: #fff;
-        position: relative;
-        overflow: hidden;
-        min-height: 80px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        flex-shrink: 0;
-      }
-
-      .settings-hero::before {
-        content: "\2699";
-        position: absolute;
-        font-size: 80px;
-        right: -10px;
-        bottom: -20px;
-        opacity: 0.08;
-        font-family: "Vazir", serif;
-      }
-
-      .settings-hero::after {
-        content: "\265B";
-        position: absolute;
-        font-size: 60px;
-        left: -10px;
-        top: -20px;
-        opacity: 0.06;
-        font-family: "Vazir", serif;
-      }
-
-      .settings-hero h1 {
-        font-size: clamp(1.2rem, 3vw, 1.8rem);
-        font-weight: 800;
-        margin-bottom: 0.1rem;
-        position: relative;
-        z-index: 1;
-      }
-
-      .settings-hero h1 i {
-        color: #ffb347;
-      }
-
-      .settings-hero p {
-        font-size: clamp(0.7rem, 1.2vw, 0.85rem);
-        opacity: 0.85;
-        max-width: 560px;
-        margin: 0 auto;
-        position: relative;
-        z-index: 1;
-      }
-
       .settings-card {
         background: #ffffff;
         border-radius: var(--radius-lg);
         padding: 1.5rem;
         box-shadow: var(--shadow-md);
         margin-bottom: 1.5rem;
-        border: 1px solid #eef2f5;
+        border: 1px solid #e2e8f0;
         flex-shrink: 0;
       }
-
       .settings-card .card-title {
-        font-size: 1.1rem;
-        color: #2c7da0;
-        border-right: 4px solid #2c7da0;
+        font-size: 1.2rem;
+        color: var(--primary-dark);
+        border-right: 4px solid var(--accent);
         padding-right: 12px;
-        margin-bottom: 0.3rem;
+        margin-bottom: 0.5rem;
         display: flex;
         align-items: center;
         gap: 0.5rem;
+        font-weight: 800;
       }
-
       .settings-card .card-title i {
-        color: #2c7da0;
+        color: var(--accent);
       }
-
       .settings-card .card-sub {
-        font-size: 0.75rem;
-        color: #5f7f9e;
-        margin: -0.1rem 0 0.8rem 0;
-        padding-right: 16px;
+        font-size: 0.8rem;
+        color: var(--text-light);
+        margin: 0 0 1.2rem 16px;
+        font-weight: 600;
       }
 
-      /* ============================================
-         🎨 انتخاب تم (۲۹ تم جدید)
-         ============================================ */
       .theme-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-        gap: 0.8rem;
-        margin-bottom: 0.3rem;
+        gap: 1rem;
+        margin-bottom: 0.5rem;
       }
-
       .theme-btn {
         background: #f8fafc;
         border: 2px solid #e2e8f0;
-        border-radius: 16px;
+        border-radius: var(--radius-md);
         padding: 0.6rem 0.3rem;
         cursor: pointer;
-        transition: all 0.25s ease;
+        transition: var(--transition-smooth);
         text-align: center;
       }
-
       .theme-btn:hover {
-        transform: translateY(-3px);
-        border-color: #2c7da0;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+        border-color: #cbd5e0;
+        box-shadow: var(--shadow-sm);
       }
-
       .theme-btn.active {
-        border-color: #2c7da0;
-        background: #2c7da0;
-        box-shadow: 0 4px 16px rgba(44, 125, 160, 0.3);
+        border-color: var(--accent);
+        background: #ebf8ff;
+        box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.2);
       }
-
       .theme-btn .theme-preview {
-        display: block;
+        display: flex;
         width: 100%;
         height: 40px;
-        border-radius: 10px;
+        border-radius: var(--radius-sm);
         border: 1px solid rgba(0, 0, 0, 0.06);
         overflow: hidden;
-        display: flex;
       }
-
       .theme-btn .theme-preview .preview-light,
       .theme-btn .theme-preview .preview-dark {
         flex: 1;
         height: 100%;
       }
 
-      /* ============================================
-         🎨 انتخاب مهره‌ها (۳۸ نوع) - بدون اسم
-         ============================================ */
       #pieceSetsContainer {
-        max-height: 380px;
+        max-height: 400px;
         overflow-y: auto;
         padding-left: 4px;
         padding-right: 2px;
         scroll-behavior: smooth;
-        margin-bottom: 0.2rem;
+        margin-bottom: 0.5rem;
       }
-
       #pieceSetsContainer::-webkit-scrollbar {
         width: 6px;
       }
-
       #pieceSetsContainer::-webkit-scrollbar-track {
         background: #f1f5f9;
         border-radius: 10px;
       }
-
       #pieceSetsContainer::-webkit-scrollbar-thumb {
-        background: #2c7da0;
+        background: #cbd5e0;
         border-radius: 10px;
       }
-
       #pieceSetsContainer::-webkit-scrollbar-thumb:hover {
-        background: #1f6392;
+        background: var(--accent);
       }
 
       .piece-section {
-        margin-bottom: 1rem;
+        margin-bottom: 1.2rem;
       }
-
       .piece-section:last-child {
         margin-bottom: 0;
       }
-
       .piece-section .section-label {
-        font-size: 0.65rem;
-        color: #8a9aaa;
-        font-weight: 600;
+        font-size: 0.75rem;
+        color: var(--text-light);
+        font-weight: 700;
         display: block;
-        margin-bottom: 0.4rem;
-        letter-spacing: 0.3px;
+        margin-bottom: 0.6rem;
+        letter-spacing: 0.5px;
         text-transform: uppercase;
       }
-
       .piece-section .section-grid {
         display: flex;
         flex-wrap: wrap;
         gap: 0.8rem;
       }
-
       .piece-btn {
         background: #ffffff;
         border: 2px solid #e2e8f0;
-        border-radius: 16px;
-        padding: 0.6rem 0.6rem;
+        border-radius: var(--radius-md);
+        padding: 0.6rem;
         cursor: pointer;
-        transition: all 0.25s ease;
+        transition: var(--transition-smooth);
         display: flex;
         align-items: center;
         justify-content: center;
-        min-width: 70px;
-        min-height: 70px;
+        min-width: 75px;
+        min-height: 75px;
       }
-
       .piece-btn:hover {
-        transform: translateY(-3px);
-        border-color: #2c7da0;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+        border-color: #cbd5e0;
+        box-shadow: var(--shadow-sm);
       }
-
       .piece-btn.active {
-        border-color: #2c7da0;
-        background: #eef6ff;
-        box-shadow: 0 4px 16px rgba(44, 125, 160, 0.2);
+        border-color: var(--accent);
+        background: #ebf8ff;
+        box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.2);
       }
-
       .piece-btn .piece-preview {
         display: flex;
         gap: 6px;
         align-items: center;
         justify-content: center;
       }
-
       .piece-btn .piece-preview img {
         width: 50px;
         height: 50px;
         object-fit: contain;
         display: block;
       }
-
       .piece-btn .piece-preview .piece-fallback {
         width: 50px;
         height: 50px;
@@ -279,115 +171,98 @@
         align-items: center;
         justify-content: center;
         font-size: 2rem;
-        background: #f8fafc;
-        border-radius: 8px;
-        color: #5f7f9e;
+        background: #f1f5f9;
+        border-radius: var(--radius-sm);
+        color: var(--text-light);
       }
 
-      /* ============================================
-         🎯 دکمه‌های اقدام
-         ============================================ */
       .settings-actions {
         display: flex;
-        gap: 0.8rem;
+        gap: 1rem;
         flex-wrap: wrap;
         justify-content: center;
-        margin-top: 1.2rem;
-        padding-top: 1.2rem;
-        border-top: 1px solid #eef2f5;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e2e8f0;
       }
-
       .settings-actions .btn {
-        padding: 0.5rem 1.5rem;
-        border-radius: 40px;
-        border: none;
+        padding: 0.6rem 1.5rem;
+        border-radius: var(--radius-sm);
+        border: 1px solid transparent;
         font-family: "Vazir";
         font-weight: 700;
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition: var(--transition-smooth);
         font-size: 0.85rem;
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
       }
-
       .settings-actions .btn-primary {
-        background: #2c7da0;
+        background: var(--accent);
         color: #fff;
+        border-color: var(--accent-dark);
+        box-shadow: 0 4px 0 var(--accent-dark);
       }
-
       .settings-actions .btn-primary:hover {
-        background: #1f6392;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 16px rgba(44, 125, 160, 0.3);
+        background: #4299e1;
+        transform: translateY(-1px);
+        box-shadow: 0 5px 0 var(--accent-dark);
+      }
+      .settings-actions .btn-primary:active {
+        transform: translateY(3px);
+        box-shadow: 0 1px 0 var(--accent-dark);
       }
 
       .settings-actions .btn-secondary {
-        background: #f4f7fb;
-        color: #1e2f3e;
+        background: #f1f5f9;
+        color: var(--text-dark);
+        border-color: #e2e8f0;
+        box-shadow: 0 4px 0 #cbd5e0;
       }
-
       .settings-actions .btn-secondary:hover {
         background: #e2e8f0;
-        transform: translateY(-2px);
+        transform: translateY(-1px);
+        box-shadow: 0 5px 0 #cbd5e0;
+      }
+      .settings-actions .btn-secondary:active {
+        transform: translateY(3px);
+        box-shadow: 0 1px 0 #cbd5e0;
       }
 
-      /* ============================================
-         🍞 توست
-         ============================================ */
       .settings-toast {
         position: fixed;
         bottom: 2rem;
         left: 50%;
         transform: translateX(-50%);
-        background: #1a2a3a;
+        background: var(--primary-dark);
         color: #fff;
-        padding: 0.6rem 1.5rem;
-        border-radius: 60px;
+        padding: 0.8rem 1.5rem;
+        border-radius: 40px;
         font-size: 0.85rem;
         font-family: "Vazir", sans-serif;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        box-shadow: var(--shadow-lg);
         z-index: 9999;
         direction: rtl;
         opacity: 0;
-        transition: opacity 0.3s ease;
+        transition: all 0.3s ease;
         pointer-events: none;
         max-width: 90vw;
         text-align: center;
+        font-weight: 600;
       }
-
       .settings-toast.show {
         opacity: 1;
+        bottom: 3rem;
       }
 
-      /* ============================================
-         📱 واکنش‌گرایی
-         ============================================ */
       @media (max-width: 768px) {
-        .container {
-          padding: 0.6rem;
-          padding-bottom: 1rem;
-        }
-
-        .settings-hero {
-          padding: 1.2rem 1rem;
-          min-height: 60px;
-        }
-        .settings-hero h1 {
-          font-size: 1.3rem;
-        }
-        .settings-hero p {
-          font-size: 0.8rem;
-        }
         .settings-card {
           padding: 1.2rem;
         }
-        .settings-card .card-title {
-          font-size: 1rem;
-        }
         .theme-grid {
           grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-          gap: 0.5rem;
+          gap: 0.6rem;
         }
         .theme-btn {
           padding: 0.5rem 0.2rem;
@@ -396,144 +271,60 @@
           height: 34px;
         }
         #pieceSetsContainer {
-          max-height: 320px;
+          max-height: 350px;
+        }
+        .piece-btn {
+          min-width: 65px;
+          min-height: 65px;
+          padding: 0.5rem;
+        }
+        .piece-btn .piece-preview img,
+        .piece-btn .piece-preview .piece-fallback {
+          width: 45px;
+          height: 45px;
+        }
+        .settings-actions .btn {
+          font-size: 0.8rem;
+          padding: 0.5rem 1.2rem;
+        }
+      }
+      @media (max-width: 480px) {
+        .settings-card {
+          padding: 1rem;
+          border-radius: var(--radius-md);
+        }
+        .settings-card .card-title {
+          font-size: 1rem;
+        }
+        .theme-grid {
+          grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+          gap: 0.4rem;
+        }
+        .theme-btn .theme-preview {
+          height: 28px;
+          border-radius: 4px;
+        }
+        #pieceSetsContainer {
+          max-height: 300px;
         }
         .piece-btn {
           min-width: 60px;
           min-height: 60px;
           padding: 0.4rem;
         }
-        .piece-btn .piece-preview img {
-          width: 42px;
-          height: 42px;
-        }
+        .piece-btn .piece-preview img,
         .piece-btn .piece-preview .piece-fallback {
-          width: 42px;
-          height: 42px;
-          font-size: 1.6rem;
-        }
-        .settings-actions .btn {
-          font-size: 0.7rem;
-          padding: 0.35rem 1rem;
-        }
-      }
-
-      @media (max-width: 480px) {
-        .container {
-          padding: 0.4rem;
-          padding-bottom: 0.8rem;
-        }
-
-        .settings-hero {
-          padding: 1rem 0.8rem;
-          min-height: 55px;
-        }
-        .settings-hero h1 {
-          font-size: 1.2rem;
-        }
-        .settings-hero p {
-          font-size: 0.75rem;
-        }
-        .settings-card {
-          padding: 0.8rem;
-          border-radius: 16px;
-        }
-        .settings-card .card-title {
-          font-size: 0.9rem;
-        }
-        .settings-card .card-sub {
-          font-size: 0.65rem;
-        }
-        .theme-grid {
-          grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-          gap: 0.4rem;
-        }
-        .theme-btn {
-          padding: 0.4rem 0.15rem;
-          border-radius: 12px;
-        }
-        .theme-btn .theme-preview {
-          height: 28px;
-          border-radius: 6px;
-        }
-        #pieceSetsContainer {
-          max-height: 260px;
-        }
-        .piece-btn {
-          min-width: 54px;
-          min-height: 54px;
-          padding: 0.3rem;
-          border-radius: 12px;
-        }
-        .piece-btn .piece-preview img {
-          width: 36px;
-          height: 36px;
-        }
-        .piece-btn .piece-preview .piece-fallback {
-          width: 36px;
-          height: 36px;
-          font-size: 1.3rem;
+          width: 40px;
+          height: 40px;
         }
         .settings-actions {
           gap: 0.5rem;
-          margin-top: 0.8rem;
-          padding-top: 0.8rem;
+          margin-top: 1rem;
+          padding-top: 1rem;
         }
         .settings-actions .btn {
-          font-size: 0.65rem;
-          padding: 0.3rem 0.9rem;
-        }
-        .settings-actions .btn i {
-          font-size: 0.65rem;
-        }
-      }
-
-      @media (max-width: 380px) {
-        .container {
-          padding: 0.3rem;
-          padding-bottom: 0.5rem;
-        }
-
-        .settings-hero h1 {
-          font-size: 1rem;
-        }
-        .settings-hero p {
-          font-size: 0.65rem;
-        }
-        .settings-card {
-          padding: 0.6rem;
-        }
-        .settings-card .card-title {
           font-size: 0.75rem;
-          padding-right: 6px;
-        }
-        .theme-grid {
-          grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-          gap: 0.3rem;
-        }
-        .theme-btn .theme-preview {
-          height: 22px;
-        }
-        #pieceSetsContainer {
-          max-height: 210px;
-        }
-        .piece-btn {
-          min-width: 46px;
-          min-height: 46px;
-          padding: 0.2rem;
-        }
-        .piece-btn .piece-preview img {
-          width: 30px;
-          height: 30px;
-        }
-        .piece-btn .piece-preview .piece-fallback {
-          width: 30px;
-          height: 30px;
-          font-size: 1rem;
-        }
-        .settings-actions .btn {
-          font-size: 0.55rem;
-          padding: 0.2rem 0.7rem;
+          padding: 0.4rem 1rem;
         }
       }
     </style>
@@ -542,9 +333,10 @@
     <div class="container">
       <div id="header-placeholder"></div>
 
-      <section class="settings-hero">
+      <!-- بنر یکپارچه -->
+      <section class="app-hero">
         <h1><i class="fas fa-cog"></i> تنظیمات</h1>
-        <p>مجموعه مهره‌ها و تم رنگی مورد علاقت را انتخاب کن</p>
+        <p>مجموعه مهره‌ها و تم رنگی مورد علاقه خود را انتخاب کنید</p>
       </section>
 
       <!-- انتخاب تم -->
@@ -585,30 +377,20 @@
       (function () {
         "use strict";
 
-        // ============================================
-        // 🎨 اعمال تم ذخیره‌شده
-        // ============================================
+        // اعمال تم ذخیره‌شده
         (function applySavedTheme() {
           try {
             const settings = JSON.parse(
               localStorage.getItem("chesshub_settings"),
             );
             if (settings && settings.theme) {
-              document.body.className = document.body.className
-                .split(" ")
-                .filter((cls) => !cls.startsWith("theme-"))
-                .join(" ");
               document.body.classList.add(`theme-${settings.theme}`);
             } else {
-              // اگر تمی ذخیره نشده، theme-1 رو اعمال کن
               document.body.classList.add("theme-1");
             }
           } catch (e) {}
         })();
 
-        // ============================================
-        // 📦 لیست ۲۹ تم جدید (بر اساس رنگ‌های داده‌شده)
-        // ============================================
         const themes = [
           { id: "1", light: "#6a9b41", dark: "#f3f3f4" },
           { id: "2", light: "#c7703c", dark: "#ecc79b" },
@@ -641,11 +423,8 @@
           { id: "29", light: "#c6b19d", dark: "#d0bbaf" },
         ];
 
-        // ============================================
-        // 📦 لیست مهره‌ها (با neo به‌عنوان پیش‌فرض)
-        // ============================================
         const pieceSets = {
-          پیش‌فرض: ["neo"], // <-- اضافه شد
+          پیش‌فرض: ["neo"],
           "سه بعدی": ["3d_chesskid", "3d_plastic", "3d_staunton", "3d_wood"],
           کلاسیک: [
             "alpha",
@@ -672,18 +451,12 @@
           ],
         };
 
-        // ============================================
-        // 💾 ذخیره و بازیابی تنظیمات (پیش‌فرض neo و theme-1)
-        // ============================================
         function loadSettings() {
           try {
             const saved = localStorage.getItem("chesshub_settings");
-            if (saved) {
-              const parsed = JSON.parse(saved);
-              return parsed;
-            }
+            if (saved) return JSON.parse(saved);
           } catch (e) {}
-          return { pieceSet: "neo", theme: "1" }; // <-- پیش‌فرض جدید
+          return { pieceSet: "neo", theme: "1" };
         }
 
         function saveSettings(settings) {
@@ -692,28 +465,21 @@
           } catch (e) {}
         }
 
-        // ============================================
-        // 🎨 ساخت دکمه‌های تم
-        // ============================================
         function buildThemeButtons() {
           const container = document.getElementById("themeGrid");
           if (!container) return;
-
           const currentTheme = loadSettings().theme || "1";
-
           container.innerHTML = "";
           themes.forEach((theme) => {
             const btn = document.createElement("button");
             btn.className = `theme-btn${theme.id === currentTheme ? " active" : ""}`;
             btn.dataset.theme = theme.id;
-
             btn.innerHTML = `
               <span class="theme-preview">
                 <span class="preview-light" style="background:${theme.light};"></span>
                 <span class="preview-dark" style="background:${theme.dark};"></span>
               </span>
             `;
-
             btn.onclick = () => {
               document
                 .querySelectorAll(".theme-btn")
@@ -722,27 +488,20 @@
               window._tempTheme = theme.id;
               showToast(`✅ تم انتخاب شد (برای اعمال ذخیره کن)`);
             };
-
             container.appendChild(btn);
           });
         }
 
-        // ============================================
-        // 🎨 ساخت دکمه‌های مهره (با neo به‌عنوان پیش‌فرض)
-        // ============================================
         function buildPieceButtons() {
           const container = document.getElementById("pieceSetsContainer");
           if (!container) return;
-
           const currentPieceSet = loadSettings().pieceSet || "neo";
-
           container.innerHTML = "";
-
           let totalCount = 0;
+
           Object.keys(pieceSets).forEach((catName) => {
             const section = document.createElement("div");
             section.className = "piece-section";
-
             const label = document.createElement("span");
             label.className = "section-label";
             label.textContent = catName;
@@ -756,22 +515,17 @@
               const btn = document.createElement("button");
               btn.className = `piece-btn${setName === currentPieceSet ? " active" : ""}`;
               btn.dataset.set = setName;
-
-              // مسیرهای با حروف کوچک
               const wKPath = `pieces/${setName}/wk.png`;
               const bKPath = `pieces/${setName}/bk.png`;
 
               btn.innerHTML = `
                 <div class="piece-preview">
-                  <img src="${wKPath}" alt="شاه سفید" 
-                       onerror="this.style.display='none';this.parentElement.querySelector('.piece-fallback-w').style.display='flex'">
-                  <div class="piece-fallback piece-fallback-w" style="display:none;width:50px;height:50px;align-items:center;justify-content:center;font-size:2rem;background:#f8fafc;border-radius:8px;color:#5f7f9e;">♔</div>
-                  <img src="${bKPath}" alt="شاه سیاه" 
-                       onerror="this.style.display='none';this.parentElement.querySelector('.piece-fallback-b').style.display='flex'">
-                  <div class="piece-fallback piece-fallback-b" style="display:none;width:50px;height:50px;align-items:center;justify-content:center;font-size:2rem;background:#f8fafc;border-radius:8px;color:#1e2f3e;">♚</div>
+                  <img src="${wKPath}" alt="شاه سفید" onerror="this.style.display='none';this.parentElement.querySelector('.piece-fallback-w').style.display='flex'">
+                  <div class="piece-fallback piece-fallback-w" style="display:none;">♔</div>
+                  <img src="${bKPath}" alt="شاه سیاه" onerror="this.style.display='none';this.parentElement.querySelector('.piece-fallback-b').style.display='flex'">
+                  <div class="piece-fallback piece-fallback-b" style="display:none;">♚</div>
                 </div>
               `;
-
               btn.onclick = () => {
                 document
                   .querySelectorAll(".piece-btn")
@@ -780,27 +534,20 @@
                 window._tempPieceSet = setName;
                 showToast(`✅ مجموعه مهره انتخاب شد (برای اعمال ذخیره کن)`);
               };
-
               grid.appendChild(btn);
             });
-
             section.appendChild(grid);
             container.appendChild(section);
           });
-
           const countDisplay = document.getElementById("pieceCountDisplay");
           if (countDisplay) countDisplay.textContent = totalCount;
         }
 
-        // ============================================
-        // 💾 ذخیره نهایی
-        // ============================================
         function saveAllSettings() {
           const settings = loadSettings();
           const newTheme = window._tempTheme || settings.theme || "1";
           const newPieceSet =
             window._tempPieceSet || settings.pieceSet || "neo";
-
           settings.theme = newTheme;
           settings.pieceSet = newPieceSet;
           saveSettings(settings);
@@ -811,116 +558,63 @@
             .join(" ");
           document.body.classList.add(`theme-${newTheme}`);
 
-          document.querySelectorAll(".theme-btn").forEach((btn) => {
-            btn.classList.toggle("active", btn.dataset.theme === newTheme);
-          });
-          document.querySelectorAll(".piece-btn").forEach((btn) => {
-            btn.classList.toggle("active", btn.dataset.set === newPieceSet);
-          });
-
           document.dispatchEvent(
             new CustomEvent("pieceSetChanged", {
               detail: { pieceSet: newPieceSet },
             }),
           );
           document.dispatchEvent(
-            new CustomEvent("themeChanged", {
-              detail: { theme: newTheme },
-            }),
+            new CustomEvent("themeChanged", { detail: { theme: newTheme } }),
           );
-
-          showToast(`✅ تنظیمات ذخیره شد`);
+          showToast(`✅ تنظیمات با موفقیت ذخیره شد`);
         }
 
-        // ============================================
-        // 🔄 بازنشانی به پیش‌فرض (neo و theme-1)
-        // ============================================
         function resetToDefault() {
           if (!confirm("آیا مطمئنی؟ تنظیمات به حالت پیش‌فرض برمی‌گردد."))
             return;
-
           const settings = { pieceSet: "neo", theme: "1" };
           saveSettings(settings);
-
           document.body.className = document.body.className
             .split(" ")
             .filter((cls) => !cls.startsWith("theme-"))
             .join(" ");
           document.body.classList.add("theme-1");
-
           window._tempTheme = "1";
           window._tempPieceSet = "neo";
-
-          document.querySelectorAll(".theme-btn").forEach((btn) => {
-            btn.classList.toggle("active", btn.dataset.theme === "1");
-          });
-          document.querySelectorAll(".piece-btn").forEach((btn) => {
-            btn.classList.toggle("active", btn.dataset.set === "neo");
-          });
-
+          buildThemeButtons();
+          buildPieceButtons();
           document.dispatchEvent(
-            new CustomEvent("pieceSetChanged", {
-              detail: { pieceSet: "neo" },
-            }),
+            new CustomEvent("pieceSetChanged", { detail: { pieceSet: "neo" } }),
           );
           document.dispatchEvent(
             new CustomEvent("themeChanged", { detail: { theme: "1" } }),
           );
-
-          showToast("✅ تنظیمات به پیش‌فرض بازگشت");
+          showToast("✅ تنظیمات به حالت پیش‌فرض بازگشت");
         }
 
-        // ============================================
-        // 💬 توست
-        // ============================================
         function showToast(text) {
           const toast = document.getElementById("settingsToast");
           if (!toast) return;
-
           toast.textContent = text;
           toast.classList.add("show");
-
           clearTimeout(toast._timeout);
           toast._timeout = setTimeout(() => {
             toast.classList.remove("show");
           }, 2500);
         }
 
-        // ============================================
-        // 🚀 راه‌اندازی
-        // ============================================
         function init() {
           const settings = loadSettings();
           window._tempTheme = settings.theme || "1";
           window._tempPieceSet = settings.pieceSet || "neo";
-
           buildThemeButtons();
           buildPieceButtons();
-
           document
             .getElementById("saveSettingsBtn")
             .addEventListener("click", saveAllSettings);
           document
             .getElementById("resetSettingsBtn")
             .addEventListener("click", resetToDefault);
-
-          document.addEventListener("themeChanged", function (e) {
-            const newTheme = e.detail.theme;
-            document.querySelectorAll(".theme-btn").forEach((btn) => {
-              btn.classList.toggle("active", btn.dataset.theme === newTheme);
-            });
-            window._tempTheme = newTheme;
-          });
-
-          document.addEventListener("pieceSetChanged", function (e) {
-            const newSet = e.detail.pieceSet;
-            document.querySelectorAll(".piece-btn").forEach((btn) => {
-              btn.classList.toggle("active", btn.dataset.set === newSet);
-            });
-            window._tempPieceSet = newSet;
-          });
-
-          console.log("✅ ChessHub Settings loaded successfully");
         }
 
         if (document.readyState === "loading") {

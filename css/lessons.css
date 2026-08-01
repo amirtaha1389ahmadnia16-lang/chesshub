@@ -1,0 +1,611 @@
+/* ============================================
+   🎯 استایل‌های اختصاصی دروس آموزشی (Pro Edition)
+   ============================================ */
+
+/* ----- نوار ابزار ----- */
+.lessons-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  align-items: center;
+  background: #ffffff;
+  border-radius: var(--radius-md);
+  padding: 0.8rem 1rem;
+  margin-top: 0.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid #e2e8f0;
+}
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  width: 100%;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-light);
+  white-space: nowrap;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.chip {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 0.4rem 1rem;
+  border-radius: var(--radius-sm);
+  font-family: "Vazir";
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  color: var(--text-light);
+}
+.chip.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent-dark);
+  box-shadow: 0 2px 4px rgba(49, 130, 206, 0.3);
+}
+.chip:hover:not(.active) {
+  background: #e2e8f0;
+  color: var(--primary-dark);
+}
+
+.search-box {
+  flex: 2;
+  min-width: 160px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f1f5f9;
+  border-radius: var(--radius-sm);
+  padding: 0.2rem 0.8rem;
+  border: 1px solid #e2e8f0;
+  transition: var(--transition-smooth);
+}
+.search-box:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.2);
+  background: #ffffff;
+}
+.search-box i {
+  color: var(--text-light);
+  font-size: 0.85rem;
+}
+.search-box input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 0.5rem 0;
+  font-family: "Vazir";
+  font-size: 0.85rem;
+  outline: none;
+  color: var(--text-dark);
+  font-weight: 600;
+}
+.search-box input::placeholder {
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+/* ----- گرید دروس ----- */
+.lessons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* ----- کارت درس ----- */
+.lesson-card {
+  background: #ffffff;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: var(--transition-smooth);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+}
+.lesson-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: #cbd5e0;
+}
+
+.lesson-thumb {
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+}
+.lesson-thumb i {
+  font-size: 3rem;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(0, 0, 0, 0.1);
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+
+.lesson-content {
+  padding: 1.2rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.lesson-meta {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.lesson-tag {
+  padding: 0.2rem 0.8rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.lesson-tag.tag-opening {
+  background: var(--success);
+} /* سبز */
+.lesson-tag.tag-middlegame {
+  background: var(--accent);
+} /* آبی */
+.lesson-tag.tag-endgame {
+  background: #805ad5;
+} /* بنفش */
+
+.lesson-level {
+  background: #f1f5f9;
+  color: var(--text-light);
+  padding: 0.2rem 0.8rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.65rem;
+  font-weight: 700;
+  border: 1px solid #e2e8f0;
+}
+
+.lesson-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--primary-dark);
+  margin-bottom: 0.4rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
+}
+
+.lesson-description {
+  font-size: 0.85rem;
+  color: var(--text-light);
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.lesson-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 0.8rem;
+}
+
+.lesson-duration {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  direction: ltr;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-weight: 600;
+}
+
+.lesson-footer .btn-view {
+  background: var(--accent);
+  color: white;
+  border: 1px solid var(--accent-dark);
+  padding: 0.3rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  font-family: "Vazir";
+  box-shadow: 0 3px 0 var(--accent-dark);
+}
+.lesson-footer .btn-view:hover {
+  background: #4299e1;
+}
+.lesson-footer .btn-view:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--accent-dark);
+}
+
+.no-result {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-light);
+  font-size: 0.9rem;
+  grid-column: 1 / -1;
+  background: #fff;
+  border-radius: var(--radius-md);
+  border: 1px dashed #cbd5e0;
+}
+
+/* ----- پنجره مطالعه (Overlay) ----- */
+.page-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100dvh;
+  background: #ffffff;
+  z-index: 1000;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  direction: rtl;
+}
+.page-overlay.open {
+  transform: translateX(0);
+}
+
+.overlay-header {
+  position: sticky;
+  top: 0;
+  background: var(--primary-dark);
+  padding: 0.8rem 1.2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+  box-shadow: var(--shadow-md);
+}
+.overlay-header h2 {
+  font-size: 1.1rem;
+  color: #ffffff;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 70%;
+  font-weight: 700;
+}
+.overlay-header h2 i {
+  color: var(--accent-light);
+}
+.overlay-header .close-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  padding: 0.4rem 1rem;
+  border-radius: var(--radius-sm);
+  font-family: "Vazir";
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #ffffff;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+.overlay-header .close-btn:hover {
+  background: var(--danger);
+}
+
+.overlay-scroll {
+  padding: 2rem 1.5rem;
+}
+.overlay-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+.overlay-scroll::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+.overlay-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 10px;
+}
+
+.lesson-viewer {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+.lesson-viewer h3 {
+  font-size: 1.8rem;
+  color: var(--primary-dark);
+  border-right: 4px solid var(--accent);
+  padding-right: 1rem;
+  margin-bottom: 1.5rem;
+  font-weight: 800;
+}
+.lesson-viewer .tag {
+  display: inline-block;
+  padding: 0.3rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 1.5rem;
+}
+.lesson-viewer p,
+.lesson-viewer li {
+  color: var(--text-dark);
+  line-height: 1.8;
+  font-size: 0.95rem;
+  margin-bottom: 0.8rem;
+}
+.lesson-viewer h4 {
+  color: var(--primary-dark);
+  margin: 1.5rem 0 0.8rem;
+  font-size: 1.2rem;
+  border-right: 3px solid var(--text-light);
+  padding-right: 0.8rem;
+  font-weight: 700;
+}
+.lesson-viewer ul,
+.lesson-viewer ol {
+  padding-right: 1.5rem;
+  margin-bottom: 1rem;
+}
+.lesson-viewer li {
+  margin-bottom: 0.5rem;
+}
+.lesson-viewer code {
+  font-family: "Courier New", monospace;
+  background: #edf2f7;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: var(--danger);
+  direction: ltr;
+  display: inline-block;
+}
+.lesson-viewer blockquote {
+  background: #ebf8ff;
+  border-right: 4px solid var(--accent);
+  padding: 1rem 1.5rem;
+  margin: 1.5rem 0;
+  border-radius: var(--radius-sm);
+  color: var(--primary-dark);
+  font-style: italic;
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+.lesson-viewer table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.9rem;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.lesson-viewer th,
+.lesson-viewer td {
+  border: 1px solid #e2e8f0;
+  padding: 0.6rem 1rem;
+  text-align: center;
+}
+.lesson-viewer th {
+  background: var(--primary-dark);
+  color: white;
+  font-weight: 700;
+}
+.lesson-viewer td {
+  background: #fff;
+  color: var(--text-dark);
+}
+.lesson-viewer tr:nth-child(even) td {
+  background: #f8fafc;
+}
+.lesson-viewer hr {
+  border: none;
+  border-top: 1px solid #e2e8f0;
+  margin: 2rem 0;
+}
+.lesson-viewer .close-modal-btn {
+  background: var(--danger);
+  color: white;
+  border: 1px solid #c53030;
+  padding: 0.6rem 1.5rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-weight: 700;
+  margin-top: 2rem;
+  font-size: 0.9rem;
+  transition: var(--transition-smooth);
+  display: block;
+  width: fit-content;
+  font-family: "Vazir";
+  box-shadow: 0 3px 0 #c53030;
+}
+.lesson-viewer .close-modal-btn:hover {
+  background: #fc8181;
+}
+.lesson-viewer .close-modal-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #c53030;
+}
+
+/* ============================================
+   📱 واکنش‌گرایی (موبایل و تبلت)
+   ============================================ */
+@media (max-width: 768px) {
+  .lessons-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0.8rem;
+    border-radius: var(--radius-md);
+  }
+  .filter-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .search-box {
+    min-width: unset;
+  }
+
+  .lessons-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .overlay-header {
+    padding: 0.6rem 1rem;
+  }
+  .overlay-header h2 {
+    font-size: 1rem;
+    max-width: 60%;
+  }
+  .overlay-scroll {
+    padding: 1.5rem 1rem;
+  }
+
+  .lesson-thumb {
+    height: 110px;
+  }
+  .lesson-thumb i {
+    font-size: 2.5rem;
+    width: 60px;
+    height: 60px;
+  }
+  .lesson-title {
+    font-size: 1rem;
+  }
+  .lesson-description {
+    font-size: 0.8rem;
+  }
+
+  .lesson-viewer h3 {
+    font-size: 1.5rem;
+  }
+  .lesson-viewer p,
+  .lesson-viewer li {
+    font-size: 0.9rem;
+  }
+  .lesson-viewer table {
+    font-size: 0.8rem;
+  }
+  .lesson-viewer th,
+  .lesson-viewer td {
+    padding: 0.5rem 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .lessons-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .chip {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.8rem;
+  }
+  .close-btn {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.8rem;
+  }
+
+  .overlay-header h2 {
+    font-size: 0.9rem;
+    max-width: 55%;
+  }
+
+  .lesson-thumb {
+    height: 100px;
+  }
+  .lesson-thumb i {
+    font-size: 2rem;
+    width: 50px;
+    height: 50px;
+  }
+  .lesson-title {
+    font-size: 0.95rem;
+  }
+  .lesson-content {
+    padding: 1rem;
+  }
+
+  .lesson-viewer h3 {
+    font-size: 1.3rem;
+  }
+  .lesson-viewer p,
+  .lesson-viewer li {
+    font-size: 0.85rem;
+  }
+  .lesson-viewer table {
+    font-size: 0.75rem;
+  }
+  .lesson-viewer th,
+  .lesson-viewer td {
+    padding: 0.4rem 0.6rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .lessons-grid {
+    gap: 0.8rem;
+  }
+  .lesson-thumb {
+    height: 90px;
+  }
+  .lesson-thumb i {
+    font-size: 1.8rem;
+    width: 45px;
+    height: 45px;
+  }
+  .lesson-title {
+    font-size: 0.9rem;
+  }
+  .chip {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.6rem;
+  }
+  .search-box input {
+    font-size: 0.8rem;
+  }
+}

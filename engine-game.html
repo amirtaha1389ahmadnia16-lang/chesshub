@@ -6,7 +6,11 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
-    <title>ChessHub | بازی با بات‌ها</title>
+    <meta
+      name="description"
+      content="بازی شطرنج با موتور استوک‌فیش و بات‌های مختلف"
+    />
+    <title>ChessHub | بازی با موتور</title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
@@ -16,71 +20,217 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="css/style.css" />
-    <script src="js/chess.min.js"></script>
-    <script src="js/stockfish.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
     <style>
-      /* ============================================
-         🎯 استایل‌های اختصاصی بازی با بات
-         ============================================ */
-
-      .engine-layout {
-        display: flex;
-        flex-wrap: wrap;
+      /* استایل‌های اختصاصی بازی با موتور (Pro Edition - Optimized) */
+      .engine-wrapper {
+        display: grid;
+        grid-template-columns: 280px 1fr 280px;
         gap: 1.5rem;
-        justify-content: center;
-        align-items: stretch;
+        margin-bottom: 2rem;
       }
-
-      /* ===== کادر چپ: تخته ===== */
-      .board-wrapper {
-        flex: 1 1 480px;
-        min-width: 280px;
-        max-width: 560px;
-        background: var(--bg-card, #ffffff);
+      .side-card {
+        background: #ffffff;
         border-radius: var(--radius-lg);
-        padding: 16px;
-        box-shadow: var(--shadow-md);
-        border: 1px solid var(--border-color, transparent);
+        padding: 1.2rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid #e2e8f0;
+        height: fit-content;
+      }
+      .side-card h3 {
+        font-size: 1.1rem;
+        color: var(--primary-dark);
+        border-right: 4px solid var(--accent);
+        padding-right: 10px;
+        margin-bottom: 1rem;
+        font-weight: 800;
+      }
+      .bots-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.8rem;
+      }
+      .bot-item {
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: var(--radius-md);
+        padding: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+      }
+      .bot-item:hover {
+        background: #f1f5f9;
+        border-color: #cbd5e0;
+      }
+      .bot-item.active {
+        background: #ebf8ff;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+      }
+      .bot-item .mini-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #e2e8f0;
+        overflow: hidden;
+        flex-shrink: 0;
+      }
+      .bot-item .mini-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .bot-item .b-info {
         display: flex;
         flex-direction: column;
       }
-
-      .board-wrapper .board-title {
-        font-size: 0.85rem;
+      .bot-item .bname {
+        font-size: 0.9rem;
         font-weight: 700;
-        color: var(--primary);
-        margin-bottom: 10px;
+        color: var(--text-dark);
+      }
+      .bot-item .brating {
+        font-size: 0.75rem;
+        color: var(--text-light);
+        font-weight: 600;
+      }
+
+      .control-group {
+        margin-bottom: 1.2rem;
+      }
+      .control-group:last-child {
+        margin-bottom: 0;
+      }
+      .control-label {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--text-light);
+        margin-bottom: 0.5rem;
+        display: block;
+      }
+      .chips-group {
+        display: flex;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+      }
+      .chip-btn {
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        padding: 0.4rem 0.8rem;
+        border-radius: var(--radius-sm);
+        font-family: "Vazir";
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        color: var(--text-light);
+      }
+      .chip-btn.active {
+        background: var(--accent);
+        color: white;
+        border-color: var(--accent-dark);
+        box-shadow: 0 2px 4px rgba(49, 130, 206, 0.3);
+      }
+      .chip-btn:hover:not(.active) {
+        background: #e2e8f0;
+        color: var(--primary-dark);
+      }
+
+      .game-main {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      .player-bar {
+        background: #ffffff;
+        border-radius: var(--radius-md);
+        padding: 0.6rem 1rem;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        justify-content: center;
+        justify-content: space-between;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid #e2e8f0;
+      }
+      .player-info {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+      }
+      .player-avatar-sm {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #e2e8f0;
+        overflow: hidden;
+        border: 2px solid #cbd5e0;
+      }
+      .player-avatar-sm img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .player-name {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--text-dark);
+      }
+      .player-rating {
+        font-size: 0.7rem;
+        color: var(--text-light);
       }
 
+      .timer-box {
+        background: var(--primary-dark);
+        color: #fff;
+        padding: 0.3rem 0.8rem;
+        border-radius: var(--radius-sm);
+        font-family: monospace;
+        font-weight: 700;
+        font-size: 1rem;
+        direction: ltr;
+        min-width: 70px;
+        text-align: center;
+      }
+      .timer-box.active-timer {
+        background: var(--success);
+        box-shadow: 0 0 0 3px rgba(56, 161, 105, 0.2);
+      }
+      .timer-box.low {
+        background: var(--danger);
+        animation: pulseUrgent 1s infinite;
+      }
+
+      .board-wrapper-engine {
+        background: #ffffff;
+        padding: 0.5rem;
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-md);
+        border: 1px solid #e2e8f0;
+        touch-action: none;
+      }
       #chessboard {
+        width: 100%;
+        max-width: 100%;
+        aspect-ratio: 1/1;
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+        box-shadow: var(--shadow-board);
+        border: 1px solid #cbd5e0;
+        touch-action: none;
         display: grid;
         grid-template-columns: repeat(8, 1fr);
-        aspect-ratio: 1 / 1;
-        width: 100%;
-        max-width: 480px;
-        margin: 0 auto;
-        border: 2px solid var(--border-color, #cbd5e1);
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: var(--shadow-sm);
-        touch-action: none;
-        user-select: none;
-        -webkit-user-select: none;
-        position: relative;
       }
-
       .square {
-        aspect-ratio: 1 / 1;
+        aspect-ratio: 1/1;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
         touch-action: none;
-        position: relative;
+        /* ترنزیشن حذف شد تا درگ کردن بدون لگ باشد */
       }
       .square.light {
         background-color: var(--board-light, #f0d9b5);
@@ -89,422 +239,112 @@
         background-color: var(--board-dark, #b58863);
       }
       .square.selected {
-        background-color: #b7d968 !important;
-        box-shadow: inset 0 0 0 3px var(--primary) !important;
+        background-color: #f6e05e !important;
       }
-      .square.computer-from {
-        background-color: #7fc97f !important;
-        box-shadow: inset 0 0 0 3px #2d8f2d !important;
-      }
+      .square.computer-from,
       .square.computer-to {
-        background-color: #7fc97f !important;
-        box-shadow: inset 0 0 0 3px #2d8f2d !important;
-        animation: glowGreen 0.8s ease-in-out 3;
+        background-color: #90cdf4 !important;
       }
-      @keyframes glowGreen {
-        0%,
-        100% {
-          box-shadow: inset 0 0 0 3px #2d8f2d;
-        }
-        50% {
-          box-shadow:
-            inset 0 0 0 6px #2d8f2d,
-            0 0 20px rgba(45, 143, 45, 0.3);
-        }
-      }
-
       .piece-img {
         width: 100%;
         height: 100%;
         pointer-events: none;
         user-select: none;
-        -webkit-user-drag: none;
-        draggable: false;
-        z-index: 1;
-        position: relative;
+        will-change: transform;
       }
 
-      /* ===== فقط دکمه‌ی بازی ===== */
-      .board-controls {
+      .game-controls {
         display: flex;
-        justify-content: center;
-        margin-top: 10px;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
       }
-      .board-controls .btn-sm {
-        background: var(--secondary);
-        border: none;
-        padding: 0.5rem 1.5rem;
-        border-radius: 30px;
-        font-family: "Vazir";
-        font-size: 0.8rem;
+      .game-controls .btn {
+        flex: 1;
+        justify-content: center;
+      }
+      .btn {
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        padding: 0.5rem 1.2rem;
+        border-radius: var(--radius-sm);
         font-weight: 700;
         cursor: pointer;
-        transition: 0.2s;
-        color: var(--text-dark);
+        transition: var(--transition-smooth);
+        font-size: 0.85rem;
         display: inline-flex;
         align-items: center;
         gap: 0.4rem;
+        font-family: "Vazir";
+        color: var(--text-dark);
       }
-      .board-controls .btn-sm.primary {
-        background: var(--primary);
+      .btn:hover {
+        background: #e2e8f0;
+        border-color: #cbd5e0;
+        transform: translateY(-1px);
+      }
+      .btn:active {
+        transform: scale(0.98);
+      }
+      .btn-primary {
+        background: var(--accent);
         color: white;
+        border: 1px solid var(--accent-dark);
+        box-shadow:
+          0 4px 0 var(--accent-dark),
+          0 4px 12px rgba(49, 130, 206, 0.3);
       }
-      .board-controls .btn-sm.primary:hover {
-        background: var(--primary-dark);
-        transform: translateY(-2px);
+      .btn-primary:hover {
+        background: #4299e1;
+        transform: translateY(-1px);
+        box-shadow:
+          0 5px 0 var(--accent-dark),
+          0 6px 15px rgba(49, 130, 206, 0.4);
       }
-      .board-controls .btn-sm:hover {
-        background: var(--border-color, #e2e8f0);
-        transform: translateY(-2px);
+      .btn-primary:active {
+        transform: translateY(3px);
+        box-shadow: 0 1px 0 var(--accent-dark);
       }
 
-      /* ===== تایمرهای مستطیلی ===== */
-      .timer-row {
-        display: flex;
-        gap: 0.8rem;
-        margin-top: 10px;
-        direction: ltr;
-      }
-      .timer-box {
-        flex: 1;
-        background: var(--secondary);
-        border-radius: 12px;
-        padding: 6px 12px;
-        border: 2px solid var(--border-color, #eef2f5);
-        text-align: center;
-        min-height: 44px;
+      .history-list {
+        max-height: 400px;
+        overflow-y: auto;
         display: flex;
         flex-direction: column;
-        justify-content: center;
-        transition: border-color 0.3s;
+        gap: 0.2rem;
+        padding-left: 4px;
       }
-      .timer-box.active-timer {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 2px rgba(44, 125, 160, 0.15);
-      }
-      .timer-box .timer-label {
-        font-size: 0.55rem;
-        color: var(--text-secondary);
-        font-weight: 600;
-        font-family: "Vazir";
-        direction: rtl;
-      }
-      .timer-box .timer-value {
-        font-family: monospace;
-        font-size: 1.3rem;
-        font-weight: 700;
-        color: var(--text-dark);
-        direction: ltr;
-        letter-spacing: 1px;
-      }
-      .timer-box .timer-value.low {
-        color: #e25555;
-        animation: blinkTimer 0.8s infinite;
-      }
-      @keyframes blinkTimer {
-        0%,
-        100% {
-          opacity: 1;
-        }
-        50% {
-          opacity: 0.3;
-        }
-      }
-
-      /* ===== تاریخچه ===== */
-      .history-box {
-        background: var(--bg-card, #ffffff);
-        border-radius: var(--radius-md);
-        padding: 0.3rem 0.6rem;
-        max-height: 50px;
-        overflow-y: auto;
-        border: 1px solid var(--border-color, #eef2f5);
-        font-size: 0.6rem;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.1rem 0.25rem;
-        align-items: center;
-        direction: ltr;
-        font-family: monospace;
-        min-height: 28px;
-        margin-top: 8px;
-      }
-      .history-box::-webkit-scrollbar {
+      .history-list::-webkit-scrollbar {
         width: 4px;
       }
-      .history-box::-webkit-scrollbar-thumb {
-        background: var(--primary);
-        border-radius: 10px;
+      .history-list::-webkit-scrollbar-track {
+        background: #f1f5f9;
       }
-      .history-box .move-item {
-        background: var(--secondary);
-        padding: 0.05rem 0.25rem;
-        border-radius: 8px;
-        white-space: nowrap;
-        font-size: 0.55rem;
+      .history-list::-webkit-scrollbar-thumb {
+        background: #cbd5e0;
+        border-radius: 4px;
       }
-      .history-box .move-item .move-num {
-        color: var(--text-secondary, #5f7f9e);
-        font-weight: 400;
-        font-size: 0.5rem;
-        margin-left: 0.1rem;
-      }
-
-      /* ============================================
-         📦 کادر راست: انتخاب بات
-         ============================================ */
-      .bots-wrapper {
-        flex: 1 1 320px;
-        min-width: 260px;
-        max-width: 420px;
-        background: var(--bg-card, #ffffff);
-        border-radius: var(--radius-lg);
-        padding: 16px;
-        box-shadow: var(--shadow-md);
-        border: 1px solid var(--border-color, transparent);
-        display: flex;
-        flex-direction: column;
-        order: -1;
-      }
-      @media (min-width: 769px) {
-        .bots-wrapper {
-          order: 0;
-        }
-      }
-
-      .bots-wrapper .bots-title {
+      .move-item {
+        background: #f8fafc;
+        padding: 0.4rem 0.6rem;
+        border-radius: var(--radius-sm);
+        font-family: monospace;
         font-size: 0.85rem;
-        font-weight: 700;
-        color: var(--primary);
-        margin-bottom: 12px;
+        color: var(--text-dark);
         display: flex;
-        align-items: center;
         gap: 0.5rem;
-        justify-content: center;
-        border-bottom: 2px solid var(--secondary);
-        padding-bottom: 6px;
+        border: 1px solid #e2e8f0;
       }
-
-      /* ===== پیش‌نمایش بات ===== */
-      .bot-preview {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        background: var(--secondary);
-        border-radius: 16px;
-        padding: 0.7rem 1rem;
-        margin-bottom: 12px;
-        border: 2px solid var(--border-color, transparent);
-        transition: border-color 0.3s;
-        min-height: 76px;
-      }
-      .bot-preview.has-bot {
-        border-color: var(--primary);
-      }
-      .bot-preview .preview-avatar {
-        width: 64px;
-        height: 64px;
-        border-radius: 50%;
-        overflow: hidden;
-        border: 3px solid var(--primary);
-        flex-shrink: 0;
-        background: var(--bg-card);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      .bot-preview .preview-avatar img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
-      .bot-preview .preview-avatar .fallback {
-        font-size: 2.2rem;
-        color: var(--text-secondary);
-      }
-      .bot-preview .preview-info {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-      }
-      .bot-preview .preview-info .pname {
+      .move-num {
+        color: var(--text-light);
         font-weight: 700;
-        font-size: 1.1rem;
-        color: var(--text-dark);
       }
-      .bot-preview .preview-info .prating {
+      .empty-history {
+        color: var(--text-light);
         font-size: 0.8rem;
-        color: var(--text-secondary);
-        font-weight: 600;
-      }
-      .bot-preview .preview-info .pempty {
-        font-size: 0.7rem;
-        color: var(--text-secondary);
-        display: flex;
-        align-items: center;
-        gap: 0.3rem;
-      }
-
-      /* ===== گرید بات‌ها ===== */
-      .bots-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 0.6rem;
-        margin-bottom: 10px;
-      }
-      .bot-item {
-        background: var(--secondary);
-        border: 2px solid var(--border-color, transparent);
-        border-radius: 14px;
-        padding: 0.6rem 0.3rem;
         text-align: center;
-        cursor: pointer;
-        transition: all 0.25s;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.2rem;
-      }
-      .bot-item:hover {
-        transform: translateY(-4px);
-        border-color: var(--primary);
-        box-shadow: var(--shadow-sm);
-      }
-      .bot-item.active {
-        border-color: var(--primary);
-        background: var(--primary);
-        color: white;
-      }
-      .bot-item .mini-avatar {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        overflow: hidden;
-        border: 2px solid var(--border-color, #e2e8f0);
-        flex-shrink: 0;
-        background: var(--bg-card);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: border-color 0.3s;
-      }
-      .bot-item.active .mini-avatar {
-        border-color: white;
-      }
-      .bot-item .mini-avatar img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
-      .bot-item .mini-avatar .fallback {
-        font-size: 1.6rem;
-        color: var(--text-secondary);
-      }
-      .bot-item .bname {
-        font-weight: 700;
-        font-size: 0.85rem;
-        line-height: 1.2;
-      }
-      .bot-item .brating {
-        font-size: 0.6rem;
-        color: var(--text-secondary);
-        direction: ltr;
-        font-weight: 600;
-        opacity: 0.7;
-      }
-      .bot-item.active .brating {
-        color: rgba(255, 255, 255, 0.8);
+        padding: 1rem;
       }
 
-      /* ===== تنظیمات ===== */
-      .game-settings {
-        background: var(--secondary);
-        border-radius: 16px;
-        padding: 12px 14px;
-        margin-top: auto;
-        border: 1px solid var(--border-color, #eef2f5);
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
-      .game-settings .settings-row {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.6rem;
-        align-items: center;
-        justify-content: center;
-      }
-      .game-settings .settings-row .setting-group {
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-        flex-wrap: wrap;
-        justify-content: center;
-      }
-      .game-settings .settings-row .setting-group .sg-label {
-        font-size: 0.65rem;
-        color: var(--text-secondary);
-        font-weight: 700;
-        white-space: nowrap;
-      }
-
-      .color-btn,
-      .time-btn {
-        background: var(--bg-card);
-        border: 2px solid var(--border-color, #dde4ec);
-        padding: 0.35rem 0.9rem;
-        border-radius: 30px;
-        font-family: "Vazir";
-        font-size: 0.65rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: 0.2s;
-        color: var(--text-dark);
-        white-space: nowrap;
-        min-height: 36px;
-        min-width: 55px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-      }
-      .color-btn:hover,
-      .time-btn:hover {
-        border-color: var(--primary);
-        transform: translateY(-2px);
-      }
-      .color-btn.active,
-      .time-btn.active {
-        border-color: var(--primary);
-        background: var(--primary);
-        color: white;
-      }
-
-      .color-btn .color-dot {
-        display: inline-block;
-        width: 18px;
-        height: 18px;
-        border-radius: 50%;
-        border: 1.5px solid rgba(0, 0, 0, 0.1);
-        flex-shrink: 0;
-      }
-      .color-btn .color-dot.white {
-        background: #ffffff;
-        border-color: #ccc;
-      }
-      .color-btn .color-dot.black {
-        background: #1a1a2e;
-        border-color: #444;
-      }
-      .color-btn .color-dot.random {
-        background: conic-gradient(#ffffff 0% 50%, #1a1a2e 50% 100%);
-        border-color: #999;
-      }
-      .color-btn .color-label {
-        font-size: 0.6rem;
-      }
-
-      /* ===== پنل نتیجه ===== */
       .result-overlay {
         position: fixed;
         top: 0;
@@ -512,417 +352,955 @@
         width: 100%;
         height: 100%;
         background: rgba(0, 0, 0, 0.6);
-        backdrop-filter: blur(8px);
+        backdrop-filter: blur(4px);
         z-index: 2000;
         display: none;
         justify-content: center;
         align-items: center;
-        direction: rtl;
-        padding: 20px;
+        padding: 1rem;
       }
       .result-overlay.open {
         display: flex;
       }
-      .result-panel {
-        background: var(--bg-card, #ffffff);
-        border-radius: 28px;
-        padding: 30px 32px;
-        max-width: 480px;
+      .result-card {
+        background: #ffffff;
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        max-width: 400px;
         width: 100%;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        animation: slideUp 0.4s ease;
         text-align: center;
-        border: 1px solid var(--border-color, transparent);
+        box-shadow: var(--shadow-lg);
+        animation: fadeIn 0.3s ease;
       }
-      @keyframes slideUp {
-        from {
-          opacity: 0;
-          transform: translateY(40px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
+      .result-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
       }
-      .result-panel .result-icon {
-        font-size: 3.5rem;
-        margin-bottom: 8px;
-      }
-      .result-panel .result-title {
+      .result-title {
         font-size: 1.5rem;
         font-weight: 800;
-        color: var(--text-dark);
-        margin-bottom: 4px;
+        color: var(--primary-dark);
+        margin-bottom: 0.5rem;
       }
-      .result-panel .result-sub {
-        font-size: 0.85rem;
-        color: var(--text-secondary);
-        margin-bottom: 16px;
-        direction: ltr;
+      .result-sub {
+        font-size: 0.9rem;
+        color: var(--text-light);
+        margin-bottom: 1.5rem;
       }
-      .result-panel .result-details {
+      .result-stats {
         display: flex;
         justify-content: center;
-        gap: 1.5rem;
-        margin-bottom: 18px;
-        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: var(--radius-md);
+        border: 1px solid #e2e8f0;
       }
-      .result-panel .result-details .rd-item {
-        text-align: center;
-        background: var(--secondary);
-        padding: 6px 14px;
-        border-radius: 12px;
-        min-width: 70px;
-      }
-      .result-panel .result-details .rd-item .rd-label {
-        font-size: 0.55rem;
-        color: var(--text-secondary);
-        font-weight: 600;
-      }
-      .result-panel .result-details .rd-item .rd-value {
-        font-size: 1rem;
-        font-weight: 700;
-        color: var(--text-dark);
-        direction: ltr;
-      }
-      .result-panel .result-actions {
+      .stat-box {
         display: flex;
-        flex-wrap: wrap;
-        gap: 0.6rem;
-        justify-content: center;
+        flex-direction: column;
+        gap: 0.2rem;
       }
-      .result-panel .result-actions .btn-result {
-        padding: 0.5rem 1.2rem;
-        border-radius: 40px;
-        border: none;
-        font-family: "Vazir";
-        font-size: 0.75rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: 0.2s;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-      }
-      .result-panel .result-actions .btn-result:hover {
-        transform: translateY(-2px);
-      }
-      .btn-result.primary {
-        background: var(--primary);
-        color: white;
-      }
-      .btn-result.primary:hover {
-        background: var(--primary-dark);
-      }
-      .btn-result.secondary {
-        background: var(--secondary);
-        color: var(--text-dark);
-      }
-      .btn-result.secondary:hover {
-        background: var(--border-color, #e2e8f0);
-      }
-      .btn-result.success {
-        background: #10b981;
-        color: white;
-      }
-      .btn-result.success:hover {
-        background: #059669;
-      }
-      .btn-result.warning {
-        background: #f59e0b;
-        color: #1a2a3a;
-      }
-      .btn-result.warning:hover {
-        background: #d97706;
-      }
-
-      /* ===== پیام وضعیت ===== */
-      .status-message {
-        text-align: center;
+      .stat-label {
         font-size: 0.7rem;
-        color: var(--text-secondary, #5f7f9e);
-        padding: 0.2rem;
-        min-height: 24px;
-        border-top: 1px solid var(--border-color, #eef2f5);
-        padding-top: 8px;
-        margin-top: 2px;
+        color: var(--text-light);
+      }
+      .stat-value {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: var(--primary-dark);
+        font-family: monospace;
+      }
+      .result-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
       }
 
-      /* ============================================
-         📱 واکنش‌گرایی
-         ============================================ */
-      @media (max-width: 768px) {
-        .engine-layout {
-          flex-direction: column;
-          align-items: center;
+      @keyframes pulseUrgent {
+        0%,
+        100% {
+          transform: scale(1);
+          box-shadow: 0 0 0 0 rgba(229, 62, 62, 0.4);
         }
-        .board-wrapper,
-        .bots-wrapper {
-          flex: unset;
+        50% {
+          transform: scale(1.05);
+          box-shadow: 0 0 0 8px rgba(229, 62, 62, 0);
+        }
+      }
+      @media (max-width: 1024px) {
+        .engine-wrapper {
+          grid-template-columns: 1fr;
+        }
+        .side-card {
           width: 100%;
-          max-width: 560px;
-        }
-        .bots-wrapper {
-          order: -1;
-        }
-        #chessboard {
-          max-width: 100%;
         }
         .bots-grid {
-          grid-template-columns: repeat(3, 1fr);
+          grid-template-columns: repeat(4, 1fr);
         }
-        .timer-row {
-          flex-direction: row;
+      }
+      @media (max-width: 768px) {
+        .bots-grid {
+          grid-template-columns: repeat(2, 1fr);
         }
-        .timer-box .timer-value {
-          font-size: 1.1rem;
-        }
-        .result-panel {
-          padding: 24px 20px;
-        }
-        .result-panel .result-title {
-          font-size: 1.3rem;
+        .history-list {
+          max-height: 200px;
         }
       }
       @media (max-width: 480px) {
         .bots-grid {
-          grid-template-columns: repeat(2, 1fr);
+          grid-template-columns: 1fr;
         }
-        .board-wrapper,
-        .bots-wrapper {
-          padding: 12px;
-        }
-        .timer-box {
-          padding: 4px 8px;
-          min-height: 36px;
-        }
-        .timer-box .timer-value {
-          font-size: 0.95rem;
-        }
-        .timer-box .timer-label {
-          font-size: 0.5rem;
-        }
-        .color-btn,
-        .time-btn {
-          font-size: 0.55rem;
-          padding: 0.2rem 0.5rem;
-          min-height: 30px;
-          min-width: 40px;
-        }
-        .color-btn .color-dot {
-          width: 14px;
-          height: 14px;
-        }
-        .board-controls .btn-sm {
-          font-size: 0.7rem;
-          padding: 0.3rem 1rem;
-        }
-        .result-panel {
-          padding: 18px 16px;
-        }
-        .result-panel .result-title {
-          font-size: 1.1rem;
-        }
-        .result-panel .result-icon {
-          font-size: 2.8rem;
-        }
-        .result-panel .result-actions .btn-result {
-          font-size: 0.65rem;
-          padding: 0.35rem 0.8rem;
-        }
-        .bot-item .mini-avatar {
-          width: 48px;
-          height: 48px;
-        }
-        .bot-preview .preview-avatar {
-          width: 48px;
-          height: 48px;
-        }
-        .bot-preview .preview-info .pname {
-          font-size: 0.9rem;
-        }
-        .history-box {
-          font-size: 0.5rem;
-          max-height: 40px;
-        }
-      }
-      @media (max-width: 360px) {
-        .bots-grid {
-          grid-template-columns: 1fr 1fr;
-        }
-        .timer-box .timer-value {
+        .player-name {
           font-size: 0.8rem;
         }
-        .color-btn,
-        .time-btn {
-          font-size: 0.5rem;
-          padding: 0.15rem 0.4rem;
-          min-height: 26px;
-          min-width: 34px;
-        }
-        .result-panel .result-title {
-          font-size: 0.95rem;
+        .timer-box {
+          font-size: 0.85rem;
+          min-width: 60px;
         }
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <!-- هدر -->
       <div id="header-placeholder"></div>
 
-      <section class="hero-section">
-        <h1>
-          <span class="highlight"><i class="fas fa-robot"></i></span>
-          <span class="highlight">بازی با</span> بات‌ها
-        </h1>
-        <p>مقابل بات‌های هوشمند با شخصیت‌های منحصربه‌فرد بازی کن</p>
+      <section class="app-hero">
+        <h1><i class="fas fa-robot"></i> بازی با موتور</h1>
+        <p>با بات‌های با سطوح مختلف از مبتدی تا استاد بزرگ بازی کن</p>
       </section>
 
-      <div class="engine-layout">
-        <!-- کادر چپ: تخته -->
-        <div class="board-wrapper">
-          <div class="board-title">
-            <i class="fas fa-chess-board"></i> تخته بازی
-          </div>
-          <div id="chessboard" dir="ltr"></div>
-
-          <!-- فقط دکمه‌ی بازی -->
-          <div class="board-controls">
-            <button class="btn-sm primary" id="playBtn">
-              <i class="fas fa-play"></i> بازی
-            </button>
-          </div>
-
-          <!-- تایمرهای مستطیلی -->
-          <div class="timer-row">
-            <div class="timer-box" id="userTimerBox">
-              <div class="timer-label">👤 شما</div>
-              <div class="timer-value" id="userTimer">--:--</div>
-            </div>
-            <div class="timer-box bot-timer" id="botTimerBox">
-              <div class="timer-label">🤖 بات</div>
-              <div class="timer-value" id="botTimer">--:--</div>
+      <div class="engine-wrapper">
+        <div class="side-card">
+          <h3><i class="fas fa-users"></i> انتخاب حریف</h3>
+          <div class="bots-grid" id="botsGrid"></div>
+          <div class="control-group" style="margin-top: 1.5rem">
+            <span class="control-label">رنگ شما:</span>
+            <div class="chips-group" id="colorGroup">
+              <button class="chip-btn active" data-color="white">سفید</button>
+              <button class="chip-btn" data-color="black">سیاه</button>
+              <button class="chip-btn" data-color="random">تصادفی</button>
             </div>
           </div>
-
-          <!-- تاریخچه -->
-          <div class="history-box" id="historyList">
-            <span style="color: var(--text-secondary); font-size: 0.6rem"
-              >هیچ حرکتی ثبت نشده</span
-            >
-          </div>
-
-          <!-- پیام وضعیت -->
-          <div class="status-message" id="statusMessage">
-            🧠 یک بات انتخاب کن و دکمه‌ی «بازی» رو بزن
+          <div class="control-group">
+            <span class="control-label">زمان:</span>
+            <div class="chips-group" id="timeGroup">
+              <button class="chip-btn active" data-time="10+0">۱۰+۰</button>
+              <button class="chip-btn" data-time="5+2">۵+۲</button>
+              <button class="chip-btn" data-time="3+2">۳+۲</button>
+              <button class="chip-btn" data-time="0">بی‌زمان</button>
+            </div>
           </div>
         </div>
 
-        <!-- کادر راست: انتخاب بات -->
-        <div class="bots-wrapper">
-          <div class="bots-title"><i class="fas fa-robot"></i> انتخاب بات</div>
-
-          <div class="bot-preview" id="botPreview">
-            <div class="preview-avatar" id="previewAvatar">
-              <span class="fallback">🤖</span>
-            </div>
-            <div class="preview-info">
-              <div class="pempty" id="previewEmpty">
-                <i class="fas fa-hand-pointer"></i> یک بات انتخاب کن
+        <div class="game-main">
+          <div class="player-bar">
+            <div class="player-info">
+              <div class="player-avatar-sm" id="botAvatarBox">
+                <img src="images/bots/1.png" alt="Bot" id="botAvatarImg" />
               </div>
-              <div class="pname" id="previewName" style="display: none"></div>
-              <div
-                class="prating"
-                id="previewRating"
-                style="display: none"
-              ></div>
+              <div>
+                <div class="player-name" id="botName">بات لوئیس</div>
+                <div class="player-rating" id="botRating">۲۵۰</div>
+              </div>
             </div>
+            <div class="timer-box" id="botTimerBox">10:00</div>
           </div>
 
-          <div class="bots-grid" id="botsGrid"></div>
+          <div class="board-wrapper-engine">
+            <div id="chessboard"></div>
+          </div>
 
-          <!-- تنظیمات بازی -->
-          <div class="game-settings">
-            <div class="settings-row">
-              <div class="setting-group">
-                <span class="sg-label">🎨 رنگ:</span>
-                <button class="color-btn" data-color="random">
-                  <span class="color-dot random"></span>
-                  <span class="color-label">تصادفی</span>
-                </button>
-                <button class="color-btn active" data-color="white">
-                  <span class="color-dot white"></span>
-                  <span class="color-label">سفید</span>
-                </button>
-                <button class="color-btn" data-color="black">
-                  <span class="color-dot black"></span>
-                  <span class="color-label">سیاه</span>
-                </button>
+          <div class="player-bar">
+            <div class="player-info">
+              <div class="player-avatar-sm">
+                <i
+                  class="fas fa-user"
+                  style="
+                    color: var(--text-light);
+                    width: 100%;
+                    text-align: center;
+                    margin-top: 8px;
+                  "
+                ></i>
+              </div>
+              <div>
+                <div class="player-name">شما</div>
+                <div class="player-rating" id="userRating">۱۲۰۰</div>
               </div>
             </div>
-            <div class="settings-row">
-              <div class="setting-group">
-                <span class="sg-label">⏱️ زمان:</span>
-                <button class="time-btn" data-time="0">∞</button>
-                <button class="time-btn active" data-time="3+2">۳+۲</button>
-                <button class="time-btn" data-time="5+3">۵+۳</button>
-                <button class="time-btn" data-time="8+3">۸+۳</button>
-                <button class="time-btn" data-time="10+2">۱۰+۲</button>
-              </div>
-            </div>
+            <div class="timer-box" id="userTimerBox">10:00</div>
+          </div>
+
+          <div class="game-controls">
+            <button class="btn btn-primary" id="playBtn">
+              <i class="fas fa-play"></i> شروع بازی
+            </button>
+            <button class="btn" id="resignBtn">
+              <i class="fas fa-flag"></i> تسلیم
+            </button>
+          </div>
+        </div>
+
+        <div class="side-card">
+          <h3><i class="fas fa-history"></i> حرکات</h3>
+          <div class="history-list" id="historyList">
+            <div class="empty-history">هنوز حرکتی ثبت نشده</div>
+          </div>
+          <div style="margin-top: 1rem; display: flex; gap: 0.5rem">
+            <button class="btn" style="flex: 1" id="copyPgnBtn">
+              <i class="fas fa-copy"></i> کپی PGN
+            </button>
+            <button class="btn" style="flex: 1" id="downloadPgnBtn">
+              <i class="fas fa-download"></i> دانلود
+            </button>
           </div>
         </div>
       </div>
 
-      <!-- فوتر -->
       <div id="footer-placeholder"></div>
     </div>
 
-    <!-- ===== پنل نتیجه ===== -->
     <div class="result-overlay" id="resultOverlay">
-      <div class="result-panel" id="resultPanel">
+      <div class="result-card">
         <div class="result-icon" id="resultIcon">🏆</div>
-        <div class="result-title" id="resultTitle">بازی تمام شد!</div>
-        <div class="result-sub" id="resultSub">نتیجه: —</div>
-        <div class="result-details">
-          <div class="rd-item">
-            <div class="rd-label">حرکات</div>
-            <div class="rd-value" id="resultMoves">۰</div>
+        <div class="result-title" id="resultTitle">برد!</div>
+        <div class="result-sub" id="resultSub">آفرین! شما برنده شدید.</div>
+        <div class="result-stats">
+          <div class="stat-box">
+            <span class="stat-label">حرکات</span
+            ><span class="stat-value" id="resultMoves">0</span>
           </div>
-          <div class="rd-item">
-            <div class="rd-label">⏱️ زمان شما</div>
-            <div class="rd-value" id="resultUserTime">--:--</div>
+          <div class="stat-box">
+            <span class="stat-label">زمان شما</span
+            ><span class="stat-value" id="resultUserTime">0:00</span>
           </div>
-          <div class="rd-item">
-            <div class="rd-label">⏱️ زمان بات</div>
-            <div class="rd-value" id="resultBotTime">--:--</div>
+          <div class="stat-box">
+            <span class="stat-label">زمان بات</span
+            ><span class="stat-value" id="resultBotTime">0:00</span>
           </div>
         </div>
         <div class="result-actions">
-          <button class="btn-result primary" id="resultRematch">
-            <i class="fas fa-redo"></i> بازی دوباره
+          <button class="btn btn-primary" id="resultRematch">
+            <i class="fas fa-redo"></i> بازی مجدد
           </button>
-          <button class="btn-result secondary" id="resultChangeBot">
-            <i class="fas fa-robot"></i> بات دیگر
-          </button>
-          <button class="btn-result success" id="resultDownloadPgn">
-            <i class="fas fa-download"></i> دانلود PGN
-          </button>
-          <button class="btn-result warning" id="resultCopyPgn">
-            <i class="fas fa-copy"></i> کپی PGN
-          </button>
-          <button class="btn-result secondary" id="resultCancel">
-            <i class="fas fa-times"></i> انصراف
-          </button>
+          <button class="btn" id="resultClose">بستن</button>
         </div>
       </div>
     </div>
 
     <script src="js/script.js"></script>
-    <script src="js/bots/bot-louis.js"></script>
-    <script src="js/bots/bot-maria.js"></script>
-    <script src="js/bots/bot-monkey.js"></script>
-    <script src="js/engine-game.js"></script>
+    <script>
+      (function () {
+        "use strict";
+
+        (function applySavedTheme() {
+          try {
+            const settings = JSON.parse(
+              localStorage.getItem("chesshub_settings"),
+            );
+            if (settings && settings.theme)
+              document.body.classList.add(`theme-${settings.theme}`);
+          } catch (e) {}
+        })();
+
+        const pieceCodes = {
+          wk: "wk.png",
+          wq: "wq.png",
+          wr: "wr.png",
+          wb: "wb.png",
+          wn: "wn.png",
+          wp: "wp.png",
+          bk: "bk.png",
+          bq: "bq.png",
+          br: "br.png",
+          bb: "bb.png",
+          bn: "bn.png",
+          bp: "bp.png",
+        };
+        let pieceSet = "neo";
+
+        function getCurrentPieceSet() {
+          try {
+            const s = JSON.parse(localStorage.getItem("chesshub_settings"));
+            return s?.pieceSet || "neo";
+          } catch {
+            return "neo";
+          }
+        }
+
+        // ===== متغیرهای بازی =====
+        let game = new Chess();
+        let selectedSquare = null;
+        let userColor = "w";
+        let selectedBot = null;
+        let selectedColorChoice = "white";
+        let selectedTimeControl = "10+0";
+        let userTime = 0,
+          botTime = 0,
+          userInc = 0,
+          botInc = 0;
+        let timerInterval = null;
+        let isGameActive = false;
+        let gameStarted = false;
+        let gameEnded = false;
+        let stockfish = null;
+        let stockfishReady = false;
+        let isWaitingForStockfish = false;
+        let computerHighlight = null;
+        let moveHistory = [];
+
+        const BOTS = [
+          {
+            name: "لوئیس",
+            rating: "۲۵۰",
+            avatar: "images/bots/1.png",
+            skillLevel: 0,
+            depth: 2,
+          },
+          {
+            name: "ماریا",
+            rating: "۱۵۰۰",
+            avatar: "images/bots/2.png",
+            skillLevel: 8,
+            depth: 8,
+          },
+          {
+            name: "مانکی",
+            rating: "۲۰۰۰",
+            avatar: "images/bots/3.png",
+            skillLevel: 15,
+            depth: 12,
+          },
+          {
+            name: "مگنوس",
+            rating: "۲۸۸۲",
+            avatar: "images/bots/Magnus_Carlsen.png",
+            skillLevel: 20,
+            depth: 20,
+          },
+        ];
+
+        const boardDiv = document.getElementById("chessboard");
+        const botsGrid = document.getElementById("botsGrid");
+        const botAvatarImg = document.getElementById("botAvatarImg");
+        const botName = document.getElementById("botName");
+        const botRating = document.getElementById("botRating");
+        const botTimerBox = document.getElementById("botTimerBox");
+        const userTimerBox = document.getElementById("userTimerBox");
+        const historyList = document.getElementById("historyList");
+        const playBtn = document.getElementById("playBtn");
+        const resignBtn = document.getElementById("resignBtn");
+        const resultOverlay = document.getElementById("resultOverlay");
+
+        // ===== معماری جدید: ذخیره خانه‌ها برای جلوگیری از لگ =====
+        let boardSquares = {};
+
+        function initStockfish() {
+          try {
+            stockfish = new Worker("js/stockfish.js");
+            stockfish.onmessage = function (e) {
+              const data = e.data;
+              if (data.includes("uciok")) {
+                stockfishReady = true;
+                stockfish.postMessage(
+                  "setoption name UCI_Chess960 value false",
+                );
+                stockfish.postMessage("setoption name Threads value 2");
+                stockfish.postMessage("setoption name Hash value 256");
+              } else if (data.includes("bestmove") && isWaitingForStockfish) {
+                isWaitingForStockfish = false;
+                const parts = data.split(" ");
+                const bestMove = parts[1];
+                if (bestMove && bestMove !== "(none)") {
+                  executeMove({
+                    from: bestMove.slice(0, 2),
+                    to: bestMove.slice(2, 4),
+                    promotion: bestMove.length === 5 ? bestMove[4] : null,
+                  });
+                }
+              }
+            };
+            stockfish.postMessage("uci");
+          } catch (e) {
+            console.error("Stockfish init error", e);
+          }
+        }
+
+        function requestComputerMove() {
+          if (!isGameActive || gameEnded || game.turn() === userColor) return;
+          isWaitingForStockfish = true;
+          if (stockfish && stockfishReady) {
+            stockfish.postMessage("stop");
+            stockfish.postMessage("position fen " + game.fen());
+            stockfish.postMessage("go depth " + (selectedBot.depth || 12));
+          } else {
+            const moves = game.moves({ verbose: true });
+            if (moves.length > 0)
+              executeMove(moves[Math.floor(Math.random() * moves.length)]);
+          }
+        }
+
+        // ===== ساخت تخته فقط برای یک بار (بهینه‌سازی فوق‌العاده) =====
+        function buildBoardDOM() {
+          boardDiv.innerHTML = "";
+          boardSquares = {};
+          const flipped = userColor === "b";
+
+          for (let i = 0; i < 8; i++) {
+            for (let j = 0; j < 8; j++) {
+              const row = flipped ? 7 - i : i;
+              const col = flipped ? 7 - j : j;
+              const squareName = String.fromCharCode(97 + col) + (8 - row);
+
+              const sq = document.createElement("div");
+              sq.className = `square ${(row + col) % 2 === 0 ? "light" : "dark"}`;
+              sq.dataset.square = squareName;
+
+              const img = document.createElement("img");
+              img.classList.add("piece-img");
+              img.draggable = false;
+              img.style.display = "none";
+              sq.appendChild(img);
+
+              boardDiv.appendChild(sq);
+              boardSquares[squareName] = { div: sq, img: img };
+            }
+          }
+          updateBoardContent();
+        }
+
+        // ===== آپدیت سریع تخته بدون بازسازی آن =====
+        function updateBoardContent() {
+          if (!game) return;
+          const board = game.board();
+          const flipped = userColor === "b";
+
+          for (let i = 0; i < 8; i++) {
+            for (let j = 0; j < 8; j++) {
+              const row = flipped ? 7 - i : i;
+              const col = flipped ? 7 - j : j;
+              const piece = board[row][col];
+              const squareName = String.fromCharCode(97 + col) + (8 - row);
+              const sqData = boardSquares[squareName];
+              if (!sqData) continue;
+
+              sqData.div.classList.remove(
+                "selected",
+                "computer-from",
+                "computer-to",
+              );
+
+              if (piece) {
+                const key =
+                  (piece.color === "w" ? "w" : "b") + piece.type.toLowerCase();
+                const newSrc = `pieces/${pieceSet}/${pieceCodes[key]}`;
+                if (sqData.img.src.indexOf(newSrc) === -1) {
+                  sqData.img.src = newSrc;
+                }
+                sqData.img.style.display = "block";
+              } else {
+                sqData.img.style.display = "none";
+              }
+            }
+          }
+
+          if (computerHighlight) {
+            if (boardSquares[computerHighlight.from])
+              boardSquares[computerHighlight.from].div.classList.add(
+                "computer-from",
+              );
+            if (boardSquares[computerHighlight.to])
+              boardSquares[computerHighlight.to].div.classList.add(
+                "computer-to",
+              );
+          }
+          if (selectedSquare && boardSquares[selectedSquare]) {
+            boardSquares[selectedSquare].div.classList.add("selected");
+          }
+        }
+
+        function updateHistory() {
+          const hist = game.history({ verbose: true });
+          if (hist.length === 0) {
+            historyList.innerHTML =
+              '<div class="empty-history">هنوز حرکتی ثبت نشده</div>';
+            return;
+          }
+          let html = "";
+          for (let i = 0; i < hist.length; i += 2) {
+            const num = Math.floor(i / 2) + 1;
+            html += `<div class="move-item"><span class="move-num">${num}.</span> ${hist[i].san} ${hist[i + 1] ? hist[i + 1].san : ""}</div>`;
+          }
+          historyList.innerHTML = html;
+          historyList.scrollTop = historyList.scrollHeight;
+        }
+
+        function executeMove(moveData) {
+          try {
+            const move = game.move({
+              from: moveData.from,
+              to: moveData.to,
+              promotion: moveData.promotion || "q",
+            });
+            if (move) {
+              moveHistory.push(move);
+              if (game.turn() === userColor) {
+                addIncrement("bot");
+                computerHighlight = { from: move.from, to: move.to };
+              } else {
+                addIncrement("user");
+                computerHighlight = null;
+              }
+
+              updateBoardContent(); // آپدیت سریع به جای رندر کامل
+              updateHistory();
+
+              if (game.game_over()) {
+                endGame(game.in_checkmate() ? "checkmate" : "draw");
+                return;
+              }
+              if (game.turn() !== userColor && isGameActive)
+                setTimeout(() => requestComputerMove(), 200);
+            }
+          } catch (e) {
+            console.error("Move error:", e);
+          }
+        }
+
+        function formatTime(s) {
+          if (s < 0) s = 0;
+          const m = Math.floor(s / 60);
+          const sec = Math.floor(s % 60);
+          return `${m.toString().padStart(2, "0")}:${sec.toString().padStart(2, "0")}`;
+        }
+        function updateTimers() {
+          userTimerBox.textContent =
+            userTime === Infinity ? "∞" : formatTime(userTime);
+          botTimerBox.textContent =
+            botTime === Infinity ? "∞" : formatTime(botTime);
+          userTimerBox.classList.toggle(
+            "low",
+            userTime < 10 && userTime > 0 && isGameActive,
+          );
+          botTimerBox.classList.toggle(
+            "low",
+            botTime < 10 && botTime > 0 && isGameActive,
+          );
+          if (isGameActive && gameStarted && !gameEnded) {
+            userTimerBox.classList.toggle(
+              "active-timer",
+              game.turn() === userColor,
+            );
+            botTimerBox.classList.toggle(
+              "active-timer",
+              game.turn() !== userColor,
+            );
+          } else {
+            userTimerBox.classList.remove("active-timer");
+            botTimerBox.classList.remove("active-timer");
+          }
+          if (userTime <= 0 && isGameActive && gameStarted)
+            endGame("timeout", "user");
+          if (botTime <= 0 && isGameActive && gameStarted)
+            endGame("timeout", "bot");
+        }
+        function startTimer() {
+          if (timerInterval) clearInterval(timerInterval);
+          timerInterval = setInterval(() => {
+            if (!isGameActive || !gameStarted || gameEnded) return;
+            if (game.turn() === userColor) userTime -= 0.1;
+            else botTime -= 0.1;
+            updateTimers();
+          }, 100);
+        }
+        function addIncrement(who) {
+          if (!gameStarted || gameEnded) return;
+          if (who === "user") userTime += userInc;
+          else botTime += botInc;
+          updateTimers();
+        }
+        function resetTimers() {
+          if (timerInterval) clearInterval(timerInterval);
+          if (selectedTimeControl === "0") {
+            userTime = Infinity;
+            botTime = Infinity;
+            userInc = 0;
+            botInc = 0;
+            userTimerBox.textContent = "∞";
+            botTimerBox.textContent = "∞";
+          } else {
+            const parts = selectedTimeControl.split("+");
+            userTime = parseInt(parts[0]) * 60;
+            botTime = userTime;
+            userInc = parseInt(parts[1]) || 0;
+            botInc = userInc;
+            updateTimers();
+          }
+        }
+
+        function endGame(reason, loser) {
+          if (gameEnded) return;
+          gameEnded = true;
+          isGameActive = false;
+          gameStarted = false;
+          if (timerInterval) clearInterval(timerInterval);
+          if (stockfish) stockfish.postMessage("stop");
+          computerHighlight = null;
+          updateBoardContent();
+
+          let icon = "🤝",
+            title = "مساوی!",
+            sub = "بازی با نتیجه برابر تمام شد.";
+          if (reason === "checkmate") {
+            const userWon = game.turn() !== userColor;
+            icon = userWon ? "🏆" : "😔";
+            title = userWon ? "برد!" : "باخت!";
+            sub = userWon
+              ? `آفرین! شما ${selectedBot.name} را مات کردید.`
+              : `${selectedBot.name} شما را مات کرد.`;
+          } else if (reason === "timeout") {
+            if (loser === "user") {
+              icon = "⏰";
+              title = "باخت!";
+              sub = "زمان شما تمام شد.";
+            } else {
+              icon = "🏆";
+              title = "برد!";
+              sub = `زمان ${selectedBot.name} تمام شد.`;
+            }
+          } else if (reason === "resign") {
+            icon = "🏳️";
+            title = "باخت!";
+            sub = "شما تسلیم شدید.";
+          }
+
+          document.getElementById("resultIcon").textContent = icon;
+          document.getElementById("resultTitle").textContent = title;
+          document.getElementById("resultSub").textContent = sub;
+          document.getElementById("resultMoves").textContent = Math.ceil(
+            moveHistory.length / 2,
+          );
+          document.getElementById("resultUserTime").textContent =
+            userTime === Infinity ? "∞" : formatTime(userTime);
+          document.getElementById("resultBotTime").textContent =
+            botTime === Infinity ? "∞" : formatTime(botTime);
+
+          resultOverlay.classList.add("open");
+          playBtn.innerHTML = '<i class="fas fa-play"></i> شروع بازی جدید';
+        }
+
+        function startGame() {
+          if (gameStarted) {
+            resetGame();
+            return;
+          }
+          if (selectedColorChoice === "random")
+            userColor = Math.random() < 0.5 ? "w" : "b";
+          else userColor = selectedColorChoice === "white" ? "w" : "b";
+
+          gameEnded = false;
+          gameStarted = true;
+          isGameActive = true;
+          game = new Chess();
+          moveHistory = [];
+          selectedSquare = null;
+          computerHighlight = null;
+          resetTimers();
+          buildBoardDOM();
+          startTimer(); // ساخت تخته فقط در شروع بازی
+          playBtn.innerHTML = '<i class="fas fa-stop"></i> توقف بازی';
+
+          if (game.turn() !== userColor)
+            setTimeout(() => requestComputerMove(), 500);
+        }
+
+        function resetGame() {
+          if (timerInterval) clearInterval(timerInterval);
+          gameEnded = false;
+          gameStarted = false;
+          isGameActive = false;
+          game = new Chess();
+          moveHistory = [];
+          selectedSquare = null;
+          computerHighlight = null;
+          if (stockfish) stockfish.postMessage("stop");
+          resultOverlay.classList.remove("open");
+          buildBoardDOM();
+          resetTimers(); // ساخت مجدد تخته برای رنگ جدید
+          playBtn.innerHTML = '<i class="fas fa-play"></i> شروع بازی';
+        }
+
+        function buildBotsGrid() {
+          botsGrid.innerHTML = "";
+          BOTS.forEach((bot, idx) => {
+            const div = document.createElement("div");
+            div.className = `bot-item${idx === 0 ? " active" : ""}`;
+            div.innerHTML = `
+              <div class="mini-avatar"><img src="${bot.avatar}" alt="${bot.name}" onerror="this.src='https://ui-avatars.com/api/?background=2c3e50&color=fff&name=${bot.name}'"></div>
+              <div class="b-info"><span class="bname">${bot.name}</span><span class="brating">${bot.rating}</span></div>
+            `;
+            div.addEventListener("click", () => {
+              document
+                .querySelectorAll(".bot-item")
+                .forEach((e) => e.classList.remove("active"));
+              div.classList.add("active");
+              selectedBot = BOTS[idx];
+              botAvatarImg.src = selectedBot.avatar;
+              botName.textContent = selectedBot.name;
+              botRating.textContent = selectedBot.rating;
+              if (gameStarted) resetGame();
+            });
+            botsGrid.appendChild(div);
+          });
+          selectedBot = BOTS[0];
+          botAvatarImg.src = selectedBot.avatar;
+          botName.textContent = selectedBot.name;
+          botRating.textContent = selectedBot.rating;
+        }
+
+        // ===== سیستم درگ با شتاب‌دهنده گرافیکی (بدون لگ) =====
+        let dragStart = null,
+          isDragging = false,
+          dragClone = null,
+          rafId = null,
+          lastX = 0,
+          lastY = 0,
+          cloneSize = 0;
+
+        function createDragClone(square, cx, cy) {
+          const sqData = boardSquares[square];
+          if (!sqData) return null;
+          const img = sqData.img;
+          if (!img || img.style.display === "none") return null;
+
+          const rect = sqData.div.getBoundingClientRect();
+          cloneSize = rect.width;
+
+          const clone = img.cloneNode(true);
+          // استفاده از translate3d برای فعال سازی GPU گوشی
+          clone.style.cssText = `
+            position: fixed; pointer-events: none; z-index: 9999;
+            width: ${cloneSize}px; height: ${cloneSize}px;
+            left: 0; top: 0;
+            transform: translate3d(${cx - cloneSize / 2}px, ${cy - cloneSize / 2}px, 0) scale(1.05);
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+            will-change: transform;
+          `;
+          document.body.appendChild(clone);
+          img.style.opacity = "0"; // مخفی کردن مهره اصلی
+          return clone;
+        }
+
+        function updateDragClone() {
+          if (dragClone) {
+            dragClone.style.transform = `translate3d(${lastX - cloneSize / 2}px, ${lastY - cloneSize / 2}px, 0) scale(1.05)`;
+          }
+          rafId = null; // ریست فلگ
+        }
+
+        function onPointerDown(e) {
+          if (!isGameActive || gameEnded || game.turn() !== userColor) return;
+          const cx = e.touches ? e.touches[0].clientX : e.clientX;
+          const cy = e.touches ? e.touches[0].clientY : e.clientY;
+
+          const el = document.elementFromPoint(cx, cy);
+          const sq = el?.closest?.(".square");
+          if (!sq) return;
+
+          const square = sq.dataset.square;
+          const piece = game.get(square);
+
+          if (piece && piece.color === userColor) {
+            e.preventDefault();
+            dragStart = square;
+            isDragging = true;
+            dragClone = createDragClone(square, cx, cy);
+            document.body.style.userSelect = "none";
+          } else if (selectedSquare) {
+            e.preventDefault();
+            if (square !== selectedSquare)
+              executeMove({ from: selectedSquare, to: square });
+            selectedSquare = null;
+            updateBoardContent();
+          }
+        }
+
+        function onPointerMove(e) {
+          if (!isDragging) return;
+          e.preventDefault(); // جلوگیری از اسکرول سایت در موبایل
+          lastX = e.touches ? e.touches[0].clientX : e.clientX;
+          lastY = e.touches ? e.touches[0].clientY : e.clientY;
+
+          // هماهنگی با نرخ نوسازی صفحه (60fps) برای جلوگیری از لگ
+          if (!rafId) {
+            rafId = requestAnimationFrame(updateDragClone);
+          }
+        }
+
+        function onPointerUp(e) {
+          if (!isDragging || !dragStart) {
+            cleanupDrag();
+            return;
+          }
+
+          const cx = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+          const cy = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+
+          if (dragClone) {
+            dragClone.remove();
+            dragClone = null;
+          }
+          if (boardSquares[dragStart] && boardSquares[dragStart].img)
+            boardSquares[dragStart].img.style.opacity = "1";
+
+          const el = document.elementFromPoint(cx, cy);
+          const target = el?.closest?.(".square");
+          const to = target ? target.dataset.square : null;
+
+          if (to && to !== dragStart) {
+            executeMove({ from: dragStart, to: to });
+          } else {
+            selectedSquare = to === dragStart ? dragStart : null;
+            updateBoardContent();
+          }
+          cleanupDrag();
+        }
+
+        function cleanupDrag() {
+          if (dragClone) {
+            dragClone.remove();
+            dragClone = null;
+          }
+          if (rafId) {
+            cancelAnimationFrame(rafId);
+            rafId = null;
+          }
+          dragStart = null;
+          isDragging = false;
+          document.body.style.userSelect = "";
+        }
+
+        function onClickFallback(e) {
+          if (isDragging) return;
+          if (!isGameActive || gameEnded || game.turn() !== userColor) return;
+          const sq = e.target.closest?.(".square");
+          if (!sq) return;
+          const square = sq.dataset.square;
+
+          if (selectedSquare === null) {
+            const piece = game.get(square);
+            if (piece && piece.color === userColor) {
+              selectedSquare = square;
+              updateBoardContent();
+            }
+          } else {
+            if (square !== selectedSquare) {
+              executeMove({ from: selectedSquare, to: square });
+            }
+            selectedSquare = null;
+            updateBoardContent();
+          }
+        }
+
+        function initSettings() {
+          document.querySelectorAll("#colorGroup .chip-btn").forEach((btn) => {
+            btn.addEventListener("click", () => {
+              document
+                .querySelectorAll("#colorGroup .chip-btn")
+                .forEach((b) => b.classList.remove("active"));
+              btn.classList.add("active");
+              selectedColorChoice = btn.dataset.color;
+              if (gameStarted) resetGame();
+            });
+          });
+          document.querySelectorAll("#timeGroup .chip-btn").forEach((btn) => {
+            btn.addEventListener("click", () => {
+              document
+                .querySelectorAll("#timeGroup .chip-btn")
+                .forEach((b) => b.classList.remove("active"));
+              btn.classList.add("active");
+              selectedTimeControl = btn.dataset.time;
+              if (gameStarted) resetGame();
+              else resetTimers();
+            });
+          });
+        }
+
+        function copyPGN() {
+          if (moveHistory.length === 0) return alert("هیچ حرکتی ثبت نشده!");
+          navigator.clipboard
+            .writeText(game.pgn())
+            .then(() => alert("✅ PGN کپی شد"));
+        }
+        function downloadPGN() {
+          if (moveHistory.length === 0) return alert("هیچ حرکتی ثبت نشده!");
+          const blob = new Blob([game.pgn()], { type: "text/plain" });
+          const a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = `game_vs_${selectedBot.name}.pgn`;
+          a.click();
+        }
+
+        async function init() {
+          pieceSet = getCurrentPieceSet();
+          document.addEventListener("pieceSetChanged", () => {
+            pieceSet = getCurrentPieceSet();
+            if (game) updateBoardContent();
+          });
+
+          initStockfish();
+          buildBotsGrid();
+          initSettings();
+          resetTimers();
+          buildBoardDOM();
+
+          playBtn.addEventListener("click", startGame);
+          resignBtn.addEventListener("click", () => {
+            if (isGameActive) endGame("resign");
+          });
+          document
+            .getElementById("resultRematch")
+            .addEventListener("click", () => {
+              resultOverlay.classList.remove("open");
+              resetGame();
+              setTimeout(startGame, 100);
+            });
+          document
+            .getElementById("resultClose")
+            .addEventListener("click", () => {
+              resultOverlay.classList.remove("open");
+              resetGame();
+            });
+          document
+            .getElementById("copyPgnBtn")
+            .addEventListener("click", copyPGN);
+          document
+            .getElementById("downloadPgnBtn")
+            .addEventListener("click", downloadPGN);
+
+          boardDiv.addEventListener("mousedown", onPointerDown);
+          window.addEventListener("mousemove", onPointerMove);
+          window.addEventListener("mouseup", onPointerUp);
+          boardDiv.addEventListener("touchstart", onPointerDown, {
+            passive: false,
+          });
+          boardDiv.addEventListener("touchmove", onPointerMove, {
+            passive: false,
+          });
+          boardDiv.addEventListener("touchend", onPointerUp, {
+            passive: false,
+          });
+          boardDiv.addEventListener("click", onClickFallback);
+        }
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", init);
+        } else {
+          init();
+        }
+      })();
+    </script>
   </body>
 </html>

@@ -1,0 +1,455 @@
+/* ============================================
+   🎯 استایل‌های اختصاصی پایگاه بازی‌ها (Pro Edition)
+   ============================================ */
+
+.players-section {
+  margin-bottom: 2rem;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+.section-header h2 {
+  font-size: 1.2rem;
+  color: var(--primary-dark);
+  border-right: 4px solid var(--accent);
+  padding-right: 12px;
+  font-weight: 800;
+}
+.section-header .badge-count {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 0.3rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  color: var(--text-light);
+  font-weight: 600;
+}
+
+.players-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1.2rem;
+}
+.player-card {
+  background: #ffffff;
+  border-radius: var(--radius-md);
+  padding: 1.2rem 0.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid #e2e8f0;
+}
+.player-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--accent);
+}
+.player-card .avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  margin: 0 auto 0.8rem;
+  overflow: hidden;
+  background: #f1f5f9;
+  border: 3px solid #e2e8f0;
+  transition: var(--transition-smooth);
+}
+.player-card:hover .avatar {
+  border-color: var(--accent);
+}
+.player-card .avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.player-card .name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--primary-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.player-card .title {
+  font-size: 0.65rem;
+  color: var(--text-light);
+  font-weight: 600;
+  margin-top: 0.2rem;
+}
+
+/* ===== Overlay ===== */
+.overlay-header {
+  position: sticky;
+  top: 0;
+  background: var(--primary-dark);
+  padding: 0.8rem 1.2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+  box-shadow: var(--shadow-md);
+}
+.overlay-header h2 {
+  font-size: 1.1rem;
+  color: #ffffff;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 70%;
+  font-weight: 700;
+}
+.overlay-header h2 i {
+  color: var(--accent-light);
+}
+.overlay-header .close-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  padding: 0.4rem 1rem;
+  border-radius: var(--radius-sm);
+  font-family: "Vazir";
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #ffffff;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+.overlay-header .close-btn:hover {
+  background: var(--danger);
+}
+
+.overlay-scroll {
+  padding: 1.5rem;
+}
+
+/* ===== نوار جستجو ===== */
+.search-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+  background: #ffffff;
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid #e2e8f0;
+}
+.search-bar .search-field {
+  flex: 2;
+  min-width: 130px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f1f5f9;
+  border-radius: var(--radius-sm);
+  padding: 0.2rem 0.8rem;
+  border: 1px solid #e2e8f0;
+}
+.search-bar .search-field i {
+  color: var(--text-light);
+  font-size: 0.85rem;
+}
+.search-bar .search-field input,
+.search-bar .search-field select {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 0.5rem 0;
+  font-family: "Vazir";
+  font-size: 0.85rem;
+  outline: none;
+  color: var(--text-dark);
+  font-weight: 600;
+}
+.search-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+.search-actions .btn-sm {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--radius-sm);
+  font-family: "Vazir";
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  color: var(--text-dark);
+}
+.search-actions .btn-sm:hover {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+/* ===== لیست بازی‌ها ===== */
+.games-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.game-item {
+  background: #ffffff;
+  border-radius: var(--radius-sm);
+  padding: 0.8rem 1rem;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  border: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.game-item:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-sm);
+  transform: translateX(-4px);
+}
+.game-info {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+.game-info .badge {
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+.game-info .badge.white-win {
+  background: #c6f6d5;
+  color: #22543d;
+}
+.game-info .badge.black-win {
+  background: #fed7d7;
+  color: #742a2a;
+}
+.game-info .badge.draw {
+  background: #feebc8;
+  color: #744210;
+}
+.game-info .opening-tag {
+  font-size: 0.65rem;
+  color: var(--text-light);
+  background: #f1f5f9;
+  padding: 0.1rem 0.6rem;
+  border-radius: var(--radius-sm);
+}
+.game-arrow {
+  color: var(--text-light);
+  font-size: 0.8rem;
+}
+.no-games {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-light);
+  font-size: 0.9rem;
+}
+.loading-state {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-light);
+}
+.loading-state i {
+  font-size: 2rem;
+  color: var(--accent);
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+/* ===== نمایشگر بازی ===== */
+.game-viewer {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+  border: 1px solid #e2e8f0;
+}
+.viewer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+}
+.viewer-header .game-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--primary-dark);
+}
+.viewer-header .game-title .vs {
+  color: var(--text-light);
+  font-weight: 400;
+  margin: 0 0.3rem;
+}
+
+.viewer-body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  justify-content: center;
+  align-items: flex-start;
+}
+.board-wrapper {
+  flex: 1.2;
+  min-width: 260px;
+  max-width: 500px;
+}
+.info-wrapper {
+  flex: 1;
+  min-width: 190px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.playback-controls {
+  display: flex;
+  justify-content: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+.playback-controls button {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--radius-sm);
+  font-family: "Vazir";
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  color: var(--text-dark);
+}
+.playback-controls button:hover {
+  background: #e2e8f0;
+  transform: scale(0.96);
+}
+.playback-controls button.primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent-dark);
+}
+.playback-controls button.primary:hover {
+  background: #4299e1;
+}
+.playback-controls .move-counter {
+  font-size: 0.75rem;
+  background: #f1f5f9;
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--radius-sm);
+  font-weight: 800;
+  min-width: 55px;
+  text-align: center;
+  border: 1px solid #e2e8f0;
+  color: var(--primary-dark);
+}
+
+.game-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  background: #f8fafc;
+  border-radius: var(--radius-sm);
+  padding: 0.8rem 1rem;
+  border: 1px solid #e2e8f0;
+}
+.game-meta .meta-item {
+  display: flex;
+  gap: 0.3rem;
+  align-items: center;
+}
+.game-meta .meta-item .label {
+  color: var(--text-light);
+  font-weight: 700;
+}
+.game-meta .meta-item .value {
+  color: var(--text-dark);
+  font-weight: 600;
+}
+
+.pgn-actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+.pgn-actions button {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--radius-sm);
+  font-family: "Vazir";
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  color: var(--text-dark);
+}
+.pgn-actions button:hover {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+/* واکنش‌گرایی */
+@media (max-width: 768px) {
+  .search-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .game-item {
+    padding: 0.6rem 0.8rem;
+  }
+  .game-viewer {
+    padding: 1rem;
+  }
+  .viewer-body {
+    flex-direction: column;
+    align-items: center;
+  }
+  .game-meta {
+    grid-template-columns: 1fr;
+  }
+  .players-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.8rem;
+  }
+  .player-card .avatar {
+    width: 56px;
+    height: 56px;
+  }
+}
+@media (max-width: 480px) {
+  .players-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+  .player-card .avatar {
+    width: 50px;
+    height: 50px;
+  }
+  .player-card .name {
+    font-size: 0.75rem;
+  }
+}

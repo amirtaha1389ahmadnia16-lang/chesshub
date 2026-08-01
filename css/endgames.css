@@ -1,0 +1,434 @@
+/* ============================================
+   🎯 استایل‌های اختصاصی آخربازی‌ها (Pro Edition)
+   ============================================ */
+
+.game-area {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+  max-width: 750px;
+  margin: 0 auto 1.5rem;
+  border: 1px solid #e2e8f0;
+  transition: var(--transition-smooth);
+}
+
+/* ===== انتخابگر موقعیت (Select Custom) ===== */
+.position-selector {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.2rem;
+}
+.position-selector select {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 0.6rem 2.5rem 0.6rem 1.2rem;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: 0.85rem;
+  font-family: "Vazir";
+  color: var(--text-dark);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  min-width: 240px;
+  outline: none;
+  max-width: 100%;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%234a5568%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: left 1rem center;
+  background-size: 0.6rem;
+}
+.position-selector select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.2);
+}
+.position-selector select option {
+  background: #ffffff;
+  color: var(--text-dark);
+  padding: 0.5rem;
+}
+
+/* ===== نوار وضعیت و آمار ===== */
+.stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 1.2rem;
+  font-weight: 700;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  color: var(--text-dark);
+  font-size: 0.85rem;
+}
+.stats span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.stats i {
+  font-size: 0.9rem;
+  color: var(--accent);
+}
+
+/* بج‌های وضعیت */
+.user-color-badge,
+.result-badge,
+.turn-indicator {
+  background: #e2e8f0;
+  color: var(--primary-dark);
+  padding: 0.3rem 0.8rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border: 1px solid #cbd5e0;
+}
+.user-color-badge i,
+.result-badge i,
+.turn-indicator i {
+  color: var(--primary-dark);
+}
+
+.result-badge.success {
+  background: #c6f6d5;
+  border-color: #9ae6b4;
+  color: #22543d;
+}
+.result-badge.success i {
+  color: #22543d;
+}
+
+.result-badge.draw {
+  background: #feebc8;
+  border-color: #fbd38d;
+  color: #744210;
+}
+.result-badge.draw i {
+  color: #744210;
+}
+
+.turn-indicator {
+  min-width: 90px;
+  justify-content: center;
+}
+
+/* تایمر شمارش معکوس */
+.timer-badge {
+  background: var(--primary-dark);
+  color: #f6e05e;
+  padding: 0.3rem 0.8rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border: 1px solid #2d3748;
+}
+.timer-badge .timer-number {
+  display: inline-block;
+  min-width: 20px;
+  text-align: center;
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+.timer-badge.urgent {
+  background: var(--danger);
+  color: #fff;
+  border-color: #c53030;
+  animation: pulseUrgent 1s infinite;
+}
+@keyframes pulseUrgent {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(229, 62, 62, 0.4);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 8px rgba(229, 62, 62, 0);
+  }
+}
+
+/* ===== تخته شطرنج (Pro Edition) ===== */
+#chessboard {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  aspect-ratio: 1/1;
+  max-width: 480px;
+  margin: 0 auto 1rem;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  box-shadow: var(--shadow-board);
+  border: 1px solid #cbd5e0;
+  touch-action: none;
+  user-select: none;
+}
+.square {
+  aspect-ratio: 1/1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  touch-action: none;
+  position: relative;
+}
+.square.light {
+  background-color: var(--board-light, #f0d9b5);
+}
+.square.dark {
+  background-color: var(--board-dark, #b58863);
+}
+.square.selected {
+  background-color: #f6e05e !important;
+  box-shadow: inset 0 0 0 3px rgba(0, 0, 0, 0.15);
+}
+.square.computer-from,
+.square.computer-to {
+  background-color: #90cdf4 !important;
+  box-shadow: inset 0 0 0 3px var(--accent) !important;
+}
+.piece-img {
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ===== دکمه‌های کنترل ===== */
+.btn-group {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+.btn {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 0.5rem 1.2rem;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: "Vazir";
+  color: var(--text-dark);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+.btn:hover:not(:disabled) {
+  background: #e2e8f0;
+  border-color: #cbd5e0;
+  transform: translateY(-1px);
+}
+.btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: white;
+  border: 1px solid var(--accent-dark);
+  box-shadow:
+    0 4px 0 var(--accent-dark),
+    0 4px 12px rgba(49, 130, 206, 0.3);
+}
+.btn-primary:hover:not(:disabled) {
+  background: #4299e1;
+  transform: translateY(-1px);
+  box-shadow:
+    0 5px 0 var(--accent-dark),
+    0 6px 15px rgba(49, 130, 206, 0.4);
+}
+.btn-primary:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--accent-dark);
+}
+
+/* ===== پیام‌های سیستم ===== */
+.message {
+  margin-top: 1.2rem;
+  padding: 0.8rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 700;
+  animation: fadeIn 0.3s ease;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid transparent;
+}
+.message i {
+  font-size: 1rem;
+}
+.message .timer-text {
+  font-weight: 800;
+  font-size: 0.95rem;
+  background: rgba(255, 255, 255, 0.4);
+  padding: 0 0.4rem;
+  border-radius: 4px;
+  min-width: 24px;
+  display: inline-block;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.success {
+  background: #c6f6d5;
+  color: #22543d;
+  border-color: #9ae6b4;
+}
+.error {
+  background: #fed7d7;
+  color: #742a2a;
+  border-color: #feb2b2;
+}
+.info {
+  background: #bee3f8;
+  color: #2a4365;
+  border-color: #90cdf4;
+}
+.warning {
+  background: #feebc8;
+  color: #744210;
+  border-color: #fbd38d;
+}
+.retry {
+  background: #fed7d7;
+  color: #742a2a;
+  border-color: #feb2b2;
+  box-shadow: 0 0 0 3px rgba(254, 178, 178, 0.2);
+}
+
+/* ============================================
+   📱 واکنش‌گرایی (موبایل و تبلت)
+   ============================================ */
+@media (max-width: 768px) {
+  .game-area {
+    padding: 1.2rem;
+    margin: 0 0.5rem 1.5rem;
+    border-radius: var(--radius-md);
+  }
+  #chessboard {
+    max-width: 100%;
+    width: 100%;
+  }
+  .stats {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.8rem;
+    border-radius: var(--radius-sm);
+    justify-content: center;
+    gap: 0.8rem;
+  }
+  .stats span {
+    font-size: 0.75rem;
+  }
+  .position-selector select {
+    font-size: 0.75rem;
+    padding: 0.5rem 2rem 0.5rem 1rem;
+    min-width: 200px;
+  }
+  .turn-indicator,
+  .user-color-badge,
+  .result-badge,
+  .timer-badge {
+    font-size: 0.7rem;
+    min-width: 80px;
+    padding: 0.2rem 0.6rem;
+  }
+  .btn {
+    font-size: 0.75rem;
+    padding: 0.4rem 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .game-area {
+    padding: 1rem;
+    margin: 0 0.2rem 1rem;
+  }
+  #chessboard {
+    max-width: 100%;
+    margin: 0 auto 0.5rem;
+  }
+  .stats {
+    font-size: 0.7rem;
+    padding: 0.4rem 0.6rem;
+    gap: 0.4rem;
+  }
+  .stats i {
+    font-size: 0.8rem;
+  }
+  .position-selector select {
+    font-size: 0.7rem;
+    padding: 0.4rem 1.5rem 0.4rem 0.8rem;
+    min-width: 160px;
+  }
+  .turn-indicator,
+  .user-color-badge,
+  .result-badge,
+  .timer-badge {
+    font-size: 0.65rem;
+    min-width: 70px;
+    padding: 0.2rem 0.5rem;
+  }
+  .btn {
+    font-size: 0.7rem;
+    padding: 0.4rem 0.8rem;
+  }
+  .message {
+    font-size: 0.7rem;
+    padding: 0.6rem 0.8rem;
+  }
+  .message i {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 360px) {
+  #chessboard {
+    max-width: 100%;
+  }
+  .stats {
+    font-size: 0.65rem;
+    padding: 0.3rem 0.4rem;
+  }
+  .btn {
+    font-size: 0.65rem;
+    padding: 0.3rem 0.6rem;
+  }
+  .message {
+    font-size: 0.65rem;
+    padding: 0.5rem;
+  }
+  .position-selector select {
+    font-size: 0.65rem;
+    min-width: 140px;
+  }
+}

@@ -24,16 +24,15 @@
   </head>
   <body>
     <div class="container">
-      <!-- هدر -->
       <div id="header-placeholder"></div>
 
-      <!-- بخش معرفی (بنر) -->
-      <section class="hero-section">
+      <!-- بنر یکپارچه اصلی -->
+      <section class="app-hero">
         <h1>جایی که شطرنجت <span class="highlight">پیشرفت</span> میکنه</h1>
         <p>از مبتدی تا استاد بزرگ، هر آنچه برای یادگیری نیاز داری اینجاست</p>
         <div class="hero-buttons">
-          <a href="index.html" class="btn btn-primary">
-            <i class="fas fa-puzzle-piece"></i> پازل روزانه
+          <a href="puzzle-rush.html" class="btn btn-primary">
+            <i class="fas fa-bolt"></i> پازل عجله‌ای
           </a>
           <a href="endgames.html" class="btn btn-outline">
             <i class="fas fa-flag-checkered"></i> آخربازی‌ها
@@ -44,44 +43,39 @@
         </div>
       </section>
 
-      <!-- آمار -->
+      <!-- کارت‌های آمار -->
       <section class="stats-row">
         <div class="stat-card">
-          <div class="icon">
-            <i class="fas fa-puzzle-piece" style="color: #e67e22"></i>
-          </div>
+          <span class="icon"><i class="fas fa-puzzle-piece"></i></span>
           <div class="stat-number">+۱۰۰۰</div>
           <div class="stat-label">پازل تاکتیکی</div>
         </div>
         <div class="stat-card">
-          <div class="icon">
-            <i class="fas fa-chess-queen" style="color: #000000"></i>
-          </div>
+          <span class="icon"><i class="fas fa-chess-queen"></i></span>
           <div class="stat-number">+۱۰</div>
           <div class="stat-label">بازی‌های استادان</div>
         </div>
         <div class="stat-card">
-          <div class="icon">
-            <i class="fas fa-flag-checkered" style="color: #27ae60"></i>
-          </div>
+          <span class="icon"><i class="fas fa-flag-checkered"></i></span>
           <div class="stat-number">+۱۰۰</div>
           <div class="stat-label">آخر بازی</div>
         </div>
         <div class="stat-card">
-          <div class="icon">
-            <i class="fas fa-book-open" style="color: #521600cd"></i>
-          </div>
+          <span class="icon"><i class="fas fa-book-open"></i></span>
           <div class="stat-number">+۱۰</div>
           <div class="stat-label">تعداد دروس</div>
         </div>
       </section>
 
-      <!-- پازل روزانه + ویژگی‌ها -->
-      <div class="home-grid">
-        <div class="puzzle-card card">
+      <!-- گرید اصلی -->
+      <section class="main-card-grid">
+        <!-- کارت پازل روزانه -->
+        <div class="card daily-puzzle-card">
           <h2><i class="fas fa-puzzle-piece"></i> مسئله روز</h2>
           <p>با مهره‌های <strong id="userColorLabel">سفید</strong> بازی کن</p>
-          <div id="chessboard"></div>
+          <div class="board-container">
+            <div id="chessboard"></div>
+          </div>
           <div class="button-group">
             <button id="resetBtn" class="btn">
               <i class="fas fa-undo-alt"></i> از نو
@@ -93,108 +87,89 @@
           <div id="message" class="message"></div>
         </div>
 
-        <div class="features card">
+        <!-- کارت امکانات -->
+        <div class="card features-card">
           <h3><i class="fas fa-crown"></i> امکانات ChessHub</h3>
-          <div class="features-grid">
+          <div class="features-list">
             <div class="feature">
               <i class="fas fa-puzzle-piece"></i>
-              <h4>پازل روزانه</h4>
+              <span>پازل روزانه</span>
               <a href="index.html">حل کن</a>
             </div>
             <div class="feature">
               <i class="fas fa-bolt"></i>
-              <h4>پازل راش</h4>
+              <span>پازل راش</span>
               <a href="puzzle-rush.html">بزن بریم</a>
             </div>
             <div class="feature">
               <i class="fas fa-book-open"></i>
-              <h4>دروس</h4>
+              <span>دروس آموزشی</span>
               <a href="lessons.html">مشاهده</a>
             </div>
             <div class="feature">
               <i class="fas fa-flag-checkered"></i>
-              <h4>آخربازی‌ها</h4>
+              <span>آخربازی‌ها</span>
               <a href="endgames.html">تمرین کن</a>
             </div>
             <div class="feature">
               <i class="fas fa-database"></i>
-              <h4>پایگاه بازی‌ها</h4>
+              <span>پایگاه بازی‌ها</span>
               <a href="games-database.html">ببین</a>
             </div>
             <div class="feature">
               <i class="fas fa-download"></i>
-              <h4>دانلود PGN</h4>
+              <span>دانلود PGN</span>
               <a href="downloads.html">دریافت</a>
+            </div>
+            <div class="feature">
+              <i class="fas fa-chess-board"></i>
+              <span>گشایش‌ها</span>
+              <a href="openings.html">مطالعه کن</a>
+            </div>
+            <div class="feature">
+              <i class="fas fa-robot"></i>
+              <span>بازی با بات</span>
+              <a href="engine-game.html">برو تو میدان</a>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- مسیر یادگیری -->
-      <section class="learning-path">
-        <h2><i class="fas fa-road"></i> مسیر یادگیری</h2>
-        <div class="path-steps">
-          <div class="path-step">
-            <div class="step-num">۱</div>
-            <h4>اصول پایه</h4>
-            <p>
-              با <strong>دروس آموزشی</strong> شروع کن و قوانین، حرکت مهره‌ها و
-              اصول اولیه رو یاد بگیر.
-            </p>
-          </div>
-          <div class="path-step">
-            <div class="step-num">۲</div>
-            <h4>تاکتیک‌ها</h4>
-            <p>
-              با <strong>پازل روزانه</strong> و <strong>پازل راش</strong> چنگال،
-              سنجاق، کیش دوگانه و ترکیب‌ها رو تمرین کن.
-            </p>
-          </div>
-          <div class="path-step">
-            <div class="step-num">۳</div>
-            <h4>گشایش‌ها</h4>
-            <p>
-              در <strong>دانشنامه گشایش‌ها</strong> واریانت‌های اصلی رو با تحلیل
-              کامل مطالعه کن.
-            </p>
-          </div>
-          <div class="path-step">
-            <div class="step-num">۴</div>
-            <h4>آخربازی</h4>
-            <p>
-              با <strong>۱۰۰+ موقعیت عملی</strong> در بخش آخربازی‌ها، تکنیک‌های
-              پایان بازی رو مسلط شو.
-            </p>
-          </div>
+        <!-- کارت‌های تبلیغاتی -->
+        <div class="card promo-card">
+          <div class="promo-icon"><i class="fas fa-flag-checkered"></i></div>
+          <div class="promo-title">تمرین آخربازی</div>
+          <div class="promo-sub">+۱۰۰ موقعیت عملی برای تسلط بر پایان بازی</div>
+          <a href="endgames.html" class="btn-promo">
+            <i class="fas fa-play"></i> شروع تمرین
+          </a>
+        </div>
+
+        <div class="card promo-card">
+          <div class="promo-icon"><i class="fas fa-book"></i></div>
+          <div class="promo-title">دانشنامه گشایش‌ها</div>
+          <div class="promo-sub">تحلیل کامل ۵۰+ گشایش معروف با واریانت‌ها</div>
+          <a href="openings.html" class="btn-promo accent">
+            <i class="fas fa-search"></i> مطالعه کن
+          </a>
         </div>
       </section>
 
-      <!-- فوتر -->
       <div id="footer-placeholder"></div>
     </div>
 
     <script src="js/script.js"></script>
     <script src="js/puzzle.js"></script>
     <script>
-      // ============================================
-      // 🎨 اتصال به تنظیمات تم
-      // ============================================
       (function applySavedTheme() {
         try {
           const settings = JSON.parse(
             localStorage.getItem("chesshub_settings"),
           );
           if (settings && settings.theme) {
-            document.body.className = document.body.className
-              .split(" ")
-              .filter((cls) => !cls.startsWith("theme-"))
-              .join(" ");
             document.body.classList.add(`theme-${settings.theme}`);
           }
         } catch (e) {}
       })();
-
-      console.log("✅ ChessHub index.html loaded successfully");
     </script>
   </body>
 </html>

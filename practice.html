@@ -1,0 +1,953 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <title>ChessHub | باشگاه تمرین</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <style>
+      /* دقیقاً مشابه استایل پازل عجله‌ای */
+      .practice-area {
+        background: #ffffff;
+        border-radius: var(--radius-lg);
+        padding: 18px 20px 20px;
+        box-shadow: var(--shadow-md);
+        max-width: 750px;
+        margin: 0 auto 1.5rem;
+        border: 1px solid #e2e8f0;
+      }
+
+      .tab-selector {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+      }
+      .tab-btn {
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        padding: 8px 18px;
+        border-radius: var(--radius-sm);
+        font-weight: 700;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        font-size: 0.85rem;
+        font-family: "Vazir";
+        color: var(--text-light);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .tab-btn.active {
+        background: var(--accent);
+        color: white;
+        border-color: var(--accent-dark);
+        box-shadow:
+          0 4px 0 var(--accent-dark),
+          0 4px 12px rgba(49, 130, 206, 0.3);
+      }
+
+      .chips-group {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 15px;
+      }
+      .chip {
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        padding: 6px 14px;
+        border-radius: var(--radius-sm);
+        font-family: "Vazir";
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s;
+        color: var(--text-light);
+      }
+      .chip.active {
+        background: var(--accent);
+        color: white;
+        border-color: var(--accent-dark);
+      }
+
+      .stats-bar {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        padding: 8px 16px;
+        border-radius: var(--radius-md);
+        margin-bottom: 15px;
+        font-weight: 700;
+        gap: 8px;
+        color: var(--text-dark);
+        font-size: 0.85rem;
+      }
+      .stats-bar span {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .stats-bar i {
+        color: var(--accent);
+      }
+      .timer-display {
+        font-size: 1.5rem;
+        font-weight: 900;
+        color: var(--danger);
+        font-family: monospace;
+      }
+      .score-display {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: var(--success);
+      }
+
+      #chessboard {
+        display: grid;
+        grid-template-columns: repeat(8, 1fr);
+        aspect-ratio: 1/1;
+        max-width: 480px;
+        margin: 10px auto;
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+        box-shadow: var(--shadow-board);
+        border: 1px solid #cbd5e0;
+        touch-action: none;
+        user-select: none;
+      }
+      .square {
+        aspect-ratio: 1/1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        touch-action: none;
+        position: relative;
+      }
+      .square.light {
+        background-color: var(--board-light, #f0d9b5);
+      }
+      .square.dark {
+        background-color: var(--board-dark, #b58863);
+      }
+      .square.selected {
+        background-color: #f6e05e !important;
+      }
+      .square.hint-from {
+        background-color: rgba(49, 130, 206, 0.2) !important;
+        box-shadow: inset 0 0 0 3px rgba(49, 130, 206, 0.5);
+      }
+      .square.hint-to {
+        background-color: rgba(49, 130, 206, 0.4) !important;
+        box-shadow: inset 0 0 0 3px rgba(49, 130, 206, 0.9);
+      }
+      .piece-img {
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        user-select: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1;
+      }
+
+      .controls-center {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 12px;
+      }
+      .btn {
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        padding: 8px 20px;
+        border-radius: var(--radius-sm);
+        font-weight: 700;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-family: "Vazir";
+        color: var(--text-dark);
+      }
+      .btn-success {
+        background: var(--success);
+        color: white;
+        border: 1px solid #2f855a;
+        box-shadow: 0 4px 0 #2f855a;
+      }
+      .btn-success:hover {
+        background: #48bb78;
+        transform: translateY(-1px);
+      }
+      .btn-success:active {
+        transform: translateY(3px);
+        box-shadow: 0 1px 0 #2f855a;
+      }
+      .btn-danger {
+        background: var(--danger);
+        color: white;
+        border: 1px solid #c53030;
+        box-shadow: 0 4px 0 #c53030;
+      }
+      .btn-danger:hover {
+        background: #fc8181;
+        transform: translateY(-1px);
+      }
+
+      .message-box {
+        margin-top: 12px;
+        padding: 8px 14px;
+        border-radius: var(--radius-sm);
+        font-size: 0.85rem;
+        font-weight: 700;
+        animation: fadeIn 0.3s ease;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .info {
+        background: #f8fafc;
+        color: var(--text-light);
+        border: 1px solid #e2e8f0;
+      }
+      .loading {
+        background: #e0f2fe;
+        color: #0369a1;
+        border: 1px solid #90cdf4;
+      }
+      .success {
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #9ae6b4;
+      }
+      .error {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #feb2b2;
+      }
+
+      .tab-content {
+        display: none;
+      }
+      .tab-content.active {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div id="header-placeholder"></div>
+
+      <section class="app-hero">
+        <h1><i class="fas fa-dumbbell"></i> باشگاه تمرین هوشمند</h1>
+        <p>با دیتابیس واقعی پازل‌ها، نقاط ضعف خود را برطرف کنید!</p>
+      </section>
+
+      <div class="practice-area">
+        <div class="tab-selector">
+          <button class="tab-btn active" data-tab="weakness">
+            <i class="fas fa-bullseye"></i> نقاط ضعف
+          </button>
+          <button class="tab-btn" data-tab="endgame">
+            <i class="fas fa-flag-checkered"></i> آخربازی
+          </button>
+          <button class="tab-btn" data-tab="timetrial">
+            <i class="fas fa-stopwatch"></i> تایم تریال
+          </button>
+        </div>
+
+        <!-- تب ۱: نقاط ضعف -->
+        <div class="tab-content active" id="tab-weakness">
+          <div class="chips-group" id="weaknessChips">
+            <button class="chip active" data-theme="all">همه</button>
+            <button class="chip" data-theme="fork">چنگال</button>
+            <button class="chip" data-theme="pin">پین</button>
+            <button class="chip" data-theme="skewer">اسکیور</button>
+            <button class="chip" data-theme="discoveredAttack">
+              حمله کشف‌شده
+            </button>
+            <button class="chip" data-theme="deflection">منحرف کردن</button>
+            <button class="chip" data-theme="mate">کیش و مات</button>
+          </div>
+          <div class="stats-bar">
+            <span
+              ><i class="fas fa-tag"></i>
+              <span id="statTactic">تاکتیک: -</span></span
+            >
+            <span
+              ><i class="fas fa-chess-knight"></i>
+              <span id="statTurn">نوبت: -</span></span
+            >
+          </div>
+          <div id="chessboard"></div>
+          <div class="controls-center">
+            <button class="btn btn-success" id="loadWeaknessBtn">
+              <i class="fas fa-sync"></i> پازل جدید
+            </button>
+          </div>
+          <div class="message-box info" id="weaknessMsg">
+            در حال بارگذاری دیتابیس...
+          </div>
+        </div>
+
+        <!-- تب ۲: آخربازی -->
+        <div class="tab-content" id="tab-endgame">
+          <div class="chips-group" id="endgameChips">
+            <button class="chip active" data-theme="endgame">
+              همه آخربازی‌ها
+            </button>
+            <button class="chip" data-theme="rookEndgame">آخربازی رخ</button>
+            <button class="chip" data-theme="pawnEndgame">آخربازی پیاده</button>
+            <button class="chip" data-theme="queenEndgame">آخربازی وزیر</button>
+            <button class="chip" data-theme="backRankMate">مات ردیف آخر</button>
+          </div>
+          <div class="stats-bar">
+            <span
+              ><i class="fas fa-tag"></i>
+              <span id="statEndgame">نوع: -</span></span
+            >
+            <span
+              ><i class="fas fa-chess-knight"></i>
+              <span id="statTurnEnd">نوبت: -</span></span
+            >
+          </div>
+          <div id="chessboard" style="display: none"></div>
+          <!-- تخته مشترک است -->
+          <div class="controls-center">
+            <button class="btn btn-success" id="loadEndgameBtn">
+              <i class="fas fa-play"></i> موقعیت جدید
+            </button>
+          </div>
+          <div class="message-box info" id="endgameMsg">
+            در حال بارگذاری دیتابیس...
+          </div>
+        </div>
+
+        <!-- تب ۳: تایم تریال -->
+        <div class="tab-content" id="tab-timetrial">
+          <div class="stats-bar">
+            <span
+              ><i class="far fa-clock"></i>
+              <span class="timer-display" id="timerDisplay">03:00</span></span
+            >
+            <span
+              ><i class="fas fa-trophy"></i>
+              <span class="score-display" id="scoreDisplay"
+                >امتیاز: 0</span
+              ></span
+            >
+          </div>
+          <div id="chessboard" style="display: none"></div>
+          <div class="controls-center">
+            <button class="btn btn-success" id="startTrialBtn">
+              <i class="fas fa-bolt"></i> شروع تریال
+            </button>
+            <button
+              class="btn btn-danger"
+              id="stopTrialBtn"
+              style="display: none"
+            >
+              <i class="fas fa-stop"></i> توقف
+            </button>
+          </div>
+          <div class="message-box info" id="trialMsg">
+            برای شروع دکمه را بزنید...
+          </div>
+        </div>
+      </div>
+
+      <div id="footer-placeholder"></div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+      (function () {
+        "use strict";
+        (function applySavedTheme() {
+          try {
+            const s = JSON.parse(localStorage.getItem("chesshub_settings"));
+            if (s && s.theme) document.body.classList.add(`theme-${s.theme}`);
+          } catch (e) {}
+        })();
+
+        let game = new Chess();
+        let boardSquares = {};
+        let selectedSquare = null;
+        let isFlipped = false;
+        let pieceSet = "neo";
+        const pieceCodes = {
+          wk: "wk.png",
+          wq: "wq.png",
+          wr: "wr.png",
+          wb: "wb.png",
+          wn: "wn.png",
+          wp: "wp.png",
+          bk: "bk.png",
+          bq: "bq.png",
+          br: "br.png",
+          bb: "bb.png",
+          bn: "bn.png",
+          bp: "bp.png",
+        };
+        function getCurrentPieceSet() {
+          try {
+            const s = JSON.parse(localStorage.getItem("chesshub_settings"));
+            return s?.pieceSet || "neo";
+          } catch {
+            return "neo";
+          }
+        }
+
+        const boardDiv = document.getElementById("chessboard");
+
+        // --- رندر تخته ---
+        function buildBoard() {
+          boardDiv.innerHTML = "";
+          boardSquares = {};
+          for (let i = 0; i < 8; i++) {
+            for (let j = 0; j < 8; j++) {
+              const row = isFlipped ? 7 - i : i,
+                col = isFlipped ? 7 - j : j;
+              const sqName = String.fromCharCode(97 + col) + (8 - row);
+              const sq = document.createElement("div");
+              sq.className = `square ${(row + col) % 2 === 0 ? "light" : "dark"}`;
+              sq.dataset.square = sqName;
+              const img = document.createElement("img");
+              img.classList.add("piece-img");
+              img.draggable = false;
+              img.style.display = "none";
+              sq.appendChild(img);
+              boardDiv.appendChild(sq);
+              boardSquares[sqName] = { div: sq, img: img };
+            }
+          }
+          updateBoard();
+        }
+
+        function updateBoard() {
+          const b = game.board();
+          for (let i = 0; i < 8; i++) {
+            for (let j = 0; j < 8; j++) {
+              const row = isFlipped ? 7 - i : i,
+                col = isFlipped ? 7 - j : j;
+              const p = b[row][col];
+              const sqName = String.fromCharCode(97 + col) + (8 - row);
+              const sqData = boardSquares[sqName];
+              if (!sqData) continue;
+              sqData.div.classList.remove("selected");
+              if (p) {
+                const key =
+                  (p.color === "w" ? "w" : "b") + p.type.toLowerCase();
+                const src = `pieces/${pieceSet}/${pieceCodes[key]}`;
+                if (sqData.img.src.indexOf(src) === -1) sqData.img.src = src;
+                sqData.img.style.display = "block";
+              } else {
+                sqData.img.style.display = "none";
+              }
+            }
+          }
+          if (selectedSquare && boardSquares[selectedSquare])
+            boardSquares[selectedSquare].div.classList.add("selected");
+        }
+
+        // --- دیتابیس پازل‌ها ---
+        let allPuzzles = [];
+        let currentPuzzle = null;
+        let puzzleMoveIndex = 0;
+        let activeTab = "weakness";
+
+        async function loadPuzzleDatabase() {
+          try {
+            const ids = ["weaknessMsg", "endgameMsg"];
+            ids.forEach((id) => {
+              const el = document.getElementById(id);
+              el.className = "message-box loading";
+              el.innerHTML =
+                '<i class="fas fa-spinner fa-spin"></i> در حال بارگذاری دیتابیس...';
+            });
+
+            // استفاده از نام فایل صحیح: puzzles.txt
+            const response = await fetch("data/puzzles.txt");
+            if (!response.ok) throw new Error("File not found");
+            const text = await response.text();
+            const lines = text.split("\n");
+
+            allPuzzles = [];
+            for (let i = 1; i < lines.length; i++) {
+              const line = lines[i].trim();
+              if (!line) continue;
+
+              const parts = line.split(",");
+              if (parts.length < 8) continue;
+
+              const fen = parts[1];
+              const movesStr = parts[2];
+              const themes = parts[7];
+
+              if (!fen || !movesStr) continue;
+
+              const turn = fen.split(" ")[1];
+              const botColor = turn;
+              const userColor = botColor === "w" ? "b" : "w";
+
+              allPuzzles.push({
+                fen: fen,
+                moves: movesStr.split(" "),
+                themes: themes,
+                userColor: userColor,
+              });
+            }
+
+            ids.forEach((id) => {
+              document.getElementById(id).className = "message-box success";
+              document.getElementById(id).textContent = `دیتابیس آماده شد!`;
+            });
+            loadPuzzle("weakness");
+          } catch (e) {
+            console.error(e);
+            const ids = ["weaknessMsg", "endgameMsg"];
+            ids.forEach((id) => {
+              document.getElementById(id).className = "message-box error";
+              document.getElementById(id).textContent =
+                "خطا در بارگذاری data/puzzles.txt";
+            });
+          }
+        }
+
+        // --- تب‌ها ---
+        document.querySelectorAll(".tab-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            if (isTimeTrial && btn.dataset.tab !== "timetrial") {
+              alert("برای تغییر بخش، ابتدا تایم تریال را متوقف کنید!");
+              return;
+            }
+
+            // مخفی کردن تخته در تب‌های غیرفعال و نمایش در تب فعال
+            document
+              .querySelectorAll("#chessboard")
+              .forEach((b) => (b.style.display = "none"));
+            const activeContent = document.getElementById(
+              `tab-${btn.dataset.tab}`,
+            );
+            const activeBoard = activeContent.querySelector("#chessboard");
+            if (activeBoard) activeBoard.style.display = "grid";
+
+            // جابجایی المان تخته به تب فعال
+            activeBoard.parentNode.insertBefore(boardDiv, activeBoard);
+            activeBoard.remove(); // حذف تگ خالی جایگزین
+            boardDiv.id = "chessboard"; // اطمینان از ID
+
+            document
+              .querySelectorAll(".tab-btn")
+              .forEach((b) => b.classList.remove("active"));
+            document
+              .querySelectorAll(".tab-content")
+              .forEach((c) => c.classList.remove("active"));
+            btn.classList.add("active");
+            activeTab = btn.dataset.tab;
+            activeContent.classList.add("active");
+
+            buildBoard(); // رندر مجدد تخته در موقعیت جدید
+          });
+        });
+
+        document.querySelectorAll("#weaknessChips .chip").forEach((c) =>
+          c.addEventListener("click", () => {
+            document
+              .querySelectorAll("#weaknessChips .chip")
+              .forEach((b) => b.classList.remove("active"));
+            c.classList.add("active");
+            if (!isTimeTrial) loadPuzzle("weakness");
+          }),
+        );
+
+        document.querySelectorAll("#endgameChips .chip").forEach((c) =>
+          c.addEventListener("click", () => {
+            document
+              .querySelectorAll("#endgameChips .chip")
+              .forEach((b) => b.classList.remove("active"));
+            c.classList.add("active");
+            loadPuzzle("endgame");
+          }),
+        );
+
+        document
+          .getElementById("loadWeaknessBtn")
+          .addEventListener("click", () => loadPuzzle("weakness"));
+        document
+          .getElementById("loadEndgameBtn")
+          .addEventListener("click", () => loadPuzzle("endgame"));
+
+        function loadPuzzle(mode) {
+          if (allPuzzles.length === 0) return;
+
+          let theme = "all";
+          let msgId = "weaknessMsg";
+          let statTacticId = "statTactic";
+          let statTurnId = "statTurn";
+
+          if (mode === "weakness" || mode === "timetrial") {
+            theme = document.querySelector("#weaknessChips .chip.active")
+              .dataset.theme;
+            msgId = isTimeTrial ? "trialMsg" : "weaknessMsg";
+          } else if (mode === "endgame") {
+            theme = document.querySelector("#endgameChips .chip.active").dataset
+              .theme;
+            msgId = "endgameMsg";
+            statTacticId = "statEndgame";
+            statTurnId = "statTurnEnd";
+          }
+
+          let pool = allPuzzles;
+          if (theme !== "all") {
+            // اصلاح فیلتر: تطبیق دقیق کلمه در لیست تم‌ها
+            pool = allPuzzles.filter((p) => {
+              if (!p.themes) return false;
+              const themeArray = p.themes.trim().split(/\s+/);
+              return themeArray.includes(theme);
+            });
+          }
+
+          if (pool.length === 0) {
+            document.getElementById(msgId).className = "message-box error";
+            document.getElementById(msgId).textContent =
+              "پازلی برای این دسته یافت نشد.";
+            return;
+          }
+
+          currentPuzzle = pool[Math.floor(Math.random() * pool.length)];
+          game = new Chess(currentPuzzle.fen);
+          isFlipped = currentPuzzle.userColor === "b";
+          puzzleMoveIndex = 0;
+          selectedSquare = null;
+          buildBoard();
+
+          document.getElementById(statTacticId).textContent =
+            `تاکتیک: ${currentPuzzle.themes.split(" ")[0] || "-"}`;
+
+          const colorName = currentPuzzle.userColor === "w" ? "سفید" : "سیاه";
+          document.getElementById(statTurnId).textContent =
+            `نوبت: ${colorName}`;
+
+          document.getElementById(msgId).className = "message-box info";
+          document.getElementById(msgId).textContent =
+            `بات حرکت اول را انجام داد. نوبت شماست (${colorName}).`;
+
+          setTimeout(() => playBotMove(), 800);
+        }
+
+        function playBotMove() {
+          if (!currentPuzzle || puzzleMoveIndex >= currentPuzzle.moves.length)
+            return;
+
+          const uci = currentPuzzle.moves[puzzleMoveIndex];
+          const from = uci.slice(0, 2),
+            to = uci.slice(2, 4);
+          game.move({ from, to, promotion: uci[4] || "q" });
+          puzzleMoveIndex++;
+
+          if (boardSquares[from])
+            boardSquares[from].div.classList.add("hint-from");
+          if (boardSquares[to]) boardSquares[to].div.classList.add("hint-to");
+          updateBoard();
+
+          setTimeout(() => {
+            if (boardSquares[from])
+              boardSquares[from].div.classList.remove("hint-from");
+            if (boardSquares[to])
+              boardSquares[to].div.classList.remove("hint-to");
+          }, 1500);
+        }
+
+        // --- مود ۳: تایم تریال ---
+        let isTimeTrial = false,
+          timeLeft = 180,
+          score = 0,
+          trialInterval = null;
+        document
+          .getElementById("startTrialBtn")
+          .addEventListener("click", () => {
+            if (allPuzzles.length === 0) {
+              alert("ابتدا صبر کنید تا دیتابیس لود شود!");
+              return;
+            }
+
+            isTimeTrial = true;
+            timeLeft = 180;
+            score = 0;
+            document.getElementById("startTrialBtn").style.display = "none";
+            document.getElementById("stopTrialBtn").style.display =
+              "inline-flex";
+
+            document
+              .querySelectorAll("#weaknessChips .chip")
+              .forEach((b) => b.classList.remove("active"));
+            document
+              .querySelector('#weaknessChips .chip[data-theme="all"]')
+              .classList.add("active");
+
+            loadPuzzle("timetrial");
+            updateTimerUI();
+
+            trialInterval = setInterval(() => {
+              timeLeft--;
+              updateTimerUI();
+              if (timeLeft <= 0) stopTimeTrial(true);
+            }, 1000);
+          });
+
+        function stopTimeTrial(isTimeUp = false) {
+          isTimeTrial = false;
+          clearInterval(trialInterval);
+          document.getElementById("startTrialBtn").style.display =
+            "inline-flex";
+          document.getElementById("stopTrialBtn").style.display = "none";
+          document.getElementById("trialMsg").className = "message-box success";
+          document.getElementById("trialMsg").textContent = isTimeUp
+            ? `زمان تمام شد! امتیاز شما: ${score}`
+            : `بازی متوقف شد. امتیاز شما: ${score}`;
+        }
+
+        function updateTimerUI() {
+          const m = Math.floor(timeLeft / 60)
+            .toString()
+            .padStart(2, "0");
+          const s = (timeLeft % 60).toString().padStart(2, "0");
+          document.getElementById("timerDisplay").textContent = `${m}:${s}`;
+          document.getElementById("scoreDisplay").textContent =
+            `امتیاز: ${score}`;
+        }
+
+        document
+          .getElementById("stopTrialBtn")
+          .addEventListener("click", () => stopTimeTrial(false));
+
+        // --- منطق حرکت و درگ‌اند‌دراپ ---
+        let dragStart = null,
+          isDragging = false,
+          dragClone = null,
+          rafId = null,
+          lastX = 0,
+          lastY = 0,
+          cloneSize = 0;
+        function createDragClone(sq, cx, cy) {
+          const d = boardSquares[sq];
+          if (!d || d.img.style.display == "none") return null;
+          const r = d.div.getBoundingClientRect();
+          cloneSize = r.width;
+          const c = d.img.cloneNode(true);
+          c.style.cssText = `position:fixed;pointer-events:none;z-index:9999;width:${cloneSize}px;height:${cloneSize}px;left:0;top:0;transform:translate3d(${cx - cloneSize / 2}px,${cy - cloneSize / 2}px,0) scale(1.05);`;
+          document.body.appendChild(c);
+          d.img.style.opacity = "0";
+          return c;
+        }
+        function updDrag() {
+          if (dragClone)
+            dragClone.style.transform = `translate3d(${lastX - cloneSize / 2}px,${lastY - cloneSize / 2}px,0) scale(1.05)`;
+          rafId = null;
+        }
+        function onDown(e) {
+          const cx = e.touches ? e.touches[0].clientX : e.clientX,
+            cy = e.touches ? e.touches[0].clientY : e.clientY;
+          const el = document.elementFromPoint(cx, cy);
+          const sq = el?.closest?.(".square");
+          if (!sq) return;
+          const s = sq.dataset.square;
+          const p = game.get(s);
+          if (p) {
+            e.preventDefault();
+            dragStart = s;
+            isDragging = true;
+            dragClone = createDragClone(s, cx, cy);
+          } else if (selectedSquare) {
+            makeMove(selectedSquare, s);
+            selectedSquare = null;
+            updateBoard();
+          }
+        }
+        function onMove(e) {
+          if (!isDragging) return;
+          e.preventDefault();
+          lastX = e.touches ? e.touches[0].clientX : e.clientX;
+          lastY = e.touches ? e.touches[0].clientY : e.clientY;
+          if (!rafId) rafId = requestAnimationFrame(updDrag);
+        }
+        function onUp(e) {
+          if (!isDragging || !dragStart) {
+            cleanup();
+            return;
+          }
+          const cx = e.changedTouches ? e.changedTouches[0].clientX : e.clientX,
+            cy = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+          if (dragClone) {
+            dragClone.remove();
+            dragClone = null;
+          }
+          if (boardSquares[dragStart])
+            boardSquares[dragStart].img.style.opacity = "1";
+          const el = document.elementFromPoint(cx, cy);
+          const t = el?.closest?.(".square");
+          const to = t ? t.dataset.square : null;
+          if (to && to !== dragStart) {
+            makeMove(dragStart, to);
+          } else if (to === dragStart) {
+            selectedSquare = selectedSquare === dragStart ? null : dragStart;
+            updateBoard();
+          }
+          cleanup();
+        }
+        function cleanup() {
+          if (dragClone) {
+            dragClone.remove();
+            dragClone = null;
+          }
+          if (rafId) {
+            cancelAnimationFrame(rafId);
+            rafId = null;
+          }
+          dragStart = null;
+          isDragging = false;
+        }
+        function onClick(e) {
+          if (isDragging) return;
+          const sq = e.target.closest?.(".square");
+          if (!sq) return;
+          const s = sq.dataset.square;
+          if (selectedSquare === null) {
+            const p = game.get(s);
+            if (p) {
+              selectedSquare = s;
+              updateBoard();
+            }
+          } else {
+            makeMove(selectedSquare, s);
+            selectedSquare = null;
+            updateBoard();
+          }
+        }
+
+        async function makeMove(from, to, promo = "q") {
+          if (!currentPuzzle || puzzleMoveIndex >= currentPuzzle.moves.length)
+            return;
+
+          const move = game.move({ from, to, promotion: promo });
+          if (!move) return;
+
+          const playedUci = move.from + move.to + (move.promotion || "");
+          const expectedUci = currentPuzzle.moves[puzzleMoveIndex];
+          const msgId = isTimeTrial
+            ? "trialMsg"
+            : activeTab === "endgame"
+              ? "endgameMsg"
+              : "weaknessMsg";
+
+          if (playedUci === expectedUci) {
+            puzzleMoveIndex++;
+            selectedSquare = null;
+            updateBoard();
+
+            if (puzzleMoveIndex < currentPuzzle.moves.length) {
+              if (isTimeTrial) {
+                document.getElementById("trialMsg").className =
+                  "message-box info";
+                document.getElementById("trialMsg").textContent =
+                  "درست! بات در حال فکر کردن...";
+              }
+              setTimeout(() => playBotMove(), 600);
+            } else {
+              // پازل حل شد!
+              if (isTimeTrial) {
+                timeLeft += 5;
+                score += 10;
+                updateTimerUI();
+                document.getElementById("trialMsg").className =
+                  "message-box success";
+                document.getElementById("trialMsg").textContent =
+                  "آفرین! +10 امتیاز و +5 ثانیه. پازل بعدی...";
+                setTimeout(() => loadPuzzle("timetrial"), 1500); // رفتن خودکار به پازل بعدی
+              } else {
+                document.getElementById(msgId).className =
+                  "message-box success";
+                document.getElementById(msgId).textContent =
+                  "آفرین! درست حل شد. پازل بعدی...";
+                setTimeout(() => loadPuzzle(activeTab), 1500); // رفتن خودکار به پازل بعدی
+              }
+            }
+          } else {
+            game.undo();
+            updateBoard();
+            if (isTimeTrial) {
+              timeLeft -= 3;
+              score = Math.max(0, score - 5);
+              updateTimerUI();
+              document.getElementById("trialMsg").className =
+                "message-box error";
+              document.getElementById("trialMsg").textContent =
+                "اشتباه! -5 امتیاز و -3 ثانیه";
+            } else {
+              document.getElementById(msgId).className = "message-box error";
+              document.getElementById(msgId).textContent =
+                "اشتباه! دوباره فکر کن.";
+            }
+          }
+        }
+
+        // --- مقداردهی اولیه ---
+        async function init() {
+          pieceSet = getCurrentPieceSet();
+          document.addEventListener("pieceSetChanged", () => {
+            pieceSet = getCurrentPieceSet();
+            updateBoard();
+          });
+          buildBoard();
+
+          await loadPuzzleDatabase();
+
+          boardDiv.addEventListener("mousedown", onDown);
+          window.addEventListener("mousemove", onMove);
+          window.addEventListener("mouseup", onUp);
+          boardDiv.addEventListener("touchstart", onDown, { passive: false });
+          boardDiv.addEventListener("touchmove", onMove, { passive: false });
+          boardDiv.addEventListener("touchend", onUp, { passive: false });
+          boardDiv.addEventListener("click", onClick);
+        }
+        if (document.readyState === "loading")
+          document.addEventListener("DOMContentLoaded", init);
+        else init();
+      })();
+    </script>
+  </body>
+</html>

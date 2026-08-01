@@ -1,0 +1,2704 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <title>ChessHub | آنالیز حرفه‌ای</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <style>
+      .analysis-wrapper {
+        display: grid;
+        grid-template-columns: 320px 1fr 320px;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+      .analysis-card {
+        background: #ffffff;
+        border-radius: var(--radius-lg);
+        padding: 1.2rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid #e2e8f0;
+        height: fit-content;
+      }
+      .analysis-card h3 {
+        font-size: 1.1rem;
+        color: var(--primary-dark);
+        border-right: 4px solid var(--accent);
+        padding-right: 10px;
+        margin-bottom: 1rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .engine-status {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: var(--radius-md);
+        padding: 1rem;
+        text-align: center;
+        margin-bottom: 1rem;
+      }
+      .eval-text {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--primary-dark);
+        font-family: monospace;
+        direction: ltr;
+      }
+      .best-move {
+        font-size: 0.9rem;
+        color: var(--text-light);
+        margin-top: 0.5rem;
+        font-weight: 600;
+        min-height: 24px;
+      }
+      .progress-track {
+        width: 100%;
+        height: 6px;
+        background: #e2e8f0;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 0.7rem;
+        display: none;
+      }
+      .progress-fill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, var(--accent), var(--accent-dark));
+        transition: width 0.25s ease;
+      }
+      .input-group {
+        margin-bottom: 1rem;
+      }
+      .input-label {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--text-light);
+        margin-bottom: 0.5rem;
+        display: block;
+      }
+      select.text-input {
+        cursor: pointer;
+      }
+      .text-input {
+        width: 100%;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        padding: 0.6rem;
+        border-radius: var(--radius-sm);
+        font-family: monospace;
+        font-size: 0.8rem;
+        outline: none;
+        color: var(--text-dark);
+        resize: vertical;
+        min-height: 80px;
+        direction: ltr;
+      }
+      .text-input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.2);
+      }
+      .btn-group-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+      }
+      .controls-grid-6 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+      }
+      .btn-full {
+        width: 100%;
+        justify-content: center;
+        margin-top: 0.5rem;
+      }
+      .btn {
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-sm);
+        font-weight: 700;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-family: "Vazir";
+        color: var(--text-dark);
+        justify-content: center;
+      }
+      .btn:hover {
+        background: #e2e8f0;
+        border-color: #cbd5e0;
+      }
+      .btn:active {
+        transform: scale(0.98);
+      }
+      .btn-success {
+        background: var(--success);
+        color: white;
+        border: 1px solid #2f855a;
+        box-shadow: 0 4px 0 #2f855a;
+      }
+      .btn-success:hover {
+        background: #48bb78;
+        transform: translateY(-1px);
+      }
+      .btn-success:active {
+        transform: translateY(3px);
+        box-shadow: 0 1px 0 #2f855a;
+      }
+      .btn-toggle.active {
+        background: var(--danger);
+        color: white;
+        border-color: #c53030;
+        box-shadow: 0 4px 0 #c53030;
+      }
+
+      .board-main {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+      }
+      .board-row {
+        display: flex;
+        gap: 0.6rem;
+        align-items: stretch;
+      }
+      .eval-bar-wrapper {
+        width: 26px;
+        min-width: 26px;
+        border-radius: 6px;
+        overflow: hidden;
+        background: #2d3748;
+        border: 1px solid #1a202c;
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        position: relative;
+      }
+      .eval-bar-white {
+        background: #f7fafc;
+        width: 100%;
+        height: 50%;
+        transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .eval-bar-value {
+        position: absolute;
+        bottom: 4px;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-size: 0.6rem;
+        font-weight: 800;
+        color: #2d3748;
+        font-family: monospace;
+        direction: ltr;
+        pointer-events: none;
+      }
+      .board-wrapper-analysis {
+        background: #ffffff;
+        padding: 0.5rem;
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-md);
+        border: 1px solid #e2e8f0;
+        touch-action: none;
+        position: relative;
+        flex: 1;
+      }
+      #chessboard {
+        width: 100%;
+        max-width: 100%;
+        aspect-ratio: 1/1;
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+        box-shadow: var(--shadow-board);
+        border: 1px solid #cbd5e0;
+        touch-action: none;
+        display: grid;
+        grid-template-columns: repeat(8, 1fr);
+        position: relative;
+      }
+      .square {
+        aspect-ratio: 1/1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        touch-action: none;
+        position: relative;
+      }
+      .square.light {
+        background-color: var(--board-light, #f0d9b5);
+      }
+      .square.dark {
+        background-color: var(--board-dark, #b58863);
+      }
+      .square.selected {
+        background-color: #f6e05e !important;
+      }
+      .square.hint-from {
+        background-color: rgba(49, 130, 206, 0.2) !important;
+        box-shadow: inset 0 0 0 3px rgba(49, 130, 206, 0.5);
+      }
+      .square.hint-to {
+        background-color: rgba(49, 130, 206, 0.4) !important;
+        box-shadow: inset 0 0 0 3px rgba(49, 130, 206, 0.9);
+      }
+      .piece-img {
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        user-select: none;
+        will-change: transform;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1;
+      }
+
+      .move-icon-svg {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        width: 45%;
+        height: 45%;
+        min-width: 18px;
+        min-height: 18px;
+        z-index: 2;
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+        pointer-events: none;
+      }
+      .move-icon-svg svg {
+        width: 100%;
+        height: 100%;
+      }
+
+      .review-text-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: var(--radius-sm);
+        padding: 1rem;
+        font-size: 0.9rem;
+        color: var(--text-dark);
+        line-height: 1.6;
+        min-height: 80px;
+        max-height: 150px;
+        overflow-y: auto;
+        margin-top: 0.5rem;
+        font-weight: 600;
+      }
+
+      .history-list {
+        max-height: 400px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 0.1rem;
+        padding-left: 4px;
+      }
+      .move-item-row {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-family: monospace;
+        font-size: 0.88rem;
+        padding: 0.2rem 0.3rem;
+        border-radius: var(--radius-sm);
+      }
+      .move-num {
+        color: var(--text-light);
+        font-weight: 700;
+        min-width: 28px;
+      }
+      .move-half {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        padding: 0.25rem 0.55rem;
+        border-radius: 6px;
+        cursor: pointer;
+        color: var(--text-dark);
+        border: 1px solid transparent;
+      }
+      .move-half:hover {
+        background: #f1f5f9;
+      }
+      .move-half.active {
+        background: #ebf8ff;
+        color: var(--accent-dark, #2b6cb0);
+        font-weight: 800;
+        border-color: var(--accent);
+      }
+      .move-mini-icon {
+        width: 18px;
+        height: 18px;
+        display: inline-block;
+      }
+      .move-mini-icon svg {
+        width: 100%;
+        height: 100%;
+      }
+      .empty-history {
+        color: var(--text-light);
+        font-size: 0.8rem;
+        text-align: center;
+        padding: 1rem;
+      }
+
+      .review-summary-card {
+        display: none;
+        margin-bottom: 1.5rem;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+      }
+      .opening-banner {
+        background: linear-gradient(90deg, var(--primary-dark), var(--accent));
+        color: #fff;
+        padding: 0.9rem 1.2rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.95rem;
+      }
+      .summary-columns {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+      .summary-col {
+        padding: 1.2rem;
+      }
+      .summary-col.white-col {
+        border-left: 1px solid #e2e8f0;
+      }
+      .summary-col h4 {
+        margin-bottom: 0.6rem;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-weight: 800;
+        color: var(--primary-dark);
+      }
+      .accuracy-value {
+        font-size: 2rem;
+        font-weight: 900;
+        color: var(--primary-dark);
+        font-family: monospace;
+        direction: ltr;
+      }
+      .accuracy-meter-track {
+        width: 100%;
+        height: 8px;
+        background: #edf2f7;
+        border-radius: 6px;
+        overflow: hidden;
+        margin: 0.5rem 0 0.35rem;
+      }
+      .accuracy-meter-fill {
+        height: 100%;
+        width: 0%;
+        border-radius: 6px;
+        transition: width 0.6s ease;
+        background: #a0aec0;
+      }
+      .avg-cp {
+        font-size: 0.75rem;
+        color: var(--text-light);
+        margin-bottom: 0.8rem;
+      }
+      .class-breakdown {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+      }
+      .class-chip {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 0.25rem 0.6rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--text-dark);
+      }
+      .class-chip .chip-icon {
+        width: 18px;
+        height: 18px;
+      }
+      .class-chip .chip-icon svg {
+        width: 100%;
+        height: 100%;
+      }
+
+      @media (max-width: 1024px) {
+        .analysis-wrapper {
+          grid-template-columns: 1fr;
+        }
+        .history-list {
+          max-height: 200px;
+        }
+        .summary-columns {
+          grid-template-columns: 1fr;
+        }
+        .summary-col.white-col {
+          border-left: none;
+          border-bottom: 1px solid #e2e8f0;
+        }
+      }
+      @media (max-width: 640px) {
+        .eval-bar-wrapper {
+          width: 18px;
+          min-width: 18px;
+        }
+        .eval-bar-value {
+          font-size: 0.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div id="header-placeholder"></div>
+
+      <section class="app-hero">
+        <h1><i class="fas fa-chart-line"></i> تخته آنالیز حرفه‌ای</h1>
+        <p>تحلیل عمیق بازی‌ها با موتور استوک‌فیش و موتور متن‌ساز ChessReview</p>
+      </section>
+
+      <div class="review-summary-card" id="reviewSummary">
+        <div class="opening-banner">
+          <i class="fas fa-book"></i><span id="openingName">-</span>
+        </div>
+        <div class="summary-columns">
+          <div class="summary-col white-col">
+            <h4><i class="fas fa-chess-king"></i> دقت سفید</h4>
+            <div class="accuracy-value" id="accWhiteValue">-</div>
+            <div class="accuracy-meter-track">
+              <div class="accuracy-meter-fill" id="meterWhite"></div>
+            </div>
+            <div class="avg-cp" id="cpWhiteValue">میانگین افت: -</div>
+            <div class="class-breakdown" id="classWhite"></div>
+          </div>
+          <div class="summary-col black-col">
+            <h4><i class="fas fa-chess-king"></i> دقت سیاه</h4>
+            <div class="accuracy-value" id="accBlackValue">-</div>
+            <div class="accuracy-meter-track">
+              <div class="accuracy-meter-fill" id="meterBlack"></div>
+            </div>
+            <div class="avg-cp" id="cpBlackValue">میانگین افت: -</div>
+            <div class="class-breakdown" id="classBlack"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="analysis-wrapper">
+        <div class="analysis-card">
+          <h3><i class="fas fa-robot"></i> موتور تحلیل‌گر</h3>
+          <div class="engine-status">
+            <div class="eval-text" id="evalText">0.0</div>
+            <div class="best-move" id="bestMoveText">موتور خاموش است</div>
+            <div class="progress-track" id="progressTrack">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+          </div>
+          <button class="btn btn-toggle btn-full" id="engineToggleBtn">
+            <i class="fas fa-power-off"></i> روشن کردن موتور زنده
+          </button>
+
+          <div class="input-group" style="margin-top: 1.2rem">
+            <span class="input-label">عمق تحلیل:</span>
+            <select class="text-input" id="depthSelect">
+              <option value="12">سریع (عمق ۱۲)</option>
+              <option value="15" selected>متعادل (عمق ۱۵)</option>
+              <option value="18">دقیق (عمق ۱۸)</option>
+              <option value="22">عمیق (عمق ۲۲)</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <span class="input-label">بارگذاری موقعیت با FEN:</span>
+            <textarea
+              class="text-input"
+              id="fenInput"
+              style="min-height: 45px"
+              placeholder="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+            ></textarea>
+            <div class="btn-group-grid">
+              <button class="btn" id="loadFenBtn">
+                <i class="fas fa-map-marker-alt"></i> بارگذاری
+              </button>
+              <button class="btn" id="copyFenBtn">
+                <i class="fas fa-copy"></i> کپی FEN
+              </button>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <span class="input-label">وارد کردن PGN برای مرور بازی:</span>
+            <textarea
+              class="text-input"
+              id="pgnInput"
+              placeholder="کد PGN بازی را اینجا پیست کنید..."
+            ></textarea>
+            <button class="btn btn-success btn-full" id="reviewGameBtn">
+              <i class="fas fa-play-circle"></i> مرور بازی
+            </button>
+          </div>
+
+          <div class="input-group">
+            <span class="input-label">خروجی PGN بازی فعلی:</span>
+            <textarea
+              class="text-input"
+              id="pgnOutput"
+              readonly
+              style="min-height: 60px"
+            ></textarea>
+            <div class="btn-group-grid">
+              <button class="btn" id="copyPgnBtn">
+                <i class="fas fa-copy"></i> کپی
+              </button>
+              <button class="btn" id="downloadPgnBtn">
+                <i class="fas fa-download"></i> دانلود
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="board-main">
+          <div class="board-row">
+            <div class="eval-bar-wrapper">
+              <div class="eval-bar-white" id="evalBarWhite"></div>
+              <div class="eval-bar-value" id="evalBarValueText">0.0</div>
+            </div>
+            <div class="board-wrapper-analysis">
+              <div id="chessboard"></div>
+            </div>
+          </div>
+          <div class="controls-grid-6">
+            <button class="btn" id="jumpStartBtn">
+              <i class="fas fa-fast-backward"></i> ابتدا
+            </button>
+            <button class="btn" id="undoBtn">
+              <i class="fas fa-step-backward"></i> قبلی
+            </button>
+            <button class="btn" id="redoBtn">
+              <i class="fas fa-step-forward"></i> بعدی
+            </button>
+            <button class="btn" id="jumpEndBtn">
+              <i class="fas fa-fast-forward"></i> پایان
+            </button>
+            <button class="btn" id="flipBtn">
+              <i class="fas fa-sync-alt"></i> چرخاندن
+            </button>
+            <button class="btn" id="resetBtn">
+              <i class="fas fa-trash"></i> شروع مجدد
+            </button>
+          </div>
+
+          <div class="analysis-card">
+            <h3><i class="fas fa-comment-dots"></i> تحلیل حرکت</h3>
+            <div class="review-text-box" id="reviewTextBox">
+              تحلیل حرکات در اینجا نمایش داده می‌شود...
+            </div>
+          </div>
+        </div>
+
+        <div class="analysis-card">
+          <h3><i class="fas fa-history"></i> حرکات</h3>
+          <div class="history-list" id="historyList">
+            <div class="empty-history">هنوز حرکتی ثبت نشده</div>
+          </div>
+        </div>
+      </div>
+      <div id="footer-placeholder"></div>
+    </div>
+
+    <script src="js/script.js"></script>
+
+    <!-- ============================================ -->
+    <!-- 🧠 کد موتور متن‌ساز ChessReview (بدون نیاز به فایل خارجی) -->
+    <!-- ============================================ -->
+    <script>
+      (function (root, factory) {
+        if (typeof module !== "undefined" && module.exports) {
+          module.exports = factory();
+        } else {
+          root.ChessReview = factory();
+        }
+      })(typeof self !== "undefined" ? self : this, function () {
+        "use strict";
+        const PIECE_VALUE = { p: 1, n: 2, b: 3, r: 4, q: 5, k: 6 };
+        const PIECE_NAME_EN = {
+          k: "King",
+          q: "Queen",
+          r: "Rook",
+          b: "Bishop",
+          n: "Knight",
+          p: "Pawn",
+        };
+        const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
+
+        function sqToFR(sq) {
+          return { f: sq.charCodeAt(0) - 97, r: parseInt(sq[1], 10) - 1 };
+        }
+        function frToSq(f, r) {
+          if (f < 0 || f > 7 || r < 0 || r > 7) return null;
+          return FILES[f] + (r + 1);
+        }
+        function otherColor(c) {
+          return c === "w" ? "b" : "w";
+        }
+
+        function boardMapFrom(chess) {
+          const b = chess.board();
+          const map = {};
+          for (let row = 0; row < 8; row++) {
+            for (let col = 0; col < 8; col++) {
+              const piece = b[row][col];
+              if (piece) {
+                const file = col,
+                  rank = 7 - row;
+                map[frToSq(file, rank)] = {
+                  type: piece.type,
+                  color: piece.color,
+                };
+              }
+            }
+          }
+          return map;
+        }
+
+        const KNIGHT_D = [
+          [1, 2],
+          [2, 1],
+          [2, -1],
+          [1, -2],
+          [-1, -2],
+          [-2, -1],
+          [-2, 1],
+          [-1, 2],
+        ];
+        const KING_D = [
+          [1, 0],
+          [1, 1],
+          [0, 1],
+          [-1, 1],
+          [-1, 0],
+          [-1, -1],
+          [0, -1],
+          [1, -1],
+        ];
+        const BISHOP_DIRS = [
+          [1, 1],
+          [1, -1],
+          [-1, 1],
+          [-1, -1],
+        ];
+        const ROOK_DIRS = [
+          [1, 0],
+          [-1, 0],
+          [0, 1],
+          [0, -1],
+        ];
+        const QUEEN_DIRS = BISHOP_DIRS.concat(ROOK_DIRS);
+
+        function attacksFrom(map, sq) {
+          const piece = map[sq];
+          if (!piece) return [];
+          const { f, r } = sqToFR(sq);
+          const out = [];
+          if (piece.type === "n") {
+            for (const [df, dr] of KNIGHT_D) {
+              const t = frToSq(f + df, r + dr);
+              if (t) out.push(t);
+            }
+          } else if (piece.type === "k") {
+            for (const [df, dr] of KING_D) {
+              const t = frToSq(f + df, r + dr);
+              if (t) out.push(t);
+            }
+          } else if (piece.type === "p") {
+            const dir = piece.color === "w" ? 1 : -1;
+            for (const df of [-1, 1]) {
+              const t = frToSq(f + df, r + dir);
+              if (t) out.push(t);
+            }
+          } else {
+            const dirs =
+              piece.type === "b"
+                ? BISHOP_DIRS
+                : piece.type === "r"
+                  ? ROOK_DIRS
+                  : QUEEN_DIRS;
+            for (const [df, dr] of dirs) {
+              let nf = f + df,
+                nr = r + dr;
+              while (true) {
+                const t = frToSq(nf, nr);
+                if (!t) break;
+                out.push(t);
+                if (map[t]) break;
+                nf += df;
+                nr += dr;
+              }
+            }
+          }
+          return out;
+        }
+
+        function attackers(map, color, sq) {
+          const out = [];
+          for (const s in map) {
+            const p = map[s];
+            if (p.color !== color) continue;
+            if (attacksFrom(map, s).indexOf(sq) !== -1) out.push(s);
+          }
+          return out;
+        }
+        function isDefended(map, sq, byColor, returnDefenders) {
+          const piece = map[sq];
+          if (!piece) return returnDefenders ? [] : false;
+          const color = byColor || piece.color;
+          const defs = attackers(map, color, sq);
+          return returnDefenders ? defs : defs.length > 0;
+        }
+        function isHanging(map, sq, capturableBy) {
+          const piece = map[sq];
+          if (!piece) return false;
+          if (capturableBy === undefined) {
+            if (isDefended(map, sq)) return false;
+            return attackers(map, otherColor(piece.color), sq).length > 0;
+          }
+          const defenderColor = otherColor(capturableBy);
+          if (isDefended(map, sq, defenderColor)) return false;
+          return attackers(map, capturableBy, sq).length > 0;
+        }
+        function checkForHangingPieces(map) {
+          const hanging = [];
+          for (const sq in map) {
+            const piece = map[sq];
+            if (
+              !isDefended(map, sq) &&
+              attackers(map, otherColor(piece.color), sq).length > 0
+            ) {
+              hanging.push(sq);
+            }
+          }
+          return hanging;
+        }
+        function findKing(map, color) {
+          for (const sq in map) {
+            if (map[sq].type === "k" && map[sq].color === color) return sq;
+          }
+          return null;
+        }
+        function isPinned(map, color, sq) {
+          const piece = map[sq];
+          if (!piece || piece.color !== color) return false;
+          const kingSq = findKing(map, color);
+          if (!kingSq || kingSq === sq) return false;
+          const kfr = sqToFR(kingSq),
+            pfr = sqToFR(sq);
+          const df = Math.sign(pfr.f - kfr.f),
+            dr = Math.sign(pfr.r - kfr.r);
+          if (df === 0 && dr === 0) return false;
+          if (
+            !(
+              df === 0 ||
+              dr === 0 ||
+              Math.abs(pfr.f - kfr.f) === Math.abs(pfr.r - kfr.r)
+            )
+          )
+            return false;
+          let f = kfr.f + df,
+            r = kfr.r + dr;
+          let sawPiece = false;
+          while (true) {
+            const t = frToSq(f, r);
+            if (!t) return false;
+            if (t === sq) {
+              sawPiece = true;
+              f += df;
+              r += dr;
+              continue;
+            }
+            const occ = map[t];
+            if (occ) {
+              if (!sawPiece) return false;
+              if (occ.color === color) return false;
+              const isDiag = df !== 0 && dr !== 0;
+              if (isDiag) return occ.type === "b" || occ.type === "q";
+              return occ.type === "r" || occ.type === "q";
+            }
+            f += df;
+            r += dr;
+          }
+        }
+        function isEndgame(map) {
+          let m = 0;
+          for (const sq in map) {
+            if (["r", "b", "n", "q"].indexOf(map[sq].type) !== -1) m++;
+          }
+          return m < 6;
+        }
+
+        function makePos(ChessCtor, fen) {
+          const chess = new ChessCtor(fen);
+          return {
+            chess: chess,
+            fen: chess.fen(),
+            map: boardMapFrom(chess),
+            turn: chess.turn(),
+          };
+        }
+        function posAfterMove(ChessCtor, pos, moveSpec) {
+          const chess = new ChessCtor(pos.fen);
+          const m = chess.move(moveSpec);
+          if (!m) return null;
+          return {
+            chess: chess,
+            fen: chess.fen(),
+            map: boardMapFrom(chess),
+            turn: chess.turn(),
+            move: m,
+          };
+        }
+        function isCastle(move) {
+          return (
+            move.flags &&
+            (move.flags.indexOf("k") !== -1 || move.flags.indexOf("q") !== -1)
+          );
+        }
+        function isCaptureMove(move) {
+          return !!(
+            move.flags &&
+            (move.flags.indexOf("c") !== -1 || move.flags.indexOf("e") !== -1)
+          );
+        }
+
+        function moveHangsPiece(after) {
+          return checkForHangingPieces(after.map);
+        }
+        function moveDefendsHangingPiece(pos, move, after) {
+          if (isCastle(move)) return [];
+          const defended = [];
+          for (const sq of attacksFrom(after.map, move.to)) {
+            const p = after.map[sq];
+            if (p && p.color === pos.turn) {
+              if (!isDefended(pos.map, sq, pos.turn)) defended.push(sq);
+            }
+          }
+          return defended;
+        }
+        function isForking(map, sq, returnSquares) {
+          const piece = map[sq];
+          if (!piece) return returnSquares ? [] : false;
+          const captureableBy = otherColor(piece.color);
+          if (attackers(map, captureableBy, sq).length > 0) {
+            if (!isDefended(map, sq, piece.color))
+              return returnSquares ? [] : false;
+          }
+          const forked = [];
+          for (const atk of attacksFrom(map, sq)) {
+            const target = map[atk];
+            if (target && target.color !== piece.color) {
+              if (!isDefended(map, atk)) {
+                forked.push(atk);
+              } else if (PIECE_VALUE[target.type] > PIECE_VALUE[piece.type]) {
+                forked.push(atk);
+              } else if (PIECE_VALUE[target.type] < PIECE_VALUE[piece.type]) {
+                if (target.type === "k") forked.push(atk);
+              }
+            }
+          }
+          return returnSquares ? forked : forked.length >= 2;
+        }
+        function moveCreatesFork(after, move, returnSquares) {
+          return isForking(after.map, move.to, returnSquares);
+        }
+        function moveAllowsFork(ChessCtor, after, returnMoves) {
+          const forkingMoves = [];
+          const replies = after.chess.moves({ verbose: true });
+          for (const reply of replies) {
+            const afterReply = posAfterMove(ChessCtor, after, {
+              from: reply.from,
+              to: reply.to,
+              promotion: reply.promotion,
+            });
+            if (!afterReply) continue;
+            if (moveCreatesFork(afterReply, reply, false))
+              forkingMoves.push(reply);
+          }
+          return returnMoves ? forkingMoves : forkingMoves.length > 0;
+        }
+        function moveMissesFork(ChessCtor, pos, actualMove) {
+          const legalMoves = pos.chess.moves({ verbose: true });
+          const forkingMoves = [];
+          for (const cand of legalMoves) {
+            const after = posAfterMove(ChessCtor, pos, {
+              from: cand.from,
+              to: cand.to,
+              promotion: cand.promotion,
+            });
+            if (!after) continue;
+            if (moveCreatesFork(after, cand, false)) forkingMoves.push(cand);
+          }
+          const played = forkingMoves.some(
+            (m) =>
+              m.from === actualMove.from &&
+              m.to === actualMove.to &&
+              m.promotion === actualMove.promotion,
+          );
+          return { misses: !played, forkingMoves: forkingMoves };
+        }
+        function moveBlocksCheck(pos, move, after) {
+          if (pos.chess.in_check() && !isCaptureMove(move)) {
+            const kingSq = findKing(pos.map, pos.turn);
+            const stillKing = after.map[kingSq];
+            return !!(stillKing && stillKing.type === "k");
+          }
+          return false;
+        }
+        function isDevelopingMove(pos, move) {
+          const piece = pos.map[move.from];
+          if (!piece) return false;
+          if (["b1", "g1", "b8", "g8"].indexOf(move.from) !== -1) {
+            return piece.type === "n" ? "n" : false;
+          } else if (["c1", "f1", "c8", "f8"].indexOf(move.from) !== -1) {
+            return piece.type === "b" ? "b" : false;
+          } else if (["h1", "a1", "h8", "a8"].indexOf(move.from) !== -1) {
+            return piece.type === "r" ? "r" : false;
+          }
+          return false;
+        }
+        function isFianchetto(pos, move) {
+          const piece = pos.map[move.from];
+          if (
+            piece &&
+            piece.type === "b" &&
+            ["c1", "f1", "c8", "f8"].indexOf(move.from) !== -1
+          ) {
+            return ["b2", "g2", "b7", "g7"].indexOf(move.to) !== -1;
+          }
+          return false;
+        }
+        function isPossibleTrade(pos, move) {
+          const from = pos.map[move.from];
+          if (!from) return false;
+          if (isCaptureMove(move)) {
+            const to = pos.map[move.to];
+            if (!to) return false;
+            if (!isDefended(pos.map, move.to, otherColor(pos.turn)))
+              return false;
+            const tv = PIECE_VALUE[to.type],
+              fv = PIECE_VALUE[from.type];
+            if (tv === fv) return true;
+            if (tv === 2 && fv === 3) return true;
+            if (tv === 3 && fv === 2) return true;
+            return false;
+          }
+          const atkSquares = attackers(pos.map, otherColor(pos.turn), move.to);
+          if (atkSquares.length === 0) return false;
+          for (const atkSq of atkSquares) {
+            if (isDefended(pos.map, move.to, pos.turn)) {
+              const av = PIECE_VALUE[pos.map[atkSq].type],
+                fv = PIECE_VALUE[from.type];
+              if (av === fv) {
+                if (!isPinned(pos.map, otherColor(pos.turn), atkSq))
+                  return true;
+              } else if (av === 2 && fv === 3) {
+                return true;
+              } else if (av === 3 && fv === 2) {
+                return true;
+              }
+            } else {
+              return true;
+            }
+          }
+          return false;
+        }
+        function moveIsDiscoveredCheck(after, move) {
+          if (!after.chess.in_check()) return false;
+          for (const sq of attacksFrom(after.map, move.to)) {
+            const p = after.map[sq];
+            if (p && p.type === "k") return false;
+          }
+          return true;
+        }
+        function moveIsDiscoveredCheckAndAttacks(
+          pos,
+          move,
+          after,
+          returnSquares,
+        ) {
+          if (!moveIsDiscoveredCheck(after, move))
+            return returnSquares ? [] : false;
+          const attacked = [];
+          for (const sq of attacksFrom(after.map, move.to)) {
+            const p = after.map[sq];
+            if (p) {
+              if (isHanging(after.map, sq, pos.turn)) {
+                attacked.push(sq);
+              } else if (
+                PIECE_VALUE[p.type] > PIECE_VALUE[after.map[move.to].type]
+              ) {
+                attacked.push(sq);
+              }
+            }
+          }
+          return returnSquares ? attacked : attacked.length > 0;
+        }
+        function isTrapped(map, sq, byColor) {
+          const piece = map[sq];
+          if (!piece || piece.type === "k") return false;
+          const atkSquares = attackers(map, byColor, sq);
+          let capturableByLower = false;
+          for (const a of atkSquares) {
+            if (
+              map[a].color !== piece.color &&
+              PIECE_VALUE[map[a].type] < PIECE_VALUE[piece.type]
+            ) {
+              capturableByLower = true;
+            }
+          }
+          if (!capturableByLower) return false;
+          let canBeSaved = true;
+          const escapeSquares = attacksFrom(map, sq);
+          for (const to of escapeSquares) {
+            const occ = map[to];
+            const emptyCase = !occ;
+            const captureLowerOrEqualCase =
+              occ &&
+              occ.color !== piece.color &&
+              PIECE_VALUE[occ.type] <= PIECE_VALUE[piece.type];
+            if (!emptyCase && !captureLowerOrEqualCase) continue;
+            const guards = attackers(map, byColor, to);
+            if (guards.length === 0) return false;
+            for (const g of guards) {
+              const gPiece = map[g];
+              if (gPiece.color !== piece.color) {
+                if (PIECE_VALUE[gPiece.type] < PIECE_VALUE[piece.type]) {
+                  canBeSaved = isPinned(map, byColor, g) ? true : false;
+                } else if (
+                  PIECE_VALUE[gPiece.type] === PIECE_VALUE[piece.type]
+                ) {
+                  if (!isPinned(map, byColor, g)) {
+                    const defenders = isDefended(
+                      map,
+                      g,
+                      otherColor(byColor),
+                      true,
+                    );
+                    if (defenders.length <= 1) canBeSaved = false;
+                  }
+                } else {
+                  canBeSaved = true;
+                }
+              }
+            }
+          }
+          return !canBeSaved;
+        }
+        function moveTrapsOpponentsPiece(pos, after, move, returnSquares) {
+          const trapped = [];
+          const moverPiece = after.map[move.to];
+          for (const sq of attacksFrom(after.map, move.to)) {
+            const p = after.map[sq];
+            if (p && moverPiece && p.color !== moverPiece.color) {
+              if (isTrapped(after.map, sq, pos.turn)) trapped.push(sq);
+            }
+          }
+          return returnSquares ? trapped : trapped.length > 0;
+        }
+        function isPossibleSacrifice(pos, move) {
+          const from = pos.map[move.from];
+          if (!from || from.type === "p") return false;
+          if (isCaptureMove(move)) {
+            const defenders = isDefended(
+              pos.map,
+              move.to,
+              otherColor(pos.turn),
+              true,
+            );
+            if (defenders.length === 0) return false;
+            const to = pos.map[move.to];
+            if (!to) return false;
+            if (PIECE_VALUE[to.type] < PIECE_VALUE[from.type]) {
+              if (
+                !(PIECE_VALUE[to.type] === 2 && PIECE_VALUE[from.type] === 3)
+              ) {
+                for (const d of defenders) {
+                  return PIECE_VALUE[pos.map[d].type] < PIECE_VALUE[from.type];
+                }
+              }
+              return false;
+            }
+            return false;
+          }
+          const atks = attackers(pos.map, otherColor(pos.turn), move.to);
+          if (atks.length > 0) {
+            for (const atkSq of atks) {
+              if (isDefended(pos.map, move.to, pos.turn)) {
+                const av = PIECE_VALUE[pos.map[atkSq].type];
+                if (av < PIECE_VALUE[from.type]) {
+                  if (!(av === 2 && PIECE_VALUE[from.type] === 3)) {
+                    if (!isPinned(pos.map, otherColor(pos.turn), atkSq))
+                      return true;
+                  }
+                }
+              } else {
+                return true;
+              }
+            }
+          }
+          return false;
+        }
+        function movePinsOpponent(pos, move, after, returnSquare) {
+          if (attackers(pos.map, otherColor(pos.turn), move.to).length > 0) {
+            if (!isDefended(pos.map, move.to, pos.turn))
+              return returnSquare ? null : false;
+          }
+          let pinnedSquare = null;
+          for (const sq of attacksFrom(after.map, move.to)) {
+            const p = after.map[sq];
+            if (p && p.color === after.turn) {
+              if (isPinned(after.map, after.turn, sq)) {
+                pinnedSquare = sq;
+                break;
+              }
+            }
+          }
+          return returnSquare ? pinnedSquare : pinnedSquare !== null;
+        }
+        function boardHasPin(ChessCtor, pos) {
+          const pinMoves = [];
+          const legalMoves = pos.chess.moves({ verbose: true });
+          for (const m of legalMoves) {
+            const after = posAfterMove(ChessCtor, pos, {
+              from: m.from,
+              to: m.to,
+              promotion: m.promotion,
+            });
+            if (!after) continue;
+            if (movePinsOpponent(pos, m, after, false)) pinMoves.push(m);
+          }
+          return pinMoves;
+        }
+        function moveMissesPin(ChessCtor, pos, actualMove) {
+          const pinMoves = boardHasPin(ChessCtor, pos);
+          const played = pinMoves.some(
+            (m) =>
+              m.from === actualMove.from &&
+              m.to === actualMove.to &&
+              m.promotion === actualMove.promotion,
+          );
+          return { misses: pinMoves.length > 0 && !played, pinMoves: pinMoves };
+        }
+        function movesRookToOpenFile(pos, move) {
+          const fromFR = sqToFR(move.from);
+          if (fromFR.r !== 0 && fromFR.r !== 7) return false;
+          const piece = pos.map[move.from];
+          if (!piece || piece.type !== "r") return false;
+          const toFR = sqToFR(move.to);
+          if (fromFR.r !== toFR.r) return false;
+          const file = FILES[toFR.f];
+          let numPieces = 0;
+          for (let rank = 1; rank <= 8; rank++) {
+            if (pos.map[file + rank]) numPieces++;
+          }
+          return numPieces < 3;
+        }
+        function moveMovesKingOffBackrank(pos, move) {
+          const backrank = (sq) => {
+            const r = sqToFR(sq).r;
+            return r === 0 || r === 7;
+          };
+          if (isEndgame(pos.map)) {
+            const piece = pos.map[move.from];
+            if (
+              piece &&
+              piece.type === "k" &&
+              backrank(move.from) &&
+              !backrank(move.to)
+            )
+              return true;
+          }
+          return false;
+        }
+        function moveAttacksPiece(pos, after, move, returnPiece) {
+          const moverColor = after.map[move.to]
+            ? after.map[move.to].color
+            : pos.turn;
+          const defended = isDefended(after.map, move.to);
+          const stillAttackedByOpp =
+            attackers(pos.map, after.turn, move.to).length > 0;
+          if (defended || !stillAttackedByOpp) {
+            for (const sq of attacksFrom(after.map, move.to)) {
+              const p = after.map[sq];
+              if (p && p.type !== "k" && p.color !== moverColor) {
+                if (
+                  PIECE_VALUE[p.type] > PIECE_VALUE[after.map[move.to].type]
+                ) {
+                  return returnPiece ? p : true;
+                } else if (isHanging(after.map, sq, after.turn)) {
+                  return returnPiece ? p : true;
+                }
+              }
+            }
+          }
+          return returnPiece ? false : false;
+        }
+        function moveWinsTempo(pos, after, move, pointsGained) {
+          if (!moveAttacksPiece(pos, after, move, false)) return false;
+          if (typeof pointsGained !== "number") return false;
+          return pointsGained > 0;
+        }
+        function moveCapturesFreePiece(pos, move) {
+          if (isCaptureMove(move)) {
+            return isHanging(pos.map, move.to, pos.turn);
+          }
+          return false;
+        }
+        function moveMissesFreePiece(pos, actualMove) {
+          const legalMoves = pos.chess.moves({ verbose: true });
+          const freeCaptures = legalMoves.filter((m) =>
+            moveCapturesFreePiece(pos, m),
+          );
+          const played = freeCaptures.some(
+            (m) =>
+              m.from === actualMove.from &&
+              m.to === actualMove.to &&
+              m.promotion === actualMove.promotion,
+          );
+          return {
+            misses: freeCaptures.length > 0 && !played,
+            freeCaptures: freeCaptures,
+          };
+        }
+        function isCapturableByLowerPiece(map, sq, capturableBy) {
+          const piece = map[sq];
+          if (!piece) return false;
+          for (const a of attackers(map, capturableBy, sq)) {
+            if (PIECE_VALUE[map[a].type] < PIECE_VALUE[piece.type]) return true;
+          }
+          return false;
+        }
+        function moveCapturesHigherPiece(pos, move) {
+          if (isCaptureMove(move)) {
+            const from = pos.map[move.from],
+              to = pos.map[move.to];
+            if (from && to)
+              return PIECE_VALUE[from.type] < PIECE_VALUE[to.type];
+          }
+          return false;
+        }
+        function checkForCapturablePiecesByLower(map, turnColor) {
+          const out = [];
+          for (const sq in map) {
+            if (map[sq].color !== turnColor) {
+              if (isCapturableByLowerPiece(map, sq, turnColor)) out.push(sq);
+            }
+          }
+          return out;
+        }
+
+        function classifyByPoints(pointsGained) {
+          if (pointsGained >= -20) return "excellent";
+          if (pointsGained >= -100) return "good";
+          if (pointsGained >= -250) return "inaccuracy";
+          if (pointsGained >= -450) return "mistake";
+          return "blunder";
+        }
+        function winPercent(cpAbs, color) {
+          const s = color === "w" ? -0.00368208 : 0.00368208;
+          return 50 + 50 * (2 / (1 + Math.exp(s * cpAbs)) - 1);
+        }
+        function calculateAccuracy(evalScoresAbs) {
+          const scores = [0].concat(evalScoresAbs);
+          const whiteWin = scores.map((s) => winPercent(s, "w"));
+          const blackWin = whiteWin.map((p) => 100 - p);
+          const whiteAcc = [],
+            blackAcc = [];
+          for (let i = 0; i < whiteWin.length - 1; i++) {
+            if (i % 2 === 0) {
+              const delta = whiteWin[i] - whiteWin[i + 1];
+              whiteAcc.push(
+                delta <= 0
+                  ? 100
+                  : 100.0307234 * Math.exp(-0.1008298 * delta) - 0.03076726,
+              );
+            } else {
+              const delta = blackWin[i] - blackWin[i + 1];
+              blackAcc.push(
+                delta <= 0
+                  ? 100
+                  : 100.0307234 * Math.exp(-0.1008298 * delta) - 0.03076726,
+              );
+            }
+          }
+          const avg = (arr) =>
+            arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 100;
+          return { white: avg(whiteAcc), black: avg(blackAcc) };
+        }
+        function estimateElo(acpl, nMoves) {
+          if (acpl > 500) return 100;
+          const estimate =
+            3000 * Math.exp(-0.01 * acpl) * Math.sqrt(nMoves / 50);
+          return Math.ceil(estimate / 100) * 100;
+        }
+        function toBookString(sanArray, uptoPly) {
+          let out = "";
+          for (let i = 0; i < uptoPly; i++) {
+            if (i % 2 === 0) {
+              if (i > 0) out += " ";
+              out += Math.floor(i / 2) + 1 + ". " + sanArray[i];
+            } else {
+              out += " " + sanArray[i];
+            }
+          }
+          return out;
+        }
+        function findOpening(bookMap, movetext) {
+          const hit = bookMap[movetext];
+          if (!hit) return null;
+          const idx = hit.indexOf("|");
+          return { eco: hit.slice(0, idx), name: hit.slice(idx + 1) };
+        }
+        function formatItemList(items) {
+          if (items.length === 0) return "";
+          if (items.length === 1) return items[0];
+          return (
+            items.slice(0, -1).join(", ") + ", and " + items[items.length - 1]
+          );
+        }
+        function pieceNames(map, squares) {
+          return squares.map((s) => PIECE_NAME_EN[map[s].type]);
+        }
+
+        function reviewMove(
+          ChessCtor,
+          pos,
+          move,
+          after,
+          previousReview,
+          bookHit,
+          engineData,
+          roast,
+        ) {
+          previousReview = previousReview || "";
+          engineData = engineData || {};
+          if (bookHit) {
+            return {
+              classification: "book",
+              review: `This is a book move. The opening is called ${bookHit.name}. `,
+              bestMove: engineData.bestMove || null,
+            };
+          }
+          let classification;
+          let review = "";
+          const bestMove = engineData.bestMove || null;
+          const san = move.san;
+          if (engineData.isMateLine) {
+            const line = engineData.isMateLine;
+            if (line.indexOf("continues gets mated") === 0) {
+              const losingSide = pos.turn === "w" ? "White" : "Black";
+              const n = line.split(" ").pop();
+              review = `${san} is good, but ${losingSide} will still get checkmated. ${losingSide} gets mated in ${n}.`;
+              classification =
+                bestMove &&
+                bestMove.from === move.from &&
+                bestMove.to === move.to
+                  ? "best"
+                  : "good";
+            } else if (line.indexOf("gets mated") === 0) {
+              const losingSide = pos.turn === "w" ? "White" : "Black";
+              const n = line.split(" ").pop();
+              if (engineData.opponentBestMove) {
+                review += `The opponent can play ${engineData.opponentBestMove.san}. `;
+              }
+              review += roast
+                ? `${san} is a blunder. You tryna sacrifice the game? ${losingSide} gets mated in ${n}.`
+                : `${san} is a blunder and allows checkmate. ${losingSide} gets mated in ${n}.`;
+              classification = "blunder";
+            } else if (line === "lost mate") {
+              if (engineData.opponentBestMove) {
+                review += roast
+                  ? `You were winning! Why did you do that? The opponent can play ${engineData.opponentBestMove.san}. `
+                  : `This loses the checkmate sequence. The opponent can play ${engineData.opponentBestMove.san}. `;
+              }
+              classification = "blunder";
+            } else if (line.indexOf("mates") === 0) {
+              const n = line.split(" ").pop();
+              const prevDigitMatch = previousReview.match(/(\d+)\D*$/);
+              if (prevDigitMatch) {
+                const prevN = parseInt(prevDigitMatch[1], 10);
+                const winningSide = pos.turn === "w" ? "White" : "Black";
+                if (parseInt(n, 10) <= prevN) {
+                  review =
+                    n === "0"
+                      ? "Checkmate!"
+                      : `${san} continues the checkmate sequence. ${winningSide} gets mated in ${n}.`;
+                  classification = "good";
+                } else {
+                  review = `${san} is good, but there was a faster way to checkmate. ${winningSide} gets mated in ${n}.`;
+                  classification = "good";
+                }
+                if (
+                  bestMove &&
+                  bestMove.from === move.from &&
+                  bestMove.to === move.to
+                )
+                  classification = "best";
+              } else {
+                review = `${san} continues the checkmate sequence.`;
+                classification = "good";
+              }
+            }
+            return {
+              classification: classification,
+              review: review,
+              bestMove: bestMove,
+            };
+          }
+          classification = classifyByPoints(engineData.pointsGained || 0);
+          if (classification === "excellent" || classification === "good") {
+            if (
+              bestMove &&
+              bestMove.from === move.from &&
+              bestMove.to === move.to
+            )
+              classification = "best";
+            review += `${san} is ${classification}. `;
+            let trade = false;
+            const discoveredCheck = moveIsDiscoveredCheck(after, move);
+            if (isPossibleTrade(pos, move) && !discoveredCheck) {
+              review += isCaptureMove(move)
+                ? "This is a trade. "
+                : "This offers a trade. ";
+              trade = true;
+            }
+            let defendedSquares = moveDefendsHangingPiece(pos, move, after);
+            let defendedPieces = pieceNames(after.map, defendedSquares);
+            const kingIdx = defendedPieces.indexOf("King");
+            if (kingIdx !== -1) {
+              defendedPieces.splice(kingIdx, 1);
+              defendedSquares.splice(kingIdx, 1);
+            }
+            if (defendedPieces.length > 0 && !trade) {
+              review += `This defends a ${formatItemList(defendedPieces)} on ${formatItemList(defendedSquares)}. `;
+            }
+            const forkedSquares = moveCreatesFork(after, move, true);
+            if (forkedSquares.length >= 2) {
+              review += `This creates a fork on ${formatItemList(pieceNames(after.map, forkedSquares))}. `;
+            } else {
+              const attackedPiece = moveAttacksPiece(pos, after, move, true);
+              if (attackedPiece)
+                review += `This attacks the ${PIECE_NAME_EN[attackedPiece.type]}. `;
+            }
+            if (moveBlocksCheck(pos, move, after))
+              review += "This blocks a check to the king with a piece. ";
+            const developing = isDevelopingMove(pos, move);
+            if (developing)
+              review += `This develops a ${PIECE_NAME_EN[developing]}. `;
+            if (isFianchetto(pos, move))
+              review +=
+                "This fianchettos the bishop by putting it on a powerful diagonal. ";
+            if (movePinsOpponent(pos, move, after, false))
+              review += "This pins a piece of the opponent to their king. ";
+            if (movesRookToOpenFile(pos, move))
+              review +=
+                "By placing the rook on an open file, it controls important columns. ";
+            if (isEndgame(pos.map) && moveMovesKingOffBackrank(pos, move)) {
+              review +=
+                "By moving the king off the back rank, the risk of back rank mate threats is reduced and improves the king's safety. ";
+            }
+            if (moveWinsTempo(pos, after, move, engineData.pointsGained))
+              review += "This move gains a tempo. ";
+            if (previousReview.indexOf("trade") === -1) {
+              if (moveCapturesHigherPiece(pos, move))
+                review += "This captures a higher value piece. ";
+              if (previousReview.indexOf("higher value piece") === -1) {
+                if (moveCapturesFreePiece(pos, move)) {
+                  review += `This captures a free ${PIECE_NAME_EN[pos.map[move.to] ? pos.map[move.to].type : after.map[move.to].type]}. `;
+                }
+              }
+            }
+            const discSquares = moveIsDiscoveredCheckAndAttacks(
+              pos,
+              move,
+              after,
+              true,
+            );
+            if (discSquares.length > 0) {
+              review += `This creates a discovered check whilst attacking a ${formatItemList(pieceNames(after.map, discSquares))}. `;
+            }
+            const trappedSquares = moveTrapsOpponentsPiece(
+              pos,
+              after,
+              move,
+              true,
+            );
+            if (trappedSquares.length > 0) {
+              review += `This traps a ${formatItemList(pieceNames(after.map, trappedSquares))}. `;
+            }
+            if (isPossibleSacrifice(pos, move)) {
+              classification = "brilliant";
+              review = review
+                .replace(/\bbest\b/g, "brilliant")
+                .replace(/\bgood\b/g, "brilliant")
+                .replace(/\bexcellent\b/g, "brilliant");
+              review += `This sacrifices the ${PIECE_NAME_EN[pos.map[move.from].type]}. `;
+            }
+            if (engineData.threatensMate)
+              review += "This creates a checkmate threat. ";
+          } else if (
+            classification === "inaccuracy" ||
+            classification === "mistake" ||
+            classification === "blunder"
+          ) {
+            review += `${san} is ${classification}. `;
+            let possibleHangingSquares = moveHangsPiece(after);
+            if (isPossibleTrade(pos, move)) {
+              const idx = possibleHangingSquares.indexOf(move.to);
+              if (idx !== -1) possibleHangingSquares.splice(idx, 1);
+            }
+            possibleHangingSquares = possibleHangingSquares.filter(
+              (s) => after.map[s] && after.map[s].color === pos.turn,
+            );
+            if (possibleHangingSquares.length > 0) {
+              review += roast
+                ? `This IS SO STUPID. ${formatItemList(pieceNames(after.map, possibleHangingSquares))} is hanging on ${formatItemList(possibleHangingSquares)}. `
+                : `This move leaves ${formatItemList(pieceNames(after.map, possibleHangingSquares))} hanging on ${formatItemList(possibleHangingSquares)}. `;
+            }
+            let capturableByLower = checkForCapturablePiecesByLower(
+              after.map,
+              after.turn === "w" ? "b" : "w",
+            );
+            capturableByLower = capturableByLower.filter(
+              (s) => possibleHangingSquares.indexOf(s) === -1,
+            );
+            if (
+              capturableByLower.length > 0 &&
+              !after.chess.in_check() &&
+              !isPossibleTrade(pos, move)
+            ) {
+              review += roast
+                ? `A lower value piece is just STARING at ${formatItemList(pieceNames(after.map, capturableByLower))}. How can you let that happen? `
+                : `A ${formatItemList(pieceNames(after.map, capturableByLower))} can be captured by a lower value piece. `;
+            }
+            const forkAllowed = moveAllowsFork(ChessCtor, after, true);
+            if (
+              engineData.opponentBestMove &&
+              forkAllowed.some(
+                (m) =>
+                  m.from === engineData.opponentBestMove.from &&
+                  m.to === engineData.opponentBestMove.to,
+              )
+            ) {
+              review += roast
+                ? "This move leaves pieces vulnerable to a fork. You can get forked! "
+                : "This move leaves pieces vulnerable to a fork. ";
+            }
+            const missedFork = moveMissesFork(ChessCtor, pos, move);
+            if (
+              bestMove &&
+              missedFork.forkingMoves.some(
+                (m) => m.from === bestMove.from && m.to === bestMove.to,
+              ) &&
+              !(bestMove.from === move.from && bestMove.to === move.to)
+            ) {
+              review += roast
+                ? `Are you blind? You could have forked with ${bestMove.san}. `
+                : `There was a missed fork with ${bestMove.san}. `;
+            }
+            const missedPin = moveMissesPin(ChessCtor, pos, move);
+            if (
+              bestMove &&
+              missedPin.pinMoves.some(
+                (m) => m.from === bestMove.from && m.to === bestMove.to,
+              ) &&
+              !(bestMove.from === move.from && bestMove.to === move.to)
+            ) {
+              review += roast
+                ? `Just another missed pin with ${bestMove.san}. `
+                : `There was a missed pin in the previous move with ${bestMove.san}. `;
+            }
+            const missedFree = moveMissesFreePiece(pos, move);
+            if (
+              bestMove &&
+              missedFree.freeCaptures.some(
+                (m) => m.from === bestMove.from && m.to === bestMove.to,
+              ) &&
+              !(bestMove.from === move.from && bestMove.to === move.to)
+            ) {
+              review += roast
+                ? `You could have taken a ${PIECE_NAME_EN[pos.map[bestMove.to] ? pos.map[bestMove.to].type : ""]}. `
+                : `An opportunity to take a ${PIECE_NAME_EN[pos.map[bestMove.to] ? pos.map[bestMove.to].type : ""]} was lost. `;
+            }
+            if (bestMove) {
+              const missedAttacked = moveAttacksPiece(
+                pos,
+                posAfterMove(ChessCtor, pos, {
+                  from: bestMove.from,
+                  to: bestMove.to,
+                  promotion: bestMove.promotion,
+                }) || after,
+                bestMove,
+                true,
+              );
+              if (missedAttacked) {
+                review += `A chance to attack a ${PIECE_NAME_EN[missedAttacked.type]} with ${bestMove.san} was missed. `;
+              }
+            }
+            let oppMoveObj = engineData.opponentBestMove;
+            if (oppMoveObj) {
+              const afterOpp = posAfterMove(ChessCtor, after, {
+                from: oppMoveObj.from,
+                to: oppMoveObj.to,
+                promotion: oppMoveObj.promotion,
+              });
+              if (
+                afterOpp &&
+                moveAttacksPiece(after, afterOpp, oppMoveObj, false)
+              ) {
+                review += "This permits the opponent to attack a piece. ";
+              }
+              if (afterOpp) {
+                const discOpp = moveIsDiscoveredCheckAndAttacks(
+                  after,
+                  oppMoveObj,
+                  afterOpp,
+                  true,
+                );
+                if (discOpp.length > 0) {
+                  review += `This lets the opponent win a ${formatItemList(pieceNames(afterOpp.map, discOpp))} from a discovered check. `;
+                }
+              }
+            }
+            if (bestMove) {
+              const afterBest = posAfterMove(ChessCtor, pos, {
+                from: bestMove.from,
+                to: bestMove.to,
+                promotion: bestMove.promotion,
+              });
+              if (afterBest) {
+                const missedDisc = moveIsDiscoveredCheckAndAttacks(
+                  pos,
+                  bestMove,
+                  afterBest,
+                  true,
+                );
+                if (missedDisc.length > 0) {
+                  review += `This loses a chance to attack a ${formatItemList(pieceNames(afterBest.map, missedDisc))} from a discovered check. `;
+                }
+              }
+            }
+            if (oppMoveObj) {
+              const afterOpp = posAfterMove(ChessCtor, after, {
+                from: oppMoveObj.from,
+                to: oppMoveObj.to,
+                promotion: oppMoveObj.promotion,
+              });
+              if (afterOpp) {
+                const trappedByOpp = moveTrapsOpponentsPiece(
+                  after,
+                  afterOpp,
+                  oppMoveObj,
+                  true,
+                );
+                if (trappedByOpp.length > 0) {
+                  review += `This allows a ${formatItemList(pieceNames(afterOpp.map, trappedByOpp))} to be trapped. `;
+                }
+              }
+            }
+            if (bestMove) {
+              const missedTrapped = moveTrapsOpponentsPiece(
+                pos,
+                posAfterMove(ChessCtor, pos, {
+                  from: bestMove.from,
+                  to: bestMove.to,
+                  promotion: bestMove.promotion,
+                }) || after,
+                bestMove,
+                true,
+              );
+              if (missedTrapped.length > 0) {
+                review += `This loses a chance to trap a ${formatItemList(pieceNames(after.map, missedTrapped))}. `;
+              }
+            }
+            if (oppMoveObj) {
+              review += `The opponent can play ${oppMoveObj.san}. `;
+            }
+          }
+          return {
+            classification: classification,
+            review: review,
+            bestMove: bestMove,
+          };
+        }
+        return {
+          PIECE_VALUE,
+          PIECE_NAME_EN,
+          boardMapFrom,
+          attacksFrom,
+          attackers,
+          isDefended,
+          isHanging,
+          checkForHangingPieces,
+          isPinned,
+          isEndgame,
+          makePos,
+          posAfterMove,
+          classifyByPoints,
+          winPercent,
+          calculateAccuracy,
+          estimateElo,
+          toBookString,
+          findOpening,
+          reviewMove,
+          isPossibleSacrifice,
+          isPossibleTrade,
+          moveCreatesFork,
+          moveTrapsOpponentsPiece,
+        };
+      });
+    </script>
+
+    <!-- ============================================ -->
+    <!-- 🚀 اسکریپت اصلی برنامه -->
+    <!-- ============================================ -->
+    <script>
+      (function () {
+        "use strict";
+        (function applySavedTheme() {
+          try {
+            const s = JSON.parse(localStorage.getItem("chesshub_settings"));
+            if (s && s.theme) document.body.classList.add(`theme-${s.theme}`);
+          } catch (e) {}
+        })();
+
+        const pieceCodes = {
+          wk: "wk.png",
+          wq: "wq.png",
+          wr: "wr.png",
+          wb: "wb.png",
+          wn: "wn.png",
+          wp: "wp.png",
+          bk: "bk.png",
+          bq: "bq.png",
+          br: "br.png",
+          bb: "bb.png",
+          bn: "bn.png",
+          bp: "bp.png",
+        };
+        let pieceSet = "neo";
+        function getCurrentPieceSet() {
+          try {
+            const s = JSON.parse(localStorage.getItem("chesshub_settings"));
+            return s?.pieceSet || "neo";
+          } catch {
+            return "neo";
+          }
+        }
+
+        let game = new Chess();
+        let historyStack = [],
+          redoStack = [],
+          selectedSquare = null,
+          isFlipped = false,
+          boardSquares = {};
+        let stockfish = null,
+          stockfishReady = false;
+        let isReviewing = false,
+          reviewInterval = null;
+        let engineOn = false;
+        let currentAnalyzedTurn = "w";
+        let stockfishResolver = null,
+          currentAbsScore = 0,
+          currentMate = null;
+        let analysisDepth = 15;
+        let plyMeta = {};
+        let bookMap = {};
+
+        const boardDiv = document.getElementById("chessboard");
+        const historyList = document.getElementById("historyList");
+        const evalText = document.getElementById("evalText");
+        const bestMoveText = document.getElementById("bestMoveText");
+        const reviewTextBox = document.getElementById("reviewTextBox");
+
+        const ICONS = {
+          book: `<svg viewBox="0 0 18 19"><g id="book"><path class="icon-shadow" opacity="0.3" d="M9,.5a9,9,0,1,0,9,9A9,9,0,0,0,9,.5Z"></path><path class="icon-background" fill="#D5A47D" d="M9,0a9,9,0,1,0,9,9A9,9,0,0,0,9,0Z"></path><path class="icon-component" fill="#fff" d="M8.45,5.4c-1-.75-2.51-1.09-4.83-1.09H3V13h.58a8.09,8.09,0,0,1,4.83,1.17Z"></path><path class="icon-component" fill="#fff" d="M9.54,14.19A8.14,8.14,0,0,1,14.38,13H15V4.31h-.58c-2.31,0-3.81.34-4.84,1.09Z"></path></g></svg>`,
+          brilliant: `<svg viewBox="0 0 18 19"><g id="Brilliant"><path class="icon-shadow" opacity="0.3" d="M9,.5a9,9,0,1,0,9,9A9,9,0,0,0,9,.5Z"></path><path class="icon-background" fill="#26c2a3" d="M9,0a9,9,0,1,0,9,9A9,9,0,0,0,9,0Z"></path><path class="icon-component" fill="#fff" d="M12.57,14.1a.51.51,0,0,1,0,.13.44.44,0,0,1-.08.11l-.11.08-.13,0h-2l-.13,0L10,14.34A.41.41,0,0,1,10,14.1V12.2A.32.32,0,0,1,10,12a.39.39,0,0,1,.1-.08l.13,0h2a.31.31,0,0,1,.24.1.39.39,0,0,1,.08.1.51.51,0,0,1,0,.13Zm-.12-3.93a.17.17,0,0,1,0,.12.41.41,0,0,1-.07.11.4.4,0,0,1-.23.08H10.35a.31.31,0,0,1-.34-.31L9.86,3.4A.36.36,0,0,1,10,3.16a.23.23,0,0,1,.11-.08.27.27,0,0,1,.13,0H12.3a.32.32,0,0,1,.25.1.36.36,0,0,1,.09.24Z"></path><path class="icon-component" fill="#fff" d="M8.07,14.1a.51.51,0,0,1,0,.13.44.44,0,0,1-.08.11l-.11.08-.13,0h-2l-.13,0-.11-.08a.41.41,0,0,1-.08-.24V12.2a.27.27,0,0,1,0-.13.36.36,0,0,1,.07-.1.39.39,0,0,1,.1-.08l.13,0h2A.31.31,0,0,1,8,12a.39.39,0,0,1,.08.1.51.51,0,0,1,0,.13ZM8,10.17a.17.17,0,0,1,0,.12.41.41,0,0,1-.07.11.4.4,0,0,1-.23.08H5.85a.31.31,0,0,1-.34-.31L5.36,3.4a.36.36,0,0,1,.09-.24.23.23,0,0,1,.11-.08.27.27,0,0,1,.13,0H7.8a.35.35,0,0,1,.25.1.36.36,0,0,1,.09.24Z"></path></g></svg>`,
+          best: `<svg viewBox="0 0 18 19"><g id="best"><path class="icon-shadow" opacity="0.3" d="M9,.5a9,9,0,1,0,9,9A9,9,0,0,0,9,.5Z"></path><path class="icon-background" fill="#81B64C" d="M9,0a9,9,0,1,0,9,9A9,9,0,0,0,9,0Z"></path><path class="icon-component" fill="#fff" d="M9,2.93A.5.5,0,0,0,8.73,3a.46.46,0,0,0-.17.22L7.24,6.67l-3.68.19A.52.52,0,0,0,3.3,7a.53.53,0,0,0-.16.23.45.45,0,0,0,0,.28.44.44,0,0,0,.15.23L6.15,10l-1,3.56a.45.45,0,0,0,0,.28.46.46,0,0,0,.17.22.41.41,0,0,0,.26.09.43.43,0,0,0,.27-.08l3.09-2,3.09,2a.46.46,0,0,0,.53,0,.46.46,0,0,0,.17-.22.53.53,0,0,0,0-.28l-1-3.56L14.71,7.7a.44.44,0,0,0,.15-.23.45.45,0,0,0,0-.28A.53.53,0,0,0,14.7,7a.52.52,0,0,0-.26-.1l-3.68-.2L9.44,3.23A.46.46,0,0,0,9.27,3,.5.5,0,0,0,9,2.93.Z"></path></g></svg>`,
+          excellent: `<svg viewBox="0 0 18 19"><g id="excellent"><path class="icon-shadow" opacity="0.3" d="M9,.5a9,9,0,1,0,9,9A9,9,0,0,0,9,.5Z"></path><path class="icon-background" fill="#81B64C" d="M9,0a9,9,0,1,0,9,9A9,9,0,0,0,9,0Z"></path><path class="icon-component" fill="#fff" d="M13.79,10.84c0-.2.4-.53.4-.94S14,9.22,14,9.08a2.06,2.06,0,0,0,.18-.83,1,1,0,0,0-.3-.69,1.13,1.13,0,0,0-.55-.2,10.29,10.29,0,0,1-2.07,0c-.37-.23,0-1.18.18-1.7s.51-2.12-.77-2.43c-.69-.17-.66.37-.78.9-.05.21-.09.43-.13.57A5,5,0,0,1,7.05,7.73a1.57,1.57,0,0,1-.42.18v4.94A7.23,7.23,0,0,1,8,13c.52.12.91.25,1.44.33a11.11,11.11,0,0,0,1.62.16,6.65,6.65,0,0,0,1.18,0,1.09,1.09,0,0,0,1-.59.66.66,0,0,0,.06-.2,1.63,1.63,0,0,1,.07-.3c.13-.28.37-.3.5-.68S13.74,11,13.79,10.84.Z"></path><path class="icon-component" fill="#fff" d="M5.49,7.59H4.31a.5.5,0,0,0-.5.5v4.56a.5.5,0,0,0,.5.5H5.49a.5.5,0,0,0,.5-.5V8.09A.5.5,0,0,0,5.49,7.59.Z"></path></g></svg>`,
+          good: `<svg viewBox="0 0 18 19"><g id="good"><path class="icon-shadow" opacity="0.3" d="M9,.5a9,9,0,1,0,9,9A9,9,0,0,0,9,.5Z"></path><path class="icon-background" fill="#4299e1" d="M9,0a9,9,0,1,0,9,9A9,9,0,0,0,9,0Z"></path><path fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M5 9.6 L7.7 12.3 L13 6.2"></path></g></svg>`,
+          inaccuracy: `<svg viewBox="0 0 18 19"><g id="inaccuracy"><path class="icon-shadow" opacity="0.3" d="M9,.5a9,9,0,1,0,9,9A9,9,0,0,0,9,.5.Z"></path><path class="icon-background" fill="#F7C631" d="M9,0a9,9,0,1,0,9,9A9,9,0,0,0,9,0.Z"></path><path class="icon-component" fill="#fff" d="M13.66,14.3a.28.28,0,0,1,0,.13.23.23,0,0,1-.08.11.28.28,0,0,1-.11.08l-.12,0h-2l-.13,0a.27.27,0,0,1-.1-.08A.36.36,0,0,1,11,14.3V12.4a.59.59,0,0,1,0-.13.36.36,0,0,1,.07-.1l.1-.08.13,0h2a.33.33,0,0,1,.23.1.39.39,0,0,1,.08.1.28.28,0,0,1,0,.13Zm-.12-3.93a.31.31,0,0,1,0,.13.3.3,0,0,1-.07.1.3.3,0,0,1-.23.08H11.43a.31.31,0,0,1-.34-.31L10.94,3.6A.5.5,0,0,1,11,3.36l.11-.08.13,0h2.11a.35.35,0,0,1,.26.1.41.41,0,0,1,.08.24.Z"></path><path class="icon-component" fill="#fff" d="M7.65,14.32a.27.27,0,0,1,0,.12.26.26,0,0,1-.07.11l-.1.07-.13,0H5.43a.25.25,0,0,1-.12,0,.27.27,0,0,1-.1-.08.31.31,0,0,1-.09-.22V12.49a.36.36,0,0,1,.09-.23l.1-.07.12,0H7.32a.32.32,0,0,1,.23.09.3.3,0,0,1,.07.1.28.28,0,0,1,0,.13Zm2.2-7.17a3.1,3.1,0,0,1-.36.73,5.58,5.58,0,0,1-.49.60A4.85,4.85,0,0,1,8.48,9a8,8,0,0,0-.65.63,1,1,0,0,0-.27.7v.22a.21.21,0,0,1,0,.12.17.17,0,0,1-.06.1.23.23,0,0,1-.1.07l-.12,0H5.53a.21.21,0,0,1-.12,0,.18.18,0,0,1-.1-.07.2.2,0,0,1-.08-.10.37.37,0,0,1,0-.12v-.35a2.68,2.68,0,0,1,.13-.84,2.91,2.91,0,0,1,.33-.66,3.38,3.38,0,0,1,.45-.55c.16-.15.33-.29.49-.42a7.84,7.84,0,0,0,.65-.64,1,1,0,0,0,.25-.67.77.77,0,0,0-.07-.34.67.67,0,0,0-.23-.27A1.16,1.16,0,0,0,6.49,6,1.61,1.61,0,0,0,6,6.11a3,3,0,0,0-.41.18,1.75,1.75,0,0,0-.29.18l-.11.09A.5.5,0,0,1,5,6.12.31.31,0,0,1,4.74,6l-1-1.21a.3.3,0,0,1,0-.4A1.36,1.36,0,0,1,4,4.18a3.07,3.07,0,0,1,.56-.38,5.49,5.49,0,0,1,.9-.37,3.69,3.69,0,0,1,1.19-.17A3.92,3.92,0,0,1,8.93,4a2.85,2.85,0,0,1,.77.92A2.82,2.82,0,0,1,10,6.21,3,3,0,0,1,9.85,7.15.Z"></path></g></svg>`,
+          mistake: `<svg viewBox="0 0 18 19"><g id="mistake"><path class="icon-shadow" opacity="0.3" d="M9,.5a9,9,0,1,0,9,9A9,9,0,0,0,9,.5.Z"></path><path class="icon-background" fill="#FFA459" d="M9,0a9,9,0,1,0,9,9A9,9,0,0,0,9,0.Z"></path><path class="icon-component" fill="#fff" d="M9.92,14.52a.27.27,0,0,1,0,.12.41.41,0,0,1-.07.11.32.32,0,0,1-.23.09H7.7a.25.25,0,0,1-.12,0,.27.27,0,0,1-.1-.08A.31.31,0,0,1,7.39,15V13.19A.32.32,0,0,1,7.48,13l.1-.07.12,0H9.59a.32.32,0,0,1,.23.09.61.61,0,0,1,.07.10.28.28,0,0,1,0,.13Zm2.2-7.17a3.1,3.1,0,0,1-.36.73,5.58,5.58,0,0,1-.49.60,6,6,0,0,1-.52.49,8,8,0,0,0-.65.63,1,1,0,0,0-.27.7v.22a.24.24,0,0,1,0,.12.17.17,0,0,1-.06.10.3.3,0,0,1-.10.07l-.12,0H7.79l-.12,0a.3.3,0,0,1-.10-.07.26.26,0,0,1-.07-.10.37.37,0,0,1,0-.12v-.35A2.42,2.42,0,0,1,7.61,10a2.55,2.55,0,0,1,.33-.66,3.38,3.38,0,0,1,.45-.55c.16-.15.33-.29.49-.42a7.73,7.73,0,0,0,.64-.64,1,1,0,0,0,.26-.67.77.77,0,0,0-.07-.34A.75.75,0,0,0,9.48,6a1.16,1.16,0,0,0-.72-.24,1.61,1.61,0,0,0-.49.07A3,3,0,0,0,7.86,6a1.41,1.41,0,0,0-.29.18l-.11.09a.5.5,0,0,1-.24.06A.31.31,0,0,1,7,6.19L6,5a.29.29,0,0,1,0-.4,1.36,1.36,0,0,1,.21-.2A3.07,3.07,0,0,1,6.81,4a5.38,5.38,0,0,1,.89-.37A3.75,3.75,0,0,1,8.9,3.46a4.07,4.07,0,0,1,1.20.19,4,4,0,0,1,1.09.56,2.76,2.76,0,0,1,.78.92,2.82,2.82,0,0,1,.28,1.28A3,3,0,0,1,12.12,7.35.Z"></path></g></svg>`,
+          blunder: `<svg viewBox="0 0 18 19"><g id="blunder"><path class="icon-shadow" opacity="0.3" d="M9,.5a9,9,0,1,0,9,9A9,9,0,0,0,9,.5.Z"></path><path class="icon-background" fill="#FA412D" d="M9,0a9,9,0,1,0,9,9A9,9,0,0,0,9,0.Z"></path><path class="icon-component" fill="#fff" d="M14.74,5A2.58,2.58,0,0,0,14,4a3.76,3.76,0,0,0-1.09-.56,4.07,4.07,0,0,0-1.20.19,3.92,3.92,0,0,0-1.18.17,5.87,5.87,0,0,0-.9.37,3,3,0,0,0-.32.2,3.46,3.46,0,0,1,.42.63,3.29,3.29,0,0,1,.36,1.47.31.31,0,0,0,.19-.06L10.37,6a2.9,2.9,0,0,1,.29-.19,3.89,3.89,0,0,1,.41-.17,1.55,1.55,0,0,1,.48-.07,1.1,1.1,0,0,1,.72.24.72.72,0,0,1,.23.26.8.8,0,0,1,.07.34,1,1,0,0,1-.25.67,7.71,7.71,0,0,1-.65.63,6.2,6.2,0,0,0-.48.43,2.93,2.93,0,0,0-.45.54,2.55,2.55,0,0,0-.33.66,2.62,2.62,0,0,0-.13.83v.35a.24.24,0,0,0,0,.12.35.35,0,0,0,.17.17l.12,0h1.71l.12,0a.23.23,0,0,0,.10-.07.21.21,0,0,0,.06-.10.27.27,0,0,0,0-.12V10.3a1,1,0,0,1,.26-.7q.27-.28.66-.63a5.79,5.79,0,0,0,.51-.48,4.51,4.51,0,0,0,.48-.60,2.56,2.56,0,0,0,.36-.72,2.81,2.81,0,0,0,.14-1A2.66,2.66,0,0,0,14.74,5.Z"></path><path class="icon-component" fill="#fff" d="M12.38,12.15H10.5l-.12,0a.34.34,0,0,0-.18.29v1.82a.36.36,0,0,0,.08.23.23.23,0,0,0,.10.07l.12,0h1.88a.24.24,0,0,0,.12,0,.26.26,0,0,0,.11-.07.36.36,0,0,0,.07-.10.28.28,0,0,0,0-.13V12.46a.27.27,0,0,0,0-.12.61.61,0,0,0-.07-.10A.32.32,0,0,0,12.38,12.15.Z"></path><path class="icon-component" fill="#fff" d="M6.79,12.15H4.91l-.12,0a.34.34,0,0,0-.18.29v1.82a.36.36,0,0,0,.08.23.23.23,0,0,0,.10.07l.12,0H6.79a.24.24,0,0,0,.12,0A.26.26,0,0,0,7,14.51a.36.36,0,0,0,.07-.10.28.28,0,0,0,0-.13V12.46a.27.27,0,0,0,0-.12.61.61,0,0,0-.07-.10A.32.32,0,0,0,6.79,12.15.Z"></path><path class="icon-component" fill="#fff" d="M8.39,4A3.76,3.76,0,0,0,7.3,3.48a4.07,4.07,0,0,0-1.20.19,3.92,3.92,0,0,0-1.18.17,5.87,5.87,0,0,0-.9.37,3.37,3.37,0,0,0-.55.38l-.21.19a.32.32,0,0,0,0,.41l1,1.20a.26.26,0,0,0,.2.12.48.48,0,0,0,.24-.06L4.78,6a2.9,2.9,0,0,1,.29-.19l.40-.17A1.66,1.66,0,0,1,6,5.56a1.1,1.1,0,0,1,.72.24.72.72,0,0,1,.23.26A.77.77,0,0,1,7,6.4a1,1,0,0,1-.26.67,7.6,7.6,0,0,1-.64.63,6.28,6.28,0,0,0-.49.43,2.93,2.93,0,0,0-.45.54,2.72,2.72,0,0,0-.33.66,2.62,2.62,0,0,0-.13.83v.35a.43.43,0,0,0,0,.12.39.39,0,0,0,.08.10.18.18,0,0,0,.10.07.21.21,0,0,0,.12,0H6.72l.12,0a.23.23,0,0,0,.10-.07.36.36,0,0,0,.07-.10.5.5,0,0,0,0-.12V10.3a1,1,0,0,1,.27-.7A8,8,0,0,1,8,9c.18-.15.35-.31.52-.48A7,7,0,0,0,9,7.89a3.23,3.23,0,0,0,.36-.72,3.07,3.07,0,0,0,.13-1A2.66,2.66,0,0,0,9.15,5,2.58,2.58,0,0,0,8.39,4.Z"></path></g></svg>`,
+        };
+
+        const CLASS_LABELS_FA = {
+          book: "کتابی",
+          brilliant: "درخشان",
+          best: "بهترین",
+          excellent: "عالی",
+          good: "خوب",
+          inaccuracy: "ناخالص",
+          mistake: "اشتباه",
+          blunder: "خطای فاحش",
+        };
+        const CLASS_ORDER = [
+          "book",
+          "brilliant",
+          "best",
+          "excellent",
+          "good",
+          "inaccuracy",
+          "mistake",
+          "blunder",
+        ];
+
+        function buildBoardDOM() {
+          boardDiv.innerHTML = "";
+          boardSquares = {};
+          for (let i = 0; i < 8; i++) {
+            for (let j = 0; j < 8; j++) {
+              const row = isFlipped ? 7 - i : i,
+                col = isFlipped ? 7 - j : j;
+              const squareName = String.fromCharCode(97 + col) + (8 - row);
+              const sq = document.createElement("div");
+              sq.className = `square ${(row + col) % 2 === 0 ? "light" : "dark"}`;
+              sq.dataset.square = squareName;
+              const img = document.createElement("img");
+              img.classList.add("piece-img");
+              img.draggable = false;
+              img.style.display = "none";
+              sq.appendChild(img);
+              boardDiv.appendChild(sq);
+              boardSquares[squareName] = { div: sq, img: img };
+            }
+          }
+          updateBoardContent();
+        }
+
+        function clearHints() {
+          document
+            .querySelectorAll(".move-icon-svg")
+            .forEach((el) => el.remove());
+          document
+            .querySelectorAll(".square.hint-from")
+            .forEach((el) => el.classList.remove("hint-from"));
+          document
+            .querySelectorAll(".square.hint-to")
+            .forEach((el) => el.classList.remove("hint-to"));
+        }
+        function updateBoardContent() {
+          const board = game.board();
+          for (let i = 0; i < 8; i++) {
+            for (let j = 0; j < 8; j++) {
+              const row = isFlipped ? 7 - i : i,
+                col = isFlipped ? 7 - j : j;
+              const piece = board[row][col];
+              const squareName = String.fromCharCode(97 + col) + (8 - row);
+              const sqData = boardSquares[squareName];
+              if (!sqData) continue;
+              sqData.div.classList.remove("selected");
+              if (piece) {
+                const key =
+                  (piece.color === "w" ? "w" : "b") + piece.type.toLowerCase();
+                const newSrc = `pieces/${pieceSet}/${pieceCodes[key]}`;
+                if (sqData.img.src.indexOf(newSrc) === -1)
+                  sqData.img.src = newSrc;
+                sqData.img.style.display = "block";
+              } else {
+                sqData.img.style.display = "none";
+              }
+            }
+          }
+          if (selectedSquare && boardSquares[selectedSquare])
+            boardSquares[selectedSquare].div.classList.add("selected");
+          document.getElementById("pgnOutput").value = game.pgn();
+          if (engineOn) startLiveAnalysis();
+        }
+
+        function addMoveIcon(square, type) {
+          const sqData = boardSquares[square];
+          if (!sqData) return;
+          const iconWrapper = document.createElement("div");
+          iconWrapper.className = "move-icon-svg";
+          iconWrapper.innerHTML = ICONS[type] || "";
+          sqData.div.appendChild(iconWrapper);
+        }
+        function winPercentWhite(cpAbs) {
+          return 50 + 50 * (2 / (1 + Math.exp(-0.00368208 * cpAbs)) - 1);
+        }
+        function updateEvalBar(cpAbs, isMate, mateSign) {
+          const wp = isMate
+            ? mateSign > 0
+              ? 100
+              : 0
+            : Math.max(0, Math.min(100, winPercentWhite(cpAbs)));
+          const whiteFill = document.getElementById("evalBarWhite");
+          if (whiteFill) whiteFill.style.height = wp + "%";
+          const label = document.getElementById("evalBarValueText");
+          if (label) {
+            if (isMate) {
+              label.textContent = mateSign > 0 ? "+M" : "-M";
+            } else {
+              const s = cpAbs / 100;
+              label.textContent = (s > 0 ? "+" : "") + s.toFixed(1);
+            }
+          }
+        }
+
+        function updateHistory() {
+          const hist = game.history({ verbose: true });
+          if (hist.length === 0) {
+            historyList.innerHTML =
+              '<div class="empty-history">هنوز حرکتی ثبت نشده</div>';
+            return;
+          }
+          const currentPly = hist.length;
+          let html = "";
+          for (let i = 0; i < hist.length; i += 2) {
+            const num = Math.floor(i / 2) + 1;
+            const plyW = i + 1,
+              plyB = i + 2;
+            const sanW = hist[i].san;
+            const sanB = hist[i + 1] ? hist[i + 1].san : "";
+            const iconW = plyMeta[plyW]
+              ? `<span class="move-mini-icon">${ICONS[plyMeta[plyW].type] || ""}</span>`
+              : "";
+            const iconB =
+              sanB && plyMeta[plyB]
+                ? `<span class="move-mini-icon">${ICONS[plyMeta[plyB].type] || ""}</span>`
+                : "";
+            const activeW = plyW === currentPly ? "active" : "";
+            const activeB = plyB === currentPly ? "active" : "";
+            html += `<div class="move-item-row"><span class="move-num">${num}.</span><span class="move-half ${activeW}" data-ply="${plyW}">${sanW}${iconW}</span>${sanB ? `<span class="move-half ${activeB}" data-ply="${plyB}">${sanB}${iconB}</span>` : ""}</div>`;
+          }
+          historyList.innerHTML = html;
+          historyList.querySelectorAll(".move-half").forEach((el) => {
+            el.addEventListener("click", () =>
+              navigateToPly(parseInt(el.dataset.ply, 10)),
+            );
+          });
+          const activeEl = historyList.querySelector(".move-half.active");
+          if (activeEl) activeEl.scrollIntoView({ block: "nearest" });
+          else historyList.scrollTop = historyList.scrollHeight;
+        }
+
+        function executeMove(from, to, promotion = "q") {
+          if (isReviewing) return;
+          const move = game.move({ from, to, promotion });
+          if (move) {
+            historyStack.push(move);
+            redoStack = [];
+            selectedSquare = null;
+            clearHints();
+            updateBoardContent();
+            updateHistory();
+          }
+        }
+        let dragStart = null,
+          isDragging = false,
+          dragClone = null,
+          rafId = null,
+          lastX = 0,
+          lastY = 0,
+          cloneSize = 0;
+        function createDragClone(square, cx, cy) {
+          const sqData = boardSquares[square];
+          if (!sqData || sqData.img.style.display === "none") return null;
+          const rect = sqData.div.getBoundingClientRect();
+          cloneSize = rect.width;
+          const clone = sqData.img.cloneNode(true);
+          clone.style.cssText = `position: fixed; pointer-events: none; z-index: 9999; width: ${cloneSize}px; height: ${cloneSize}px; left: 0; top: 0; transform: translate3d(${cx - cloneSize / 2}px, ${cy - cloneSize / 2}px, 0) scale(1.05); filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); will-change: transform;`;
+          document.body.appendChild(clone);
+          sqData.img.style.opacity = "0";
+          return clone;
+        }
+        function updateDragClone() {
+          if (dragClone)
+            dragClone.style.transform = `translate3d(${lastX - cloneSize / 2}px, ${lastY - cloneSize / 2}px, 0) scale(1.05)`;
+          rafId = null;
+        }
+        function onPointerDown(e) {
+          if (isReviewing) return;
+          const cx = e.touches ? e.touches[0].clientX : e.clientX,
+            cy = e.touches ? e.touches[0].clientY : e.clientY;
+          const el = document.elementFromPoint(cx, cy);
+          const sq = el?.closest?.(".square");
+          if (!sq) return;
+          const square = sq.dataset.square;
+          const piece = game.get(square);
+          if (piece) {
+            e.preventDefault();
+            dragStart = square;
+            isDragging = true;
+            dragClone = createDragClone(square, cx, cy);
+          } else if (selectedSquare) {
+            executeMove(selectedSquare, square);
+            selectedSquare = null;
+            updateBoardContent();
+          }
+        }
+        function onPointerMove(e) {
+          if (!isDragging) return;
+          e.preventDefault();
+          lastX = e.touches ? e.touches[0].clientX : e.clientX;
+          lastY = e.touches ? e.touches[0].clientY : e.clientY;
+          if (!rafId) rafId = requestAnimationFrame(updateDragClone);
+        }
+        function onPointerUp(e) {
+          if (!isDragging || !dragStart) {
+            cleanupDrag();
+            return;
+          }
+          const cx = e.changedTouches ? e.changedTouches[0].clientX : e.clientX,
+            cy = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+          if (dragClone) {
+            dragClone.remove();
+            dragClone = null;
+          }
+          if (boardSquares[dragStart] && boardSquares[dragStart].img)
+            boardSquares[dragStart].img.style.opacity = "1";
+          const el = document.elementFromPoint(cx, cy);
+          const target = el?.closest?.(".square");
+          const to = target ? target.dataset.square : null;
+          if (to && to !== dragStart) {
+            executeMove(dragStart, to);
+          } else if (to === dragStart) {
+            selectedSquare = selectedSquare === dragStart ? null : dragStart;
+            updateBoardContent();
+          }
+          cleanupDrag();
+        }
+        function cleanupDrag() {
+          if (dragClone) {
+            dragClone.remove();
+            dragClone = null;
+          }
+          if (rafId) {
+            cancelAnimationFrame(rafId);
+            rafId = null;
+          }
+          dragStart = null;
+          isDragging = false;
+        }
+        function onClickFallback(e) {
+          if (isReviewing || isDragging) return;
+          const sq = e.target.closest?.(".square");
+          if (!sq) return;
+          const square = sq.dataset.square;
+          if (selectedSquare === null) {
+            const piece = game.get(square);
+            if (piece) {
+              selectedSquare = square;
+              updateBoardContent();
+            }
+          } else {
+            if (square !== selectedSquare) executeMove(selectedSquare, square);
+            selectedSquare = null;
+            updateBoardContent();
+          }
+        }
+
+        function setupStockfishListeners() {
+          stockfish.onmessage = function (e) {
+            const data = e.data;
+            if (data.includes("uciok")) {
+              stockfishReady = true;
+              bestMoveText.textContent = "موتور آماده است.";
+            } else if (
+              typeof data === "string" &&
+              data.startsWith("info depth")
+            ) {
+              const cpMatch = data.match(/score cp (-?\d+)/);
+              const mateMatch = data.match(/score mate (-?\d+)/);
+              if (cpMatch) {
+                let score = parseInt(cpMatch[1]);
+                let absScore = currentAnalyzedTurn === "w" ? score : -score;
+                currentAbsScore = absScore;
+                let s = absScore / 100;
+                evalText.textContent =
+                  s > 0 ? `+${s.toFixed(2)}` : s.toFixed(2);
+                updateEvalBar(absScore, false, 0);
+              } else if (mateMatch) {
+                let mate = parseInt(mateMatch[1]);
+                let absMate = currentAnalyzedTurn === "w" ? mate : -mate;
+                currentAbsScore = absMate > 0 ? 10000 : -10000;
+                evalText.textContent = `مات در ${Math.abs(absMate)}`;
+                updateEvalBar(0, true, absMate);
+              }
+              const pvMatch = data.match(/ pv (.+)/);
+              if (pvMatch && engineOn) {
+                const moves = pvMatch[1].split(" ");
+                if (moves[0]) {
+                  document
+                    .querySelectorAll(".square.hint-from")
+                    .forEach((el) => el.classList.remove("hint-from"));
+                  document
+                    .querySelectorAll(".square.hint-to")
+                    .forEach((el) => el.classList.remove("hint-to"));
+                  const from = moves[0].slice(0, 2),
+                    to = moves[0].slice(2, 4);
+                  if (boardSquares[from])
+                    boardSquares[from].div.classList.add("hint-from");
+                  if (boardSquares[to])
+                    boardSquares[to].div.classList.add("hint-to");
+                }
+              }
+            } else if (
+              typeof data === "string" &&
+              data.startsWith("bestmove")
+            ) {
+              if (stockfishResolver) {
+                const bestMoveStr = data.split(" ")[1];
+                let bestMoveObj = null;
+                if (bestMoveStr && bestMoveStr !== "(none)") {
+                  const from = bestMoveStr.slice(0, 2);
+                  const to = bestMoveStr.slice(2, 4);
+                  const promotion =
+                    bestMoveStr.length === 5 ? bestMoveStr[4] : undefined;
+                  bestMoveObj = { from, to, promotion };
+                }
+                stockfishResolver({
+                  score: currentAbsScore,
+                  bestMove: bestMoveObj,
+                  isMate: currentMate !== null,
+                  mate: currentMate,
+                });
+                stockfishResolver = null;
+              }
+            }
+          };
+          stockfish.postMessage("uci");
+        }
+
+        function initStockfish() {
+          try {
+            stockfish = new Worker("js/stockfish.js");
+            setupStockfishListeners();
+          } catch (e) {
+            fetch(
+              "https://cdn.jsdelivr.net/npm/stockfish@10.0.2/src/stockfish.js",
+            )
+              .then((response) => response.text())
+              .then((scriptText) => {
+                const blob = new Blob([scriptText], {
+                  type: "application/javascript",
+                });
+                stockfish = new Worker(URL.createObjectURL(blob));
+                setupStockfishListeners();
+              })
+              .catch((err) => {
+                bestMoveText.textContent = "خطا در بارگذاری موتور!";
+              });
+          }
+        }
+
+        function startLiveAnalysis() {
+          if (!stockfishReady || !engineOn) return;
+          bestMoveText.textContent = "در حال تحلیل زنده...";
+          stockfish.postMessage("stop");
+          currentAnalyzedTurn = game.turn();
+          stockfish.postMessage("position fen " + game.fen());
+          stockfish.postMessage("go depth " + analysisDepth);
+        }
+        function toggleEngine() {
+          engineOn = !engineOn;
+          const btn = document.getElementById("engineToggleBtn");
+          if (engineOn) {
+            btn.classList.add("active");
+            btn.innerHTML = '<i class="fas fa-stop"></i> خاموش کردن موتور';
+            startLiveAnalysis();
+          } else {
+            btn.classList.remove("active");
+            btn.innerHTML =
+              '<i class="fas fa-power-off"></i> روشن کردن موتور زنده';
+            stockfish.postMessage("stop");
+            bestMoveText.textContent = "موتور خاموش است";
+            clearHints();
+          }
+        }
+        function getEngineInfo(fen, depth) {
+          return new Promise((resolve) => {
+            if (!stockfishReady) {
+              resolve({ score: 0, bestMove: null, isMate: false, mate: null });
+              return;
+            }
+            stockfishResolver = resolve;
+            currentAbsScore = 0;
+            currentMate = null;
+            currentAnalyzedTurn = fen.split(" ")[1];
+            stockfish.postMessage("stop");
+            stockfish.postMessage("position fen " + fen);
+            stockfish.postMessage(`go depth ${depth}`);
+          });
+        }
+
+        async function loadOpenings() {
+          try {
+            const response = await fetch("data/openings_master.csv");
+            if (!response.ok) throw new Error("CSV not found");
+            const text = await response.text();
+            const lines = text.split("\n");
+            for (let i = 1; i < lines.length; i++) {
+              const line = lines[i].trim();
+              if (!line) continue;
+              const firstComma = line.indexOf(",");
+              const lastComma = line.lastIndexOf(",");
+              if (
+                firstComma !== -1 &&
+                lastComma !== -1 &&
+                lastComma > firstComma
+              ) {
+                const eco = line
+                  .substring(0, firstComma)
+                  .trim()
+                  .replace(/"/g, "");
+                const name = line
+                  .substring(firstComma + 1, lastComma)
+                  .trim()
+                  .replace(/"/g, "");
+                const pgn = line
+                  .substring(lastComma + 1)
+                  .trim()
+                  .replace(/"/g, "");
+                if (pgn) bookMap[pgn] = { eco, name };
+              }
+            }
+            console.log("✅ Openings loaded:", Object.keys(bookMap).length);
+          } catch (e) {
+            console.warn("⚠️ Could not load openings_master.csv.", e);
+          }
+        }
+
+        function navigateToPly(n) {
+          if (isReviewing) stopReview();
+          let current = game.history().length;
+          if (n !== current) {
+            if (n < current) {
+              while (game.history().length > n) {
+                const m = game.undo();
+                if (!m) break;
+                redoStack.push(m);
+              }
+            } else {
+              while (game.history().length < n && redoStack.length) {
+                const m = redoStack.pop();
+                const applied = game.move(m);
+                if (!applied) break;
+              }
+            }
+          }
+          refreshPositionDisplay();
+        }
+        function refreshPositionDisplay() {
+          selectedSquare = null;
+          updateBoardContent();
+          updateHistory();
+          clearHints();
+          const ply = game.history().length;
+          const hist = game.history({ verbose: true });
+          const last = hist[hist.length - 1];
+          const meta = plyMeta[ply];
+          if (meta) {
+            if (last) addMoveIcon(last.to, meta.type);
+            if (!engineOn) {
+              updateEvalBar(meta.evalAfter, meta.isMate, meta.mateIn);
+              evalText.textContent = meta.isMate
+                ? `مات (حرکت ${ply})`
+                : (meta.evalAfter / 100 > 0 ? "+" : "") +
+                  (meta.evalAfter / 100).toFixed(2);
+              if (meta.review) reviewTextBox.innerHTML = meta.review;
+            }
+          } else if (!engineOn) {
+            updateEvalBar(0, false, 0);
+            evalText.textContent = "0.0";
+          }
+        }
+
+        async function reviewGame() {
+          if (isReviewing) {
+            stopReview();
+            return;
+          }
+          const pgnText = document.getElementById("pgnInput").value.trim();
+          if (!pgnText) return alert("لطفا ابتدا کد PGN را وارد کنید!");
+          let tempGame = new Chess();
+          try {
+            tempGame.load_pgn(pgnText);
+          } catch (e) {
+            return alert("کد PGN نامعتبر است!");
+          }
+          const moves = tempGame.history({ verbose: true });
+          if (moves.length === 0)
+            return alert("هیچ حرکتی در این PGN یافت نشد!");
+          if (engineOn) toggleEngine();
+          isReviewing = true;
+          document.getElementById("reviewGameBtn").innerHTML =
+            '<i class="fas fa-stop"></i> توقف مرور';
+          document.getElementById("reviewSummary").style.display = "none";
+          const progressTrack = document.getElementById("progressTrack");
+          const progressFill = document.getElementById("progressFill");
+          if (progressTrack) progressTrack.style.display = "block";
+          bestMoveText.textContent = "در حال پردازش عمیق بازی...";
+          game = new Chess();
+          historyStack = [];
+          redoStack = [];
+          plyMeta = {};
+          selectedSquare = null;
+          clearHints();
+          updateBoardContent();
+          updateHistory();
+          let analysisResults = [];
+          let analyzeGame = new Chess();
+          let evalScoresAbs = [];
+          let currentBookStr = "";
+
+          for (let i = 0; i < moves.length; i++) {
+            const move = moves[i];
+            const pos = ChessReview.makePos(Chess, analyzeGame.fen());
+            const player = pos.turn;
+            const infoBefore = await getEngineInfo(pos.fen, analysisDepth);
+            const evalBeforeAbs =
+              player === "w" ? infoBefore.score : -infoBefore.score;
+            const bestMove = infoBefore.bestMove;
+            const after = ChessReview.posAfterMove(Chess, pos, move);
+            if (!after) {
+              analyzeGame.move(move);
+              continue;
+            }
+            const infoAfter = await getEngineInfo(after.fen, analysisDepth);
+            const evalAfterAbs =
+              player === "w" ? -infoAfter.score : infoAfter.score;
+            evalScoresAbs.push(evalAfterAbs);
+            const pointsGained = evalAfterAbs - evalBeforeAbs;
+
+            const moveNumber = Math.floor(i / 2) + 1;
+            if (i % 2 === 0) {
+              currentBookStr =
+                `${currentBookStr} ${moveNumber}. ${move.san}`.trim();
+            } else {
+              currentBookStr = `${currentBookStr} ${move.san}`.trim();
+            }
+            const bookHit = bookMap[currentBookStr] || null;
+
+            let isMateLine = null;
+            if (infoBefore.isMate && infoAfter.isMate) {
+              let mateBeforeMover = infoBefore.mate;
+              let mateAfterMover = -infoAfter.mate;
+              if (mateBeforeMover > 0 && mateAfterMover > 0)
+                isMateLine = `mates ${mateAfterMover}`;
+              else if (mateBeforeMover < 0 && mateAfterMover < 0)
+                isMateLine = `continues gets mated ${Math.abs(mateAfterMover)}`;
+              else if (mateBeforeMover > 0 && mateAfterMover < 0)
+                isMateLine = "lost mate";
+              else if (mateBeforeMover < 0 && mateAfterMover > 0)
+                isMateLine = `gets mated ${mateAfterMover}`;
+            } else if (infoBefore.isMate && !infoAfter.isMate) {
+              isMateLine = "lost mate";
+            } else if (!infoBefore.isMate && infoAfter.isMate) {
+              let mateAfterMover = -infoAfter.mate;
+              if (mateAfterMover > 0) isMateLine = `mates ${mateAfterMover}`;
+              else isMateLine = `gets mated ${Math.abs(mateAfterMover)}`;
+            }
+
+            const engineData = {
+              bestMove: bestMove,
+              pointsGained: pointsGained,
+              isMateLine: isMateLine,
+              opponentBestMove: infoAfter.bestMove,
+            };
+            const previousReview =
+              analysisResults.length > 0
+                ? analysisResults[analysisResults.length - 1].review
+                : "";
+            const result = ChessReview.reviewMove(
+              Chess,
+              pos,
+              move,
+              after,
+              previousReview,
+              bookHit,
+              engineData,
+              false,
+            );
+
+            analysisResults.push(result);
+            analyzeGame.move(move);
+            bestMoveText.textContent = `پردازش حرکت ${i + 1} از ${moves.length}...`;
+            if (progressFill)
+              progressFill.style.width = ((i + 1) / moves.length) * 100 + "%";
+          }
+
+          if (progressTrack) progressTrack.style.display = "none";
+          const acc = ChessReview.calculateAccuracy(evalScoresAbs);
+          const openingName = bookMap[currentBookStr]
+            ? bookMap[currentBookStr].name
+            : "گشایش نامشخص";
+          renderReviewSummary(acc, openingName, analysisResults);
+
+          bestMoveText.textContent = "پخش بازی...";
+          game = new Chess();
+          updateBoardContent();
+          updateHistory();
+          let currentMoveIdx = 0;
+          reviewInterval = setInterval(() => {
+            if (currentMoveIdx >= analysisResults.length) {
+              stopReview();
+              bestMoveText.textContent = "مرور بازی تمام شد!";
+              return;
+            }
+            const res = analysisResults[currentMoveIdx];
+            const move = game.move(moves[currentMoveIdx]);
+            if (move) {
+              historyStack.push(move);
+              selectedSquare = null;
+              clearHints();
+              updateBoardContent();
+              updateHistory();
+              addMoveIcon(move.to, res.classification);
+              reviewTextBox.innerHTML = `<strong>حرکت ${currentMoveIdx + 1}:</strong> ${res.review}`;
+              if (
+                res.classification === "blunder" ||
+                res.classification === "mistake" ||
+                res.classification === "inaccuracy"
+              ) {
+                if (res.bestMove) {
+                  const hintFrom = res.bestMove.from,
+                    hintTo = res.bestMove.to;
+                  if (boardSquares[hintFrom])
+                    boardSquares[hintFrom].div.classList.add("hint-from");
+                  if (boardSquares[hintTo])
+                    boardSquares[hintTo].div.classList.add("hint-to");
+                }
+              }
+              currentMoveIdx++;
+            }
+          }, 2000);
+        }
+
+        function stopReview() {
+          if (reviewInterval) clearInterval(reviewInterval);
+          isReviewing = false;
+          document.getElementById("reviewGameBtn").innerHTML =
+            '<i class="fas fa-play-circle"></i> مرور بازی';
+        }
+        function renderReviewSummary(acc, openingName, results) {
+          document.getElementById("openingName").textContent = openingName;
+          document.getElementById("accWhiteValue").textContent =
+            acc.white.toFixed(1) + "٪";
+          document.getElementById("accBlackValue").textContent =
+            acc.black.toFixed(1) + "٪";
+          const wMeter = document.getElementById("meterWhite");
+          const bMeter = document.getElementById("meterBlack");
+          if (wMeter) {
+            wMeter.style.width = Math.max(2, Math.min(100, acc.white)) + "%";
+            wMeter.style.background =
+              acc.white >= 90
+                ? "#26c2a3"
+                : acc.white >= 75
+                  ? "#81B64C"
+                  : acc.white >= 55
+                    ? "#F7C631"
+                    : acc.white >= 35
+                      ? "#FFA459"
+                      : "#FA412D";
+          }
+          if (bMeter) {
+            bMeter.style.width = Math.max(2, Math.min(100, acc.black)) + "%";
+            bMeter.style.background =
+              acc.black >= 90
+                ? "#26c2a3"
+                : acc.black >= 75
+                  ? "#81B64C"
+                  : acc.black >= 55
+                    ? "#F7C631"
+                    : acc.black >= 35
+                      ? "#FFA459"
+                      : "#FA412D";
+          }
+
+          function fillBreakdown(id, color) {
+            let html = "";
+            const counts = {};
+            results.forEach((r, i) => {
+              if (
+                (i % 2 === 0 && color === "w") ||
+                (i % 2 !== 0 && color === "b")
+              ) {
+                counts[r.classification] = (counts[r.classification] || 0) + 1;
+              }
+            });
+            CLASS_ORDER.forEach((t) => {
+              const c = counts[t] || 0;
+              if (c > 0)
+                html += `<div class="class-chip"><span class="chip-icon">${ICONS[t]}</span><span>${CLASS_LABELS_FA[t]}</span><b>${c}</b></div>`;
+            });
+            document.getElementById(id).innerHTML =
+              html || '<div class="class-chip-empty">حرکتی ثبت نشد</div>';
+          }
+          fillBreakdown("classWhite", "w");
+          fillBreakdown("classBlack", "b");
+          document.getElementById("reviewSummary").style.display = "block";
+        }
+
+        document.getElementById("undoBtn").addEventListener("click", () => {
+          if (isReviewing) return;
+          const m = game.undo();
+          if (m) {
+            redoStack.push(m);
+            refreshPositionDisplay();
+          }
+        });
+        document.getElementById("redoBtn").addEventListener("click", () => {
+          if (isReviewing) return;
+          const m = redoStack.pop();
+          if (m) {
+            game.move(m);
+            refreshPositionDisplay();
+          }
+        });
+        document
+          .getElementById("jumpStartBtn")
+          .addEventListener("click", () => {
+            navigateToPly(0);
+          });
+        document.getElementById("jumpEndBtn").addEventListener("click", () => {
+          navigateToPly(game.history().length + redoStack.length);
+        });
+        document.getElementById("flipBtn").addEventListener("click", () => {
+          isFlipped = !isFlipped;
+          buildBoardDOM();
+          refreshPositionDisplay();
+        });
+        document.getElementById("resetBtn").addEventListener("click", () => {
+          stopReview();
+          game = new Chess();
+          historyStack = [];
+          redoStack = [];
+          plyMeta = {};
+          selectedSquare = null;
+          clearHints();
+          document.getElementById("reviewSummary").style.display = "none";
+          updateBoardContent();
+          updateHistory();
+          reviewTextBox.innerHTML = "تحلیل حرکات در اینجا نمایش داده می‌شود...";
+          if (!engineOn) {
+            updateEvalBar(0, false, 0);
+            evalText.textContent = "0.0";
+            bestMoveText.textContent = "موتور خاموش است";
+          }
+        });
+        document
+          .getElementById("engineToggleBtn")
+          .addEventListener("click", toggleEngine);
+        document
+          .getElementById("reviewGameBtn")
+          .addEventListener("click", reviewGame);
+        document
+          .getElementById("depthSelect")
+          .addEventListener("change", (e) => {
+            analysisDepth = parseInt(e.target.value, 10);
+          });
+        document.getElementById("loadFenBtn").addEventListener("click", () => {
+          const fen = document.getElementById("fenInput").value.trim();
+          if (!fen) return alert("لطفا FEN را وارد کنید!");
+          const tmp = new Chess();
+          const ok = tmp.load(fen);
+          if (!ok) return alert("FEN نامعتبر است!");
+          stopReview();
+          game = tmp;
+          historyStack = [];
+          redoStack = [];
+          plyMeta = {};
+          selectedSquare = null;
+          clearHints();
+          document.getElementById("reviewSummary").style.display = "none";
+          updateBoardContent();
+          updateHistory();
+          reviewTextBox.innerHTML = "تحلیل حرکات در اینجا نمایش داده می‌شود...";
+          if (!engineOn) {
+            updateEvalBar(0, false, 0);
+            evalText.textContent = "0.0";
+            bestMoveText.textContent = "موتور خاموش است";
+          }
+        });
+        document.getElementById("copyFenBtn").addEventListener("click", () => {
+          navigator.clipboard
+            .writeText(game.fen())
+            .then(() => alert("✅ FEN کپی شد"));
+        });
+        document.getElementById("copyPgnBtn").addEventListener("click", () => {
+          navigator.clipboard
+            .writeText(document.getElementById("pgnOutput").value)
+            .then(() => alert("✅ PGN کپی شد"));
+        });
+        document
+          .getElementById("downloadPgnBtn")
+          .addEventListener("click", () => {
+            const pgn = document.getElementById("pgnOutput").value;
+            const blob = new Blob([pgn], { type: "text/plain" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = `chesshub_game_${new Date().toISOString().split("T")[0]}.pgn`;
+            a.click();
+          });
+
+        async function init() {
+          pieceSet = getCurrentPieceSet();
+          document.addEventListener("pieceSetChanged", () => {
+            pieceSet = getCurrentPieceSet();
+            updateBoardContent();
+          });
+          buildBoardDOM();
+          initStockfish();
+          loadOpenings();
+          boardDiv.addEventListener("mousedown", onPointerDown);
+          window.addEventListener("mousemove", onPointerMove);
+          window.addEventListener("mouseup", onPointerUp);
+          boardDiv.addEventListener("touchstart", onPointerDown, {
+            passive: false,
+          });
+          boardDiv.addEventListener("touchmove", onPointerMove, {
+            passive: false,
+          });
+          boardDiv.addEventListener("touchend", onPointerUp, {
+            passive: false,
+          });
+          boardDiv.addEventListener("click", onClickFallback);
+        }
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", init);
+        } else {
+          init();
+        }
+      })();
+    </script>
+  </body>
+</html>
