@@ -12,7 +12,7 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
     />
     <link
-      href="https://cdn.jsdelivr.net/gh/rastikerdardar/vazir-font@v30.1.0/dist/font-face.css"
+      href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="css/style.css" />
@@ -33,7 +33,6 @@
         width: 100%;
         max-width: 600px;
       }
-
       .status-bar {
         background: var(--primary-dark);
         color: #fff;
@@ -48,7 +47,6 @@
         background: var(--warning);
         color: #000;
       }
-
       #chessboard {
         width: 100%;
         aspect-ratio: 1/1;
@@ -85,7 +83,6 @@
         left: 0;
         z-index: 1;
       }
-
       .message-box {
         margin-top: 1rem;
         padding: 1rem;
@@ -100,24 +97,20 @@
   <body>
     <div class="container">
       <div id="header-placeholder"></div>
-
       <section class="app-hero">
         <h1><i class="fas fa-globe"></i> بازی آنلاین</h1>
-        <p>با بازیکنان دیگر از سراسر جهان رقابت کنید!</p>
+        <p>سیستم ضد تقلب و پایدار با توکن اختصاصی!</p>
       </section>
 
       <div class="online-wrapper">
         <div class="game-card">
           <div class="status-bar waiting" id="statusBar">
-            در حال جستجوی حریف...
+            در حال اتصال به سرور...
           </div>
           <div id="chessboard"></div>
-          <div class="message-box" id="msgBox">
-            لطفاً صبر کنید تا یک حریف پیدا شود.
-          </div>
+          <div class="message-box" id="msgBox">لطفاً صبر کنید.</div>
         </div>
       </div>
-
       <div id="footer-placeholder"></div>
     </div>
 
@@ -126,13 +119,15 @@
       (function () {
         "use strict";
 
-        // اتصال به سرور
+        // آدرس سرور (لوکال یا رندر)
         const socket = io("http://localhost:3000");
         let game = new Chess();
         let boardSquares = {};
         let selectedSquare = null;
         let myColor = "w";
         let isFlipped = false;
+        let currentGameId = localStorage.getItem("chesshub_game_id");
+        let myName = localStorage.getItem("chesshub_player_name") || "Player";
         const pieceCodes = {
           wk: "wk.png",
           wq: "wq.png",
@@ -193,29 +188,15 @@
         }
 
         function makeMove(from, to, promo = "q") {
-          if (game.turn() !== myColor) return false;
-          const move = game.move({ from, to, promotion: promo });
-          if (move) {
-            selectedSquare = null;
-            updateBoard();
-            socket.emit("move", {
-              from: move.from,
-              to: move.to,
-              promotion: move.promotion,
-            });
-            checkGameOver();
-            return true;
-          }
-          return false;
+          socket.emit("makeMove", {
+            gameId: currentGameId,
+            from,
+            to,
+            promotion: promo,
+          });
         }
 
-        function checkGameOver() {
-          if (game.game_over()) {
-            document.getElementById("statusBar").textContent = "بازی تمام شد!";
-          }
-        }
-
-        // --- منطق درگ‌اند‌دراپ (مشابه پازل عجله‌ای) ---
+        // --- منطق درگ‌اند‌دراپ ---
         let dragStart = null,
           isDragging = false,
           dragClone = null,
@@ -223,7 +204,6 @@
           lastX = 0,
           lastY = 0,
           cloneSize = 0;
-
         function createDragClone(sq, cx, cy) {
           const d = boardSquares[sq];
           if (!d) return null;
@@ -237,13 +217,11 @@
           img.style.opacity = "0";
           return c;
         }
-
         function updDrag() {
           if (dragClone)
             dragClone.style.transform = `translate3d(${lastX - cloneSize / 2}px,${lastY - cloneSize / 2}px,0) scale(1.05)`;
           rafId = null;
         }
-
         function onDown(e) {
           if (game.turn() !== myColor || game.game_over()) return;
           const cx = e.touches ? e.touches[0].clientX : e.clientX,
@@ -264,7 +242,6 @@
             updateBoard();
           }
         }
-
         function onMove(e) {
           if (!isDragging) return;
           e.preventDefault();
@@ -272,7 +249,6 @@
           lastY = e.touches ? e.touches[0].clientY : e.clientY;
           if (!rafId) rafId = requestAnimationFrame(updDrag);
         }
-
         function onUp(e) {
           if (!isDragging || !dragStart) {
             cleanup();
@@ -299,7 +275,6 @@
           }
           cleanup();
         }
-
         function cleanup() {
           if (dragClone) {
             dragClone.remove();
@@ -312,7 +287,6 @@
           dragStart = null;
           isDragging = false;
         }
-
         function onClick(e) {
           if (isDragging) return;
           if (game.turn() !== myColor || game.game_over()) return;
@@ -328,22 +302,48 @@
           } else {
             makeMove(selectedSquare, s);
             selectedSquare = null;
-            updateBoard();
           }
         }
 
         // --- رویدادهای Socket.io ---
+        socket.on("connect", () => {
+          if (currentGameId) {
+            // اگه داشتم بازی می‌کردم و رفرش کردم، درخواست برگشتم رو میدم
+            socket.emit("reconnectGame", { gameId: currentGameId });
+          } else {
+            // اگه تازه اومدم، دنبال حریف می‌گردم
+            socket.emit("findGame");
+          }
+        });
+
+        socket.on("waiting", (data) => {
+          myName = data.name;
+          localStorage.setItem("chesshub_player_name", myName);
+          document.getElementById("statusBar").className = "status-bar waiting";
+          document.getElementById("statusBar").textContent =
+            `در انتظار حریف... (شما: ${myName})`;
+          document.getElementById("msgBox").textContent =
+            "لطفاً صبر کنید تا یک نفر پیدا شود.";
+        });
+
         socket.on("gameStart", (data) => {
+          currentGameId = data.gameId;
+          localStorage.setItem("chesshub_game_id", currentGameId);
+
           myColor = data.color;
           isFlipped = myColor === "b";
+          game = new Chess(data.fen);
           buildBoard();
+
           document.getElementById("statusBar").className = "status-bar";
+          let oppText = data.opponent ? ` | حریف: ${data.opponent}` : "";
+          let reconnectText = data.reconnect ? " (ادامه بازی پس از قطعی)" : "";
           document.getElementById("statusBar").textContent =
-            `بازی شروع شد! شما ${myColor === "w" ? "سفید" : "سیاه"} هستید.`;
+            `شما ${myColor === "w" ? "سفید" : "سیاه"} هستید${reconnectText}${oppText}`;
           document.getElementById("msgBox").textContent =
             "بازی در حال انجام است.";
 
-          // اضافه کردن رویدادهای موس و لمسی به تخته
+          // اضافه کردن رویدادهای موس و لمسی
           boardDiv.addEventListener("mousedown", onDown);
           window.addEventListener("mousemove", onMove);
           window.addEventListener("mouseup", onUp);
@@ -353,14 +353,30 @@
           boardDiv.addEventListener("click", onClick);
         });
 
-        socket.on("opponentMove", (data) => {
-          game.move({
-            from: data.from,
-            to: data.to,
-            promotion: data.promotion || "q",
-          });
+        // سرور حرکت رو تایید کرد و وضعیت جدید رو فرستاد
+        socket.on("moveMade", (data) => {
+          game.load(data.fen);
           updateBoard();
-          checkGameOver();
+        });
+
+        // اگه بازی قبلی تموم شده بود یا پیدا نشد، دوباره بگرد
+        socket.on("findNewGame", () => {
+          localStorage.removeItem("chesshub_game_id");
+          currentGameId = null;
+          socket.emit("findGame");
+        });
+
+        socket.on("gameOver", (data) => {
+          document.getElementById("statusBar").textContent =
+            `بازی تمام شد! (${data.result})`;
+          localStorage.removeItem("chesshub_game_id");
+          localStorage.removeItem("chesshub_player_name");
+        });
+
+        socket.on("opponentLeft", () => {
+          document.getElementById("statusBar").textContent =
+            "حریف بازی رو ترک کرد! برنده شدی.";
+          localStorage.removeItem("chesshub_game_id");
         });
 
         buildBoard(); // ساخت تخته خالی تا قبل از اتصال
