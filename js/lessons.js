@@ -32,9 +32,9 @@
   const closeBtn = document.getElementById("closeOverlay");
 
   const categoryColors = {
-    "شروع بازی": "#38a169", // سبز
-    "وسط بازی": "#3182ce", // آبی
-    "آخر بازی": "#805ad5", // بنفش
+    "شروع بازی": "#38a169",
+    "وسط بازی": "#3182ce",
+    "آخر بازی": "#805ad5",
   };
 
   const categoryClasses = {
@@ -54,7 +54,7 @@
     viewerContainer.innerHTML = `
       <div class="lesson-viewer">
         <h3>${lesson.title}</h3>
-        <div class="tag" style="background:${color}">${lesson.category} – ${lesson.level}</div>
+        <div class="tag" style="background:${color}">${lesson.category} – ${lesson.level || "متوسط"}</div>
         ${lesson.content}
         <button class="close-modal-btn" id="closeLessonBtn">✖ بستن درس</button>
       </div>
@@ -81,13 +81,14 @@
   // ============================================
   function renderLessons() {
     const lessonsData = window.lessons || [];
+
     let filtered = lessonsData.filter((l) => {
       if (currentCategory !== "all" && l.category !== currentCategory)
         return false;
       if (
         searchText &&
         !l.title.includes(searchText) &&
-        !l.description.includes(searchText)
+        !(l.description || "").includes(searchText)
       )
         return false;
       return true;
@@ -108,17 +109,17 @@
       card.className = "lesson-card";
       card.innerHTML = `
         <div class="lesson-thumb" style="background:linear-gradient(135deg, ${color}, ${color}cc)">
-          <i class="${lesson.thumbIcon}"></i>
+          <i class="${lesson.thumbIcon || "fas fa-book"}"></i>
         </div>
         <div class="lesson-content">
           <div class="lesson-meta">
             <span class="lesson-tag ${cls}">${lesson.category}</span>
-            <span class="lesson-level">${lesson.level}</span>
+            ${lesson.level ? `<span class="lesson-level">${lesson.level}</span>` : ""}
           </div>
           <div class="lesson-title">${lesson.title}</div>
-          <p class="lesson-description">${lesson.description}</p>
+          <p class="lesson-description">${lesson.description || ""}</p>
           <div class="lesson-footer">
-            <span class="lesson-duration"><i class="far fa-clock"></i> ${lesson.duration}</span>
+            <span class="lesson-duration"><i class="far fa-clock"></i> ${lesson.duration || "مدت نامشخص"}</span>
             <button class="btn-view" data-id="${lesson.id}">مشاهده</button>
           </div>
         </div>

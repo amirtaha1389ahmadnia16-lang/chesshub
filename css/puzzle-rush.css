@@ -1,19 +1,16 @@
 /* ============================================
    🎯 استایل‌های اختصاصی پازل عجله‌ای (Pro Edition)
    ============================================ */
-
-/* ----- بخش اصلی بازی ----- */
 .game-area {
   background: #ffffff;
   border-radius: var(--radius-lg);
   padding: 1.5rem;
   box-shadow: var(--shadow-md);
-  max-width: 750px;
+  max-width: 900px;
   margin: 0 auto 1.5rem;
   border: 1px solid #e2e8f0;
 }
 
-/* ----- انتخابگر حالت بازی ----- */
 .mode-selector {
   display: flex;
   justify-content: center;
@@ -21,7 +18,6 @@
   margin-bottom: 1.2rem;
   flex-wrap: wrap;
 }
-
 .mode-btn {
   background: #f1f5f9;
   border: 1px solid #e2e8f0;
@@ -37,18 +33,15 @@
   align-items: center;
   gap: 0.4rem;
 }
-
 .mode-btn i {
   font-size: 0.9rem;
   color: var(--text-light);
   transition: var(--transition-smooth);
 }
-
 .mode-btn:hover:not(.active) {
   background: #e2e8f0;
   color: var(--primary-dark);
 }
-
 .mode-btn.active {
   background: var(--accent);
   color: white;
@@ -57,12 +50,10 @@
     0 4px 0 var(--accent-dark),
     0 4px 12px rgba(49, 130, 206, 0.3);
 }
-
 .mode-btn.active i {
   color: white;
 }
 
-/* ----- نوار آمار و وضعیت ----- */
 .stats {
   display: flex;
   justify-content: space-between;
@@ -78,19 +69,15 @@
   color: var(--text-dark);
   font-size: 0.85rem;
 }
-
 .stats span {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
 }
-
 .stats i {
   font-size: 0.9rem;
   color: var(--accent);
 }
-
-/* نشانگر نوبت */
 .turn-indicator {
   background: #e2e8f0;
   padding: 0.3rem 0.8rem;
@@ -105,18 +92,27 @@
   justify-content: center;
   gap: 0.3rem;
 }
-
 .turn-indicator i {
   font-size: 0.75rem;
   color: var(--primary-dark);
 }
 
-/* ----- تخته شطرنج ----- */
+/* لایوت تخته و پنل هوشمند */
+.rush-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+.board-container-rush {
+  position: relative;
+}
+
 #chessboard {
   display: grid;
   grid-template-columns: repeat(8, 1fr);
   aspect-ratio: 1/1;
-  max-width: 480px;
+  max-width: 100%;
   margin: 0 auto 1rem;
   border-radius: var(--radius-sm);
   overflow: hidden;
@@ -125,7 +121,6 @@
   touch-action: none;
   user-select: none;
 }
-
 .square {
   aspect-ratio: 1/1;
   display: flex;
@@ -136,25 +131,21 @@
   position: relative;
   transition: background-color 0.1s;
 }
-
 .square.light {
   background-color: var(--board-light, #f0d9b5);
 }
 .square.dark {
   background-color: var(--board-dark, #b58863);
 }
-
 .square.selected {
   background-color: #f6e05e !important;
   box-shadow: inset 0 0 0 3px rgba(0, 0, 0, 0.15);
 }
-
 .square.computer-from,
 .square.computer-to {
   background-color: #90cdf4 !important;
   box-shadow: inset 0 0 0 3px var(--accent) !important;
 }
-
 .piece-img {
   width: 100%;
   height: 100%;
@@ -162,14 +153,76 @@
   user-select: none;
 }
 
-/* ----- دکمه‌های کنترل ----- */
+/* پنل تحلیل هوشمند */
+.weakness-panel {
+  background: #fffaf0;
+  border: 1px solid #fbd38d;
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  height: 100%;
+}
+.weakness-panel h3 {
+  font-size: 0.95rem;
+  color: var(--primary-dark);
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.weakness-panel h3 i {
+  color: #d69e2e;
+}
+.hint-text {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  margin-bottom: 1rem;
+}
+.weakness-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  max-height: 300px;
+  overflow-y: auto;
+  padding-left: 4px;
+}
+.weakness-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.w-name {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  text-transform: capitalize;
+}
+.w-bar-bg {
+  width: 100%;
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.w-bar-fill {
+  height: 100%;
+  background: #e53e3e;
+  transition:
+    width 0.5s ease,
+    background-color 0.3s;
+  border-radius: 4px;
+}
+.w-bar-fill.good {
+  background: #38a169;
+}
+
 .button-group-center {
   display: flex;
   justify-content: center;
   margin-top: 1rem;
   gap: 0.5rem;
 }
-
 .btn {
   background: #f1f5f9;
   border: 1px solid #e2e8f0;
@@ -186,17 +239,14 @@
   color: var(--text-dark);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
-
 .btn:hover {
   background: #e2e8f0;
   border-color: #cbd5e0;
   transform: translateY(-1px);
 }
-
 .btn:active {
   transform: scale(0.98);
 }
-
 .btn-primary {
   background: var(--accent);
   color: white;
@@ -205,7 +255,6 @@
     0 4px 0 var(--accent-dark),
     0 4px 12px rgba(49, 130, 206, 0.3);
 }
-
 .btn-primary:hover {
   background: #4299e1;
   border-color: var(--accent-dark);
@@ -214,13 +263,11 @@
     0 5px 0 var(--accent-dark),
     0 6px 15px rgba(49, 130, 206, 0.4);
 }
-
 .btn-primary:active {
   transform: translateY(3px);
   box-shadow: 0 1px 0 var(--accent-dark);
 }
 
-/* ----- پیام‌های سیستم ----- */
 .message {
   margin-top: 1.2rem;
   padding: 0.8rem 1rem;
@@ -235,11 +282,9 @@
   gap: 0.5rem;
   border: 1px solid transparent;
 }
-
 .message i {
   font-size: 1rem;
 }
-
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -250,8 +295,6 @@
     transform: translateY(0);
   }
 }
-
-/* رنگ‌بندی پیام‌ها */
 .success {
   background: #c6f6d5;
   color: #22543d;
@@ -279,21 +322,19 @@
   box-shadow: 0 0 0 3px rgba(246, 224, 94, 0.2);
 }
 
-/* ============================================
-   📱 واکنش‌گرایی (موبایل و تبلت)
-   ============================================ */
 @media (max-width: 768px) {
   .game-area {
     padding: 1.2rem;
     margin: 0 0.5rem 1.5rem;
     border-radius: var(--radius-md);
   }
-
+  .rush-layout {
+    grid-template-columns: 1fr;
+  }
   #chessboard {
     max-width: 100%;
     width: 100%;
   }
-
   .stats {
     font-size: 0.75rem;
     padding: 0.5rem 0.8rem;
@@ -301,86 +342,48 @@
     justify-content: center;
     gap: 0.8rem;
   }
-
   .stats span {
     font-size: 0.75rem;
   }
-
   .turn-indicator {
     font-size: 0.7rem;
     min-width: 80px;
     padding: 0.2rem 0.6rem;
   }
-
   .mode-btn {
     font-size: 0.75rem;
     padding: 0.4rem 0.8rem;
     flex-grow: 1;
     justify-content: center;
   }
-
   .btn {
     font-size: 0.75rem;
     padding: 0.4rem 1rem;
   }
-
   .message {
     font-size: 0.75rem;
     padding: 0.6rem 0.8rem;
   }
 }
-
 @media (max-width: 480px) {
   .game-area {
     padding: 1rem;
     margin: 0 0.2rem 1rem;
   }
-
-  #chessboard {
-    max-width: 100%;
-    margin: 0 auto 0.5rem;
-  }
-
   .stats {
     font-size: 0.7rem;
     padding: 0.4rem 0.6rem;
     gap: 0.4rem;
   }
-
   .stats i {
     font-size: 0.8rem;
   }
-
-  .turn-indicator {
-    font-size: 0.65rem;
-    min-width: 70px;
-    padding: 0.2rem 0.5rem;
-  }
-
-  .mode-selector {
-    gap: 0.3rem;
-  }
-
   .mode-btn {
     font-size: 0.7rem;
     padding: 0.4rem 0.5rem;
   }
-
-  .mode-btn i {
-    font-size: 0.8rem;
-  }
-
   .btn {
     font-size: 0.7rem;
     padding: 0.4rem 0.8rem;
-  }
-
-  .message {
-    font-size: 0.7rem;
-    padding: 0.5rem;
-  }
-
-  .message i {
-    font-size: 0.9rem;
   }
 }

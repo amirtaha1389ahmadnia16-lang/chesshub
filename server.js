@@ -1,37 +1,39 @@
+require("dotenv").config();
 const express = require("express");
 const http = require("http");
 const path = require("path");
 const { Server } = require("socket.io");
 
-// مسیرهای جدید نسبت به فایل server.js
-const { authenticateSocket } = require("./middleware/authMiddleware");
 const MatchmakingManager = require("./managers/MatchmakingManager");
 const GameManager = require("./managers/GameManager");
-const logger = require("./utils/logger"); // اگر پوشه utils را ساختی
+const logger = require("./utils/logger");
 
 const app = express();
-
-// این خط بسیار مهم است! به Render می‌گوید فایل‌های سایت (HTML/CSS) کجا هستند
-app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname)));
 
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: { origin: "*" },
 });
 
-// احراز هویت و ضد تقلب
-io.use(authenticateSocket);
+// احراز هویت ساده سوکت‌ها (بدون دیتابیس)
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+  // اگر توکن داشت اجازه بده، اگر نداشت یک آیدی موقت بده
+  socket.user = { id: token || socket.id, rating: 1200 };
+  next();
+});
 
 io.on("connection", (socket) => {
-  logger.info(`User connected: ${socket.id}`);
+  logger.info(`User connected: ${socket.user.id}`);
 
   socket.on("findGame", () => {
-    const playerData = { id: socket.id, socket: socket };
+    const playerData = { id: socket.user.id, socket: socket, rating: 1200 };
     const matchedPlayers = MatchmakingManager.addToQueue(playerData);
 
     if (matchedPlayers) {
       const [p1, p2] = matchedPlayers;
-      const game = GameManager.createGame(p1, p2, 10); // 10 دقیقه
+      const game = GameManager.createGame(p1, p2, 10);
 
       p1.socket.join(game.id);
       p2.socket.join(game.id);
@@ -69,11 +71,11 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    MatchmakingManager.removeFromQueue(socket.id);
+    MatchmakingManager.removeFromQueue(socket.user.id);
   });
 });
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`ChessHub Server running on port ${PORT}`);
+  logger.info(`🚀 ChessHub Server running on port ${PORT}`);
 });

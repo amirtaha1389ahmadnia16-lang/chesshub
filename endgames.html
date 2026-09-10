@@ -8,7 +8,7 @@
     />
     <meta
       name="description"
-      content="تمرین آخر بازی‌های شطرنج - یادگیری تکنیک‌های پایان بازی"
+      content="تمرین آخر بازی‌های شطرنج با سیستم راهنمایی هوشمند"
     />
     <title>ChessHub | آخربازی‌ها</title>
     <link
@@ -27,52 +27,65 @@
     <div class="container">
       <div id="header-placeholder"></div>
 
-      <!-- بنر یکپارچه -->
       <section class="app-hero">
-        <h1><i class="fas fa-flag-checkered"></i> تمرین آخربازی</h1>
-        <p>تسلط بر تکنیک‌های پایان بازی برای پیروزی قطعی</p>
+        <h1><i class="fas fa-flag-checkered"></i> تمرین آخربازی هوشمند</h1>
+        <p>
+          موقعیت‌ها را حل کن و اگر گیر کردی، از موتور استوک‌فیش راهنمایی بگیر!
+        </p>
       </section>
 
-      <div class="game-area">
-        <div class="position-selector">
-          <select id="endgameSelect"></select>
-        </div>
-
-        <div class="stats">
+      <div class="endgame-container">
+        <!-- نوار وضعیت بالایی -->
+        <div class="endgame-stats-bar">
           <span id="positionCounter"
             ><i class="fas fa-map-marker-alt"></i> 1</span
           >
           <span id="moveCount"><i class="fas fa-exchange-alt"></i> 0</span>
-          <span id="userColorDisplay" class="user-color-badge"
-            ><i class="fas fa-user"></i> سفید</span
-          >
-          <span id="resultDisplay" class="result-badge"
-            ><i class="fas fa-flag"></i> برد سفید</span
-          >
-          <span id="turnDisplay" class="turn-indicator"
-            ><i class="fas fa-user"></i> شما</span
-          >
-          <span id="timerBadge" class="timer-badge" style="display: none">
-            <i class="fas fa-hourglass-half"></i>
-            <span id="timerCount">10</span>
-          </span>
+          <span id="turnDisplay"><i class="fas fa-user"></i> شما</span>
         </div>
 
-        <div id="chessboard"></div>
+        <!-- تخته و پنل راهنما -->
+        <div class="endgame-layout">
+          <div class="board-container-endgame">
+            <div id="chessboard"></div>
+          </div>
 
-        <div class="btn-group">
-          <button id="undoBtn" class="btn">
-            <i class="fas fa-undo"></i> برگشت
-          </button>
-          <button id="resetBtn" class="btn">
-            <i class="fas fa-redo"></i> از نو
-          </button>
-          <button id="nextBtn" class="btn btn-primary">
-            <i class="fas fa-forward"></i> بعدی
-          </button>
+          <div class="endgame-side-panel">
+            <div class="panel-card">
+              <h3><i class="fas fa-info-circle"></i> اطلاعات موقعیت</h3>
+              <div class="info-list">
+                <p>نام موقعیت: <strong id="egName">-</strong></p>
+                <p>هدف: <strong id="egGoal">برد سفید</strong></p>
+                <p>نوبت: <strong id="egTurn">-</strong></p>
+              </div>
+            </div>
+
+            <div class="panel-card hint-card">
+              <h3><i class="fas fa-lightbulb"></i> راهنمایی هوشمند</h3>
+              <p class="hint-text">
+                اگر در انجام حرکت مردد هستی، روی دکمه زیر بزن تا موتور استوک‌فیش
+                بهترین حرکت را به تو نشان دهد.
+              </p>
+              <button id="hintBtn" class="btn btn-hint">
+                <i class="fas fa-lightbulb"></i> نمایش حرکت بهینه
+              </button>
+            </div>
+
+            <div class="control-buttons">
+              <button id="undoBtn" class="btn">
+                <i class="fas fa-undo"></i> برگشت
+              </button>
+              <button id="resetBtn" class="btn">
+                <i class="fas fa-redo"></i> از نو
+              </button>
+              <button id="nextBtn" class="btn btn-primary">
+                <i class="fas fa-forward"></i> بعدی
+              </button>
+            </div>
+          </div>
         </div>
 
-        <div id="message" class="message"></div>
+        <div id="message" class="rush-message"></div>
       </div>
 
       <div id="footer-placeholder"></div>

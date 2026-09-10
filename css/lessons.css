@@ -177,13 +177,13 @@
 }
 .lesson-tag.tag-opening {
   background: var(--success);
-} /* سبز */
+}
 .lesson-tag.tag-middlegame {
   background: var(--accent);
-} /* آبی */
+}
 .lesson-tag.tag-endgame {
   background: #805ad5;
-} /* بنفش */
+}
 
 .lesson-level {
   background: #f1f5f9;
@@ -336,16 +336,6 @@
 
 .overlay-scroll {
   padding: 2rem 1.5rem;
-}
-.overlay-scroll::-webkit-scrollbar {
-  width: 5px;
-}
-.overlay-scroll::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
-.overlay-scroll::-webkit-scrollbar-thumb {
-  background: #cbd5e0;
-  border-radius: 10px;
 }
 
 .lesson-viewer {
@@ -583,29 +573,5 @@
   .lesson-viewer th,
   .lesson-viewer td {
     padding: 0.4rem 0.6rem;
-  }
-}
-
-@media (max-width: 360px) {
-  .lessons-grid {
-    gap: 0.8rem;
-  }
-  .lesson-thumb {
-    height: 90px;
-  }
-  .lesson-thumb i {
-    font-size: 1.8rem;
-    width: 45px;
-    height: 45px;
-  }
-  .lesson-title {
-    font-size: 0.9rem;
-  }
-  .chip {
-    font-size: 0.7rem;
-    padding: 0.2rem 0.6rem;
-  }
-  .search-box input {
-    font-size: 0.8rem;
   }
 }

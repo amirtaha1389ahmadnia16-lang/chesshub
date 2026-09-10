@@ -1,89 +1,37 @@
-// openings.js – دانشنامه گشایش‌ها (همراه با تخته و نمایش تعاملی)
+// openings.js – دانشنامه گشایش‌ها
 
 (function () {
   "use strict";
 
-  // ============================================
-  // 📦 استفاده از ChessUtils (در صورت وجود)
-  // ============================================
-  const { pieceCodes, getCurrentPieceSet, loadPieces, getBoardColors } =
-    window.ChessUtilsBound || {
-      pieceCodes: {
-        wk: "wk.png",
-        wq: "wq.png",
-        wr: "wr.png",
-        wb: "wb.png",
-        wn: "wn.png",
-        wp: "wp.png",
-        bk: "bk.png",
-        bq: "bq.png",
-        br: "br.png",
-        bb: "bb.png",
-        bn: "bn.png",
-        bp: "bp.png",
-      },
-      getCurrentPieceSet: function () {
-        try {
-          const s = JSON.parse(localStorage.getItem("chesshub_settings"));
-          return s?.pieceSet || "neo";
-        } catch {
-          return "neo";
-        }
-      },
-      loadPieces: function () {
-        return Promise.resolve();
-      },
-      getBoardColors: function () {
-        const root = document.documentElement;
-        const light =
-          getComputedStyle(root).getPropertyValue("--board-light").trim() ||
-          "#f0d9b5";
-        const dark =
-          getComputedStyle(root).getPropertyValue("--board-dark").trim() ||
-          "#b58863";
-        return { light, dark };
-      },
-    };
+  const ChessUtilsBound = window.ChessUtilsBound || {};
+  const pieceCodes = ChessUtilsBound.pieceCodes || {
+    wk: "wk.png",
+    wq: "wq.png",
+    wr: "wr.png",
+    wb: "wb.png",
+    wn: "wn.png",
+    wp: "wp.png",
+    bk: "bk.png",
+    bq: "bq.png",
+    br: "br.png",
+    bb: "bb.png",
+    bn: "bn.png",
+    bp: "bp.png",
+  };
+  const getCurrentPieceSet =
+    ChessUtilsBound.getCurrentPieceSet || (() => "neo");
+  const loadPieces = ChessUtilsBound.loadPieces || (() => Promise.resolve());
+  const getBoardColors =
+    ChessUtilsBound.getBoardColors ||
+    (() => ({ light: "#f0d9b5", dark: "#b58863" }));
 
-  // ============================================
-  // 📦 متغیرها
-  // ============================================
   let openingsData = { categories: [] };
   let currentFilter = "all";
   let viewStack = [];
   let currentMoves = [];
   let currentMoveIndex = 0;
   let autoInterval = null;
-  let piecesLoaded = false;
-  let pieceImages = {};
 
-  // ============================================
-  // 🖼️ بارگذاری مهره‌ها
-  // ============================================
-  function loadPiecesLocal() {
-    if (piecesLoaded) return Promise.resolve();
-    return new Promise((resolve) => {
-      const set = getCurrentPieceSet();
-      let loaded = 0,
-        total = Object.keys(pieceCodes).length;
-      for (const [key, filename] of Object.entries(pieceCodes)) {
-        const img = new Image();
-        img.onload = img.onerror = () => {
-          loaded++;
-          if (loaded === total) {
-            piecesLoaded = true;
-            resolve();
-          }
-        };
-        img.src = `pieces/${set}/${filename}`;
-        pieceImages[key] = img;
-      }
-    });
-  }
-
-  // ============================================
-  // 📥 بارگذاری داده‌ها
-  // ============================================
   async function loadOpeningsJSON() {
     try {
       const res = await fetch("data/openings.json");
@@ -94,16 +42,24 @@
       console.error(err);
       const container = document.getElementById("openingsList");
       if (container) {
-        container.innerHTML = `
-          <div class="no-result"><i class="fas fa-exclamation-circle"></i> خطا در بارگذاری دیتابیس گشایش‌ها.</div>
-        `;
+        container.innerHTML = `<div class="no-result"><i class="fas fa-exclamation-circle"></i> خطا در بارگذاری دیتابیس گشایش‌ها.</div>`;
       }
     }
   }
 
-  // ============================================
-  // 🎨 رندر لیست گشایش‌ها
-  // ============================================
+  // تشخیص هوشمند دسته‌بندی بر اساس حرکت اول
+  function getCategoryCode(cat) {
+    if (cat.code) return cat.code;
+    if (cat.openings && cat.openings.length > 0) {
+      const firstMove = cat.openings[0].moves?.[0];
+      if (firstMove === "e4") return "e4";
+      if (firstMove === "d4") return "d4";
+      if (firstMove === "c4") return "c4";
+      if (firstMove === "Nf3") return "Nf3";
+    }
+    return "other";
+  }
+
   function renderList() {
     const container = document.getElementById("openingsList");
     let categories = openingsData.categories || [];
@@ -111,8 +67,11 @@
       document.getElementById("searchInput")?.value.trim().toLowerCase() || "";
 
     if (currentFilter !== "all") {
-      categories = categories.filter((c) => c.code === currentFilter);
+      categories = categories.filter(
+        (c) => getCategoryCode(c) === currentFilter,
+      );
     }
+
     if (query) {
       categories = categories
         .map((cat) => ({
@@ -142,10 +101,7 @@
 
         card.innerHTML = `
           <div class="card-header">
-            <div class="card-title">
-              <i class="fas fa-chess-queen"></i>
-              <span>${opening.name}</span>
-            </div>
+            <div class="card-title"><i class="fas fa-chess-queen"></i><span>${opening.name}</span></div>
             <span class="card-moves" dir="ltr">${movesDisplay}</span>
             <i class="fas fa-chevron-down chevron"></i>
           </div>
@@ -172,7 +128,6 @@
         `;
 
         container.appendChild(card);
-
         const header = card.querySelector(".card-header");
         const body = card.querySelector(".card-body");
         const chevron = header.querySelector(".chevron");
@@ -197,9 +152,6 @@
     });
   }
 
-  // ============================================
-  // 🎮 Overlay و نمایش جزئیات
-  // ============================================
   const overlay = document.getElementById("mainOverlay");
   const overlayTitle = document.getElementById("overlayTitle");
   const overlayContent = document.getElementById("overlayContent");
@@ -239,8 +191,8 @@
       const g = new Chess();
       try {
         g.load_pgn(current.game.pgn);
-        const moves = g.history();
-        setupBoard("gameBoard", moves);
+        current._gameMoves = g.history();
+        setupBoard("gameBoard", current._gameMoves);
       } catch (e) {
         console.error(e);
       }
@@ -254,9 +206,6 @@
     if (e.key === "Escape") popView();
   });
 
-  // ============================================
-  // 🖼️ تخته و کنترل‌های پخش
-  // ============================================
   function renderBoardDOM(containerId, moves, moveIndex) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -265,13 +214,11 @@
       game.move(moves[i], { sloppy: true });
     }
     const board = game.board();
-    const colors = getBoardColors();
     const pieceSet = getCurrentPieceSet();
 
     container.innerHTML = "";
     container.style.display = "grid";
     container.style.gridTemplateColumns = "repeat(8, 1fr)";
-    container.style.aspectRatio = "1 / 1";
 
     for (let i = 0; i < 8; i++) {
       for (let j = 0; j < 8; j++) {
@@ -286,7 +233,6 @@
           img.src = `pieces/${pieceSet}/${pieceCodes[key]}`;
           img.classList.add("piece-img");
           img.draggable = false;
-          img.style.pointerEvents = "none";
           sq.appendChild(img);
         }
         container.appendChild(sq);
@@ -299,14 +245,11 @@
     currentMoveIndex = 0;
     const total = moves.length;
     const counter = document.getElementById("moveCounter");
-    if (counter) counter.textContent = `0/${Math.ceil(total / 2)}`;
 
     const update = () => {
       renderBoardDOM(boardId, moves, currentMoveIndex);
       if (counter)
-        counter.textContent = `${Math.ceil(currentMoveIndex / 2)}/${Math.ceil(
-          total / 2,
-        )}`;
+        counter.textContent = `${Math.ceil(currentMoveIndex / 2)}/${Math.ceil(total / 2)}`;
     };
 
     window._first = () => {
@@ -359,9 +302,6 @@
     if (btn) btn.innerHTML = '<i class="fas fa-play"></i> شروع';
   }
 
-  // ============================================
-  // 🥧 نمودار دایره‌ای
-  // ============================================
   function drawPieChart(stats) {
     const canvas = document.getElementById("pieChart");
     if (!canvas) return;
@@ -369,19 +309,14 @@
     const w = canvas.width,
       h = canvas.height;
     ctx.clearRect(0, 0, w, h);
-    const total = stats.whiteWins + stats.blackWins + stats.draws;
-    if (total === 0) {
-      ctx.fillStyle = "#94a3b8";
-      ctx.font = "12px Vazir";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText("داده‌ای موجود نیست", w / 2, h / 2);
-      return;
-    }
+    const total =
+      (stats.whiteWins || 0) + (stats.blackWins || 0) + (stats.draws || 0);
+    if (total === 0) return;
+
     const data = [
-      { value: stats.whiteWins, color: "#e2e8f0" },
-      { value: stats.blackWins, color: "#1e293b" },
-      { value: stats.draws, color: "#64748b" },
+      { value: stats.whiteWins || 0, color: "#e2e8f0" },
+      { value: stats.blackWins || 0, color: "#1e293b" },
+      { value: stats.draws || 0, color: "#64748b" },
     ];
     let startAngle = -Math.PI / 2;
     const cx = w / 2,
@@ -401,16 +336,8 @@
     ctx.arc(cx, cy, r * 0.55, 0, 2 * Math.PI);
     ctx.fillStyle = "rgba(255,255,255,0.15)";
     ctx.fill();
-    ctx.fillStyle = "#1e293b";
-    ctx.font = "bold 14px Vazir";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(`${total}`, cx, cy);
   }
 
-  // ============================================
-  // 📂 باز کردن View‌ها
-  // ============================================
   function openVariantView(variant, openingName) {
     const stats = variant.stats || { whiteWins: 0, blackWins: 0, draws: 0 };
     const view = {
@@ -448,7 +375,6 @@
             <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
               <button class="btn-sm primary" onclick="window._openGamesList()"><i class="fas fa-list"></i> نمونه بازی‌ها (${(variant.sampleGames || []).length})</button>
               <button class="btn-sm primary" onclick="window._openTrapsList()"><i class="fas fa-fish"></i> تله‌ها (${(variant.traps || []).length})</button>
-              <button class="btn-sm" onclick="alert('📥 دانلود تحلیل به زودی اضافه می‌شود.')"><i class="fas fa-download"></i> دانلود تحلیل</button>
             </div>
           </div>
         </div>
@@ -468,115 +394,41 @@
   }
 
   function openGamesListView(games, parentTitle) {
-    const view = {
+    pushView({
       type: "gamesList",
       title: `نمونه بازی‌های ${parentTitle}`,
-      html: `
-        <div class="info-card" style="max-width:600px; margin:0 auto;">
-          ${games.length === 0 ? '<p style="color:#5f7f9e;"><i class="fas fa-info-circle"></i> نمونه بازی‌ای ثبت نشده است.</p>' : ""}
-          ${games
-            .map(
-              (g, i) => `
-            <div class="game-item" onclick="window._openGameView(${i})">
-              <span><i class="fas fa-chess-king"></i> ${g.white} vs ${g.black} (${g.year}) – ${g.result}</span>
-              <i class="fas fa-chevron-left"></i>
-            </div>
-          `,
-            )
-            .join("")}
-        </div>
-      `,
-    };
-    pushView(view);
+      html: `<div class="info-card" style="max-width:600px; margin:0 auto;">${games.length === 0 ? '<p style="color:#5f7f9e;"><i class="fas fa-info-circle"></i> نمونه بازی‌ای ثبت نشده است.</p>' : games.map((g, i) => `<div class="game-item" onclick="window._openGameView(${i})"><span><i class="fas fa-chess-king"></i> ${g.white} vs ${g.black} (${g.year}) – ${g.result}</span><i class="fas fa-chevron-left"></i></div>`).join("")}</div>`,
+    });
     window._openGameView = (idx) => openGameView(games[idx], parentTitle);
   }
 
   function openGameView(game, parentTitle) {
-    const view = {
+    pushView({
       type: "game",
       title: `${game.white} vs ${game.black}`,
       game: game,
-      html: `
-        <div class="viewer-body">
-          <div class="board-wrapper">
-            <div id="gameBoard" class="chessboard"></div>
-            <div class="control-buttons">
-              <button class="btn-sm" onclick="window._first()"><i class="fas fa-fast-backward"></i></button>
-              <button class="btn-sm" onclick="window._prev()"><i class="fas fa-step-backward"></i></button>
-              <button class="btn-sm primary" id="playPauseBtn" onclick="window._toggle()"><i class="fas fa-play"></i> شروع</button>
-              <button class="btn-sm" onclick="window._next()"><i class="fas fa-step-forward"></i></button>
-              <button class="btn-sm" onclick="window._last()"><i class="fas fa-fast-forward"></i></button>
-              <span class="move-counter" id="moveCounter">0/0</span>
-            </div>
-          </div>
-          <div class="info-wrapper">
-            <div class="info-card">
-              <p><i class="fas fa-user"></i> سفید: ${game.white} | <i class="fas fa-user"></i> سیاه: ${game.black}</p>
-              <p><i class="fas fa-calendar"></i> سال: ${game.year} | <i class="fas fa-flag"></i> نتیجه: ${game.result}</p>
-            </div>
-          </div>
-        </div>
-      `,
-    };
-    pushView(view);
+      html: `<div class="viewer-body"><div class="board-wrapper"><div id="gameBoard" class="chessboard"></div><div class="control-buttons"><button class="btn-sm" onclick="window._first()"><i class="fas fa-fast-backward"></i></button><button class="btn-sm" onclick="window._prev()"><i class="fas fa-step-backward"></i></button><button class="btn-sm primary" id="playPauseBtn" onclick="window._toggle()"><i class="fas fa-play"></i> شروع</button><button class="btn-sm" onclick="window._next()"><i class="fas fa-step-forward"></i></button><button class="btn-sm" onclick="window._last()"><i class="fas fa-fast-forward"></i></button><span class="move-counter" id="moveCounter">0/0</span></div></div><div class="info-wrapper"><div class="info-card"><p><i class="fas fa-user"></i> سفید: ${game.white} | <i class="fas fa-user"></i> سیاه: ${game.black}</p><p><i class="fas fa-calendar"></i> سال: ${game.year} | <i class="fas fa-flag"></i> نتیجه: ${game.result}</p></div></div></div>`,
+    });
   }
 
   function openTrapsListView(traps, parentTitle) {
-    const view = {
+    pushView({
       type: "trapsList",
       title: `تله‌های ${parentTitle}`,
-      html: `
-        <div class="info-card" style="max-width:600px; margin:0 auto;">
-          ${traps.length === 0 ? '<p style="color:#5f7f9e;"><i class="fas fa-info-circle"></i> تله‌ای ثبت نشده است.</p>' : ""}
-          ${traps
-            .map(
-              (t, i) => `
-            <div class="trap-item" onclick="window._openTrapView(${i})">
-              <span><i class="fas fa-skull"></i> ${t.name || "تله " + (i + 1)}</span>
-              <i class="fas fa-chevron-left"></i>
-            </div>
-          `,
-            )
-            .join("")}
-        </div>
-      `,
-    };
-    pushView(view);
+      html: `<div class="info-card" style="max-width:600px; margin:0 auto;">${traps.length === 0 ? '<p style="color:#5f7f9e;"><i class="fas fa-info-circle"></i> تله‌ای ثبت نشده است.</p>' : traps.map((t, i) => `<div class="trap-item" onclick="window._openTrapView(${i})"><span><i class="fas fa-skull"></i> ${t.name || "تله " + (i + 1)}</span><i class="fas fa-chevron-left"></i></div>`).join("")}</div>`,
+    });
     window._openTrapView = (idx) => openTrapView(traps[idx], parentTitle);
   }
 
   function openTrapView(trap, parentTitle) {
-    const view = {
+    pushView({
       type: "trap",
       title: trap.name || "تله",
       trap: trap,
-      html: `
-        <div class="viewer-body">
-          <div class="board-wrapper">
-            <div id="trapBoard" class="chessboard"></div>
-            <div class="control-buttons">
-              <button class="btn-sm" onclick="window._first()"><i class="fas fa-fast-backward"></i></button>
-              <button class="btn-sm" onclick="window._prev()"><i class="fas fa-step-backward"></i></button>
-              <button class="btn-sm primary" id="playPauseBtn" onclick="window._toggle()"><i class="fas fa-play"></i> شروع</button>
-              <button class="btn-sm" onclick="window._next()"><i class="fas fa-step-forward"></i></button>
-              <button class="btn-sm" onclick="window._last()"><i class="fas fa-fast-forward"></i></button>
-              <span class="move-counter" id="moveCounter">0/0</span>
-            </div>
-          </div>
-          <div class="info-wrapper">
-            <div class="info-card">
-              <p><i class="fas fa-info-circle"></i> توضیح: ${trap.description || "توضیحی ثبت نشده است."}</p>
-            </div>
-          </div>
-        </div>
-      `,
-    };
-    pushView(view);
+      html: `<div class="viewer-body"><div class="board-wrapper"><div id="trapBoard" class="chessboard"></div><div class="control-buttons"><button class="btn-sm" onclick="window._first()"><i class="fas fa-fast-backward"></i></button><button class="btn-sm" onclick="window._prev()"><i class="fas fa-step-backward"></i></button><button class="btn-sm primary" id="playPauseBtn" onclick="window._toggle()"><i class="fas fa-play"></i> شروع</button><button class="btn-sm" onclick="window._next()"><i class="fas fa-step-forward"></i></button><button class="btn-sm" onclick="window._last()"><i class="fas fa-fast-forward"></i></button><span class="move-counter" id="moveCounter">0/0</span></div></div><div class="info-wrapper"><div class="info-card"><p><i class="fas fa-info-circle"></i> توضیح: ${trap.description || "توضیحی ثبت نشده است."}</p></div></div></div>`,
+    });
   }
 
-  // ============================================
-  // 🎛️ رویدادهای جستجو و فیلتر
-  // ============================================
   document.getElementById("searchInput").addEventListener("input", renderList);
   document.querySelectorAll("#filterChips .chip").forEach((chip) => {
     chip.addEventListener("click", function () {
@@ -589,51 +441,29 @@
     });
   });
 
-  // ============================================
-  // 🚀 راه‌اندازی
-  // ============================================
-  loadPiecesLocal().then(() => {
+  function updateBoardIfOpen() {
+    if (overlay.classList.contains("open") && viewStack.length > 0) {
+      const current = viewStack[viewStack.length - 1];
+      if (["variant", "game", "trap"].includes(current.type)) {
+        const boardId = current.type + "Board";
+        const boardEl = document.getElementById(boardId);
+        if (boardEl) {
+          const moves =
+            current.type === "variant"
+              ? current.variant.moves
+              : current.type === "game"
+                ? current._gameMoves || []
+                : current.trap.moves;
+          renderBoardDOM(boardId, moves, currentMoveIndex || 0);
+        }
+      }
+    }
+  }
+  document.addEventListener("themeChanged", updateBoardIfOpen);
+  document.addEventListener("pieceSetChanged", updateBoardIfOpen);
+
+  loadPieces().then(() => {
     loadOpeningsJSON();
     console.log("✅ ChessHub Openings loaded successfully");
-  });
-
-  // گوش‌دادن به تغییرات تم و مهره‌ها
-  document.addEventListener("themeChanged", () => {
-    if (overlay.classList.contains("open") && viewStack.length > 0) {
-      const current = viewStack[viewStack.length - 1];
-      if (["variant", "game", "trap"].includes(current.type)) {
-        const boardId = current.type + "Board";
-        const boardEl = document.getElementById(boardId);
-        if (boardEl) {
-          const moves =
-            current.type === "variant"
-              ? current.variant.moves
-              : current.type === "game"
-                ? current._gameMoves || []
-                : current.trap.moves;
-          const idx = currentMoveIndex || 0;
-          renderBoardDOM(boardId, moves, idx);
-        }
-      }
-    }
-  });
-  document.addEventListener("pieceSetChanged", () => {
-    if (overlay.classList.contains("open") && viewStack.length > 0) {
-      const current = viewStack[viewStack.length - 1];
-      if (["variant", "game", "trap"].includes(current.type)) {
-        const boardId = current.type + "Board";
-        const boardEl = document.getElementById(boardId);
-        if (boardEl) {
-          const moves =
-            current.type === "variant"
-              ? current.variant.moves
-              : current.type === "game"
-                ? current._gameMoves || []
-                : current.trap.moves;
-          const idx = currentMoveIndex || 0;
-          renderBoardDOM(boardId, moves, idx);
-        }
-      }
-    }
   });
 })();

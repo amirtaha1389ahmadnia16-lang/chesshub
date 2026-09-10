@@ -8,7 +8,7 @@
     />
     <meta
       name="description"
-      content="پازل عجله‌ای شطرنج - حل سریع پازل‌ها در زمان محدود"
+      content="پازل عجله‌ای شطرنج - حل سریع پازل‌ها با سیستم هوشمند تشخیص ضعف"
     />
     <title>ChessHub | پازل عجله‌ای</title>
     <link
@@ -27,10 +27,12 @@
     <div class="container">
       <div id="header-placeholder"></div>
 
-      <!-- بنر یکپارچه -->
       <section class="app-hero">
-        <h1><i class="fas fa-bolt"></i> پازل عجله‌ای</h1>
-        <p>حداکثر تعداد پازل‌ها را در زمان محدوده حل کن!</p>
+        <h1><i class="fas fa-bolt"></i> پازل عجله‌ای هوشمند</h1>
+        <p>
+          سیستم هوشمند chesshub، نقاط ضعف تو را شناسایی کرده و برای تقویت آن‌ها
+          تمرین می‌دهد!
+        </p>
       </section>
 
       <div class="game-area">
@@ -57,7 +59,21 @@
           >
         </div>
 
-        <div id="chessboard"></div>
+        <div class="rush-layout">
+          <div class="board-container-rush">
+            <div id="chessboard"></div>
+          </div>
+
+          <div class="weakness-panel">
+            <h3><i class="fas fa-brain"></i> تحلیل هوشمند تو</h3>
+            <p class="hint-text">میزان موفقیت تو در تاکتیک‌های مختلف:</p>
+            <div id="weaknessTracker" class="weakness-list">
+              <p style="font-size: 0.75rem; color: #94a3b8; text-align: center">
+                هنوز داده‌ای ثبت نشده. بازی کن!
+              </p>
+            </div>
+          </div>
+        </div>
 
         <div class="button-group-center">
           <button id="resetGameBtn" class="btn btn-primary">

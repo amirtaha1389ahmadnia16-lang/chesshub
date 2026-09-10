@@ -2,15 +2,12 @@
 <html lang="fa" dir="rtl">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="ChessHub - آموزش شطرنج با پازل، آنالیز و بانک بازی‌های استادان بزرگ"
+      content="ChessHub - آموزش حرفه‌ای شطرنج، بازی آنلاین، پازل و آنالیز"
     />
-    <title>ChessHub | آموزش حرفه‌ای شطرنج</title>
+    <title>ChessHub | خانه</title>
     <link
       href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css"
       rel="stylesheet"
@@ -26,19 +23,19 @@
     <div class="container">
       <div id="header-placeholder"></div>
 
-      <!-- بنر یکپارچه اصلی -->
+      <!-- بنر اصلی (Hero Section) -->
       <section class="app-hero">
         <h1>جایی که شطرنجت <span class="highlight">پیشرفت</span> میکنه</h1>
-        <p>از مبتدی تا استاد بزرگ، هر آنچه برای یادگیری نیاز داری اینجاست</p>
+        <p>
+          از مبتدی تا استاد بزرگ، هر آنچه برای یادگیری، تمرین و بازی نیاز داری
+          اینجاست.
+        </p>
         <div class="hero-buttons">
-          <a href="puzzle-rush.html" class="btn btn-primary">
+          <a href="online.html" class="hero-btn primary">
+            <i class="fas fa-play"></i> شروع بازی آنلاین
+          </a>
+          <a href="puzzle-rush.html" class="hero-btn outline">
             <i class="fas fa-bolt"></i> پازل عجله‌ای
-          </a>
-          <a href="endgames.html" class="btn btn-outline">
-            <i class="fas fa-flag-checkered"></i> آخربازی‌ها
-          </a>
-          <a href="games-database.html" class="btn btn-outline">
-            <i class="fas fa-database"></i> پایگاه بازی‌ها
           </a>
         </div>
       </section>
@@ -52,105 +49,116 @@
         </div>
         <div class="stat-card">
           <span class="icon"><i class="fas fa-chess-queen"></i></span>
-          <div class="stat-number">+۱۰</div>
+          <div class="stat-number">+۳۰</div>
           <div class="stat-label">بازی‌های استادان</div>
         </div>
         <div class="stat-card">
           <span class="icon"><i class="fas fa-flag-checkered"></i></span>
           <div class="stat-number">+۱۰۰</div>
-          <div class="stat-label">آخر بازی</div>
+          <div class="stat-label">موقعیت آخربازی</div>
         </div>
         <div class="stat-card">
-          <span class="icon"><i class="fas fa-book-open"></i></span>
-          <div class="stat-number">+۱۰</div>
-          <div class="stat-label">تعداد دروس</div>
+          <span class="icon"><i class="fas fa-users"></i></span>
+          <div class="stat-number">+۵۰۰۰</div>
+          <div class="stat-label">بازیکن فعال</div>
         </div>
       </section>
 
-      <!-- گرید اصلی -->
+      <!-- گرید اصلی: پازل روز و امکانات -->
       <section class="main-card-grid">
         <!-- کارت پازل روزانه -->
         <div class="card daily-puzzle-card">
           <h2><i class="fas fa-puzzle-piece"></i> مسئله روز</h2>
-          <p>با مهره‌های <strong id="userColorLabel">سفید</strong> بازی کن</p>
+          <p>با مهره‌های <strong>سفید</strong> بازی کن و مات کن!</p>
           <div class="board-container">
-            <div id="chessboard"></div>
+            <i
+              class="fas fa-chess-board"
+              style="font-size: 4rem; color: #cbd5e0"
+            ></i>
           </div>
-          <div class="button-group">
-            <button id="resetBtn" class="btn">
-              <i class="fas fa-undo-alt"></i> از نو
-            </button>
-            <button id="hintBtn" class="btn btn-hint">
+          <div class="btn-group-center">
+            <button class="btn"><i class="fas fa-undo-alt"></i> از نو</button>
+            <button class="btn btn-primary">
               <i class="fas fa-lightbulb"></i> راهنمایی
             </button>
           </div>
-          <div id="message" class="message"></div>
         </div>
 
-        <!-- کارت امکانات -->
+        <!-- کارت امکانات سایت -->
         <div class="card features-card">
           <h3><i class="fas fa-crown"></i> امکانات ChessHub</h3>
           <div class="features-list">
-            <div class="feature">
-              <i class="fas fa-puzzle-piece"></i>
-              <span>پازل روزانه</span>
-              <a href="index.html">حل کن</a>
-            </div>
-            <div class="feature">
+            <a href="puzzle-rush.html" class="feature-item">
               <i class="fas fa-bolt"></i>
               <span>پازل راش</span>
-              <a href="puzzle-rush.html">بزن بریم</a>
-            </div>
-            <div class="feature">
+            </a>
+            <a href="lessons.html" class="feature-item">
               <i class="fas fa-book-open"></i>
               <span>دروس آموزشی</span>
-              <a href="lessons.html">مشاهده</a>
-            </div>
-            <div class="feature">
+            </a>
+            <a href="endgames.html" class="feature-item">
               <i class="fas fa-flag-checkered"></i>
               <span>آخربازی‌ها</span>
-              <a href="endgames.html">تمرین کن</a>
-            </div>
-            <div class="feature">
+            </a>
+            <a href="games-database.html" class="feature-item">
               <i class="fas fa-database"></i>
               <span>پایگاه بازی‌ها</span>
-              <a href="games-database.html">ببین</a>
-            </div>
-            <div class="feature">
-              <i class="fas fa-download"></i>
-              <span>دانلود PGN</span>
-              <a href="downloads.html">دریافت</a>
-            </div>
-            <div class="feature">
+            </a>
+            <a href="openings.html" class="feature-item">
               <i class="fas fa-chess-board"></i>
               <span>گشایش‌ها</span>
-              <a href="openings.html">مطالعه کن</a>
-            </div>
-            <div class="feature">
+            </a>
+            <a href="engine-game.html" class="feature-item">
               <i class="fas fa-robot"></i>
               <span>بازی با بات</span>
-              <a href="engine-game.html">برو تو میدان</a>
-            </div>
+            </a>
+            <a href="analysis.html" class="feature-item">
+              <i class="fas fa-chart-line"></i>
+              <span>آنالیزور</span>
+            </a>
+            <a href="downloads.html" class="feature-item">
+              <i class="fas fa-download"></i>
+              <span>دانلود PGN</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- کارت‌های تبلیغاتی پایین -->
+      <section class="promo-grid">
+        <div class="promo-card">
+          <div class="promo-icon"><i class="fas fa-graduation-cap"></i></div>
+          <div class="promo-content">
+            <h4>دوره‌های آموزشی</h4>
+            <p>از اصول اولیه تا تاکتیک‌های پیشرفته با ویدیوهای تدریس شده.</p>
+            <a
+              href="lessons.html"
+              class="hero-btn primary"
+              style="padding: 0.5rem 1.2rem; font-size: 0.8rem"
+            >
+              مشاهده دوره‌ها <i class="fas fa-arrow-left"></i>
+            </a>
           </div>
         </div>
 
-        <!-- کارت‌های تبلیغاتی -->
-        <div class="card promo-card">
-          <div class="promo-icon"><i class="fas fa-flag-checkered"></i></div>
-          <div class="promo-title">تمرین آخربازی</div>
-          <div class="promo-sub">+۱۰۰ موقعیت عملی برای تسلط بر پایان بازی</div>
-          <a href="endgames.html" class="btn-promo">
-            <i class="fas fa-play"></i> شروع تمرین
-          </a>
-        </div>
-
-        <div class="card promo-card">
-          <div class="promo-icon"><i class="fas fa-book"></i></div>
-          <div class="promo-title">دانشنامه گشایش‌ها</div>
-          <div class="promo-sub">تحلیل کامل ۵۰+ گشایش معروف با واریانت‌ها</div>
-          <a href="openings.html" class="btn-promo accent">
-            <i class="fas fa-search"></i> مطالعه کن
-          </a>
+        <div class="promo-card">
+          <div class="promo-icon"><i class="fas fa-trophy"></i></div>
+          <div class="promo-content">
+            <h4>تورنمنت‌های زنده</h4>
+            <p>در مسابقات روزانه شرکت کن و رتبه خود را بالا ببر.</p>
+            <a
+              href="#"
+              class="hero-btn outline"
+              style="
+                padding: 0.5rem 1.2rem;
+                font-size: 0.8rem;
+                color: var(--accent);
+                border-color: var(--accent);
+              "
+            >
+              به زودی <i class="fas fa-clock"></i>
+            </a>
+          </div>
         </div>
       </section>
 
@@ -159,17 +167,5 @@
 
     <script src="js/script.js"></script>
     <script src="js/puzzle.js"></script>
-    <script>
-      (function applySavedTheme() {
-        try {
-          const settings = JSON.parse(
-            localStorage.getItem("chesshub_settings"),
-          );
-          if (settings && settings.theme) {
-            document.body.classList.add(`theme-${settings.theme}`);
-          }
-        } catch (e) {}
-      })();
-    </script>
   </body>
 </html>
