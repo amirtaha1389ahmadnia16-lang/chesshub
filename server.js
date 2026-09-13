@@ -30,7 +30,7 @@ const zlib = require("zlib");
 
 /* ------------------------- تنظیمات ------------------------- */
 
-const VERSION = "8.1.0";
+const VERSION = "8.1.1";
 const PORT = Number(process.env.PORT) || Number(process.argv[2]) || 3000;
 const HOST = process.env.HOST || "0.0.0.0"; // Render باید روی 0.0.0.0 گوش دهد
 const ROOT = __dirname;

@@ -823,7 +823,7 @@ function computeLeaderboard() {
   list.sort(function (a, b) {
     return b.rating - a.rating || b.wins - a.wins || b.winRate - a.winRate || String(a.name).localeCompare(String(b.name), "fa");
   });
-  lbCache = list.slice(0, 100);
+  lbCache = list.slice(0, 500); // تا ۵۰۰ نفر نمایش داده می‌شوند
   return lbCache;
 }
 
