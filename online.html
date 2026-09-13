@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <meta name="description" content="بازی آنلاین شطرنج — حریف زنده، ریتینگ، تماشا و چت" />
+    <meta name="description" content="بازی آنلاین شطرنج — حریف زنده، ریتینگ، تماشای زنده، لیدربورد و چت" />
     <title>ChessHub | بازی آنلاین</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%E2%99%9B%3C/text%3E%3C/svg%3E" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
@@ -126,11 +126,62 @@
       .ol-user-item:hover, .ol-live-item:hover, .ol-hist-item:hover { border-color: var(--accent-light); background: var(--accent-soft); }
       .ol-user-item .mini-av { width: 38px; height: 38px; border-radius: 50%; overflow: hidden; background: #e2e8f0; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--text-light); }
       .ol-user-item .mini-av img { width: 100%; height: 100%; object-fit: cover; }
+      /* (آواتار لیدربورد با سلکتور بالایی پوشش داده می‌شود) */
       .ol-u-name { font-size: 0.85rem; font-weight: 800; color: var(--text-dark); }
       .ol-u-sub { font-size: 0.68rem; color: var(--text-light); font-weight: 700; }
       .ol-badge-playing { background: rgba(214,158,46,0.15); color: #975a16; border-radius: 99px; padding: 0.12rem 0.55rem; font-size: 0.62rem; font-weight: 800; }
       .ol-badge-free { background: rgba(56,161,105,0.12); color: var(--success-dark); border-radius: 99px; padding: 0.12rem 0.55rem; font-size: 0.62rem; font-weight: 800; }
+      .ol-watch-chip {
+        background: linear-gradient(135deg, #805ad5, #6b46c1); color: #fff;
+        border-radius: 99px; padding: 0.3rem 0.75rem; font-size: 0.68rem; font-weight: 800;
+        display: inline-flex; align-items: center; gap: 0.3rem; flex-shrink: 0;
+        white-space: nowrap;
+      }
+      .ol-user-item .mini-av, .ol-lb-item .mini-av { width: 38px; height: 38px; border-radius: 50%; overflow: hidden; background: #e2e8f0; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--text-light); }
+      .ol-user-item .mini-av img, .ol-lb-item .mini-av img { width: 100%; height: 100%; object-fit: cover; }
       .ol-empty { text-align: center; color: var(--text-light); font-size: 0.78rem; padding: 1.4rem; }
+
+      /* ---------- 🏆 لیدربورد ---------- */
+      .ol-lb-item {
+        background: #f8fafc; border: 1px solid #e2e8f0; border-radius: var(--radius-md);
+        padding: 0.55rem 0.7rem; display: flex; align-items: center; gap: 0.6rem;
+        transition: var(--transition-smooth);
+      }
+      .ol-lb-item:hover { border-color: var(--accent-light); background: var(--accent-soft); }
+      .ol-lb-item.me {
+        border-color: var(--accent); background: var(--accent-soft);
+        box-shadow: inset -3px 0 0 var(--accent);
+      }
+      .ol-lb-rank {
+        width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.78rem; font-weight: 800; color: var(--text-light); background: #e2e8f0;
+      }
+      .ol-lb-rank.r1 { background: linear-gradient(135deg, #fde68a, #f59e0b); color: #78350f; font-size: 1rem; }
+      .ol-lb-rank.r2 { background: linear-gradient(135deg, #e5e7eb, #9ca3af); color: #374151; font-size: 1rem; }
+      .ol-lb-rank.r3 { background: linear-gradient(135deg, #fbd38d, #c05621); color: #7b341e; font-size: 1rem; }
+      .ol-lb-rating {
+        background: var(--primary-dark); color: #fff; border-radius: 99px;
+        padding: 0.05rem 0.55rem; font-size: 0.7rem; font-weight: 800; direction: ltr;
+        display: inline-block; margin-inline-start: auto;
+      }
+      .ol-lb-me-tag {
+        background: var(--accent); color: #fff; border-radius: 99px;
+        padding: 0.05rem 0.5rem; font-size: 0.58rem; font-weight: 800;
+      }
+
+      /* ---------- 📺 حالت تماشا ---------- */
+      .ol-spect-hud {
+        display: none; align-items: center; justify-content: center; gap: 0.45rem;
+        background: linear-gradient(135deg, #805ad5, #6b46c1); color: #fff;
+        border-radius: var(--radius-md); padding: 0.5rem; margin-bottom: 0.5rem;
+        font-size: 0.8rem; font-weight: 800;
+      }
+      .ol-spect-hud.show { display: flex; }
+      .ol-spect-hud .spect-n {
+        background: rgba(255,255,255,0.22); border-radius: 99px; padding: 0 0.55rem;
+        font-size: 0.72rem;
+      }
 
       /* ---------- نمای بازی ---------- */
       .ol-game { display: none; }
@@ -267,6 +318,7 @@
       @media (max-width: 768px) {
         .ol-menu-grid { grid-template-columns: 1fr; }
         .ol-list { max-height: 220px; }
+        .ol-tab { font-size: 0.66rem; padding: 0.4rem 0.15rem; }
       }
       @media (max-width: 480px) {
         .ol-avatar { width: 52px; height: 52px; }
@@ -313,7 +365,8 @@
               <div class="ol-tabs">
                 <button class="ol-tab active" data-tab="users"><i class="fas fa-user-group"></i> آنلاین‌ها</button>
                 <button class="ol-tab" data-tab="live"><i class="fas fa-tv"></i> در حال بازی</button>
-                <button class="ol-tab" data-tab="hist"><i class="fas fa-clock-rotate-left"></i> تاریخچه‌ی من</button>
+                <button class="ol-tab" data-tab="top"><i class="fas fa-trophy"></i> برترین‌ها</button>
+                <button class="ol-tab" data-tab="hist"><i class="fas fa-clock-rotate-left"></i> تاریخچه</button>
               </div>
               <div class="ol-list" id="olList"></div>
             </div>
@@ -323,6 +376,10 @@
         <!-- ===== نمای بازی ===== -->
         <div class="ol-game" id="olGame">
           <div class="ol-status" id="olStatus">آماده…</div>
+          <div class="ol-spect-hud" id="olSpectHud">
+            <i class="fas fa-tv"></i> حالت تماشا — زنده
+            <span class="spect-n"><i class="fas fa-eye"></i> <span id="olSpectCount">۰</span> تماشاگر</span>
+          </div>
           <div class="ol-player-bar">
             <div class="player-info">
               <div class="ol-avatar" style="width:36px;height:36px" id="oppAvatar"><i class="fas fa-user"></i></div>
@@ -353,6 +410,7 @@
           </div>
           <div class="ol-chat" id="olChat">
             <div class="ol-chat-log" id="olChatLog"></div>
+            <div class="ol-chat-readonly" id="olChatReadonly" style="display:none"><i class="fas fa-eye"></i> در حالت تماشا فقط می‌توانی گفتگوی بازیکن‌ها را ببینی</div>
             <div class="ol-chat-form" id="olChatForm">
               <input type="text" id="olChatInput" maxlength="200" placeholder="پیام به حریف…" />
               <button id="olChatSend"><i class="fas fa-paper-plane"></i></button>

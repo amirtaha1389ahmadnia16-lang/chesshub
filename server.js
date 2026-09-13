@@ -30,7 +30,7 @@ const zlib = require("zlib");
 
 /* ------------------------- تنظیمات ------------------------- */
 
-const VERSION = "7.0.0";
+const VERSION = "8.0.0";
 const PORT = Number(process.env.PORT) || Number(process.argv[2]) || 3000;
 const HOST = process.env.HOST || "0.0.0.0"; // Render باید روی 0.0.0.0 گوش دهد
 const ROOT = __dirname;
@@ -48,6 +48,10 @@ const COMMUNITY_LIMITS = {
 const USERNAMES_FILE = path.join(ROOT, "data", "usernames.json");
 const USERNAME_RULES = { min: 2, max: 16 };
 
+// 🔄 ماندگاری داده‌ها با گیت‌هاب (اختیاری — با GITHUB_TOKEN فعال می‌شود)
+let dataSync = null;
+try { dataSync = require("./data-sync"); } catch (e) { dataSync = null; }
+
 function readUsernames() {
   try {
     const j = JSON.parse(fs.readFileSync(USERNAMES_FILE, "utf8"));
@@ -63,6 +67,7 @@ function writeUsernames(map) {
   fs.mkdirSync(path.dirname(USERNAMES_FILE), { recursive: true });
   fs.writeFileSync(USERNAMES_FILE + ".tmp", JSON.stringify({ usernames: map }, null, 2));
   fs.renameSync(USERNAMES_FILE + ".tmp", USERNAMES_FILE);
+  if (dataSync) dataSync.pushLater("usernames.json"); // 🔄 همگام‌سازی گیت‌هاب
 }
 
 // کلید یکتا: حروف کوچک + فاصله‌های تکراری حذف‌شده → «علی» و «ALI» یکی هستند
@@ -430,6 +435,7 @@ function writeCommunity(data) {
   fs.mkdirSync(path.dirname(COMMUNITY_FILE), { recursive: true });
   fs.writeFileSync(COMMUNITY_FILE + ".tmp", JSON.stringify(data));
   fs.renameSync(COMMUNITY_FILE + ".tmp", COMMUNITY_FILE);
+  if (dataSync) dataSync.pushLater("community_content.json"); // 🔄 همگام‌سازی گیت‌هاب
 }
 
 // آماده‌سازی اقلام بر اساس نوع — خروجی تمیز و محدودشده
@@ -568,6 +574,9 @@ function notFoundPage(res) {
 /* ---------------------- مسیرهای API ------------------------ */
 
 function handleAPI(req, res, pathname, query) {
+  // 🔄 ماندگاری گیت‌هاب — بازیابی فایل‌های داده در اولین فرصت
+  if (dataSync) dataSync.init();
+
   if (pathname === "/api/daily-puzzle") {
     const dayParam = parseInt(query.get("day"), 10);
     const payload = dailyPuzzlePayload(Number.isFinite(dayParam) ? dayParam : undefined);
@@ -1012,6 +1021,12 @@ server.listen(PORT, HOST, () => {
   console.log(`  ▸ سلامت سرور:     /api/health`);
   console.log(`  ▸ محتوای عمومی:   /api/community/content`);
   console.log(`  ▸ نام کاربری:     /api/username/check + /api/username/register + /api/username/avatar`);
+  console.log(
+    `  ▸ ماندگاری داده:  ` +
+      (process.env.GITHUB_TOKEN && process.env.GITHUB_REPO
+        ? `فعال (گیت‌هاب) — ریتینگ/بازی‌ها/محتوا با هر دیپلوی می‌ماند`
+        : `فقط همین سرور — با هر دیپلوی Render پاک می‌شود (GITHUB_TOKEN بگذار)`)
+  );
   console.log(
     `  ▸ پازل‌ها:         ${
       puzzles.length

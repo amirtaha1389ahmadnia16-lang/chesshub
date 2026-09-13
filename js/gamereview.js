@@ -277,7 +277,30 @@
       wrap.appendChild(row);
     }
     const cur = wrap.querySelector(".gr-move.cur");
-    if (cur) cur.scrollIntoView({ block: "nearest" });
+    if (cur) scrollMovesBox(wrap, cur);
+  }
+
+  // 🔧 رفع باگ پرش صفحه در موبایل:
+  // قبلاً scrollIntoView استفاده می‌شد که در صفحات کوچک کل اورلی (اسکرولر صفحه)
+  // را به پایین می‌پراند و تخته از دید خارج می‌شد. حالا فقط خودِ لیست حرکات
+  // اسکرول می‌شود — هیچ اسکرولر دیگری (اورلی/بدنه) هرگز تکان نمی‌خورد.
+  function scrollMovesBox(box, el) {
+    try {
+      const boxRect = box.getBoundingClientRect();
+      const elRect = el.getBoundingClientRect();
+      const delta = elRect.top - boxRect.top;
+      const target = box.scrollTop + delta - (box.clientHeight - elRect.height) / 2;
+      const max = box.scrollHeight - box.clientHeight;
+      const clamped = Math.max(0, Math.min(target, Math.max(0, max)));
+      if (Math.abs(clamped - box.scrollTop) < 2) return;
+      if (typeof box.scrollTo === "function") {
+        box.scrollTo({ top: clamped, behavior: "smooth" });
+      } else {
+        box.scrollTop = clamped;
+      }
+    } catch (e) {
+      box.scrollTop = el.offsetTop;
+    }
   }
 
   function renderSummary() {

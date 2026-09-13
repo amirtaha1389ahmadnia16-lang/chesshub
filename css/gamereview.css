@@ -11,6 +11,10 @@
   overflow-y: auto;
   padding: 1rem;
   animation: grIn 0.25s ease both;
+  /* 🔧 موبایل: جلوگیری از پرش/زنجیره‌شدن اسکرول به بدنه‌ی صفحه */
+  overscroll-behavior: contain;
+  overflow-anchor: none;
+  -webkit-overflow-scrolling: touch;
 }
 @keyframes grIn {
   from { opacity: 0; }
@@ -304,6 +308,9 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  /* 🔧 موبایل: اسکرول داخل لیست به صفحه بیرونی زنجیر نمی‌شود */
+  overscroll-behavior: contain;
+  overflow-anchor: none;
 }
 .gr-moves::-webkit-scrollbar { display: none; }
 .gr-moves { scrollbar-width: none; -ms-overflow-style: none; }

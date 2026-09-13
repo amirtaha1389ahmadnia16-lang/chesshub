@@ -185,9 +185,10 @@
       case "challengeDeclined": return toast("دعوت رد شد");
       case "challengeFailed": return toast(msg.reason === "playing" ? "این بازیکن در حال بازی است" : "این بازیکن آنلاین نیست");
       case "games": return renderHistory(msg.list);
-      case "spectateStart": return;
+      case "leaderboard": return renderLeaderboard(msg.list);
+      case "spectateStart": return onSpectateStart(msg);
       case "spectateEnd": return;
-      case "spectators": return;
+      case "spectators": return onSpectCount(msg);
       case "error": return onError(msg);
       default: return;
     }
@@ -354,11 +355,39 @@
       div.className = "ol-live-item";
       div.innerHTML =
         '<div style="flex:1;min-width:0"><div class="ol-u-name" style="direction:ltr;text-align:right">⚪ ' + esc(g.white.name) + " ⚫ " + esc(g.black.name) + "</div>" +
-        '<div class="ol-u-sub"><i class="fas fa-stopwatch"></i> ' + tcLabel(g.tc) + " · حرکت " + fa(g.moveCount) + " · 👁 " + fa(g.spectators) + "</div></div>" +
-        '<i class="fas fa-chevron-left" style="color:var(--text-light)"></i>';
+        '<div class="ol-u-sub"><i class="fas fa-stopwatch"></i> ' + tcLabel(g.tc) + " · حرکت " + fa(g.moveCount) + " · <i class=\"fas fa-eye\"></i> " + fa(g.spectators) + "</div></div>" +
+        '<span class="ol-watch-chip"><i class="fas fa-tv"></i> تماشا</span>';
       div.addEventListener("click", function () {
         send({ t: "spectate", gameId: g.gameId });
       });
+      box.appendChild(div);
+    });
+  }
+
+  // ===== 🏆 لیدربورد — رتبه‌بندی بر اساس ریتینگ، برد/باخت/مساوی و کیفیت حریف‌ها =====
+  function renderLeaderboard(list) {
+    if (!isTab("top")) return;
+    const box = $("olList");
+    if (!list || !list.length) {
+      box.innerHTML = '<div class="ol-empty"><i class="fas fa-trophy"></i> هنوز بازی ریتینگ‌داری ثبت نشده — اولین بازی را شروع کن تا جدول برترین‌ها شکل بگیرد!</div>';
+      return;
+    }
+    box.innerHTML = "";
+    const MEDALS = ["🥇", "🥈", "🥉"];
+    list.forEach(function (p, i) {
+      const rank = i + 1;
+      const isMe = p.userId === myUserId;
+      const div = document.createElement("div");
+      div.className = "ol-lb-item" + (isMe ? " me" : "");
+      div.innerHTML =
+        '<div class="ol-lb-rank' + (rank <= 3 ? " r" + rank : "") + '">' + (rank <= 3 ? MEDALS[rank - 1] : fa(rank)) + "</div>" +
+        '<div class="mini-av">' + (p.avatar ? '<img src="' + esc(p.avatar) + '" onerror="this.remove()">' : '<i class="fas fa-user"></i>') + "</div>" +
+        '<div style="flex:1;min-width:0">' +
+          '<div class="ol-u-name" style="display:flex;align-items:center;gap:0.35rem">' + esc(p.name) + (isMe ? ' <span class="ol-lb-me-tag">تو</span>' : "") + "</div>" +
+          '<div class="ol-u-sub">' + fa(p.wins) + " برد · " + fa(p.losses) + " باخت · " + fa(p.draws) + " مساوی — <b>" + fa(p.winRate) + "٪ امتیاز</b></div>" +
+          '<div class="ol-u-sub">میانگین حریف‌ها: ' + fa(p.avgOpp) + (p.bestWin ? " · بهترین برد: " + fa(p.bestWin.rating) + " (" + esc(p.bestWin.name) + ")" : "") + "</div>" +
+        "</div>" +
+        '<span class="ol-lb-rating">' + fa(p.rating) + "</span>";
       box.appendChild(div);
     });
   }
@@ -406,41 +435,8 @@
   }
 
   // ===== بازی =====
-  function onGameStart(msg) {
-    closeModal("inviteModal");
-    setSearching(false);
-    curGameId = msg.gameId;
-    myColor = msg.color;
-    oppInfo = msg.opp;
-    isSpectating = false;
-    game = new Chess();
-    if (msg.fen && msg.fen !== "start") game.load(msg.fen);
-    lastMove = null;
-    clocks = { w: msg.tc.base, b: msg.tc.base };
-    lastServerClock = Date.now();
-    posStarted = false;
-
-    $("olMenu").style.display = "none";
-    $("olGame").classList.add("show");
-    $("olExitSpectate").style.display = "none";
-    $("olChatForm").style.display = "flex";
-    $("olChatLog").innerHTML = "";
-
-    // اطلاعات حریف
-    $("oppName").textContent = oppInfo ? oppInfo.name : "حریف";
-    $("oppRating").textContent = oppInfo ? "ریتینگ " + fa(oppInfo.rating) : "";
-    setAvatarImg($("oppAvatar"), oppInfo ? oppInfo.avatar : null);
-    $("meColorLabel").textContent = myColor === "w" ? "مهره‌های سفید" : "مهره‌های سیاه";
-    $("oppClock").textContent = fmtClock(msg.tc.base);
-    $("meClock").textContent = fmtClock(msg.tc.base);
-
-    // دکمه‌ها — قاعده‌ی لغو:
-    //   حرکتی زده نشده → هر دو طرف «لغو» دارند
-    //   سفید حرکت اول را زده → سفید دیگر لغو ندارد (تسلیم/مساوی)؛ سیاه هنوز می‌تواند لغو کند
-    //   سیاه هم حرکت داد → هیچ‌کس لغو ندارد؛ هر دو تسلیم/مساوی
-    updateActionButtons(0);
-
-    // تخته
+  // ساخت تخته — مشترک بین بازیکن و تماشاگر (canMove خودش isSpectating را رعایت می‌کند)
+  function createBoardInstance() {
     if (myBoard) myBoard.destroy();
     myBoard = ChessBoardUI.create({
       boardEl: $("olBoard"),
@@ -461,10 +457,94 @@
       },
     });
     myBoard.build();
+  }
+
+  function onGameStart(msg) {
+    closeModal("inviteModal");
+    setSearching(false);
+    curGameId = msg.gameId;
+    myColor = msg.color;
+    oppInfo = msg.opp;
+    isSpectating = false;
+    game = new Chess();
+    if (msg.fen && msg.fen !== "start") game.load(msg.fen);
+    lastMove = null;
+    clocks = { w: msg.tc.base, b: msg.tc.base };
+    lastServerClock = Date.now();
+    posStarted = false;
+
+    $("olMenu").style.display = "none";
+    $("olGame").classList.add("show");
+    $("olSpectHud").classList.remove("show");
+    $("olExitSpectate").style.display = "none";
+    $("olGameActions").style.display = "";
+    $("olChatReadonly").style.display = "none";
+    $("olChatForm").style.display = "flex";
+    $("olChatLog").innerHTML = "";
+
+    // اطلاعات حریف
+    $("oppName").textContent = oppInfo ? oppInfo.name : "حریف";
+    $("oppRating").textContent = oppInfo ? "ریتینگ " + fa(oppInfo.rating) : "";
+    setAvatarImg($("oppAvatar"), oppInfo ? oppInfo.avatar : null);
+    $("meColorLabel").textContent = myColor === "w" ? "مهره‌های سفید" : "مهره‌های سیاه";
+    $("oppClock").textContent = fmtClock(msg.tc.base);
+    $("meClock").textContent = fmtClock(msg.tc.base);
+
+    // دکمه‌ها — قاعده‌ی لغو:
+    //   حرکتی زده نشده → هر دو طرف «لغو» دارند
+    //   سفید حرکت اول را زده → سفید دیگر لغو ندارد (تسلیم/مساوی)؛ سیاه هنوز می‌تواند لغو کند
+    //   سیاه هم حرکت داد → هیچ‌کس لغو ندارد؛ هر دو تسلیم/مساوی
+    updateActionButtons(0);
+
+    // تخته
+    createBoardInstance();
 
     setStatus(msg.reconnect ? "ادامه‌ی بازی پس از قطعی — نوبت " + (game.turn() === myColor ? "تو" : "حریف") : "شروع بازی! مهره‌های " + (myColor === "w" ? "سفید" : "سیاه") + " با توست", false);
     startLocalTick();
     renderMyProfile();
+  }
+
+  // ===== 📺 تماشای زنده =====
+  function onSpectateStart(msg) {
+    isSpectating = true;
+    curGameId = msg.gameId;
+    myColor = "w"; // تماشا همیشه از دید سفید
+    game = new Chess();
+    lastMove = null;
+    clocks = { w: msg.tc.base, b: msg.tc.base };
+    lastServerClock = Date.now();
+    posStarted = (msg.moveCount || 0) > 0;
+    const whiteInfo = msg.white || null;  // نوار پایین = سفید
+    oppInfo = msg.black || null;          // نوار بالا = سیاه
+
+    $("olMenu").style.display = "none";
+    $("olGame").classList.add("show");
+    $("olSpectHud").classList.add("show");
+    $("olSpectCount").textContent = fa(msg.spectators || 0);
+    $("olGameActions").style.display = "none";   // تماشاگر هیچ کنترلی ندارد
+    $("olChatForm").style.display = "none";      // چت فقط برای بازیکن‌ها
+    $("olChatReadonly").style.display = "";
+    $("olExitSpectate").style.display = "";
+
+    // نوارها: بالا = سیاه، پایین = سفید (هم‌راستا با جهت تخته)
+    $("oppName").textContent = oppInfo ? oppInfo.name : "سیاه";
+    $("oppRating").textContent = "مهره‌های سیاه" + (oppInfo ? " — ریتینگ " + fa(oppInfo.rating) : "");
+    setAvatarImg($("oppAvatar"), oppInfo ? oppInfo.avatar : null);
+    $("meName2").textContent = whiteInfo ? whiteInfo.name : "سفید";
+    $("meColorLabel").textContent = "مهره‌های سفید" + (whiteInfo ? " — ریتینگ " + fa(whiteInfo.rating) : "");
+    setAvatarImg($("meAvatar2"), whiteInfo ? whiteInfo.avatar : null);
+    $("oppClock").textContent = fmtClock(msg.tc.base);
+    $("meClock").textContent = fmtClock(msg.tc.base);
+
+    createBoardInstance();
+
+    setStatus("📺 در حال تماشای زنده — " + (whiteInfo ? whiteInfo.name : "سفید") + " در برابر " + (oppInfo ? oppInfo.name : "سیاه"), false);
+    startLocalTick();
+  }
+
+  function onSpectCount(msg) {
+    const el = $("olSpectCount");
+    if (el && typeof msg.n === "number") el.textContent = fa(msg.n);
   }
 
   // دکمه‌های لغو/تسلیم/مساوی بر اساس تعداد حرکت‌ها و رنگ من
@@ -500,8 +580,12 @@
     // ⏱ شمارش معکوس لغو خودکار (قبل از دو حرکت کامل)
     if (typeof msg.abortIn === "number" && msg.abortIn > 0 && (msg.moveCount || 0) < 2 && !isSpectating) {
       setStatus("⏱ اگر نوبت‌دار تا " + fa(Math.ceil(msg.abortIn)) + " ثانیه حرکت نکند، بازی خودکار لغو می‌شود", true);
-    } else if (!isSpectating && !game.game_over()) {
-      setStatus("نوبت " + (game.turn() === myColor ? "تو" : "حریف") + (game.in_check() ? " — کیش!" : ""), false);
+    } else if (!game.game_over()) {
+      if (isSpectating) {
+        setStatus(posStarted ? "نوبت " + (game.turn() === "w" ? "سفید" : "سیاه") + (game.in_check() ? " — کیش!" : "") : "در انتظار شروع بازی…", false);
+      } else {
+        setStatus("نوبت " + (game.turn() === myColor ? "تو" : "حریف") + (game.in_check() ? " — کیش!" : ""), false);
+      }
     }
   }
 
@@ -553,6 +637,7 @@
     if (msg.gameId !== curGameId) return;
     stopLocalTick();
     lastGameEnd = msg;
+    send({ t: "leaderboard" }); // 🏆 رفرش بی‌صدا جدول بعد از هر بازی تمام‌شده
     const won =
       (myColor === "w" && msg.result === "1-0") ||
       (myColor === "b" && msg.result === "0-1");
@@ -601,7 +686,9 @@
   function backToMenu() {
     $("olResultOverlay").classList.remove("open");
     $("olGame").classList.remove("show");
+    $("olSpectHud").classList.remove("show");
     $("olMenu").style.display = "";
+    if (isSpectating) send({ t: "unSpectate" });
     curGameId = null;
     isSpectating = false;
     send({ t: "listUsers" });
@@ -734,6 +821,7 @@
         const tab = this.dataset.tab;
         if (tab === "users") send({ t: "listUsers" });
         else if (tab === "live") send({ t: "listLive" });
+        else if (tab === "top") send({ t: "leaderboard" });
         else send({ t: "myGames" });
         $("olList").innerHTML = '<div class="ol-empty"><i class="fas fa-spinner fa-pulse"></i></div>';
       });
@@ -842,13 +930,27 @@
 
     // نتیجه
     $("olNewGameBtn").addEventListener("click", function () {
+      const wasSpectating = isSpectating;
       backToMenu();
+      if (wasSpectating) return; // تماشاگر «بازی جدید» ندارد — به منو برمی‌گردد
       const tc = lastTcUsed || selectedTc;
       send({ t: "quick", tc: parseTcCode(tc) });
     });
     $("olReviewBtn").addEventListener("click", function () {
       if (!lastGameEnd) return;
       const g = lastGameEnd;
+      if (isSpectating) {
+        // تماشاگر: نام‌های واقعی سفید/سیاه از پیام پایانی سرور
+        window.GameReview.open({
+          moves: g.moves || [],
+          white: g.whiteName || "سفید",
+          black: g.blackName || "سیاه",
+          title: "بازی آنلاین ChessHub",
+          subtitle: "تماشای بازی — " + (g.whiteName || "سفید") + " برابر " + (g.blackName || "سیاه"),
+          result: g.result,
+        });
+        return;
+      }
       const myName = myProfile ? myProfile.name : "من";
       const oppName = g.opponentName || "حریف";
       window.GameReview.open({

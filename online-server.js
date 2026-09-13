@@ -36,6 +36,9 @@ const ROOT = __dirname;
 const DATA_DIR = path.join(ROOT, "data");
 const USERS_FILE = path.join(DATA_DIR, "users.json");
 const GAMES_FILE = path.join(DATA_DIR, "online_games.json");
+// 🔄 ماندگاری داده‌ها با گیت‌هاب (اختیاری — با GITHUB_TOKEN فعال می‌شود)
+let dataSync = null;
+try { dataSync = require("./data-sync"); } catch (e) { dataSync = null; }
 const ELO_K = 32;
 const START_RATING = 1200;
 const NAME_COOLDOWN_MS = 15 * 24 * 3600 * 1000; // ۱۵ روز
@@ -59,6 +62,7 @@ function saveFiles(force) {
       fs.writeFileSync(USERS_FILE + ".tmp", JSON.stringify(users));
       fs.renameSync(USERS_FILE + ".tmp", USERS_FILE);
       dirtyUsers = false;
+      if (dataSync) dataSync.pushLater("users.json"); // 🔄 همگام‌سازی گیت‌هاب
     } catch (e) { console.error("[Online] ذخیره users:", e.message); }
   }
   if (dirtyGames || force) {
@@ -67,6 +71,7 @@ function saveFiles(force) {
       fs.writeFileSync(GAMES_FILE + ".tmp", JSON.stringify(games));
       fs.renameSync(GAMES_FILE + ".tmp", GAMES_FILE);
       dirtyGames = false;
+      if (dataSync) dataSync.pushLater("online_games.json"); // 🔄 همگام‌سازی گیت‌هاب
     } catch (e) { console.error("[Online] ذخیره games:", e.message); }
   }
 }
@@ -367,6 +372,7 @@ function finishGame(g, result, reason, rated, loserId) {
     else if (sw === 0) { w.losses++; b.wins++; }
     else { w.draws++; b.draws++; }
     dirtyUsers = true;
+    lbCache = null; // 🏆 جدول برترین‌ها باید از نو محاسبه شود
   }
   g.ratingDelta = { [g.white]: dw, [g.black]: db };
 
@@ -405,8 +411,14 @@ function finishGame(g, result, reason, rated, loserId) {
       opponentName: opponent ? opponent.name : "حریف",
     });
   });
+  // 📺 تماشاگرها هم نتیجه + حرکات + PGN می‌گیرند تا بتوانند بازی را مرور کنند
+  const wNameEnd = w ? w.name : "؟", bNameEnd = b ? b.name : "؟";
   g.spectators.forEach(function (uid) {
-    wsSendTo(uid, { t: "gameEnd", gameId: g.id, result: g.result, reason: reason });
+    wsSendTo(uid, {
+      t: "gameEnd", gameId: g.id, result: g.result, reason: reason,
+      moves: g.moves || [], pgn: g.pgn || null,
+      whiteName: wNameEnd, blackName: bNameEnd,
+    });
   });
 
   setTimeout(function () {
@@ -710,8 +722,21 @@ function handleChat(client, msg) {
 function handleSpectate(client, msg) {
   const g = gamesMap.get(msg.gameId);
   if (!g) return wsSend(client, { t: "error", msg: "بازی یافت نشد" });
+  // 🚫 بازیکن خودِ بازی نمی‌تواند بازی خودش را تماشا کند
+  if (colorOf(g, client.userId)) {
+    return wsSend(client, { t: "error", msg: "بازی خودت را نمی‌توانی تماشا کنی" });
+  }
   g.spectators.add(client.userId);
-  wsSend(client, { t: "spectateStart", gameId: g.id, tc: g.tc, white: { name: users[g.white] ? users[g.white].name : "؟" }, black: { name: users[g.black] ? users[g.black].name : "؟" } });
+  const wU = users[g.white] || {}, bU = users[g.black] || {};
+  wsSend(client, {
+    t: "spectateStart",
+    gameId: g.id,
+    tc: g.tc,
+    white: { name: wU.name || "؟", avatar: wU.avatar || "", rating: wU.rating || 0 },
+    black: { name: bU.name || "؟", avatar: bU.avatar || "", rating: bU.rating || 0 },
+    moveCount: g.moves.length,
+    spectators: g.spectators.size,
+  });
   wsSend(client, publicPosition(g));
   g.chat.forEach(function (ch) { wsSend(client, { t: "chat", gameId: g.id, from: ch.from, text: ch.text }); });
   wsSend(client, { t: "spectators", gameId: g.id, n: g.spectators.size });
@@ -754,6 +779,56 @@ function handleUpdateProfile(client, msg) {
   if (changed) dirtyUsers = true;
   wsSend(client, { t: "authed", profile: publicProfile(client.userId) });
   broadcastUsers();
+}
+
+// 🏆 لیدربورد — رتبه‌بندی بازیکنان بر اساس ریتینگ Elo، برد/باخت/مساوی و کیفیت حریف‌ها
+let lbCache = null; // کش — با هر بازی ریتینگ‌دار باطل می‌شود
+
+function computeLeaderboard() {
+  if (lbCache) return lbCache;
+  const stats = {};
+  Object.keys(users).forEach(function (uid) {
+    const u = users[uid];
+    const played = (u.wins || 0) + (u.losses || 0) + (u.draws || 0);
+    if (played <= 0) return; // فقط کسانی که بازی ریتینگ‌دار دارند
+    stats[uid] = {
+      userId: uid, name: u.name, avatar: u.avatar || "", rating: u.rating || START_RATING,
+      wins: u.wins || 0, losses: u.losses || 0, draws: u.draws || 0,
+      games: played, winRate: 0, avgOpp: 0, bestWin: null,
+      _oppSum: 0, _oppN: 0,
+    };
+  });
+  // میانگین ریتینگ حریف‌ها + بهترین برد (حریف قوی‌تر شکست‌داده‌شده) از آرشیو
+  games.forEach(function (g) {
+    if (!g || !g.white || !g.black) return;
+    [[g.white, g.black], [g.black, g.white]].forEach(function (pair) {
+      const me = pair[0], opp = pair[1];
+      const s = stats[me.id];
+      if (!s) return;
+      const oppR = opp.rating || 0;
+      s._oppSum += oppR; s._oppN++;
+      const iWon = (me === g.white && g.result === "1-0") || (me === g.black && g.result === "0-1");
+      if (iWon && (!s.bestWin || oppR > s.bestWin.rating)) {
+        s.bestWin = { rating: oppR, name: opp.name || "؟" };
+      }
+    });
+  });
+  const list = Object.keys(stats).map(function (uid) {
+    const s = stats[uid];
+    s.winRate = s.games ? Math.round(((s.wins + s.draws * 0.5) / s.games) * 100) : 0;
+    s.avgOpp = s._oppN ? Math.round(s._oppSum / s._oppN) : 0;
+    delete s._oppSum; delete s._oppN;
+    return s;
+  });
+  list.sort(function (a, b) {
+    return b.rating - a.rating || b.wins - a.wins || b.winRate - a.winRate || String(a.name).localeCompare(String(b.name), "fa");
+  });
+  lbCache = list.slice(0, 100);
+  return lbCache;
+}
+
+function handleLeaderboard(client) {
+  wsSend(client, { t: "leaderboard", list: computeLeaderboard() });
 }
 
 function handleMyGames(client) {
@@ -844,6 +919,18 @@ function attach(server) {
   loadFiles();
   setInterval(function () { saveFiles(false); }, 2000);
 
+  // 🔄 ماندگاری گیت‌هاب — اگر فایل‌های محلی نبودند از ریپو برمی‌گردند
+  if (dataSync) {
+    dataSync.init().then(function (fetched) {
+      if (fetched && fetched.length) {
+        loadFiles(); // داده‌های بازیابی‌شده را دوباره بخوان
+        broadcastUsers();
+        broadcastLive();
+        console.log("[Sync] بازگردانی از گیت‌هاب: " + fetched.join(", "));
+      }
+    }).catch(function () {});
+  }
+
   process.on("SIGTERM", function () { saveFiles(true); });
   process.on("SIGINT", function () { saveFiles(true); });
   process.on("exit", function () { saveFiles(true); });
@@ -900,6 +987,7 @@ function route(client, msg) {
     case "chat": return handleChat(client, msg);
     case "spectate": return handleSpectate(client, msg);
     case "unSpectate": return handleUnSpectate(client);
+    case "leaderboard": return handleLeaderboard(client);
     case "listUsers": return broadcastUsers();
     case "listLive": return broadcastLive();
     case "myGames": return handleMyGames(client);
