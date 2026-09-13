@@ -67,7 +67,16 @@
     const sec = s % 60;
     return fa(m) + ":" + fa(String(sec).padStart(2, "0"));
   }
-  function tcLabel(code) { return code === "custom" ? "سفارشی" : code.replace("+", "+").replace(/\d+/g, function (m) { return fa(m); }); }
+  // نمایش خوانا برای کاربر: «300+3» → «5+3» (دقیقه + افزوده) — فقط نمایش، پروتکل ثانیه می‌ماند
+  function tcMinuteStr(code) {
+    const parts = String(code).split("+");
+    if (parts.length !== 2) return String(code);
+    const base = parseInt(parts[0], 10), inc = parseInt(parts[1], 10);
+    if (isNaN(base) || isNaN(inc)) return String(code);
+    const baseStr = base % 60 === 0 ? String(base / 60) : String(base);
+    return baseStr + "+" + String(inc);
+  }
+  function tcLabel(code) { return code === "custom" ? "سفارشی" : tcMinuteStr(code).replace(/\d+/g, function (m) { return fa(m); }); }
   function parseTcCode(code) {
     if (code === "custom") {
       const m = Math.max(1, Math.min(120, parseInt($("olCustomMin").value, 10) || 7));
@@ -736,7 +745,7 @@
     { label: "کلاسیک", icon: "fa-chess-king", list: ["3600+0", "5400+30", "7200+0"] },
   ];
   function tcFa(code) {
-    return code.replace(/\d+/g, function (m) { return fa(m); });
+    return tcMinuteStr(code).replace(/\d+/g, function (m) { return fa(m); });
   }
   function buildTcChips(container, onPick, activeCode, withCustom, customBoxId) {
     if (!container) return;

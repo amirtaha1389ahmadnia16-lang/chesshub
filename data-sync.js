@@ -124,6 +124,26 @@ function localWrite(name, content) {
     return true;
   } catch (e) { return false; }
 }
+// تشخیص «فایل خالی» — خروجی اولین بوت روی دیسک پاک‌شده‌ی Render
+// اگر فایل محلی وجود داشته باشد ولی خالی باشد، نباید مانع بازیابی از گیت‌هاب شود
+function isBlank(name, content) {
+  if (content == null) return true;
+  try {
+    const j = JSON.parse(content);
+    if (j == null) return true;
+    if (Array.isArray(j)) return j.length === 0;
+    if (typeof j !== "object") return false;
+    const keys = Object.keys(j);
+    if (keys.length === 0) return true; // {}
+    if (name === "usernames.json") return Object.keys(j.usernames || {}).length === 0;
+    if (name === "community_content.json")
+      return ["lessons", "openings", "articles"].every(function (k) {
+        return !(Array.isArray(j[k]) && j[k].length);
+      });
+    return false;
+  } catch (e) { return false; } // محتوای خراب → خالی حساب نکن؛ دست نزن
+}
+
 function hashOf(str) {
   let x = 5381;
   for (let i = 0; i < str.length; i++) x = ((x << 5) + x + str.charCodeAt(i)) | 0;
@@ -212,8 +232,12 @@ function init() {
       try {
         const remote = await fetchRemote(name);
         const local = localRead(name);
-        if (local == null && remote != null) {
-          if (localWrite(name, remote)) fetched.push(name);
+        if (remote != null && (local == null || isBlank(name, local))) {
+          // فایل محلی نیست یا خالی است (دیسک تازه‌ی Render) → بازیابی از گیت‌هاب
+          if (localWrite(name, remote)) {
+            state[name].lastPushedHash = hashOf(remote); // مبنای push فقط تغییرات بعدی
+            fetched.push(name);
+          }
         } else if (local != null) {
           state[name].lastPushedHash = hashOf(local); // محتوای فعلی مبناست
         }

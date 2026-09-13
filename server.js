@@ -30,7 +30,7 @@ const zlib = require("zlib");
 
 /* ------------------------- تنظیمات ------------------------- */
 
-const VERSION = "8.0.0";
+const VERSION = "8.1.0";
 const PORT = Number(process.env.PORT) || Number(process.argv[2]) || 3000;
 const HOST = process.env.HOST || "0.0.0.0"; // Render باید روی 0.0.0.0 گوش دهد
 const ROOT = __dirname;
@@ -826,6 +826,12 @@ function handleAPI(req, res, pathname, query) {
       date: new Date().toISOString().slice(0, 10),
       uptimeSeconds: Math.round(process.uptime()),
       node: process.version,
+      // 🔄 وضعیت ماندگاری داده — برای اطمینان مدیر سایت
+      persistence: {
+        enabled: !!(dataSync && dataSync.enabled()),
+        repo: (process.env.GITHUB_REPO || "").trim() || null,
+        branch: (process.env.GITHUB_BRANCH || "main").trim() || "main",
+      },
     });
   }
 
