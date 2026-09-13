@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="دانلود فایل‌های PGN بازی‌های استادان بزرگ شطرنج" />
+    <title>ChessHub | دانلود PGN</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%E2%99%9B%3C/text%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+      /* استایل‌های اختصاصی صفحه دانلود (Pro Edition) */
+      .search-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.8rem;
+        align-items: center;
+        background: #ffffff;
+        padding: 0.8rem 1rem;
+        border-radius: var(--radius-md);
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid #e2e8f0;
+      }
+      .search-field {
+        flex: 2;
+        min-width: 150px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: #f1f5f9;
+        border-radius: var(--radius-sm);
+        padding: 0.2rem 0.8rem;
+        border: 1px solid #e2e8f0;
+        transition: var(--transition-smooth);
+      }
+      .search-field:focus-within {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.2);
+        background: #ffffff;
+      }
+      .search-field i {
+        color: var(--text-light);
+        font-size: 0.85rem;
+      }
+      .search-field input {
+        width: 100%;
+        border: none;
+        background: transparent;
+        padding: 0.5rem 0;
+        font-family: "Vazir";
+        font-size: 0.85rem;
+        outline: none;
+        color: var(--text-dark);
+        font-weight: 600;
+      }
+      .download-count {
+        font-size: 0.8rem;
+        color: var(--text-light);
+        background: #f1f5f9;
+        padding: 0.3rem 1rem;
+        border-radius: var(--radius-sm);
+        white-space: nowrap;
+        font-weight: 600;
+        border: 1px solid #e2e8f0;
+      }
+
+      .players-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1.2rem;
+        margin-bottom: 2rem;
+      }
+      .player-card {
+        background: #ffffff;
+        border-radius: var(--radius-md);
+        padding: 1.2rem 0.5rem;
+        text-align: center;
+        transition: var(--transition-smooth);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid #e2e8f0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .player-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--accent);
+      }
+      .player-avatar {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        margin: 0 auto 0.8rem;
+        overflow: hidden;
+        background: #f1f5f9;
+        border: 3px solid #e2e8f0;
+        transition: var(--transition-smooth);
+      }
+      .player-card:hover .player-avatar {
+        border-color: var(--accent);
+      }
+      .player-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .player-name {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--primary-dark);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 100%;
+      }
+      .player-title {
+        font-size: 0.65rem;
+        color: var(--text-light);
+        font-weight: 600;
+        margin-bottom: 0.8rem;
+      }
+      .btn-download {
+        background: var(--accent);
+        color: #fff;
+        border: 1px solid var(--accent-dark);
+        padding: 0.3rem 1rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.75rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        font-family: "Vazir";
+        box-shadow: 0 3px 0 var(--accent-dark);
+      }
+      .btn-download:hover {
+        background: #4299e1;
+      }
+      .btn-download:active {
+        transform: translateY(2px);
+        box-shadow: 0 1px 0 var(--accent-dark);
+      }
+
+      .no-result {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-light);
+        font-size: 0.9rem;
+        grid-column: 1 / -1;
+        background: #fff;
+        border-radius: var(--radius-md);
+        border: 1px dashed #cbd5e0;
+      }
+
+      @media (max-width: 768px) {
+        .search-container {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .players-grid {
+          grid-template-columns: repeat(3, 1fr);
+          gap: 0.8rem;
+        }
+        .player-avatar {
+          width: 56px;
+          height: 56px;
+        }
+      }
+      @media (max-width: 480px) {
+        .players-grid {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 0.5rem;
+        }
+        .player-avatar {
+          width: 50px;
+          height: 50px;
+        }
+        .player-name {
+          font-size: 0.75rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div id="header-placeholder"></div>
+
+      <!-- بنر یکپارچه -->
+      <section class="app-hero">
+        <h1><i class="fas fa-database"></i> دانلود فایل‌های PGN</h1>
+        <p>
+          فایل کامل بازی‌های ۳۰ استاد بزرگ به فرمت PGN برای تحلیل در
+          نرم‌افزارهای شطرنج
+        </p>
+      </section>
+
+      <!-- نوار جستجو -->
+      <div class="search-container">
+        <div class="search-field">
+          <i class="fas fa-search"></i>
+          <input
+            type="text"
+            id="searchPlayerInput"
+            placeholder="جستجوی نام استاد..."
+          />
+        </div>
+        <div class="download-count" id="resultCount">۳۰ فایل</div>
+      </div>
+
+      <!-- گرید بازیکنان -->
+      <div id="playersGridContainer" class="players-grid"></div>
+
+      <div id="footer-placeholder"></div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script src="js/profile.js"></script>
+    <script>
+      (function () {
+        "use strict";
+
+        // اعمال تم ذخیره شده
+        (function applySavedTheme() {
+          try {
+            const settings = JSON.parse(
+              localStorage.getItem("chesshub_settings"),
+            );
+            if (settings && settings.theme) {
+              document.body.classList.add(`theme-${settings.theme}`);
+            }
+          } catch (e) {}
+        })();
+
+        const players = [
+          { name: "Magnus Carlsen", title: "قهرمان جهان", file: "Carlsen.pgn", avatar: "images/players/carlsen.jpg" },
+          { name: "Garry Kasparov", title: "قهرمان جهان", file: "Kasparov.pgn", avatar: "images/players/kasparov.jpg" },
+          { name: "Bobby Fischer", title: "قهرمان جهان", file: "Fischer.pgn", avatar: "images/players/fischer.jpg" },
+          { name: "Anatoly Karpov", title: "قهرمان جهان", file: "Karpov.pgn", avatar: "images/players/karpov.jpg" },
+          { name: "José Raúl Capablanca", title: "قهرمان جهان", file: "Capablanca.pgn", avatar: "images/players/capablanca.jpg" },
+          { name: "Alexander Alekhine", title: "قهرمان جهان", file: "Alekhine.pgn", avatar: "images/players/alekhine.jpg" },
+          { name: "Mikhail Tal", title: "قهرمان جهان", file: "Tal.pgn", avatar: "images/players/tal.jpg" },
+          { name: "Emanuel Lasker", title: "قهرمان جهان", file: "Lasker.pgn", avatar: "images/players/lasker.jpg" },
+          { name: "Wilhelm Steinitz", title: "قهرمان جهان", file: "Steinitz.pgn", avatar: "images/players/steinitz.jpg" },
+          { name: "Viswanathan Anand", title: "قهرمان جهان", file: "Anand.pgn", avatar: "images/players/anand.jpg" },
+          { name: "Vladimir Kramnik", title: "قهرمان جهان", file: "Kramnik.pgn", avatar: "images/players/kramnik.jpg" },
+          { name: "Vasily Smyslov", title: "قهرمان جهان", file: "Smyslov.pgn", avatar: "images/players/smyslov.jpg" },
+          { name: "Tigran Petrosian", title: "قهرمان جهان", file: "Petrosian.pgn", avatar: "images/players/petrosian.jpg" },
+          { name: "Boris Spassky", title: "قهرمان جهان", file: "Spassky.pgn", avatar: "images/players/spassky.jpg" },
+          { name: "Max Euwe", title: "قهرمان جهان", file: "Euwe.pgn", avatar: "images/players/euwe.jpg" },
+          { name: "Mikhail Botvinnik", title: "قهرمان جهان", file: "Botvinnik.pgn", avatar: "images/players/botvinnik.jpg" },
+          { name: "Paul Morphy", title: "افسانه", file: "Morphy.pgn", avatar: "images/players/morphy.jpg" },
+          { name: "Hikaru Nakamura", title: "سوپر استاد", file: "Nakamura.pgn", avatar: "images/players/nakamura.jpg" },
+          { name: "Fabiano Caruana", title: "سوپر استاد", file: "Caruana.pgn", avatar: "images/players/caruana.jpg" },
+          { name: "Levon Aronian", title: "سوپر استاد", file: "Aronian.pgn", avatar: "images/players/aronian.jpg" },
+          { name: "Wesley So", title: "سوپر استاد", file: "So.pgn", avatar: "images/players/so.jpg" },
+          { name: "Ding Liren", title: "قهرمان جهان", file: "Ding.pgn", avatar: "images/players/ding.jpg" },
+          { name: "Ian Nepomniachtchi", title: "سوپر استاد", file: "Nepomniachtchi.pgn", avatar: "images/players/nepomniachtchi.jpg" },
+          { name: "Alireza Firouzja", title: "سوپر استاد", file: "Firouzja.pgn", avatar: "images/players/firouzja.jpg" },
+          { name: "Richard Réti", title: "استاد بزرگ", file: "Reti.pgn", avatar: "images/players/reti.jpg" },
+          { name: "Aaron Nimzowitsch", title: "استاد بزرگ", file: "Nimzowitsch.pgn", avatar: "images/players/nimzowitsch.jpg" },
+          { name: "Frank Marshall", title: "استاد بزرگ", file: "Marshall.pgn", avatar: "images/players/marshall.jpg" },
+          { name: "David Bronstein", title: "استاد بزرگ", file: "Bronstein.pgn", avatar: "images/players/bronstein.jpg" },
+          { name: "Viktor Korchnoi", title: "استاد بزرگ", file: "Korchnoi.pgn", avatar: "images/players/korchnoi.jpg" },
+          { name: "Gukesh D", title: "سوپر استاد", file: "Gukesh.pgn", avatar: "images/players/gukesh.jpg" },
+        ];
+
+        let currentFilter = "";
+        const gridContainer = document.getElementById("playersGridContainer");
+        const resultCount = document.getElementById("resultCount");
+
+        function renderPlayers() {
+          const filtered =
+            currentFilter === ""
+              ? players
+              : players.filter((p) =>
+                  p.name.toLowerCase().includes(currentFilter.toLowerCase()),
+                );
+          if (resultCount) resultCount.innerText = `${filtered.length} فایل`;
+
+          if (filtered.length === 0) {
+            gridContainer.innerHTML = `<div class="no-result">❌ هیچ استادی با این نام یافت نشد</div>`;
+            return;
+          }
+
+          gridContainer.innerHTML = "";
+          filtered.forEach((player) => {
+            const card = document.createElement("div");
+            card.className = "player-card";
+            card.innerHTML = `
+              <div class="player-avatar">
+                <img src="${player.avatar}" alt="${player.name}" onerror="this.src='https://ui-avatars.com/api/?background=2c3e50&color=fff&name=${encodeURIComponent(player.name)}'" loading="lazy">
+              </div>
+              <div class="player-name">${player.name}</div>
+              <div class="player-title">${player.title}</div>
+              <button class="btn-download" data-file="${player.file}">
+                <i class="fas fa-download"></i> دانلود PGN
+              </button>
+            `;
+            gridContainer.appendChild(card);
+          });
+
+          document.querySelectorAll(".btn-download").forEach((btn) => {
+            btn.addEventListener("click", function (e) {
+              e.stopPropagation();
+              const fileName = this.getAttribute("data-file");
+              const link = document.createElement("a");
+              link.href = `pgn/${fileName}`;
+              link.download = fileName;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            });
+          });
+        }
+
+        function initSearch() {
+          const searchInput = document.getElementById("searchPlayerInput");
+          if (searchInput) {
+            searchInput.addEventListener("input", function (e) {
+              currentFilter = e.target.value.trim();
+              renderPlayers();
+            });
+          }
+        }
+
+        function init() {
+          renderPlayers();
+          initSearch();
+        }
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", init);
+        } else {
+          init();
+        }
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,387 @@
+/* ============================================================
+   ♛ ChessHub — استایل مرور بازی (Game Review)
+   ============================================================ */
+
+.gr-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.62);
+  backdrop-filter: blur(4px);
+  z-index: 5000;
+  overflow-y: auto;
+  padding: 1rem;
+  animation: grIn 0.25s ease both;
+}
+@keyframes grIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.gr-inner {
+  max-width: 1080px;
+  margin: 0.5rem auto 2rem;
+  background: #f8fafc;
+  border-radius: var(--radius-xl, 18px);
+  overflow: hidden;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+  animation: grUp 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
+}
+@keyframes grUp {
+  from { opacity: 0; transform: translateY(22px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---------- هدر ---------- */
+.gr-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 0.85rem 1.2rem;
+  background: linear-gradient(135deg, var(--primary-dark, #1a202c), #24344d);
+  color: #fff;
+}
+.gr-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+.gr-title > i { color: var(--accent-light, #63b3ed); font-size: 1.2rem; }
+.gr-title b { display: block; font-size: 1rem; }
+.gr-title span {
+  display: block;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.7);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gr-close {
+  background: rgba(255, 255, 255, 0.12);
+  border: none;
+  color: #fff;
+  padding: 0.45rem 1rem;
+  border-radius: var(--radius-md, 8px);
+  font-family: "Vazir";
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.82rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+  transition: var(--transition-smooth, all 0.2s);
+}
+.gr-close:hover { background: var(--danger, #e53e3e); }
+
+/* ---------- نوار پیشرفت تحلیل ---------- */
+.gr-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.55rem 1.2rem;
+  background: var(--accent-soft, #ebf8ff);
+  border-bottom: 1px solid var(--border, #e2e8f0);
+}
+.gr-progress.done { background: rgba(56, 161, 105, 0.1); }
+.gr-prog-text {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--accent-dark, #2c5282);
+  white-space: nowrap;
+}
+.gr-progress.done .gr-prog-text { color: var(--success-dark, #2f855a); }
+.gr-prog-track {
+  flex: 1;
+  height: 8px;
+  background: rgba(49, 130, 206, 0.15);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.gr-prog-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent, #3182ce), var(--accent-light, #63b3ed));
+  border-radius: 99px;
+  transition: width 0.3s ease;
+}
+
+/* ---------- بدنه ---------- */
+.gr-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 1.1rem;
+  padding: 1.1rem;
+  align-items: start;
+}
+
+/* ---------- ستون تخته ---------- */
+.gr-board-side { min-width: 0; }
+.gr-players {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--primary-dark, #1a202c);
+  margin-bottom: 0.6rem;
+  flex-wrap: wrap;
+}
+.gr-players .gr-vs { font-size: 0.68rem; color: var(--text-light, #64748b); font-weight: 600; }
+.gr-board-wrap {
+  position: relative;
+  max-width: 480px;
+  margin: 0 auto;
+}
+.gr-board {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  aspect-ratio: 1/1;
+  direction: ltr;
+  border-radius: var(--radius-md, 8px);
+  overflow: hidden;
+  box-shadow: var(--shadow-board, 0 12px 24px rgba(0,0,0,0.18));
+  touch-action: none;
+  user-select: none;
+}
+.gr-board .square { position: relative; display: flex; align-items: center; justify-content: center; }
+.gr-board .piece-img { width: 92%; height: 92%; object-fit: contain; pointer-events: none; z-index: 2; }
+.gr-board .piece-glyph { width: 90%; height: 90%; pointer-events: none; z-index: 2; display: flex; align-items: center; justify-content: center; font-size: var(--glyph-size, 34px); }
+.gr-board .square.light { background: var(--board-light, #f0d9b5); }
+.gr-board .square.dark { background: var(--board-dark, #b58863); }
+.gr-board .square.last-move::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(246, 173, 85, 0.4);
+  z-index: 1;
+  pointer-events: none;
+}
+.gr-board .square.check::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(229,62,62,0.55) 15%, rgba(229,62,62,0.12) 62%, transparent 75%);
+  z-index: 1;
+  pointer-events: none;
+}
+.board-arrows {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
+  direction: ltr;
+}
+.board-arrows .arrow-line { stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- نوار ارزیابی ---------- */
+.gr-eval-num {
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: var(--primary-dark, #1a202c);
+  min-width: 3.2rem;
+  text-align: center;
+  direction: ltr;
+}
+
+/* ---------- کنترل‌ها ---------- */
+.gr-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.8rem;
+  flex-wrap: wrap;
+}
+.gr-btn {
+  background: #fff;
+  border: 1.5px solid var(--border, #e2e8f0);
+  color: var(--text-light, #64748b);
+  padding: 0.45rem 0.8rem;
+  border-radius: var(--radius-md, 8px);
+  font-family: "Vazir";
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition-smooth, all 0.2s);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.gr-btn:hover { border-color: var(--accent, #3182ce); color: var(--accent, #3182ce); background: var(--accent-soft, #ebf8ff); }
+.gr-btn:active { transform: scale(0.96); }
+.gr-btn.primary { background: var(--accent, #3182ce); border-color: var(--accent-dark, #2c5282); color: #fff; }
+.gr-btn.primary:hover { background: var(--accent-dark, #2c5282); color: #fff; }
+.gr-counter {
+  background: var(--secondary, #f1f5f9);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: var(--radius-sm, 6px);
+  padding: 0.4rem 0.7rem;
+  font-weight: 800;
+  font-size: 0.78rem;
+  color: var(--primary-dark, #1a202c);
+  min-width: 3.4rem;
+  text-align: center;
+}
+
+/* ---------- پنل ---------- */
+.gr-panel { min-width: 0; display: flex; flex-direction: column; gap: 0.9rem; }
+
+.gr-summary {
+  background: #fff;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: var(--radius-lg, 12px);
+  padding: 0.9rem;
+}
+.gr-loading {
+  text-align: center;
+  color: var(--text-light, #64748b);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.5rem;
+}
+.gr-sum-title {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--primary-dark, #1a202c);
+  margin-bottom: 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.gr-sum-title i { color: var(--accent, #3182ce); }
+.gr-side { padding: 0.5rem 0; border-top: 1px dashed var(--border, #e2e8f0); }
+.gr-side:first-of-type { border-top: none; }
+.gr-side-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.35rem;
+  font-size: 0.84rem;
+}
+.gr-side-head b { color: var(--primary-dark, #1a202c); }
+.gr-acc { font-weight: 800; color: var(--accent, #3182ce); font-size: 0.78rem; }
+.gr-kinds { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.gr-kinds span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  border-radius: 99px;
+  padding: 0.16rem 0.55rem;
+  background: var(--secondary, #f1f5f9);
+}
+
+/* رنگ‌بندی کیفیت حرکت */
+.k-best  { background: rgba(56, 161, 105, 0.14) !important; color: var(--success-dark, #2f855a) !important; }
+.k-exc   { background: rgba(56, 161, 105, 0.09) !important; color: #38a169 !important; }
+.k-good  { background: rgba(49, 130, 206, 0.09) !important; color: var(--accent, #3182ce) !important; }
+.k-ina   { background: rgba(214, 158, 46, 0.12) !important; color: #975a16 !important; }
+.k-mis   { background: rgba(246, 173, 85, 0.16) !important; color: #c05621 !important; }
+.k-blun  { background: rgba(229, 62, 62, 0.12) !important; color: var(--danger, #e53e3e) !important; }
+.k-book  { background: rgba(128, 90, 213, 0.1) !important; color: var(--purple, #805ad5) !important; }
+
+/* ---------- نمودار ---------- */
+.gr-graph-wrap {
+  background: #fff;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: var(--radius-lg, 12px);
+  padding: 0.7rem;
+}
+.gr-graph-wrap canvas { width: 100%; display: block; border-radius: 6px; }
+
+/* ---------- فهرست حرکات ---------- */
+.gr-moves {
+  background: #fff;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: var(--radius-lg, 12px);
+  padding: 0.6rem;
+  max-height: 300px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.gr-moves::-webkit-scrollbar { display: none; }
+.gr-moves { scrollbar-width: none; -ms-overflow-style: none; }
+.gr-mrow { display: flex; align-items: stretch; gap: 0.3rem; }
+.gr-mnum {
+  width: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--text-light, #64748b);
+  flex-shrink: 0;
+}
+.gr-move {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  background: var(--secondary, #f1f5f9);
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-sm, 6px);
+  padding: 0.3rem 0.4rem;
+  cursor: pointer;
+  font-family: "Vazir";
+  transition: var(--transition-smooth, all 0.2s);
+}
+.gr-move:hover { border-color: var(--accent-light, #63b3ed); }
+.gr-move.cur { border-color: var(--accent, #3182ce); box-shadow: 0 0 0 2px rgba(49,130,206,0.25); }
+.gr-move .gr-san {
+  font-family: monospace;
+  direction: ltr;
+  font-weight: 800;
+  font-size: 0.82rem;
+  color: var(--primary-dark, #1a202c);
+}
+.gr-move .gr-kind {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.6rem;
+  font-weight: 700;
+  border-radius: 99px;
+  padding: 0.05rem 0.4rem;
+  background: var(--secondary, #f1f5f9);
+  color: var(--text-light, #64748b);
+}
+.gr-move.k-best .gr-kind, .gr-move.k-exc .gr-kind, .gr-move.k-good .gr-kind,
+.gr-move.k-ina .gr-kind, .gr-move.k-mis .gr-kind, .gr-move.k-blun .gr-kind,
+.gr-move.k-book .gr-kind { background: transparent; }
+.gr-move.k-best { background: rgba(56, 161, 105, 0.08); }
+.gr-move.k-blun { background: rgba(229, 62, 62, 0.07); }
+.gr-move.k-mis { background: rgba(246, 173, 85, 0.1); }
+
+.gr-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; }
+
+/* ---------- ریسپانسیو ---------- */
+@media (max-width: 960px) {
+  .gr-body { grid-template-columns: 1fr; }
+  .gr-panel { max-width: 480px; margin: 0 auto; width: 100%; }
+  .gr-moves { max-height: 220px; }
+}
+@media (max-width: 480px) {
+  .gr-overlay { padding: 0; }
+  .gr-inner { margin: 0; border-radius: 0; min-height: 100dvh; }
+  .gr-head { padding: 0.7rem 0.85rem; }
+  .gr-title b { font-size: 0.9rem; }
+  .gr-title span { font-size: 0.65rem; }
+  .gr-close { padding: 0.35rem 0.7rem; font-size: 0.75rem; }
+  .gr-progress { padding: 0.5rem 0.85rem; }
+  .gr-prog-text { font-size: 0.68rem; white-space: normal; }
+  .gr-body { padding: 0.8rem; gap: 0.85rem; }
+  .gr-board-wrap { max-width: min(88vw, 340px); }
+  .gr-btn { padding: 0.38rem 0.6rem; font-size: 0.72rem; }
+  .gr-actions .gr-btn { flex: 1; justify-content: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gr-overlay, .gr-inner { animation: none !important; }
+}

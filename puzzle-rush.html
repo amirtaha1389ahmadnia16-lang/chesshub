@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta
+      name="description"
+      content="پازل عجله‌ای شطرنج - حل سریع پازل‌ها در زمان محدود"
+    />
+    <title>ChessHub | پازل عجله‌ای</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/puzzle-rush.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <div id="header-placeholder"></div>
+
+      <!-- بنر یکپارچه -->
+      <section class="app-hero">
+        <h1><i class="fas fa-bolt"></i> پازل عجله‌ای</h1>
+        <p>حداکثر تعداد پازل‌ها را در زمان محدود حل کن!</p>
+      </section>
+
+      <div class="game-area">
+        <div class="mode-selector">
+          <button type="button" class="mode-btn active" data-mode="3">
+            <i class="fas fa-stopwatch"></i> ۳ دقیقه
+          </button>
+          <button type="button" class="mode-btn" data-mode="5">
+            <i class="fas fa-stopwatch"></i> ۵ دقیقه
+          </button>
+          <button type="button" class="mode-btn" data-mode="unlimited">
+            <i class="fas fa-infinity"></i> بی‌زمان
+          </button>
+        </div>
+
+        <div id="bestRecordDisplay" class="best-record"></div>
+
+        <div class="stats">
+          <span id="puzzleCounter"
+            ><i class="fas fa-check-circle"></i> ۰</span
+          >
+          <span id="ratingDisplay" title=""
+            ><i class="fas fa-chart-line"></i> —</span
+          >
+          <span id="timerDisplay"><i class="far fa-clock"></i> ۳:۰۰</span>
+          <span id="mistakeDisplay"
+            ><i class="fas fa-times-circle"></i> خطا: ۰</span
+          >
+          <span id="turnDisplay" class="turn-indicator"
+            ><i class="fas fa-hourglass-start"></i> شروع</span
+          >
+        </div>
+
+        <div id="chessboard"></div>
+
+        <div class="button-group-center">
+          <button id="resetGameBtn" type="button" class="btn btn-primary">
+            <i class="fas fa-redo"></i> شروع مجدد
+          </button>
+        </div>
+
+        <div id="message" class="message"></div>
+        <div
+          id="recordDisplay"
+          class="message record"
+          style="display: none"
+        ></div>
+      </div>
+
+      <div id="footer-placeholder"></div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script src="js/profile.js"></script>
+    <script src="js/puzzle-rush.js"></script>
+  </body>
+</html>

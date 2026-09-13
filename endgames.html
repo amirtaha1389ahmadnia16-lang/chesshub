@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta
+      name="description"
+      content="آکادمی آخربازی شطرنج — مربی هوشمند Stockfish: هر موقعیت خودش به درس تبدیل می‌شود، تحلیل تک‌تک حرکات، نمایش ادامه‌ی بازی و چالش تایمردار"
+    />
+    <title>ChessHub | آکادمی آخربازی</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/endgames.css?v=5" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <div id="header-placeholder"></div>
+
+      <!-- بنر یکپارچه -->
+      <section class="app-hero">
+        <h1><i class="fas fa-graduation-cap"></i> آکادمی آخربازی</h1>
+        <p>
+          مربی واقعی به تو: انجین Stockfish هر موقعیت را تحلیل می‌کند، تک‌تک
+          حرکاتت را نمره می‌دهد و ادامه‌ی بازی را نشانت می‌دهد
+        </p>
+      </section>
+
+      <!-- تب‌های حالت -->
+      <nav class="mode-tabs" id="modeTabs">
+        <button class="mode-tab active" data-mode="academy">
+          <i class="fas fa-chalkboard-teacher"></i> آموزش
+        </button>
+        <button class="mode-tab" data-mode="concepts">
+          <i class="fas fa-book-open"></i> مفاهیم
+        </button>
+        <button class="mode-tab" data-mode="challenge">
+          <i class="fas fa-bolt"></i> چالش
+        </button>
+      </nav>
+
+      <!-- ═══════════ حالت آموزش ═══════════ -->
+      <section id="academySection" class="mode-section">
+        <div class="section-head">
+          <h2><i class="fas fa-chalkboard-teacher"></i> درس‌های خودکار انجین</h2>
+          <p>
+            برای هر موقعیت، انجین <b>همه‌ی حرکات ممکن</b> را تحلیل می‌کند و
+            می‌گوید کدام‌ها برنده‌اند، کدام‌ها مساوی می‌کنند و کدام‌ها می‌بازند.
+            حرکت اشتباه بزنی، ادامه‌ی بازی و تغییر برتری را زنده نشانت می‌دهند.
+          </p>
+        </div>
+        <div class="academy-progress" id="academyProgress"></div>
+        <div class="filter-group">
+          <span class="filter-label"><i class="fas fa-layer-group"></i> دسته‌بندی پایانی</span>
+          <div class="filter-chips" id="lessonCatFilters"></div>
+        </div>
+        <div class="filter-group">
+          <span class="filter-label"><i class="fas fa-filter"></i> فیلترها</span>
+          <div class="filter-chips" id="lessonFilters"></div>
+        </div>
+        <div class="lessons-grid" id="lessonsGrid"></div>
+        <div class="data-empty" id="lessonsEmpty" hidden>
+          <i class="fas fa-chess-pawn"></i>
+          <p>موقعیتی برای آموزش پیدا نشد — فایل data/endgames.json را بررسی کن</p>
+        </div>
+      </section>
+
+      <!-- ═══════════ مفاهیم ═══════════ -->
+      <section id="conceptsSection" class="mode-section" hidden>
+        <div class="section-head">
+          <h2><i class="fas fa-book-open"></i> کتابخانه‌ی مفاهیم</h2>
+          <p>
+            کلیدهای نظری آخربازی — از اوپوزیسیون و زوتسوانگ تا پل لوچنا و دفاع
+            فیلیدور؛ هر مفهوم با توضیح حرفه‌ای، نکته‌ی طلایی و نمونه‌ی زنده روی تخته.
+          </p>
+        </div>
+        <div class="filter-chips" id="conceptFilters"></div>
+        <div class="concepts-grid" id="conceptsGrid"></div>
+      </section>
+
+      <!-- ═══════════ چالش ═══════════ -->
+      <section id="challengeSection" class="mode-section" hidden>
+        <div class="section-head">
+          <h2><i class="fas fa-bolt"></i> چالش آخربازی</h2>
+          <p>
+            زمان خودت را انتخاب کن، موقعیت تصادفی می‌آید و باید در برابر انجین
+            به نتیجه‌ی معما برسی. بدون راهنما، بدون ارزیابی — آزمون واقعی!
+          </p>
+        </div>
+        <div class="challenge-panel" id="challengePanel">
+          <!-- صفحه‌ی آماده‌سازی -->
+          <div class="challenge-intro" id="challengeIntro">
+            <div class="ch-setup">
+              <div class="ch-setup-block">
+                <h3><i class="fas fa-hourglass-half"></i> زمان هر موقعیت</h3>
+                <div class="time-chips" id="chTimeChips">
+                  <button class="time-chip" data-sec="30">۳۰ ثانیه</button>
+                  <button class="time-chip active" data-sec="60">۱ دقیقه</button>
+                  <button class="time-chip" data-sec="120">۲ دقیقه</button>
+                  <button class="time-chip" data-sec="180">۳ دقیقه</button>
+                </div>
+              </div>
+              <div class="ch-setup-block">
+                <h3><i class="fas fa-brain"></i> انتخاب موقعیت</h3>
+                <div class="mode-select" id="chModeSelect">
+                  <button class="mode-opt active" data-mode="smart">
+                    <i class="fas fa-user-graduate"></i>
+                    <b>مربی هوشمند</b>
+                    <span>نقاط ضعفت را پیدا و همان‌ها را تمرین می‌دهد</span>
+                  </button>
+                  <button class="mode-opt" data-mode="random">
+                    <i class="fas fa-dice"></i>
+                    <b>تصادفی</b>
+                    <span>از بین همه‌ی موقعیت‌ها به‌طور رندوم</span>
+                  </button>
+                </div>
+              </div>
+              <div class="ch-stats" id="chStats"></div>
+              <button class="btn-start-challenge" id="challengeStartBtn">
+                <i class="fas fa-play"></i> شروع چالش
+              </button>
+            </div>
+          </div>
+
+          <!-- صفحه‌ی اجرا -->
+          <div class="challenge-run" id="challengeRun" hidden>
+            <div class="challenge-statusbar">
+              <span class="ch-timer" id="chTimer">
+                <i class="fas fa-stopwatch"></i> <b id="chTimerNum">1:00</b>
+              </span>
+              <span class="ch-score" id="chScore">
+                <i class="fas fa-coins"></i> امتیاز <b id="chScoreNum">۰</b>
+              </span>
+              <span class="ch-streak" id="chStreak">
+                <i class="fas fa-fire"></i> <b id="chStreakNum">۰</b>
+              </span>
+              <span class="ch-pos" id="chPosNum">موقعیت ۱</span>
+            </div>
+            <div class="challenge-goal-mini" id="chGoal"></div>
+            <div class="board-wrapper">
+              <div id="chBoard" class="chessboard"></div>
+            </div>
+            <div class="feedback-bar" id="chFeedback" hidden></div>
+            <div class="ch-run-actions">
+              <button class="btn-sm" id="chEndBtn">
+                <i class="fas fa-flag-checkered"></i> پایان جلسه
+              </button>
+            </div>
+          </div>
+
+          <!-- جمع‌بندی -->
+          <div class="challenge-summary" id="challengeSummary" hidden></div>
+        </div>
+      </section>
+
+      <div id="footer-placeholder"></div>
+    </div>
+
+    <!-- ═══════════ اورلی درس (مربی) ═══════════ -->
+    <div class="page-overlay" id="lessonOverlay" aria-hidden="true">
+      <div class="overlay-inner">
+        <div class="overlay-header">
+          <button class="btn-back" id="lessonBackBtn">
+            <i class="fas fa-arrow-right"></i> بازگشت
+          </button>
+          <h2 class="overlay-title" id="lessonTitle"></h2>
+          <div class="lesson-best-stars" id="lessonBestStars"></div>
+        </div>
+
+        <div class="lesson-body">
+          <div class="board-side">
+            <div class="lesson-goal-bar" id="lessonGoalBar"></div>
+            <div class="board-wrapper">
+              <div id="lessonBoard" class="chessboard"></div>
+              <svg class="board-arrows" id="boardArrows" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+            </div>
+            <div class="eval-bar" id="lessonEvalBar">
+              <div class="eval-track">
+                <div class="eval-fill" id="lessonEvalFill"></div>
+                <div class="eval-mid"></div>
+              </div>
+            </div>
+            <div class="feedback-bar" id="lessonFeedback" hidden></div>
+            <div class="trainer-buttons">
+              <button class="btn-sm" id="lessonHintBtn" disabled>
+                <i class="fas fa-lightbulb"></i> راهنما
+              </button>
+              <button class="btn-sm" id="lessonUndoBtn">
+                <i class="fas fa-undo"></i> برگشت
+              </button>
+              <button class="btn-sm" id="lessonRestartBtn">
+                <i class="fas fa-redo"></i> از نو
+              </button>
+            </div>
+          </div>
+
+          <aside class="lesson-info">
+            <div class="coach-panel">
+              <div class="coach-head">
+                <span class="coach-avatar"><i class="fas fa-robot"></i></span>
+                <div class="coach-name">
+                  <b>مربی Stockfish</b>
+                  <span id="coachStatus">آماده‌ام…</span>
+                </div>
+                <button class="coach-gear" id="coachGearBtn" title="آپشن‌های مربی" type="button">
+                  <i class="fas fa-sliders"></i>
+                </button>
+              </div>
+              <div class="coach-opts" id="coachOptsPanel" hidden>
+                <div class="copt-row">
+                  <span class="copt-label">قدرت تحلیل انجین</span>
+                  <div class="copt-chips" id="coptDepth">
+                    <button type="button" data-v="0.6">سریع</button>
+                    <button type="button" data-v="1" class="active">متوازن</button>
+                    <button type="button" data-v="1.6">عمیق</button>
+                  </div>
+                </div>
+                <label class="copt-row copt-toggle"><input type="checkbox" id="coptPV" checked /><span class="copt-label">نمایش خط اصلی انجین</span></label>
+                <label class="copt-row copt-toggle"><input type="checkbox" id="coptEval" checked /><span class="copt-label">نوار ارزیابی</span></label>
+                <label class="copt-row copt-toggle"><input type="checkbox" id="coptArrow" /><span class="copt-label">فلش خودکار حرکت درست بعد از خطا</span></label>
+                <label class="copt-row copt-toggle"><input type="checkbox" id="coptDelay" checked /><span class="copt-label">مکث طبیعی پاسخ حریف (فرصت فکر)</span></label>
+              </div>
+              <div class="coach-log" id="coachLog"></div>
+            </div>
+
+            <div class="info-card done-card" id="lessonDoneCard" hidden>
+              <div class="done-stars" id="doneStars"></div>
+              <h3 id="doneTitle"></h3>
+              <p id="doneDetail"></p>
+              <div class="done-buttons">
+                <button class="btn-sm primary" id="doneNextBtn">
+                  <i class="fas fa-forward"></i> درس بعدی
+                </button>
+                <button class="btn-sm" id="doneRetryBtn">
+                  <i class="fas fa-redo"></i> تمرین دوباره
+                </button>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script src="js/profile.js"></script>
+    <script src="js/endgames.js?v=12"></script>
+  </body>
+</html>

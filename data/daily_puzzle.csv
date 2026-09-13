@@ -1,0 +1,6 @@
+PuzzleId,FEN,Moves,Rating,RatingDeviation,Popularity,NbPlays,Themes,GameUrl,OpeningTags
+demo1,6k1/p4ppp/8/8/8/8/5PPP/2R3K1 b - - 0 1,a7a6 c1c8,1187,76,96,312,mateIn1 backRankMate,,Endgame
+demo2,6k1/2r5/8/8/8/8/P4PPP/6K1 w - - 0 1,a2a3 c7c1,1204,78,95,287,mateIn1 backRankMate,,Endgame
+demo3,r3k3/2q4p/8/3N4/8/8/7P/6K1 b - - 0 1,h7h6 d5c7 e8e7 c7a8,1651,84,94,158,fork,,Fork tactics
+demo4,6k1/5ppp/8/8/3N4/8/r4PPP/6K1 w - - 0 1,d4b5 a2a1,1298,80,93,201,mateIn1 backRankMate,,Endgame
+demo5,6k1/8/8/8/3n4/1p6/P6P/R3K3 w - - 0 1,a2a4 d4c2 e1d1 c2a1,1580,83,92,143,fork,,Fork tactics

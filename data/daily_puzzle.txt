@@ -1,0 +1,10 @@
+a7PXy,8/4k3/p1p1P1nR/2N5/2P3r1/3K3p/P7/8 w - - 0 47,d3e2 g4h4 h6h4 g6h4,2227,92,81,25,crushing endgame master short,https://lichess.org/N8nKs8r2#93,
+a7PYK,4r3/Qpk2p1p/6p1/2Pp4/8/1n6/5PPP/4N1K1 w - - 1 29,g1f1 b3d2 f1g1 e8e1,954,91,94,375,backRankMate deflection endgame mate mateIn2 short,https://lichess.org/HxRyvRUv#57,
+a7PaO,8/p2k3p/1p1Pr1p1/8/5K2/8/PP4PP/3R4 b - - 6 35,e6d6 d1d6 d7d6 f4g5,1023,79,94,634,crushing endgame master rookEndgame short,https://lichess.org/GNSQj1Qe/black#70,
+a7Pdj,6Qk/pp1R2p1/7p/2PPp1N1/7n/2P1P2P/6PK/1q6 b - - 0 34,h8g8 d7d8,694,93,69,147,endgame mate mateIn1 oneMove,https://lichess.org/Y301xwgx/black#68,
+a7PhY,2r3r1/pR3pkp/2Pp1q1p/2b1p2b/Q3P3/2P2NP1/P2NBP1P/1R4K1 w - - 7 23,f3h4 f6f2,1999,247,100,21,equality kingsideAttack middlegame oneMove,https://lichess.org/dnROJI7u#45,
+a7Pn7,4r3/pp6/2p1r2k/4n1p1/8/7P/PPP1BPP1/3RR1K1 w - - 2 25,e2d3 e5f3 g2f3 e6e1 d1e1 e8e1,1147,78,90,1834,advantage discoveredAttack endgame long,https://lichess.org/Nm1T2UCK#49,
+a7PrF,1qr1kb1r/pp1bnppp/4p3/1N1p4/8/P2B1Q2/1P3PPP/R1B1R1K1 b k - 3 14,a7a6 c1f4 b8f4 f3f4,1553,74,82,403,advantage opening short,https://lichess.org/dAK9jeLb/black#28,French_Defense French_Defense_Advance_Variation
+a7Psd,r3k1nr/p1pp1p2/1pb1p1p1/4q2p/8/8/PPP1BB2/RN1QKR2 b Qkq - 1 16,e5b2 f2d4 b2b4 c2c3 b4d6 d4h8,1782,76,77,59,advantage defensiveMove fork long opening,https://lichess.org/E1hCXNOp/black#32,Owen_Defense Owen_Defense_Other_variations
+a7Pvg,rnb1r3/pppp1kpp/8/4P3/4n2q/4Q2N/PPP2PPP/RN2R1K1 b - - 3 11,e8e5 b1d2 d7d5 d2f3,2926,112,91,1016,advantage middlegame short,https://lichess.org/fep4RThp/black#22,Bishops_Opening Bishops_Opening_Ponziani_Gambit
+a7Pxn,r3kb1R/3n1pp1/p2pp3/6P1/NQ1NbP2/4B3/PPPK4/5q2 w q - 3 25,d4e6 f1g2 d2e1 f7e6,2303,83,90,293,advantage intermezzo middlegame short,https://lichess.org/ppPmXF7h#49,

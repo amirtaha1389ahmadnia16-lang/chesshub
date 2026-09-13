@@ -1,0 +1,1355 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="پایگاه بازی‌های استادان بزرگ شطرنج - بیش از ۳۰ استاد بزرگ و هزاران بازی معروف" />
+    <title>ChessHub | پایگاه بازی‌ها</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%E2%99%9B%3C/text%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/gamereview.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <style>
+      /* استایل‌های اختصاصی پایگاه بازی‌ها (Pro Edition) */
+      .players-section { margin-bottom: 2rem; }
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 0.8rem;
+      }
+      .section-header h2 {
+        font-size: 1.2rem;
+        color: var(--primary-dark);
+        border-right: 4px solid var(--accent);
+        padding-right: 12px;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+      }
+      .section-header h2 i { color: var(--accent); }
+      .section-header .badge-count {
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        padding: 0.3rem 1rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.8rem;
+        color: var(--text-light);
+        font-weight: 600;
+      }
+
+      .players-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1.2rem;
+      }
+      .player-card {
+        background: #ffffff;
+        border-radius: var(--radius-md);
+        padding: 1.2rem 0.5rem;
+        text-align: center;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid #e2e8f0;
+        position: relative;
+      }
+      .player-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--accent);
+      }
+      .player-card .avatar {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        margin: 0 auto 0.8rem;
+        overflow: hidden;
+        background: #f1f5f9;
+        border: 3px solid #e2e8f0;
+        transition: var(--transition-smooth);
+      }
+      .player-card:hover .avatar { border-color: var(--accent); }
+      .player-card .avatar img { width: 100%; height: 100%; object-fit: cover; }
+      .player-card .name {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--primary-dark);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .player-card .title {
+        font-size: 0.65rem;
+        color: var(--text-light);
+        font-weight: 600;
+        margin-top: 0.2rem;
+      }
+
+      .page-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100dvh;
+        background: #ffffff;
+        z-index: 1000;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 0;
+        transform: translateX(100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        direction: rtl;
+      }
+      .page-overlay.open { transform: translateX(0); }
+      .page-close {
+        position: sticky;
+        top: 0;
+        background: var(--primary-dark);
+        padding: 0.8rem 1.2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 10;
+        box-shadow: var(--shadow-md);
+      }
+      .page-close h2 {
+        font-size: 1.1rem;
+        color: #ffffff;
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 70%;
+        font-weight: 700;
+      }
+      .page-close h2 i { color: var(--accent-light); }
+      .page-close .close-btn {
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        padding: 0.4rem 1rem;
+        border-radius: var(--radius-sm);
+        font-family: "Vazir";
+        font-weight: 700;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        color: #ffffff;
+        font-size: 0.85rem;
+        flex-shrink: 0;
+      }
+      .page-close .close-btn:hover { background: var(--danger); }
+
+      .overlay-scroll { padding: 1.5rem; }
+
+      .search-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        align-items: center;
+        background: #ffffff;
+        padding: 0.6rem 0.8rem;
+        border-radius: var(--radius-md);
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid #e2e8f0;
+      }
+      .search-bar .search-field {
+        flex: 2;
+        min-width: 130px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: #f1f5f9;
+        border-radius: var(--radius-sm);
+        padding: 0.2rem 0.8rem;
+        border: 1px solid #e2e8f0;
+      }
+      .search-bar .search-field i { color: var(--text-light); font-size: 0.85rem; }
+      .search-bar .search-field input,
+      .search-bar .search-field select {
+        width: 100%;
+        border: none;
+        background: transparent;
+        padding: 0.5rem 0;
+        font-family: "Vazir";
+        font-size: 0.85rem;
+        outline: none;
+        color: var(--text-dark);
+        font-weight: 600;
+      }
+      .search-actions { display: flex; gap: 0.4rem; }
+      .search-actions .btn-sm {
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        padding: 0.4rem 0.9rem;
+        border-radius: var(--radius-sm);
+        font-family: "Vazir";
+        font-size: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        color: var(--text-dark);
+      }
+      .search-actions .btn-sm:hover { background: var(--accent); color: white; border-color: var(--accent); }
+
+      .games-list { display: flex; flex-direction: column; gap: 0.6rem; }
+      .game-item {
+        background: #ffffff;
+        border-radius: var(--radius-sm);
+        padding: 0.8rem 1rem;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        border: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+      }
+      .game-item:hover {
+        border-color: var(--accent);
+        box-shadow: var(--shadow-sm);
+        transform: translateX(-4px);
+      }
+      .game-info {
+        display: flex;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+        align-items: center;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-dark);
+      }
+      .game-info .badge {
+        padding: 0.2rem 0.6rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.65rem;
+        font-weight: 700;
+      }
+      .game-info .badge.white-win { background: #c6f6d5; color: #22543d; }
+      .game-info .badge.black-win { background: #fed7d7; color: #742a2a; }
+      .game-info .badge.draw { background: #feebc8; color: #744210; }
+      .game-info .opening-tag {
+        font-size: 0.65rem;
+        color: var(--text-light);
+        background: #f1f5f9;
+        padding: 0.1rem 0.6rem;
+        border-radius: var(--radius-sm);
+      }
+      .game-arrow { color: var(--text-light); font-size: 0.8rem; }
+
+      /* ⭐ علاقه‌مندی‌ها — قلب */
+      .fav-heart {
+        background: none; border: none; cursor: pointer;
+        font-size: 1rem; color: #cbd5e0; padding: 0.3rem;
+        transition: transform 0.18s ease, color 0.18s ease;
+        line-height: 1;
+        flex-shrink: 0;
+      }
+      .fav-heart:hover { transform: scale(1.25); color: #f56565; }
+      .fav-heart.on { color: #e53e3e; }
+      .fav-heart.on i { font-weight: 900; }
+      .fav-section { margin-bottom: 2rem; }
+      .fav-grid { display: flex; flex-direction: column; gap: 0.5rem; }
+      .fav-item {
+        background: #ffffff; border: 1px solid #e2e8f0; border-radius: var(--radius-sm);
+        padding: 0.6rem 0.9rem; cursor: pointer; transition: var(--transition-smooth);
+        display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+      }
+      .fav-item:hover { border-color: var(--accent); box-shadow: var(--shadow-sm); transform: translateX(-4px); }
+      .fav-item .fav-player {
+        font-size: 0.66rem; font-weight: 800; color: var(--accent);
+        background: var(--accent-soft); padding: 0.15rem 0.6rem; border-radius: 99px;
+      }
+      .fav-empty { text-align: center; color: var(--text-light); font-size: 0.82rem; padding: 1rem; }
+
+      /* فیلتر حرفه‌ای */
+      .filter-bar { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; align-items: center; }
+      .filter-bar .f-chip {
+        background: #f1f5f9; border: 1.5px solid #e2e8f0; color: var(--text-light);
+        border-radius: 99px; padding: 0.35rem 0.9rem; font-family: "Vazir";
+        font-size: 0.72rem; font-weight: 700; cursor: pointer; transition: var(--transition-smooth);
+        display: inline-flex; align-items: center; gap: 0.35rem;
+      }
+      .filter-bar .f-chip:hover { border-color: var(--accent); color: var(--accent); }
+      .filter-bar .f-chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+      .filter-bar .f-chip.active i { color: #fff; }
+      .adv-filters {
+        display: none; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 0.6rem; background: #ffffff; border: 1px solid #e2e8f0;
+        border-radius: var(--radius-md); padding: 0.9rem; margin-bottom: 1.2rem; box-shadow: var(--shadow-sm);
+      }
+      .adv-filters.show { display: grid; }
+      .adv-filters .af-field { display: flex; flex-direction: column; gap: 0.2rem; }
+      .adv-filters label { font-size: 0.66rem; font-weight: 800; color: var(--text-light); }
+      .adv-filters select, .adv-filters input {
+        border: 1px solid #e2e8f0; background: #f8fafc; border-radius: var(--radius-sm);
+        padding: 0.4rem 0.5rem; font-family: "Vazir"; font-size: 0.78rem; font-weight: 600;
+        color: var(--text-dark); outline: none;
+      }
+      .adv-filters select:focus, .adv-filters input:focus { border-color: var(--accent); }
+      .results-count {
+        font-size: 0.72rem; font-weight: 800; color: var(--text-light);
+        background: #f1f5f9; border-radius: 99px; padding: 0.3rem 0.9rem;
+      }
+
+      .no-games {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-light);
+        font-size: 0.9rem;
+      }
+      .loading-state { text-align: center; padding: 2rem; color: var(--text-light); }
+      .loading-state i {
+        font-size: 2rem;
+        color: var(--accent);
+        display: block;
+        margin-bottom: 0.5rem;
+      }
+
+      .game-viewer {
+        background: #ffffff;
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid #e2e8f0;
+        margin-top: 0.5rem;
+        animation: fadeSlideIn 0.3s ease;
+      }
+      @keyframes fadeSlideIn {
+        from { opacity: 0; transform: translateY(16px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .viewer-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        margin-bottom: 1.5rem;
+      }
+      .viewer-header .game-title {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: var(--primary-dark);
+      }
+      .viewer-header .game-title .vs {
+        color: var(--text-light);
+        font-weight: 400;
+        margin: 0 0.3rem;
+      }
+
+      .viewer-body {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        justify-content: center;
+        align-items: flex-start;
+      }
+      .board-wrapper {
+        flex: 1.2;
+        min-width: 260px;
+        max-width: 500px;
+      }
+      .info-wrapper {
+        flex: 1;
+        min-width: 190px;
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+      }
+
+      .playback-controls {
+        display: flex;
+        justify-content: center;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+      }
+      .playback-controls button {
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        padding: 0.4rem 0.8rem;
+        border-radius: var(--radius-sm);
+        font-family: "Vazir";
+        font-size: 0.75rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        color: var(--text-dark);
+      }
+      .playback-controls button:hover { background: #e2e8f0; transform: scale(0.96); }
+      .playback-controls button.primary {
+        background: var(--accent);
+        color: #fff;
+        border-color: var(--accent-dark);
+      }
+      .playback-controls button.primary:hover { background: #4299e1; }
+      .playback-controls button.review {
+        background: var(--success);
+        color: #fff;
+        border-color: var(--success-dark);
+      }
+      .playback-controls button.review:hover { background: #38a169; }
+      .playback-controls .move-counter {
+        font-size: 0.75rem;
+        background: #f1f5f9;
+        padding: 0.4rem 0.8rem;
+        border-radius: var(--radius-sm);
+        font-weight: 800;
+        min-width: 55px;
+        text-align: center;
+        border: 1px solid #e2e8f0;
+        color: var(--primary-dark);
+      }
+
+      .game-meta {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.4rem;
+        font-size: 0.8rem;
+        background: #f8fafc;
+        border-radius: var(--radius-sm);
+        padding: 0.8rem 1rem;
+        border: 1px solid #e2e8f0;
+      }
+      .game-meta .meta-item { display: flex; gap: 0.3rem; align-items: center; }
+      .game-meta .meta-item .label { color: var(--text-light); font-weight: 700; }
+      .game-meta .meta-item .value { color: var(--text-dark); font-weight: 600; }
+
+      .pgn-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+      .pgn-actions button {
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        padding: 0.4rem 0.8rem;
+        border-radius: var(--radius-sm);
+        font-family: "Vazir";
+        font-size: 0.7rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        color: var(--text-dark);
+      }
+      .pgn-actions button:hover { background: var(--accent); color: white; border-color: var(--accent); }
+
+      @media (max-width: 768px) {
+        .search-bar { flex-direction: column; align-items: stretch; }
+        .game-item { padding: 0.6rem 0.8rem; }
+        .game-viewer { padding: 1rem; }
+        .viewer-body { flex-direction: column; align-items: center; }
+        .game-meta { grid-template-columns: 1fr; }
+        .players-grid { grid-template-columns: repeat(3, 1fr); gap: 0.8rem; }
+        .player-card .avatar { width: 56px; height: 56px; }
+      }
+      @media (max-width: 480px) {
+        .players-grid { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+        .player-card .avatar { width: 50px; height: 50px; }
+        .player-card .name { font-size: 0.75rem; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div id="header-placeholder"></div>
+
+      <section class="app-hero">
+        <h1><i class="fas fa-database"></i> پایگاه بازی‌های استادان</h1>
+        <p>۳۰ استاد بزرگ برتر | هزاران بازی معروف | مرور تحلیلی با انجین</p>
+      </section>
+
+      <div class="players-section" id="playersSection">
+        <div class="section-header">
+          <h2><i class="fas fa-chess-queen"></i> استادان بزرگ</h2>
+          <span class="badge-count" id="playerCount">۳۰ بازیکن</span>
+        </div>
+        <div class="players-grid" id="playersGrid"></div>
+      </div>
+
+      <!-- ⭐ بازی‌های مورد علاقه (با قلب نشانه‌گذاری می‌شوند) -->
+      <div class="fav-section" id="favSection">
+        <div class="section-header">
+          <h2><i class="fas fa-heart" style="color:#e53e3e"></i> بازی‌های مورد علاقه‌ی من</h2>
+          <span class="badge-count" id="favCount">۰ بازی</span>
+        </div>
+        <div class="fav-grid" id="favGrid"></div>
+      </div>
+
+      <div id="footer-placeholder"></div>
+    </div>
+
+    <!-- Overlay بازی‌های یک بازیکن -->
+    <div class="page-overlay" id="gamesOverlay">
+      <div class="page-close">
+        <h2>
+          <i class="fas fa-chess-queen"></i> بازی‌های
+          <span id="overlayPlayerName"></span>
+        </h2>
+        <button class="close-btn" id="closeGamesOverlay">
+          <i class="fas fa-times"></i> بستن
+        </button>
+      </div>
+      <div class="overlay-scroll">
+        <!-- فیلتر حرفه‌ای -->
+        <div class="filter-bar">
+          <button class="f-chip" id="favOnlyChip"><i class="fas fa-heart"></i> فقط مورد علاقه</button>
+          <button class="f-chip" id="advToggleChip"><i class="fas fa-sliders"></i> فیلتر پیشرفته</button>
+          <span class="results-count" id="resultsCount"></span>
+        </div>
+        <div class="adv-filters" id="advFilters">
+          <div class="af-field">
+            <label>نتیجه</label>
+            <select id="fResult">
+              <option value="all">همه</option>
+              <option value="1-0">برد سفید</option>
+              <option value="0-1">برد سیاه</option>
+              <option value="draw">مساوی</option>
+            </select>
+          </div>
+          <div class="af-field">
+            <label>حضور استاد</label>
+            <select id="fSide">
+              <option value="all">فرقی ندارد</option>
+              <option value="white">استاد با سفید</option>
+              <option value="black">استاد با سیاه</option>
+            </select>
+          </div>
+          <div class="af-field">
+            <label>گشایش / ECO</label>
+            <input type="text" id="fOpening" placeholder="مثلاً Sicilian یا B90" />
+          </div>
+          <div class="af-field">
+            <label>از سال</label>
+            <input type="number" id="fYearFrom" placeholder="1858" min="1400" max="2100" />
+          </div>
+          <div class="af-field">
+            <label>تا سال</label>
+            <input type="number" id="fYearTo" placeholder="2024" min="1400" max="2100" />
+          </div>
+          <div class="af-field">
+            <label>ترتیب</label>
+            <select id="fSort">
+              <option value="old">قدیمی‌ترین اول</option>
+              <option value="new">جدیدترین اول</option>
+            </select>
+          </div>
+        </div>
+        <div class="search-bar">
+          <div class="search-field">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="جستجو در بازی‌ها (حریف، رقیب، سال...)" />
+          </div>
+          <div class="search-field" style="flex: 0.7; min-width: 90px">
+            <select id="searchField">
+              <option value="all">همه</option>
+              <option value="white">سفید</option>
+              <option value="black">سیاه</option>
+              <option value="result">نتیجه</option>
+              <option value="date">تاریخ</option>
+            </select>
+          </div>
+          <div class="search-actions">
+            <button class="btn-sm" id="resetSearchBtn">
+              <i class="fas fa-times"></i> پاک کردن همه
+            </button>
+          </div>
+        </div>
+        <div id="gamesListContainer" class="games-list"></div>
+      </div>
+    </div>
+
+    <!-- Overlay نمایش بازی -->
+    <div class="page-overlay" id="gameOverlay">
+      <div class="page-close">
+        <h2><i class="fas fa-chess-board"></i> نمایش بازی</h2>
+        <button class="close-btn" id="closeGameOverlay">
+          <i class="fas fa-arrow-right"></i> بازگشت
+        </button>
+      </div>
+      <div class="overlay-scroll">
+        <div id="gameViewerContainer"></div>
+      </div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script src="js/profile.js"></script>
+    <script src="js/engine-core.js"></script>
+    <script src="js/board-ui.js"></script>
+    <script src="js/gamereview.js"></script>
+    <script>
+      (function () {
+        "use strict";
+
+        // اعمال تم ذخیره شده
+        (function applySavedTheme() {
+          try {
+            const settings = JSON.parse(
+              localStorage.getItem("chesshub_settings"),
+            );
+            if (settings && settings.theme) {
+              document.body.classList.add(`theme-${settings.theme}`);
+            }
+          } catch (e) {}
+        })();
+
+        const players = [
+          { name: "Magnus Carlsen", title: "قهرمان جهان", file: "Carlsen.pgn", avatar: "images/players/carlsen.jpg" },
+          { name: "Garry Kasparov", title: "قهرمان جهان", file: "Kasparov.pgn", avatar: "images/players/kasparov.jpg" },
+          { name: "Bobby Fischer", title: "قهرمان جهان", file: "Fischer.pgn", avatar: "images/players/fischer.jpg" },
+          { name: "Anatoly Karpov", title: "قهرمان جهان", file: "Karpov.pgn", avatar: "images/players/karpov.jpg" },
+          { name: "José Raúl Capablanca", title: "قهرمان جهان", file: "Capablanca.pgn", avatar: "images/players/capablanca.jpg" },
+          { name: "Alexander Alekhine", title: "قهرمان جهان", file: "Alekhine.pgn", avatar: "images/players/alekhine.jpg" },
+          { name: "Mikhail Tal", title: "قهرمان جهان", file: "Tal.pgn", avatar: "images/players/tal.jpg" },
+          { name: "Emanuel Lasker", title: "قهرمان جهان", file: "Lasker.pgn", avatar: "images/players/lasker.jpg" },
+          { name: "Wilhelm Steinitz", title: "قهرمان جهان", file: "Steinitz.pgn", avatar: "images/players/steinitz.jpg" },
+          { name: "Viswanathan Anand", title: "قهرمان جهان", file: "Anand.pgn", avatar: "images/players/anand.jpg" },
+          { name: "Vladimir Kramnik", title: "قهرمان جهان", file: "Kramnik.pgn", avatar: "images/players/kramnik.jpg" },
+          { name: "Vasily Smyslov", title: "قهرمان جهان", file: "Smyslov.pgn", avatar: "images/players/smyslov.jpg" },
+          { name: "Tigran Petrosian", title: "قهرمان جهان", file: "Petrosian.pgn", avatar: "images/players/petrosian.jpg" },
+          { name: "Boris Spassky", title: "قهرمان جهان", file: "Spassky.pgn", avatar: "images/players/spassky.jpg" },
+          { name: "Max Euwe", title: "قهرمان جهان", file: "Euwe.pgn", avatar: "images/players/euwe.jpg" },
+          { name: "Mikhail Botvinnik", title: "قهرمان جهان", file: "Botvinnik.pgn", avatar: "images/players/botvinnik.jpg" },
+          { name: "Paul Morphy", title: "افسانه", file: "Morphy.pgn", avatar: "images/players/morphy.jpg" },
+          { name: "Hikaru Nakamura", title: "سوپر استاد", file: "Nakamura.pgn", avatar: "images/players/nakamura.jpg" },
+          { name: "Fabiano Caruana", title: "سوپر استاد", file: "Caruana.pgn", avatar: "images/players/caruana.jpg" },
+          { name: "Levon Aronian", title: "سوپر استاد", file: "Aronian.pgn", avatar: "images/players/aronian.jpg" },
+          { name: "Wesley So", title: "سوپر استاد", file: "So.pgn", avatar: "images/players/so.jpg" },
+          { name: "Ding Liren", title: "قهرمان جهان", file: "Ding.pgn", avatar: "images/players/ding.jpg" },
+          { name: "Ian Nepomniachtchi", title: "سوپر استاد", file: "Nepomniachtchi.pgn", avatar: "images/players/nepomniachtchi.jpg" },
+          { name: "Alireza Firouzja", title: "سوپر استاد", file: "Firouzja.pgn", avatar: "images/players/firouzja.jpg" },
+          { name: "Richard Réti", title: "استاد بزرگ", file: "Reti.pgn", avatar: "images/players/reti.jpg" },
+          { name: "Aaron Nimzowitsch", title: "استاد بزرگ", file: "Nimzowitsch.pgn", avatar: "images/players/nimzowitsch.jpg" },
+          { name: "Frank Marshall", title: "استاد بزرگ", file: "Marshall.pgn", avatar: "images/players/marshall.jpg" },
+          { name: "David Bronstein", title: "استاد بزرگ", file: "Bronstein.pgn", avatar: "images/players/bronstein.jpg" },
+          { name: "Viktor Korchnoi", title: "استاد بزرگ", file: "Korchnoi.pgn", avatar: "images/players/korchnoi.jpg" },
+          { name: "Gukesh D", title: "سوپر استاد", file: "Gukesh.pgn", avatar: "images/players/gukesh.jpg" },
+        ];
+
+        const pieceCodes = {
+          wk: "wk.png", wq: "wq.png", wr: "wr.png", wb: "wb.png",
+          wn: "wn.png", wp: "wp.png", bk: "bk.png", bq: "bq.png",
+          br: "br.png", bb: "bb.png", bn: "bn.png", bp: "bp.png",
+        };
+        const pieceImages = {};
+
+        function getCurrentPieceSet() {
+          try {
+            const s = JSON.parse(localStorage.getItem("chesshub_settings"));
+            return s?.pieceSet || "neo";
+          } catch {
+            return "neo";
+          }
+        }
+
+        function loadPieces() {
+          return new Promise((resolve) => {
+            const pieceSet = getCurrentPieceSet();
+            let loaded = 0;
+            const total = Object.keys(pieceCodes).length;
+            for (const [key, filename] of Object.entries(pieceCodes)) {
+              const img = new Image();
+              img.onload = img.onerror = () => {
+                loaded++;
+                if (loaded === total) resolve();
+              };
+              img.src = `pieces/${pieceSet}/${filename}`;
+              pieceImages[key] = img;
+            }
+          });
+        }
+
+        document.addEventListener("pieceSetChanged", function () {
+          loadPieces();
+        });
+
+        // 🔑 مهره‌های «مرور بازی» (اورلی مشترک GameReview) از ChessUtils مشترک
+        // تغذیه می‌شوند — این صفحه قبلاً در شروع، ChessUtils.loadPieces را صدا
+        // نمی‌زد و به همین دلیل در مرور بازی، تصویر مهره‌ها لود نمی‌شد.
+        if (window.ChessUtils && typeof ChessUtils.loadPieces === "function") {
+          ChessUtils.loadPieces();
+        }
+
+        function getBoardColors() {
+          // تم‌ها روی body تعریف می‌شوند (body.theme-X)
+          const host = document.body || document.documentElement;
+          const light =
+            getComputedStyle(host).getPropertyValue("--board-light").trim() ||
+            "#f0d9b5";
+          const dark =
+            getComputedStyle(host).getPropertyValue("--board-dark").trim() ||
+            "#b58863";
+          return { light, dark };
+        }
+
+        // 🖼 جایگزین‌های عکس کاربر — فقط از طریق کد (بدون UI روی صفحه):
+        //   ChessDB.setPlayerImage("Magnus Carlsen", "images/players/carlsen.jpg")
+        //   ChessDB.setPlayerImage("Magnus Carlsen", "https://example.com/carlsen.png")
+        //   ChessDB.clearPlayerImage("Magnus Carlsen")
+        const AVATAR_KEY = "chesshub_avatar_overrides";
+        function avatarOverrides() {
+          try { return JSON.parse(localStorage.getItem(AVATAR_KEY)) || {}; } catch (e) { return {}; }
+        }
+        function saveAvatarOverride(name, url) {
+          try {
+            const all = avatarOverrides();
+            if (url) all[name] = url;
+            else delete all[name];
+            localStorage.setItem(AVATAR_KEY, JSON.stringify(all));
+          } catch (e) {}
+        }
+        window.ChessDB = {
+          setPlayerImage: function (name, url) {
+            saveAvatarOverride(name, String(url || "").trim());
+            renderPlayers();
+          },
+          clearPlayerImage: function (name) {
+            saveAvatarOverride(name, "");
+            renderPlayers();
+          },
+          getPlayerImage: function (name) { return avatarOverrides()[name] || null; },
+        };
+
+        // ❤️ علاقه‌مندی‌ها — قلب روی هر بازی؛ ذخیره در localStorage
+        const FAV_KEY = "chesshub_fav_games";
+        function favAll() {
+          try { return JSON.parse(localStorage.getItem(FAV_KEY)) || {}; } catch (e) { return {}; }
+        }
+        function favSave(all) {
+          try { localStorage.setItem(FAV_KEY, JSON.stringify(all)); } catch (e) {}
+        }
+        function gameKeyOf(playerFile, game) {
+          return playerFile + "::" + game.white + "|" + game.black + "|" + game.date + "|" + game.result;
+        }
+        function isFav(key) { return !!favAll()[key]; }
+        function toggleFav(player, game) {
+          const key = gameKeyOf(player.file, game);
+          const all = favAll();
+          if (all[key]) delete all[key];
+          else all[key] = {
+            playerFile: player.file, playerName: player.name,
+            white: game.white, black: game.black, result: game.result,
+            date: game.date, eco: game.eco, opening: game.opening, t: Date.now(),
+          };
+          favSave(all);
+          renderFavSection();
+          return !!all[key];
+        }
+
+        let currentPlayerGames = [];
+        let filteredGames = [];
+        let currentPlayerFile = null; // فایل PGN استادِ جاری (برای قلب‌ها)
+        let currentPlayer = null;     // آبجکت استادِ جاری
+        let favOnly = false;
+        let currentGameMoves = [];
+        let currentMoveIndex = 0;
+        let currentGame = null;
+        let autoPlayInterval = null;
+        let isAutoPlaying = false;
+        let totalPlies = 0;
+
+        const playersGrid = document.getElementById("playersGrid");
+        const gamesOverlay = document.getElementById("gamesOverlay");
+        const gameOverlay = document.getElementById("gameOverlay");
+        const gamesListContainer = document.getElementById("gamesListContainer");
+        const gameViewerContainer = document.getElementById("gameViewerContainer");
+        const overlayPlayerName = document.getElementById("overlayPlayerName");
+        const closeGamesOverlayBtn = document.getElementById("closeGamesOverlay");
+        const closeGameOverlayBtn = document.getElementById("closeGameOverlay");
+        const searchInput = document.getElementById("searchInput");
+        const searchField = document.getElementById("searchField");
+        const resetSearchBtn = document.getElementById("resetSearchBtn");
+        const playerCount = document.getElementById("playerCount");
+
+        function playerAvatar(p) {
+          const overrides = avatarOverrides();
+          return overrides[p.name] || p.avatar;
+        }
+
+        function faNum(n) {
+          try { return Number(n).toLocaleString("fa-IR"); } catch (e) { return String(n); }
+        }
+
+        function renderPlayers() {
+          if (!playersGrid) return;
+          playersGrid.innerHTML = "";
+          players.forEach((p) => {
+            const card = document.createElement("div");
+            card.className = "player-card";
+            card.innerHTML = `
+              <div class="avatar">
+                <img src="${playerAvatar(p)}" alt="${p.name}" onerror="this.src='https://ui-avatars.com/api/?background=2c3e50&color=fff&name=${encodeURIComponent(p.name)}'" loading="lazy">
+              </div>
+              <div class="name">${p.name}</div>
+              <div class="title">${p.title}</div>
+            `;
+            card.addEventListener("click", function () {
+              openPlayerGames(p);
+            });
+            playersGrid.appendChild(card);
+          });
+          if (playerCount) playerCount.textContent = `${players.length} بازیکن`;
+        }
+
+        // ❤️ رندر بخش «بازی‌های مورد علاقه‌ی من» — کلیک = بازکردن مستقیم بازی
+        function renderFavSection() {
+          const grid = document.getElementById("favGrid");
+          const count = document.getElementById("favCount");
+          if (!grid) return;
+          const all = favAll();
+          const list = Object.entries(all).sort((a, b) => (b[1].t || 0) - (a[1].t || 0));
+          if (count) count.textContent = faNum(list.length) + " بازی";
+          if (!list.length) {
+            grid.innerHTML = '<div class="fav-empty"><i class="fas fa-heart" style="color:#e53e3e"></i> هنوز بازی‌ای را قلب نزده‌ای — در لیست بازی‌های هر استاد روی ❤ بزن تا این‌جا ذخیره شود</div>';
+            return;
+          }
+          grid.innerHTML = "";
+          list.forEach(([key, f]) => {
+            const div = document.createElement("div");
+            div.className = "fav-item";
+            const resultText = f.result === "1-0" ? "برد سفید" : f.result === "0-1" ? "برد سیاه" : "مساوی";
+            div.innerHTML = `
+              <button class="fav-heart on" title="حذف از علاقه‌مندی‌ها"><i class="fas fa-heart"></i></button>
+              <span class="fav-player"><i class="fas fa-chess-queen"></i> ${f.playerName}</span>
+              <span style="font-size:0.8rem;font-weight:700">⚪ ${f.white} — ⚫ ${f.black}</span>
+              <span style="font-size:0.7rem;color:var(--text-light)">${f.date}${f.opening ? " · " + f.opening : ""}</span>
+              <span class="badge ${f.result === "1-0" ? "white-win" : f.result === "0-1" ? "black-win" : "draw"}" style="font-size:0.62rem">${resultText}</span>
+            `;
+            div.querySelector(".fav-heart").addEventListener("click", function (e) {
+              e.stopPropagation();
+              delete favAll()[key];
+              favSave(favAll());
+              renderFavSection();
+              if (currentPlayerFile === f.playerFile) applyFilters();
+            });
+            div.addEventListener("click", function () {
+              // باز کردن مستقیم بازیِ مورد علاقه از صفحه‌ی اصلی
+              const player = players.find((p) => p.file === f.playerFile);
+              if (!player) return;
+              openPlayerGames(player);
+              // پس از لود بازی‌ها، همین بازی پیدا و باز شود
+              setTimeout(function () {
+                const idx = currentPlayerGames.findIndex(
+                  (g) => g.white === f.white && g.black === f.black && g.date === f.date && g.result === f.result,
+                );
+                if (idx >= 0) openGameViewer(idx, filteredGames.length ? filteredGames : currentPlayerGames);
+              }, 450);
+            });
+            grid.appendChild(div);
+          });
+        }
+
+        function openPlayerGames(player) {
+          if (!player) return;
+          if (overlayPlayerName) overlayPlayerName.textContent = player.name;
+          currentPlayer = player;
+          currentPlayerFile = player.file;
+          favOnly = false;
+          const favChip = document.getElementById("favOnlyChip");
+          if (favChip) favChip.classList.remove("active");
+          if (gamesOverlay) gamesOverlay.classList.add("open");
+          document.body.style.overflow = "hidden";
+
+          if (searchInput) searchInput.value = "";
+          // ریست فیلترهای پیشرفته
+          const fResult = document.getElementById("fResult");
+          const fSide = document.getElementById("fSide");
+          const fOpening = document.getElementById("fOpening");
+          const fYearFrom = document.getElementById("fYearFrom");
+          const fYearTo = document.getElementById("fYearTo");
+          const fSort = document.getElementById("fSort");
+          if (fResult) fResult.value = "all";
+          if (fSide) fSide.value = "all";
+          if (fOpening) fOpening.value = "";
+          if (fYearFrom) fYearFrom.value = "";
+          if (fYearTo) fYearTo.value = "";
+          if (fSort) fSort.value = "old";
+          if (gameOverlay) gameOverlay.classList.remove("open");
+          if (gameViewerContainer) gameViewerContainer.innerHTML = "";
+
+          if (gamesListContainer) {
+            gamesListContainer.innerHTML = `<div class="loading-state"><i class="fas fa-spinner fa-pulse"></i> بارگذاری بازی‌های ${player.name}...</div>`;
+          }
+
+          fetch(`pgn/${player.file}`)
+            .then((res) => {
+              if (!res.ok) throw new Error("فایل یافت نشد");
+              return res.text();
+            })
+            .then((pgnText) => {
+              currentPlayerGames = parsePGN(pgnText);
+              filteredGames = [...currentPlayerGames];
+              applyFilters();
+            })
+            .catch((err) => {
+              console.error(err);
+              if (gamesListContainer) {
+                gamesListContainer.innerHTML =
+                  `<div class="no-games">فایل PGN «pgn/${player.file}» پیدا نشد — فایل بازی‌های این استاد را در پوشه‌ی pgn/ قرار بده تا این‌جا نمایش داده شود.</div>`;
+              }
+            });
+        }
+
+        function parsePGN(pgnText) {
+          const rawGames = pgnText.split(/(?=\[Event ")/);
+          const games = [];
+          for (let raw of rawGames) {
+            if (!raw.trim()) continue;
+            const whiteMatch = raw.match(/\[White "([^"]+)"\]/);
+            const blackMatch = raw.match(/\[Black "([^"]+)"\]/);
+            const resultMatch = raw.match(/\[Result "([^"]+)"\]/);
+            const dateMatch = raw.match(/\[Date "([^"]+)"\]/);
+            const ecoMatch = raw.match(/\[ECO "([^"]+)"\]/);
+            const openingMatch = raw.match(/\[Opening "([^"]+)"\]/);
+            games.push({
+              white: whiteMatch ? whiteMatch[1] : "?",
+              black: blackMatch ? blackMatch[1] : "?",
+              result: resultMatch ? resultMatch[1] : "*",
+              date: dateMatch ? dateMatch[1] : "????.??.??",
+              eco: ecoMatch ? ecoMatch[1] : "",
+              opening: openingMatch ? openingMatch[1] : "",
+              pgn: raw,
+            });
+          }
+          return games;
+        }
+
+        function renderGamesList(games) {
+          if (!gamesListContainer) return;
+          const rc = document.getElementById("resultsCount");
+          if (rc) rc.textContent = faNum(games.length) + " بازی";
+          if (!games.length) {
+            gamesListContainer.innerHTML = `<div class="no-games">هیچ بازی‌ای با این فیلترها یافت نشد</div>`;
+            return;
+          }
+          gamesListContainer.innerHTML = "";
+          games.forEach((game, idx) => {
+            const div = document.createElement("div");
+            div.className = "game-item";
+            const resultText =
+              game.result === "1-0"
+                ? "برد سفید"
+                : game.result === "0-1"
+                  ? "برد سیاه"
+                  : "مساوی";
+            const resultClass =
+              game.result === "1-0"
+                ? "white-win"
+                : game.result === "0-1"
+                  ? "black-win"
+                  : "draw";
+            const key = gameKeyOf(currentPlayerFile || "", game);
+            const fav = isFav(key);
+            div.innerHTML = `
+              <button class="fav-heart${fav ? " on" : ""}" title="${fav ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها"}"><i class="${fav ? "fas" : "far"} fa-heart"></i></button>
+              <div class="game-info">
+                <span class="badge ${resultClass}">${resultText}</span>
+                <span>⚪ ${game.white}</span>
+                <span>⚫ ${game.black}</span>
+                <span>📅 ${game.date}</span>
+                ${game.opening ? `<span class="opening-tag">${game.opening}</span>` : ""}
+              </div>
+              <div class="game-arrow"><i class="fas fa-chevron-left"></i></div>
+            `;
+            div.querySelector(".fav-heart").addEventListener("click", function (e) {
+              e.stopPropagation();
+              const on = toggleFav(currentPlayer, game);
+              this.className = "fav-heart" + (on ? " on" : "");
+              this.innerHTML = `<i class="${on ? "fas" : "far"} fa-heart"></i>`;
+            });
+            div.addEventListener("click", function () {
+              openGameViewer(idx, games);
+            });
+            gamesListContainer.appendChild(div);
+          });
+        }
+
+        // 🔎 فیلتر حرفه‌ای — جستجو + فیلترهای پیشرفته + علاقه‌مندی + ترتیب
+        function applyFilters() {
+          if (!currentPlayerFile) return;
+          const query = searchInput ? searchInput.value.trim().toLowerCase() : "";
+          const field = searchField ? searchField.value : "all";
+          const fResult = (document.getElementById("fResult") || {}).value || "all";
+          const fSide = (document.getElementById("fSide") || {}).value || "all";
+          const fOpening = ((document.getElementById("fOpening") || {}).value || "").trim().toLowerCase();
+          const fFrom = parseInt((document.getElementById("fYearFrom") || {}).value, 10);
+          const fTo = parseInt((document.getElementById("fYearTo") || {}).value, 10);
+          const fSort = (document.getElementById("fSort") || {}).value || "old";
+
+          let list = currentPlayerGames.filter((game) => {
+            // ❤️ فقط مورد علاقه
+            if (favOnly && !isFav(gameKeyOf(currentPlayerFile, game))) return false;
+            // نتیجه
+            if (fResult !== "all") {
+              if (fResult === "draw") { if (game.result !== "1/2-1/2" && game.result !== "*") return false; }
+              else if (game.result !== fResult) return false;
+            }
+            // حضور استاد (بازیکنِ انتخاب‌شده کدام رنگ است) — با توکن‌های نام مقاوم به فاصله/لقب
+            if (fSide !== "all") {
+              const tokens = (currentPlayer ? currentPlayer.name.toLowerCase().split(/\s+/) : [])
+                .filter((t) => t.length > 2);
+              const isWhite = tokens.some((t) => game.white.toLowerCase().includes(t));
+              if (fSide === "white" && !isWhite) return false;
+              if (fSide === "black" && isWhite) return false;
+            }
+            // گشایش / ECO
+            if (fOpening) {
+              const hay = ((game.opening || "") + " " + (game.eco || "")).toLowerCase();
+              if (!hay.includes(fOpening)) return false;
+            }
+            // بازه‌ی سال
+            const y = parseInt((game.date || "").slice(0, 4), 10);
+            if (!isNaN(fFrom) && (!isNaN(y) && y < fFrom)) return false;
+            if (!isNaN(fTo) && (!isNaN(y) && y > fTo)) return false;
+            // جستجوی متنی
+            if (query) {
+              if (field === "all") {
+                const hay = game.white + " " + game.black + " " + game.result + " " + game.date + " " + (game.opening || "");
+                if (!hay.toLowerCase().includes(query)) return false;
+              } else if (field === "white") {
+                if (!game.white.toLowerCase().includes(query)) return false;
+              } else if (field === "black") {
+                if (!game.black.toLowerCase().includes(query)) return false;
+              } else if (field === "date") {
+                if (!game.date.includes(query)) return false;
+              }
+            }
+            return true;
+          });
+          // ترتیب
+          list = list.slice().sort((a, b) => {
+            const ya = parseInt((a.date || "0000").slice(0, 4), 10) || 0;
+            const yb = parseInt((b.date || "0000").slice(0, 4), 10) || 0;
+            return fSort === "new" ? yb - ya : ya - yb;
+          });
+          filteredGames = list;
+          renderGamesList(list);
+        }
+        // سازگاری با لیسنرهای قدیمی
+        function performSearch() { applyFilters(); }
+
+        function openGameViewer(gameIdx, games) {
+          if (!games || !games[gameIdx]) return;
+          const game = games[gameIdx];
+          currentGame = game;
+          stopAutoPlay();
+          if (!gameViewerContainer) return;
+
+          const viewer = document.createElement("div");
+          viewer.className = "game-viewer";
+          viewer.id = "gameViewer";
+          const resultIcon =
+            game.result === "1-0"
+              ? "🏆 برد سفید"
+              : game.result === "0-1"
+                ? "🏆 برد سیاه"
+                : "🤝 مساوی";
+
+          viewer.innerHTML = `
+            <div class="viewer-header">
+              <div class="game-title">♜ ${game.white} <span class="vs">vs</span> ${game.black} <span style="font-size:0.65rem;color:var(--text-light);font-weight:400;margin-right:0.4rem;">${resultIcon}</span></div>
+            </div>
+            <div class="viewer-body">
+              <div class="board-wrapper">
+                <div id="gameBoard" class="chessboard"></div>
+                <div class="playback-controls">
+                  <button id="firstMoveBtn"><i class="fas fa-fast-backward"></i></button>
+                  <button id="prevMoveBtn"><i class="fas fa-step-backward"></i></button>
+                  <button id="playPauseBtn" class="primary"><i class="fas fa-play"></i> شروع</button>
+                  <button id="nextMoveBtn"><i class="fas fa-step-forward"></i></button>
+                  <button id="lastMoveBtn"><i class="fas fa-fast-forward"></i></button>
+                  <span class="move-counter" id="moveCounter">0/0</span>
+                </div>
+                <div class="playback-controls">
+                  <button id="reviewBtn" class="review"><i class="fas fa-magnifying-glass-chart"></i> مرور بازی با انجین</button>
+                </div>
+              </div>
+              <div class="info-wrapper">
+                <div class="game-meta">
+                  <div class="meta-item"><span class="label">گشایش:</span><span class="value">${game.opening || "نامشخص"}</span></div>
+                  <div class="meta-item"><span class="label">ECO:</span><span class="value">${game.eco || "-"}</span></div>
+                  <div class="meta-item"><span class="label">تاریخ:</span><span class="value">${game.date}</span></div>
+                  <div class="meta-item"><span class="label">تعداد حرکت:</span><span class="value" id="totalMoves">0</span></div>
+                </div>
+                <div class="pgn-actions">
+                  <button id="copyPgnBtn"><i class="fas fa-copy"></i> کپی PGN</button>
+                  <button id="downloadPgnBtn"><i class="fas fa-download"></i> دانلود PGN</button>
+                </div>
+              </div>
+            </div>
+          `;
+
+          gameViewerContainer.innerHTML = "";
+          gameViewerContainer.appendChild(viewer);
+          loadGameMoves(game.pgn);
+
+          document.getElementById("firstMoveBtn").addEventListener("click", goToFirstMove);
+          document.getElementById("prevMoveBtn").addEventListener("click", goToPrevMove);
+          document.getElementById("playPauseBtn").addEventListener("click", toggleAutoPlay);
+          document.getElementById("nextMoveBtn").addEventListener("click", goToNextMove);
+          document.getElementById("lastMoveBtn").addEventListener("click", goToLastMove);
+          document.getElementById("copyPgnBtn").addEventListener("click", copyPGN);
+          document.getElementById("downloadPgnBtn").addEventListener("click", downloadPGN);
+          document.getElementById("reviewBtn").addEventListener("click", function () {
+            if (!currentGameMoves.length) return;
+            // تبدیل حرکات به UCI برای مرور بازی
+            const g = new Chess();
+            const uciMoves = [];
+            currentGameMoves.forEach(function (mv) {
+              try {
+                const m = g.move(mv, { sloppy: true });
+                if (m) uciMoves.push(m.from + m.to + (m.promotion || ""));
+              } catch (e) {}
+            });
+            window.GameReview.open({
+              moves: uciMoves,
+              white: game.white,
+              black: game.black,
+              title: "بازی استادان",
+              subtitle: game.white + " در برابر " + game.black + (game.opening ? " — " + game.opening : ""),
+              result: game.result,
+            });
+          });
+
+          if (gameOverlay) gameOverlay.classList.add("open");
+          document.body.style.overflow = "hidden";
+          if (gameOverlay) gameOverlay.scrollTop = 0;
+        }
+
+        function loadGameMoves(pgn) {
+          const temp = new Chess();
+          try {
+            temp.load_pgn(pgn);
+            currentGameMoves = temp.history({ verbose: true });
+          } catch (e) {
+            currentGameMoves = [];
+          }
+          totalPlies = currentGameMoves.length;
+          currentMoveIndex = 0;
+          const moveCount = Math.ceil(totalPlies / 2);
+          const totalMovesEl = document.getElementById("totalMoves");
+          if (totalMovesEl) totalMovesEl.textContent = moveCount;
+          updateBoard();
+        }
+
+        function renderBoardDOM(boardId, moves, moveIndex) {
+          const container = document.getElementById(boardId);
+          if (!container) return;
+          const game = new Chess();
+          for (let i = 0; i < moveIndex; i++) {
+            try {
+              game.move(moves[i], { sloppy: true });
+            } catch (e) {
+              break;
+            }
+          }
+          const board = game.board();
+          const pieceSet = getCurrentPieceSet();
+          container.innerHTML = "";
+          container.style.display = "grid";
+          container.style.gridTemplateColumns = "repeat(8, 1fr)";
+          container.style.aspectRatio = "1 / 1";
+          for (let i = 0; i < 8; i++) {
+            for (let j = 0; j < 8; j++) {
+              const piece = board[i][j];
+              const isLight = (i + j) % 2 === 0;
+              const squareDiv = document.createElement("div");
+              squareDiv.className = `square ${isLight ? "light" : "dark"}`;
+              if (piece) {
+                const key =
+                  (piece.color === "w" ? "w" : "b") + piece.type.toLowerCase();
+                const img = document.createElement("img");
+                img.src = `pieces/${pieceSet}/${pieceCodes[key]}`;
+                img.classList.add("piece-img");
+                img.draggable = false;
+                img.style.pointerEvents = "none";
+                squareDiv.appendChild(img);
+              }
+              container.appendChild(squareDiv);
+            }
+          }
+        }
+
+        function updateBoard() {
+          renderBoardDOM("gameBoard", currentGameMoves, currentMoveIndex);
+          const moveNumber = Math.ceil(currentMoveIndex / 2);
+          const totalMoves = Math.ceil(totalPlies / 2);
+          const counter = document.getElementById("moveCounter");
+          if (counter) counter.textContent = `${moveNumber}/${totalMoves}`;
+        }
+
+        function goToFirstMove() {
+          stopAutoPlay();
+          currentMoveIndex = 0;
+          updateBoard();
+        }
+        function goToPrevMove() {
+          stopAutoPlay();
+          if (currentMoveIndex > 0) currentMoveIndex--;
+          updateBoard();
+        }
+        function goToNextMove() {
+          stopAutoPlay();
+          if (currentMoveIndex < totalPlies) currentMoveIndex++;
+          updateBoard();
+        }
+        function goToLastMove() {
+          stopAutoPlay();
+          currentMoveIndex = totalPlies;
+          updateBoard();
+        }
+
+        function toggleAutoPlay() {
+          if (isAutoPlaying) stopAutoPlay();
+          else startAutoPlay();
+        }
+        function startAutoPlay() {
+          if (isAutoPlaying) return;
+          if (currentMoveIndex >= totalPlies) {
+            currentMoveIndex = 0;
+            updateBoard();
+          }
+          isAutoPlaying = true;
+          const btn = document.getElementById("playPauseBtn");
+          if (btn) btn.innerHTML = '<i class="fas fa-pause"></i> توقف';
+          autoPlayInterval = setInterval(() => {
+            if (currentMoveIndex < totalPlies) {
+              currentMoveIndex++;
+              updateBoard();
+            } else {
+              stopAutoPlay();
+            }
+          }, 1200);
+        }
+        function stopAutoPlay() {
+          isAutoPlaying = false;
+          if (autoPlayInterval) {
+            clearInterval(autoPlayInterval);
+            autoPlayInterval = null;
+          }
+          const btn = document.getElementById("playPauseBtn");
+          if (btn) btn.innerHTML = '<i class="fas fa-play"></i> شروع';
+        }
+
+        function copyPGN() {
+          if (!currentGame) return;
+          navigator.clipboard
+            .writeText(currentGame.pgn)
+            .then(() => alert("✅ PGN کپی شد"))
+            .catch(() => alert("❌ خطا در کپی PGN"));
+        }
+        function downloadPGN() {
+          if (!currentGame) return;
+          const blob = new Blob([currentGame.pgn], { type: "text/plain" });
+          const a = document.createElement("a");
+          const url = URL.createObjectURL(blob);
+          a.href = url;
+          a.download = `${currentGame.white}_vs_${currentGame.black}.pgn`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }
+
+        function closeGameOverlay() {
+          if (gameOverlay) gameOverlay.classList.remove("open");
+          if (!gamesOverlay || !gamesOverlay.classList.contains("open")) {
+            document.body.style.overflow = "";
+          }
+          stopAutoPlay();
+          if (gameViewerContainer) gameViewerContainer.innerHTML = "";
+        }
+        function closeGamesOverlay() {
+          if (gamesOverlay) gamesOverlay.classList.remove("open");
+          if (gameOverlay) gameOverlay.classList.remove("open");
+          document.body.style.overflow = "";
+          stopAutoPlay();
+          if (gameViewerContainer) gameViewerContainer.innerHTML = "";
+        }
+
+        function init() {
+          loadPieces().then(() => {
+            renderPlayers();
+            renderFavSection();
+            if (closeGamesOverlayBtn)
+              closeGamesOverlayBtn.addEventListener("click", closeGamesOverlay);
+            if (closeGameOverlayBtn)
+              closeGameOverlayBtn.addEventListener("click", closeGameOverlay);
+            if (searchInput) searchInput.addEventListener("input", applyFilters);
+            if (searchField) searchField.addEventListener("change", applyFilters);
+            if (resetSearchBtn)
+              resetSearchBtn.addEventListener("click", function () {
+                if (searchInput) searchInput.value = "";
+                ["fResult", "fSide", "fSort"].forEach((id) => {
+                  const el = document.getElementById(id);
+                  if (el) el.value = id === "fSort" ? "old" : "all";
+                });
+                ["fOpening", "fYearFrom", "fYearTo"].forEach((id) => {
+                  const el = document.getElementById(id);
+                  if (el) el.value = "";
+                });
+                favOnly = false;
+                const fc = document.getElementById("favOnlyChip");
+                if (fc) fc.classList.remove("active");
+                applyFilters();
+              });
+
+            // فیلتر حرفه‌ای — چیپ‌ها و ورودی‌های پیشرفته
+            const favChip = document.getElementById("favOnlyChip");
+            if (favChip)
+              favChip.addEventListener("click", function () {
+                favOnly = !favOnly;
+                this.classList.toggle("active", favOnly);
+                applyFilters();
+              });
+            const advChip = document.getElementById("advToggleChip");
+            if (advChip)
+              advChip.addEventListener("click", function () {
+                const box = document.getElementById("advFilters");
+                if (box) box.classList.toggle("show");
+                this.classList.toggle("active", box && box.classList.contains("show"));
+              });
+            ["fResult", "fSide", "fSort"].forEach((id) => {
+              const el = document.getElementById(id);
+              if (el) el.addEventListener("change", applyFilters);
+            });
+            ["fOpening", "fYearFrom", "fYearTo"].forEach((id) => {
+              const el = document.getElementById(id);
+              if (el) el.addEventListener("input", applyFilters);
+            });
+
+            document.addEventListener("keydown", function (e) {
+              if (e.key === "Escape") {
+                if (gameOverlay && gameOverlay.classList.contains("open"))
+                  closeGameOverlay();
+                else if (gamesOverlay && gamesOverlay.classList.contains("open"))
+                  closeGamesOverlay();
+              }
+            });
+
+            document.addEventListener("pieceSetChanged", function () {
+              loadPieces().then(() => {
+                if (currentGame) updateBoard();
+              });
+            });
+            document.addEventListener("themeChanged", function () {
+              if (currentGame) updateBoard();
+            });
+          });
+        }
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", init);
+        } else {
+          init();
+        }
+      })();
+    </script>
+  </body>
+</html>
