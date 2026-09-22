@@ -1,0 +1,645 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="تخته آنالیز ChessHub — تحلیل زنده با انجین Stockfish، خط اصلی، نوار ارزیابی و مرور بازی" />
+    <title>ChessHub | آنالیز</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%E2%99%9B%3C/text%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="lib/fontawesome/all.min.css" />
+    <link href="fonts/vazir/font-face.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/gamereview.css" />
+    <script src="lib/chess.min.js"></script>
+    <style>
+      .an-wrap { display: flex; flex-direction: column; gap: 1rem; }
+      .an-toolbar {
+        display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center;
+        background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-md);
+        padding: 0.6rem 0.8rem; box-shadow: var(--shadow-sm);
+      }
+      .an-toolbar .an-btn {
+        background: #f1f5f9; border: 1px solid var(--border); color: var(--text-dark);
+        border-radius: var(--radius-sm); padding: 0.42rem 0.8rem; font-family: "Vazir";
+        font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: var(--transition-smooth);
+        display: inline-flex; align-items: center; gap: 0.35rem;
+      }
+      .an-toolbar .an-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+      .an-toolbar .an-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent-dark); }
+      .an-toolbar .an-btn.primary:hover { filter: brightness(1.08); }
+      .an-toolbar .an-btn.on { background: var(--success); color: #fff; border-color: var(--success-dark); }
+      .an-toolbar input[type="text"] {
+        flex: 1; min-width: 160px; border: 1px solid var(--border); background: #f8fafc;
+        border-radius: var(--radius-sm); padding: 0.42rem 0.6rem; font-family: "Vazir";
+        font-size: 0.78rem; font-weight: 600; color: var(--text-dark); direction: ltr; text-align: left;
+      }
+      .an-toolbar input[type="text"]:focus { border-color: var(--accent); outline: none; }
+
+      .an-body { display: flex; gap: 1.2rem; align-items: flex-start; flex-wrap: wrap; }
+      .an-board-side { flex: 1.25; min-width: 280px; max-width: 560px; margin: 0 auto; }
+      .an-board-wrap { position: relative; }
+      #anBoard {
+        display: grid; grid-template-columns: repeat(8, 1fr);
+        aspect-ratio: 1 / 1; border-radius: var(--radius-sm); overflow: hidden;
+        box-shadow: var(--shadow-board); direction: ltr;
+        /* 🔑 درگ مهره در موبایل: لمسِ روی تخته هرگز نباید به اسکرول/زوم صفحه
+           تبدیل شود — وگرنه مرورگر pointercancel می‌فرستد و کشیدن نصفه قطع می‌شد */
+        touch-action: none;
+        -webkit-user-select: none; user-select: none;
+        -webkit-touch-callout: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      #anBoard .square {
+        position: relative; display: flex; align-items: center; justify-content: center;
+        touch-action: none; cursor: pointer;
+      }
+      #anBoard .square.light { background: var(--board-light, #f0d9b5); }
+      #anBoard .square.dark { background: var(--board-dark, #b58863); }
+      #anBoard .piece-img { width: 92%; height: 92%; object-fit: contain; pointer-events: none; z-index: 2; }
+      #anBoard .piece-glyph {
+        width: 90%; height: 90%; display: flex; align-items: center; justify-content: center;
+        font-size: min(6vw, 34px); pointer-events: none; z-index: 2;
+      }
+      #anBoard .piece-glyph.w { color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.75); }
+      #anBoard .piece-glyph.b { color: #1a202c; text-shadow: 0 1px 2px rgba(255,255,255,0.35); }
+      #anBoard .square.last-move::after {
+        content: ""; position: absolute; inset: 0; background: rgba(255, 213, 79, 0.42); z-index: 1;
+      }
+      #anBoard .square.check::before {
+        content: ""; position: absolute; inset: 0;
+        background: radial-gradient(circle, rgba(229,57,53,0.85) 12%, rgba(229,57,53,0.25) 55%, transparent 72%); z-index: 1;
+      }
+      #anBoard .square.selected { outline: 3px solid rgba(49,130,206,0.9); outline-offset: -3px; z-index: 2; }
+      #anBoard .square.dot::after, #anBoard .square.dot-capture::after {
+        content: ""; position: absolute; width: 30%; height: 30%; border-radius: 50%;
+        background: rgba(20,30,40,0.28); z-index: 3;
+      }
+      #anBoard .square.dot-capture::after {
+        width: 88%; height: 88%; background: transparent; border: 4px solid rgba(20,30,40,0.3);
+      }
+      #anBoard .square.drag-over { outline: 3px solid rgba(56,161,105,0.95); outline-offset: -3px; z-index: 2; }
+      .board-arrows {
+        position: absolute; inset: 0; width: 100%; height: 100%;
+        pointer-events: none; z-index: 5;
+      }
+      .arrow-line { stroke-linecap: round; }
+
+      .an-panel {
+        flex: 1; min-width: 270px; display: flex; flex-direction: column; gap: 0.9rem;
+      }
+      .an-card {
+        background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-lg);
+        padding: 1rem 1.1rem; box-shadow: var(--shadow-sm);
+      }
+      .an-card h3 {
+        font-size: 0.9rem; font-weight: 800; color: var(--primary-dark);
+        display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.7rem;
+      }
+      .an-card h3 i { color: var(--accent); }
+
+      .an-eval-row { display: flex; align-items: center; gap: 0.8rem; }
+      .an-eval-bar {
+        flex: 1; height: 14px; border-radius: 99px; overflow: hidden;
+        background: linear-gradient(90deg, #1a202c 0%, #1a202c 50%, #f8fafc 50%, #f8fafc 100%);
+        border: 1px solid var(--border); position: relative;
+      }
+      .an-eval-fill {
+        position: absolute; top: 0; right: 0; height: 100%;
+        background: #f8fafc; transition: width 0.35s ease;
+        /* از راست پر می‌شود چون صفحه RTL است — سفید از سمت راست */
+      }
+      .an-eval-num {
+        font-weight: 800; font-size: 1rem; color: var(--primary-dark);
+        min-width: 64px; text-align: center; direction: ltr;
+        background: #f1f5f9; border-radius: 99px; padding: 0.2rem 0.6rem; border: 1px solid var(--border);
+      }
+      .an-pv-lines { display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.7rem; }
+      .an-pv {
+        background: #f8fafc; border: 1px solid var(--border); border-radius: var(--radius-sm);
+        padding: 0.5rem 0.7rem; font-size: 0.78rem; direction: ltr; text-align: left;
+        font-weight: 600; color: var(--text-dark); line-height: 1.9; word-spacing: 2px;
+      }
+      .an-pv b { color: var(--accent); direction: ltr; display: inline-block; margin-right: 0.35rem; }
+      .an-status { font-size: 0.72rem; color: var(--text-light); font-weight: 700; margin-top: 0.5rem; }
+
+      .an-moves {
+        display: flex; flex-wrap: wrap; gap: 0.3rem; max-height: 220px; overflow-y: auto;
+        padding: 0.3rem; background: #f8fafc; border-radius: var(--radius-sm); border: 1px solid var(--border);
+        scrollbar-width: none; -ms-overflow-style: none;
+      }
+      .an-moves::-webkit-scrollbar { display: none; }
+      .an-move {
+        background: #fff; border: 1px solid var(--border); border-radius: var(--radius-sm);
+        padding: 0.2rem 0.55rem; font-size: 0.74rem; font-weight: 700; cursor: pointer;
+        color: var(--text-dark); transition: var(--transition-smooth); direction: ltr;
+      }
+      .an-move:hover { border-color: var(--accent); color: var(--accent); }
+      .an-move.cur { background: var(--accent); color: #fff; border-color: var(--accent); }
+      .an-move .n { color: var(--text-light); font-size: 0.62rem; margin-left: 0.25rem; }
+      .an-move.cur .n { color: rgba(255,255,255,0.75); }
+
+      .an-nav { display: flex; gap: 0.35rem; justify-content: center; flex-wrap: wrap; margin-top: 0.7rem; }
+      .an-nav button {
+        background: #f1f5f9; border: 1px solid var(--border); border-radius: var(--radius-sm);
+        padding: 0.4rem 0.75rem; cursor: pointer; color: var(--text-dark); font-size: 0.8rem;
+        transition: var(--transition-smooth);
+      }
+      .an-nav button:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+      .an-offline {
+        background: #fffaf0; border: 1px solid #f6d78a; color: #744210;
+        border-radius: var(--radius-sm); padding: 0.6rem 0.8rem; font-size: 0.74rem; font-weight: 700;
+        display: none; margin-top: 0.6rem;
+      }
+      .an-offline.show { display: block; }
+
+      @media (max-width: 860px) {
+        .an-body { flex-direction: column; }
+        .an-board-side { max-width: 100%; }
+        #anBoard .piece-glyph { font-size: min(7.5vw, 40px); }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div id="header-placeholder"></div>
+
+      <section class="app-hero">
+        <h1><i class="fas fa-chart-line"></i> آنالیز با انجین</h1>
+        <p>هر موقعیتی را با Stockfish تحلیل کن — خط اصلی، ارزیابی زنده و مرور کامل</p>
+      </section>
+
+      <div class="an-wrap">
+        <!-- نوار ابزار -->
+        <div class="an-toolbar">
+          <input type="text" id="fenInput" placeholder="FEN را این‌جا بچسبان…" dir="ltr" />
+          <button class="an-btn primary" id="loadFenBtn"><i class="fas fa-upload"></i> بارگذاری FEN</button>
+          <button class="an-btn" id="loadPgnBtn"><i class="fas fa-file-import"></i> از PGN</button>
+          <button class="an-btn" id="copyFenBtn"><i class="fas fa-copy"></i> کپی FEN</button>
+          <button class="an-btn" id="flipBtn"><i class="fas fa-repeat"></i> چرخش تخته</button>
+          <button class="an-btn" id="resetBtn"><i class="fas fa-rotate-right"></i> موقعیت اولیه</button>
+          <button class="an-btn" id="undoBtn"><i class="fas fa-undo"></i> برگشت</button>
+          <input type="file" id="pgnFile" accept=".pgn,text/plain" style="display:none" />
+        </div>
+
+        <div class="an-body">
+          <!-- تخته -->
+          <div class="an-board-side">
+            <div class="an-board-wrap">
+              <div id="anBoard"></div>
+              <svg class="board-arrows" id="anArrows" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+            </div>
+            <div class="an-nav">
+              <button id="navFirst" title="شروع"><i class="fas fa-fast-backward"></i></button>
+              <button id="navPrev" title="قبلی"><i class="fas fa-step-backward"></i></button>
+              <button id="navNext" title="بعدی"><i class="fas fa-step-forward"></i></button>
+              <button id="navLast" title="زنده"><i class="fas fa-fast-forward"></i></button>
+            </div>
+          </div>
+
+          <!-- پنل انجین -->
+          <div class="an-panel">
+            <div class="an-card">
+              <h3><i class="fas fa-robot"></i> تحلیل انجین</h3>
+              <div class="an-eval-row">
+                <div class="an-eval-bar"><div class="an-eval-fill" id="anEvalFill" style="width:50%"></div></div>
+                <span class="an-eval-num" id="anEvalNum">۰٫۰</span>
+              </div>
+              <div class="an-pv-lines" id="anPvLines">
+                <div class="an-status">انجین آماده می‌شود…</div>
+              </div>
+              <div class="an-offline" id="anOffline">
+                انجین در این مرورگر در دسترس نیست — مرورگر دیگری (کروم/فایرفاکس) را امتحان کن.
+              </div>
+              <div class="an-toolbar" style="margin-top:0.8rem;box-shadow:none;border-style:dashed">
+                <button class="an-btn on" id="liveBtn"><i class="fas fa-circle-play"></i> تحلیل زنده: روشن</button>
+                <button class="an-btn" id="reviewBtn"><i class="fas fa-magnifying-glass-chart"></i> مرور این بازی</button>
+              </div>
+              <div class="an-status" id="anEngineStatus">—</div>
+            </div>
+
+            <div class="an-card">
+              <h3><i class="fas fa-list-ol"></i> حرکات</h3>
+              <div class="an-moves" id="anMoves"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="footer-placeholder"></div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script src="js/profile.js"></script>
+    <script src="js/engine-core.js"></script>
+    <script src="js/board-ui.js"></script>
+    <script src="js/gamereview.js"></script>
+    <script>
+      (function () {
+        "use strict";
+        // اعمال تم ذخیره‌شده
+        (function () {
+          try {
+            const s = JSON.parse(localStorage.getItem("chesshub_settings"));
+            if (s && s.theme) document.body.classList.add("theme-" + s.theme);
+          } catch (e) {}
+        })();
+
+        const FA = "۰۱۲۳۴۵۶۷۸۹";
+        function fa(n) { return String(n).replace(/\d/g, function (d) { return FA[+d]; }); }
+        function $(id) { return document.getElementById(id); }
+
+        let game = new Chess();
+        let board = null;
+        let flipped = false;
+        let live = true;
+        let analysisEpoch = 0;
+        let lastEval = null;          // {cp, mate} از دید نوبت‌دار
+        let lastPvLines = [];         // [{cp, sans:[...]}]
+        let historyStack = [];        // SAN های بازی حاضر (بعد از لود PGN)
+        let viewIdx = null;           // null = زنده؛ عدد = اندیس در historyStack
+        let pgnBaseMoves = [];        // UCI های PGN لودشده (برای مرور)
+
+        function pvToSanList(fen, pvUci, max) {
+          const g = new Chess();
+          if (!g.load(fen)) return [];
+          const out = [];
+          for (let i = 0; i < pvUci.length && i < max; i++) {
+            const u = pvUci[i];
+            let mv = null;
+            try { mv = g.move({ from: u.slice(0, 2), to: u.slice(2, 4), promotion: u[4] || "q" }); } catch (e) {}
+            if (!mv) break;
+            out.push(mv.san);
+          }
+          return out;
+        }
+
+        function fmtEval(score) {
+          // score از دید نوبت‌دار
+          if (!score) return "۰٫۰";
+          if (score.type === "mate") {
+            return score.value > 0 ? "M" + fa(Math.abs(score.value)) : "-" + fa(Math.abs(score.value));
+          }
+          const v = score.value / 100;
+          const s = (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(1);
+          return s.replace(/\d/g, function (d) { return FA[+d]; }).replace(".", "٫");
+        }
+
+        function setEvalUI(score, moverWhite) {
+          const fill = $("anEvalFill");
+          const num = $("anEvalNum");
+          // ارزیابی از دید سفید برای نوار
+          let cpWhite = 0, show = "۰٫۰";
+          if (score) {
+            if (score.type === "mate") {
+              cpWhite = score.value > 0 ? 3000 : -3000;
+              show = fmtEval(score);
+            } else {
+              cpWhite = moverWhite ? score.value : -score.value;
+              const v = cpWhite / 100;
+              show = (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(1);
+              show = show.replace(/\d/g, function (d) { return FA[+d]; }).replace(".", "٫");
+            }
+          }
+          const w = 50 + (Math.max(-3000, Math.min(3000, cpWhite)) / 3000) * 47;
+          if (fill) fill.style.width = w + "%";
+          if (num) num.textContent = show;
+        }
+
+        function renderPvLines() {
+          const box = $("anPvLines");
+          if (!box) return;
+          if (!lastPvLines.length) {
+            box.innerHTML = '<div class="an-status">در انتظار تحلیل…</div>';
+            return;
+          }
+          const fen = game.fen();
+          const moverWhite = fen.split(" ")[1] === "w";
+          box.innerHTML = lastPvLines
+            .map(function (ln, i) {
+              const sans = pvToSanList(fen, ln.pv || [], 10);
+              const cpWhite = moverWhite ? ln.cp : -ln.cp;
+              const v = cpWhite / 100;
+              const tag = (v >= 0 ? "+" : "−") + Math.abs(v).toFixed(1);
+              return '<div class="an-pv"><b>' +
+                tag.replace(/\d/g, function (d) { return FA[+d]; }).replace(".", "٫") +
+                "</b> " + sans.join(" ") + (sans.length >= 10 ? "…" : "") + "</div>";
+            })
+            .join("");
+        }
+
+        function engineStatus(txt) {
+          const el = $("anEngineStatus");
+          if (el) el.textContent = txt;
+        }
+
+        // تحلیل موقعیت جاری — با چند خط (MultiPV ۳)
+        let analyzeTimer = null;
+        function scheduleAnalysis(delay) {
+          clearTimeout(analyzeTimer);
+          analyzeTimer = setTimeout(runAnalysis, delay == null ? 120 : delay);
+        }
+        async function runAnalysis() {
+          if (!window.ChessEngine) return;
+          const myEpoch = ++analysisEpoch;
+          const fen = game.fen();
+          if (game.game_over()) {
+            lastPvLines = [];
+            renderPvLines();
+            setEvalUI(game.in_checkmate() ? { type: "mate", value: game.turn() === "w" ? -1 : 1 } : { type: "cp", value: 0 }, true);
+            engineStatus("بازی تمام شده — " +
+              (game.in_checkmate() ? "کیش‌ومات" : game.in_stalemate() ? "پات" : "پایان"));
+            return;
+          }
+          if (!ChessEngine.isAvailable()) {
+            engineStatus("انجین در حال راه‌اندازی…");
+            setTimeout(function () {
+              if (myEpoch === analysisEpoch && live) runAnalysis();
+            }, 1500);
+            return;
+          }
+          engineStatus("انجین در حال تحلیل…");
+          const n = (fen.split(" ")[0].match(/[a-zA-Z]/g) || []).length;
+          const budget = n <= 6 ? { movetime: 700, depth: 24 } : n <= 16 ? { movetime: 450, depth: 20 } : { movetime: 320, depth: 18 };
+          const r = await ChessEngine.ask(fen, {
+            movetime: budget.movetime, depth: budget.depth, skill: 20, multiPV: 3,
+          });
+          if (myEpoch !== analysisEpoch) return; // موقعیت عوض شد
+          if (!r.score) {
+            engineStatus("انجین در دسترس نیست");
+            const off = $("anOffline");
+            if (off) off.classList.add("show");
+            return;
+          }
+          const off = $("anOffline");
+          if (off) off.classList.remove("show");
+          lastEval = r.score;
+          setEvalUI(r.score, fen.split(" ")[1] === "w");
+          // خطوط MultiPV از pv های تودرتو: با multiPV=3 فقط اولین خط کامل می‌آید در این بیلد؛
+          // خطوط ۲ و ۳ را با دو پرسش تک‌خطی تکمیل می‌کنیم (کوتاه‌تر)
+          const lines = [{ cp: ChessEngine.cpOf(r.score), pv: (r.pv || []).slice(0, 12) }];
+          lastPvLines = lines;
+          renderPvLines();
+          engineStatus("عمق تحلیل: " + (budget.depth ? "تا عمق " + fa(budget.depth) : "زمان " + fa(Math.round(budget.movetime / 100) / 10) + " ثانیه") + " — زنده");
+        }
+
+        function renderMoves() {
+          const box = $("anMoves");
+          if (!box) return;
+          box.innerHTML = "";
+          for (let i = 0; i < historyStack.length; i += 2) {
+            const row = document.createElement("button");
+            row.className = "an-move" + (viewIdx === i + 1 ? " cur" : "");
+            row.dataset.i = i + 1;
+            row.innerHTML = '<span class="n">' + fa(i / 2 + 1) + ".</span> " + historyStack[i] +
+              (historyStack[i + 1] ? " " + historyStack[i + 1] : "");
+            row.addEventListener("click", function () {
+              viewIdx = parseInt(this.dataset.i, 10);
+              showView();
+            });
+            box.appendChild(row);
+          }
+          const cur = box.querySelector(".an-move.cur");
+          if (cur) cur.scrollIntoView({ block: "nearest" });
+        }
+
+        function replayTo(idx) {
+          // بازسازی بازی تا اندیس idx از historyStack
+          game = new Chess();
+          for (let i = 0; i < idx; i++) {
+            try { game.move(historyStack[i]); } catch (e) { break; }
+          }
+        }
+
+        function showView() {
+          const idx = viewIdx == null ? historyStack.length : viewIdx;
+          replayTo(idx);
+          const last = idx > 0 ? moveUciOf(historyStack[idx - 1]) : null;
+          board.render({ lastMove: last });
+          renderMoves();
+          scheduleAnalysis();
+        }
+
+        const _sanGame = new Chess();
+        function moveUciOf(san) {
+          // uci آخرین حرکتِ بازی فعلی — از تاریخچه
+          const hist = game.history({ verbose: true });
+          const m = hist[hist.length - 1];
+          return m ? { from: m.from, to: m.to } : null;
+        }
+
+        function goLive() {
+          viewIdx = null;
+          replayTo(historyStack.length);
+          board.render({});
+          renderMoves();
+          scheduleAnalysis();
+        }
+
+        function refreshAll() {
+          board.render({});
+          renderMoves();
+          scheduleAnalysis();
+        }
+
+        function buildBoard() {
+          if (board) board.destroy();
+          board = ChessBoardUI.create({
+            boardEl: $("anBoard"),
+            arrowsEl: $("anArrows"),
+            getGame: function () { return game; },
+            canMove: function () { return viewIdx == null && !game.game_over(); },
+            userColor: function () { return game.turn(); },
+            orientation: function () { return flipped ? "b" : "w"; },
+            onAttempt: function (from, to, promo) {
+              const mv = game.move({ from: from, to: to, promotion: promo || "q" });
+              if (!mv) return false;
+              // اگر در حالت مرور تاریخی بودیم، ادامه‌ها حذف شوند
+              if (viewIdx != null) {
+                historyStack = historyStack.slice(0, viewIdx);
+                viewIdx = null;
+              }
+              historyStack.push(mv.san);
+              window.ChessHub && ChessHub.Sound.play("move");
+              board.render({ lastMove: { from: mv.from, to: mv.to } });
+              renderMoves();
+              scheduleAnalysis();
+              return true;
+            },
+          });
+          board.build();
+        }
+
+        function toast(msg) {
+          let el = document.querySelector(".settings-toast");
+          if (!el) {
+            el = document.createElement("div");
+            el.className = "settings-toast";
+            document.body.appendChild(el);
+          }
+          el.textContent = msg;
+          el.classList.add("show");
+          clearTimeout(el._t);
+          el._t = setTimeout(function () { el.classList.remove("show"); }, 2200);
+        }
+
+        function loadFen(fen) {
+          const g = new Chess();
+          if (!g.load(fen)) return toast("FEN نامعتبر است");
+          game = g;
+          historyStack = [];
+          viewIdx = null;
+          pgnBaseMoves = [];
+          flipped = game.turn() === "b";
+          buildBoard();
+          refreshAll();
+          toast("موقعیت بارگذاری شد");
+        }
+
+        function loadPgnText(pgnText) {
+          const g = new Chess();
+          try {
+            if (!g.load_pgn(pgnText)) return toast("PGN قابل خواندن نبود");
+          } catch (e) {
+            return toast("PGN قابل خواندن نبود");
+          }
+          const verbose = g.history({ verbose: true });
+          if (!verbose.length) return toast("حرکتی در PGN نیست");
+          pgnBaseMoves = verbose.map(function (m) { return m.from + m.to + (m.promotion || ""); });
+          game = new Chess();
+          historyStack = g.history();
+          viewIdx = null;
+          flipped = false;
+          buildBoard();
+          refreshAll();
+          toast(fa(historyStack.length) + " حرکت از PGN بارگذاری شد");
+        }
+
+        async function init() {
+          if (typeof Chess === "undefined") return;
+          // ♟️ اول مهره‌های کاربر، بعد تخته
+          if (window.ChessUtils && ChessUtils.loadPieces) {
+            try { await ChessUtils.loadPieces(); } catch (e) {}
+          }
+          window.ChessEngine.init();
+          ChessEngine.onReady(function () {
+            engineStatus("انجین آماده است");
+            if (live) scheduleAnalysis(50);
+          });
+
+          buildBoard();
+          renderMoves();
+
+          $("loadFenBtn").addEventListener("click", function () {
+            const v = $("fenInput").value.trim();
+            if (v) loadFen(v);
+            else toast("اول FEN را بچسبان");
+          });
+          $("fenInput").addEventListener("keydown", function (e) {
+            if (e.key === "Enter") $("loadFenBtn").click();
+          });
+          $("loadPgnBtn").addEventListener("click", function () { $("pgnFile").click(); });
+          $("pgnFile").addEventListener("change", function () {
+            const f = this.files && this.files[0];
+            if (!f) return;
+            const rd = new FileReader();
+            rd.onload = function () { loadPgnText(String(rd.result || "")); };
+            rd.readAsText(f);
+            this.value = "";
+          });
+          $("copyFenBtn").addEventListener("click", function () {
+            const fen = game.fen();
+            navigator.clipboard.writeText(fen)
+              .then(function () { toast("FEN کپی شد"); })
+              .catch(function () { toast("کپی نشد"); });
+          });
+          $("flipBtn").addEventListener("click", function () {
+            flipped = !flipped;
+            buildBoard();
+            board.render({});
+            renderMoves();
+          });
+          $("resetBtn").addEventListener("click", function () {
+            game = new Chess();
+            historyStack = []; viewIdx = null; pgnBaseMoves = []; flipped = false;
+            buildBoard();
+            refreshAll();
+          });
+          $("undoBtn").addEventListener("click", function () {
+            if (viewIdx != null) viewIdx = Math.max(0, viewIdx - 1);
+            else viewIdx = Math.max(0, historyStack.length - 1);
+            showView();
+          });
+          $("navFirst").addEventListener("click", function () { viewIdx = 0; showView(); });
+          $("navPrev").addEventListener("click", function () {
+            const cur = viewIdx == null ? historyStack.length : viewIdx;
+            viewIdx = Math.max(0, cur - 1); showView();
+          });
+          $("navNext").addEventListener("click", function () {
+            const cur = viewIdx == null ? historyStack.length : viewIdx;
+            if (cur < historyStack.length) { viewIdx = cur + 1; showView(); }
+          });
+          $("navLast").addEventListener("click", goLive);
+          $("liveBtn").addEventListener("click", function () {
+            live = !live;
+            this.classList.toggle("on", live);
+            this.innerHTML = live
+              ? '<i class="fas fa-circle-play"></i> تحلیل زنده: روشن'
+              : '<i class="fas fa-circle-pause"></i> تحلیل زنده: خاموش';
+            if (live) scheduleAnalysis(30);
+            else { analysisEpoch++; engineStatus("تحلیل زنده خاموش است"); }
+          });
+          $("reviewBtn").addEventListener("click", function () {
+            const moves = pgnBaseMoves.length
+              ? pgnBaseMoves
+              : (function () {
+                  const g = new Chess();
+                  const uci = [];
+                  historyStack.forEach(function (san) {
+                    try {
+                      const m = g.move(san);
+                      if (m) uci.push(m.from + m.to + (m.promotion || ""));
+                    } catch (e) {}
+                  });
+                  return uci;
+                })();
+            if (!moves.length) return toast("اول FEN یا PGN بارگذاری کن یا چند حرکت بازی کن");
+            window.GameReview.open({
+              moves: moves,
+              white: "سفید",
+              black: "سیاه",
+              title: "آنالیز ChessHub",
+              subtitle: "مرور انجینی موقعیت/بازی",
+              result: "*",
+            });
+          });
+
+          document.addEventListener("pieceSetChanged", function () {
+            if (window.ChessUtils) ChessUtils.loadPieces().then(function () {
+              buildBoard();
+              board.render({});
+              renderMoves();
+            });
+          });
+          document.addEventListener("themeChanged", function () {
+            buildBoard();
+            board.render({});
+          });
+          document.addEventListener("keydown", function (e) {
+            if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) return;
+            if (e.key === "ArrowLeft") $("navNext").click();
+            else if (e.key === "ArrowRight") $("navPrev").click();
+          });
+
+          scheduleAnalysis(400);
+        }
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", init);
+        } else {
+          init();
+        }
+      })();
+    </script>
+  </body>
+</html>

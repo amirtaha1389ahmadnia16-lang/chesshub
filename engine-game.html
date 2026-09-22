@@ -1,0 +1,669 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="description" content="بازی شطرنج با ۳۵ بات از مبتنی تا قهرمان جهان" />
+    <title>ChessHub | بازی با بات</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%E2%99%9B%3C/text%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="lib/fontawesome/all.min.css" />
+    <link href="fonts/vazir/font-face.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/gamereview.css" />
+    <script src="lib/chess.min.js"></script>
+    <style>
+      .engine-wrapper {
+        display: grid;
+        grid-template-columns: 300px 1fr 260px;
+        gap: 1.2rem;
+        margin-bottom: 2rem;
+      }
+      .side-card {
+        background: #ffffff;
+        border-radius: var(--radius-lg);
+        padding: 1.1rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid #e2e8f0;
+        height: fit-content;
+      }
+      .side-card h3 {
+        font-size: 1rem;
+        color: var(--primary-dark);
+        border-right: 4px solid var(--accent);
+        padding-right: 10px;
+        margin-bottom: 0.9rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+      }
+      .side-card h3 i { color: var(--accent); }
+
+      /* ---------- گرید بات‌ها ---------- */
+      .bot-search {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        border-radius: var(--radius-sm);
+        padding: 0.3rem 0.7rem;
+        margin-bottom: 0.6rem;
+      }
+      .bot-search i { color: var(--text-light); font-size: 0.8rem; }
+      .bot-search input {
+        width: 100%;
+        border: none;
+        background: transparent;
+        outline: none;
+        font-family: "Vazir";
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-dark);
+      }
+      .rating-chips { display: flex; gap: 0.3rem; flex-wrap: wrap; margin-bottom: 0.7rem; }
+      .rating-chips .chip {
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        padding: 0.28rem 0.7rem;
+        border-radius: 99px;
+        font-family: "Vazir";
+        font-size: 0.7rem;
+        font-weight: 700;
+        cursor: pointer;
+        color: var(--text-light);
+        transition: var(--transition-smooth);
+      }
+      .rating-chips .chip.active {
+        background: var(--accent);
+        color: #fff;
+        border-color: var(--accent-dark);
+      }
+      .bots-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.55rem;
+        max-height: 400px;
+        overflow-y: auto;
+        padding-left: 4px;
+      }
+      .bots-grid::-webkit-scrollbar { display: none; }
+      .bots-grid { scrollbar-width: none; -ms-overflow-style: none; }
+      .bot-item {
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: var(--radius-md);
+        padding: 0.55rem 0.7rem;
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+      }
+      .bot-item:hover { background: #f1f5f9; border-color: #cbd5e0; }
+      .bot-item.active {
+        background: #ebf8ff;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.12);
+      }
+      .bot-item .mini-avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: #e2e8f0;
+        overflow: hidden;
+        flex-shrink: 0;
+        border: 2px solid #cbd5e0;
+      }
+      .bot-item .mini-avatar img { width: 100%; height: 100%; object-fit: cover; }
+      .bot-item .b-info { display: flex; flex-direction: column; min-width: 0; }
+      .bot-item .bname {
+        font-size: 0.88rem;
+        font-weight: 800;
+        color: var(--text-dark);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .bot-item .bmeta {
+        font-size: 0.68rem;
+        color: var(--text-light);
+        font-weight: 700;
+        display: flex;
+        gap: 0.4rem;
+        align-items: center;
+      }
+      .bot-item .bstyle {
+        background: var(--accent-soft);
+        color: var(--accent-dark);
+        border-radius: 99px;
+        padding: 0.04rem 0.45rem;
+        font-size: 0.6rem;
+      }
+
+      /* ---------- کنترل‌ها ---------- */
+      .control-group { margin-bottom: 1rem; }
+      .control-group:last-child { margin-bottom: 0; }
+      .control-label {
+        font-size: 0.76rem;
+        font-weight: 800;
+        color: var(--text-light);
+        margin-bottom: 0.45rem;
+        display: block;
+      }
+      .chips-group { display: flex; gap: 0.35rem; flex-wrap: wrap; align-items: center; }
+      .tc-group-label {
+        display: inline-flex; align-items: center; gap: 0.3rem;
+        font-size: 0.66rem; font-weight: 800; color: var(--text-light);
+        margin-top: 0.3rem; letter-spacing: 0.2px;
+      }
+      .tc-group-label i { font-size: 0.6rem; color: var(--accent); }
+      .chip-btn {
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        padding: 0.38rem 0.75rem;
+        border-radius: var(--radius-sm);
+        font-family: "Vazir";
+        font-size: 0.78rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        color: var(--text-light);
+      }
+      .chip-btn.active {
+        background: var(--accent);
+        color: white;
+        border-color: var(--accent-dark);
+        box-shadow: 0 2px 4px rgba(49, 130, 206, 0.3);
+      }
+      .chip-btn:hover:not(.active) { background: #e2e8f0; color: var(--primary-dark); }
+      .custom-time {
+        display: none;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+      }
+      .custom-time.show { display: flex; }
+      .custom-time input {
+        flex: 1;
+        width: 100%;
+        border: 1.5px solid #e2e8f0;
+        border-radius: var(--radius-sm);
+        padding: 0.4rem 0.5rem;
+        font-family: "Vazir";
+        font-size: 0.78rem;
+        outline: none;
+        background: #f8fafc;
+        color: var(--text-dark);
+      }
+      .custom-time input:focus { border-color: var(--accent); background: #fff; }
+      .custom-time label {
+        font-size: 0.66rem;
+        color: var(--text-light);
+        display: block;
+        margin-bottom: 2px;
+        font-weight: 700;
+      }
+
+      /* ---------- ستون بازی ---------- */
+      .game-main { display: flex; flex-direction: column; gap: 0.5rem; min-width: 0; }
+      .player-bar {
+        background: #ffffff;
+        border-radius: var(--radius-md);
+        padding: 0.55rem 0.9rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid #e2e8f0;
+      }
+      .player-info { display: flex; align-items: center; gap: 0.6rem; min-width: 0; }
+      .player-avatar-sm {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: #e2e8f0;
+        overflow: hidden;
+        border: 2px solid #cbd5e0;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-light);
+      }
+      .player-avatar-sm img { width: 100%; height: 100%; object-fit: cover; }
+      .player-name {
+        font-size: 0.88rem;
+        font-weight: 800;
+        color: var(--text-dark);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .player-rating { font-size: 0.68rem; color: var(--text-light); font-weight: 700; }
+      .timer-box {
+        background: var(--primary-dark);
+        color: #fff;
+        padding: 0.28rem 0.8rem;
+        border-radius: var(--radius-sm);
+        font-family: monospace;
+        font-weight: 700;
+        font-size: 1rem;
+        direction: ltr;
+        min-width: 72px;
+        text-align: center;
+        flex-shrink: 0;
+      }
+      .timer-box.active-timer { background: var(--success); box-shadow: 0 0 0 3px rgba(56, 161, 105, 0.2); }
+      .timer-box.low { background: var(--danger); animation: pulseUrgent 1s infinite; }
+      @keyframes pulseUrgent {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.06); }
+      }
+
+      .bot-speech {
+        background: #f8fafc;
+        border: 1px dashed #cbd5e0;
+        border-radius: var(--radius-md);
+        padding: 0.45rem 0.8rem;
+        font-size: 0.76rem;
+        font-weight: 600;
+        color: var(--text-light);
+        text-align: center;
+        min-height: 2.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .board-wrapper-engine {
+        background: #ffffff;
+        padding: 0.5rem;
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-md);
+        border: 1px solid #e2e8f0;
+        touch-action: none;
+        position: relative;
+      }
+      #chessboard {
+        width: 100%;
+        max-width: 100%;
+        aspect-ratio: 1/1;
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+        box-shadow: var(--shadow-board);
+        border: 1px solid #cbd5e0;
+        touch-action: none;
+        display: grid;
+        grid-template-columns: repeat(8, 1fr);
+        -webkit-user-select: none;
+        user-select: none;
+      }
+      .square {
+        aspect-ratio: 1/1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        touch-action: none;
+        position: relative;
+      }
+      .square.light { background-color: var(--board-light, #f0d9b5); }
+      .square.dark { background-color: var(--board-dark, #b58863); }
+      .square.selected { box-shadow: inset 0 0 0 3px rgba(49, 130, 206, 0.85); }
+      .square.last-move::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: rgba(246, 173, 85, 0.38);
+        z-index: 1;
+        pointer-events: none;
+      }
+      .square.check::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle, rgba(229, 62, 62, 0.6) 18%, rgba(229, 62, 62, 0.12) 62%, transparent 75%);
+        z-index: 1;
+        pointer-events: none;
+      }
+      .square.dot::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 26%;
+        height: 26%;
+        border-radius: 50%;
+        background: rgba(15, 23, 42, 0.28);
+        z-index: 2;
+        pointer-events: none;
+      }
+      .square.dot-capture::after {
+        content: "";
+        position: absolute;
+        inset: 5%;
+        border-radius: 50%;
+        border: 4px solid rgba(15, 23, 42, 0.3);
+        background: transparent;
+        z-index: 2;
+        pointer-events: none;
+      }
+      .square.dragging .piece-img { opacity: 0.3; }
+      .square.drag-over { box-shadow: inset 0 0 0 3px rgba(49, 130, 206, 0.7); }
+      .piece-img {
+        width: 92%;
+        height: 92%;
+        pointer-events: none;
+        user-select: none;
+        z-index: 2;
+      }
+      .piece-glyph { font-size: var(--glyph-size, 34px); line-height: 1; pointer-events: none; z-index: 2; }
+      .piece-glyph.w { color: #3d4a5c; -webkit-text-stroke: 1.2px #f7fafc; }
+      .piece-glyph.b { color: #1a202c; -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3); }
+
+      .game-controls { display: flex; gap: 0.5rem; margin-top: 0.4rem; }
+      .game-controls .btn { flex: 1; justify-content: center; }
+      .btn {
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        padding: 0.5rem 1.2rem;
+        border-radius: var(--radius-sm);
+        font-weight: 700;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-family: "Vazir";
+        color: var(--text-dark);
+      }
+      .btn:hover { background: #e2e8f0; border-color: #cbd5e0; transform: translateY(-1px); }
+      .btn:active { transform: scale(0.98); }
+      .btn-primary {
+        background: var(--accent);
+        color: white;
+        border: 1px solid var(--accent-dark);
+        box-shadow: 0 4px 0 var(--accent-dark), 0 4px 12px rgba(49, 130, 206, 0.3);
+      }
+      .btn-primary:hover { background: #4299e1; }
+      .btn-danger { background: #fff5f5; border-color: #feb2b2; color: var(--danger); }
+      .btn-danger:hover { background: #fed7d7; border-color: var(--danger); }
+
+      /* ---------- ستون حرکات ---------- */
+      .history-list {
+        max-height: 380px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+        padding-left: 4px;
+      }
+      .history-list::-webkit-scrollbar { display: none; }
+      .history-list { scrollbar-width: none; -ms-overflow-style: none; }
+      .move-item {
+        background: #f8fafc;
+        padding: 0.38rem 0.6rem;
+        border-radius: var(--radius-sm);
+        font-family: monospace;
+        font-size: 0.83rem;
+        color: var(--text-dark);
+        display: flex;
+        gap: 0.5rem;
+        border: 1px solid #e2e8f0;
+      }
+      .move-num { color: var(--text-light); font-weight: 700; }
+      .empty-history {
+        color: var(--text-light);
+        font-size: 0.78rem;
+        text-align: center;
+        padding: 1rem;
+      }
+      .engine-status {
+        margin-top: 0.8rem;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: var(--radius-sm);
+        padding: 0.5rem 0.7rem;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-light);
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+      .engine-status i { color: var(--success); }
+      .engine-status.busy i { color: var(--warning); }
+
+      /* ---------- اورلی نتیجه ---------- */
+      .result-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+        z-index: 2000;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        padding: 1rem;
+      }
+      .result-overlay.open { display: flex; }
+      .result-card {
+        background: #ffffff;
+        border-radius: var(--radius-xl);
+        padding: 2rem 1.6rem 1.6rem;
+        max-width: 420px;
+        width: 100%;
+        text-align: center;
+        box-shadow: var(--shadow-lg);
+        animation: fadeIn 0.3s ease;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(14px); }
+        to { opacity: 1; transform: none; }
+      }
+      .result-icon { font-size: 3rem; margin-bottom: 0.6rem; }
+      .result-title { font-size: 1.5rem; font-weight: 800; color: var(--primary-dark); margin-bottom: 0.4rem; }
+      .result-sub { font-size: 0.88rem; color: var(--text-light); margin-bottom: 1.2rem; line-height: 1.9; }
+      .result-stats {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 1.4rem;
+        padding: 0.9rem;
+        background: #f8fafc;
+        border-radius: var(--radius-md);
+        border: 1px solid #e2e8f0;
+      }
+      .stat-box { display: flex; flex-direction: column; gap: 0.15rem; }
+      .stat-label { font-size: 0.66rem; color: var(--text-light); font-weight: 700; }
+      .stat-value { font-size: 1.15rem; font-weight: 800; color: var(--primary-dark); font-family: monospace; }
+      .result-actions { display: flex; flex-direction: column; gap: 0.5rem; }
+      .result-actions .btn { justify-content: center; width: 100%; }
+
+      /* ---------- ریسپانسیو ---------- */
+      @media (max-width: 1100px) {
+        .engine-wrapper { grid-template-columns: 280px 1fr; }
+        .side-card.history-card { grid-column: 1 / -1; }
+      }
+      @media (max-width: 860px) {
+        .engine-wrapper { grid-template-columns: 1fr; }
+        .bots-grid { max-height: 260px; }
+        .history-list { max-height: 180px; }
+      }
+      @media (max-width: 480px) {
+        .player-name { font-size: 0.78rem; }
+        .timer-box { font-size: 0.85rem; min-width: 60px; }
+        .bot-item .mini-avatar { width: 36px; height: 36px; }
+        .game-controls { flex-wrap: wrap; }
+        .game-controls .btn { min-width: 45%; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div id="header-placeholder"></div>
+
+      <section class="app-hero">
+        <h1><i class="fas fa-robot"></i> بازی با بات</h1>
+        <p>۳۵ حریف از مبتنی ۲۵۰ تا قهرمان جهان ۲۸۸۲ — هر کس با سبک خودش</p>
+      </section>
+
+      <div class="engine-wrapper">
+        <div class="side-card">
+          <h3><i class="fas fa-users"></i> انتخاب حریف</h3>
+          <div class="bot-search">
+            <i class="fas fa-search"></i>
+            <input type="text" id="botSearch" placeholder="جستجوی نام بات…" />
+          </div>
+          <div class="rating-chips" id="ratingChips">
+            <button class="chip active" data-r="all">همه</button>
+            <button class="chip" data-r="low">تا ۱۲۰۰</button>
+            <button class="chip" data-r="mid">۱۲۰۰ تا ۲۰۰۰</button>
+            <button class="chip" data-r="high">۲۰۰۰ به بالا</button>
+          </div>
+          <div class="bots-grid" id="botsGrid"></div>
+
+          <div class="control-group" style="margin-top: 1.2rem">
+            <span class="control-label">رنگ شما:</span>
+            <div class="chips-group" id="colorGroup">
+              <button class="chip-btn active" data-color="white">سفید</button>
+              <button class="chip-btn" data-color="black">سیاه</button>
+              <button class="chip-btn" data-color="random">تصادفی</button>
+            </div>
+          </div>
+          <div class="control-group">
+            <span class="control-label">زمان — همه‌ی زمان‌های رسمی:</span>
+            <div class="chips-group" id="timeGroup">
+              <span class="tc-group-label" style="width:100%"><i class="fas fa-bolt"></i> بولت</span>
+              <button class="chip-btn" data-time="1+0">۱+۰</button>
+              <button class="chip-btn" data-time="1+1">۱+۱</button>
+              <button class="chip-btn" data-time="2+0">۲+۰</button>
+              <button class="chip-btn" data-time="2+1">۲+۱</button>
+              <span class="tc-group-label" style="width:100%"><i class="fas fa-fire"></i> برق‌آسا</span>
+              <button class="chip-btn" data-time="3+0">۳+۰</button>
+              <button class="chip-btn" data-time="3+2">۳+۲</button>
+              <button class="chip-btn" data-time="5+0">۵+۰</button>
+              <button class="chip-btn" data-time="5+3">۵+۳</button>
+              <span class="tc-group-label" style="width:100%"><i class="fas fa-gauge-high"></i> سریع</span>
+              <button class="chip-btn active" data-time="10+0">۱۰+۰</button>
+              <button class="chip-btn" data-time="10+5">۱۰+۵</button>
+              <button class="chip-btn" data-time="15+10">۱۵+۱۰</button>
+              <button class="chip-btn" data-time="25+0">۲۵+۰</button>
+              <button class="chip-btn" data-time="30+0">۳۰+۰</button>
+              <button class="chip-btn" data-time="30+20">۳۰+۲۰</button>
+              <span class="tc-group-label" style="width:100%"><i class="fas fa-chess-king"></i> کلاسیک</span>
+              <button class="chip-btn" data-time="60+0">۶۰+۰</button>
+              <button class="chip-btn" data-time="90+30">۹۰+۳۰</button>
+              <button class="chip-btn" data-time="120+0">۱۲۰+۰</button>
+              <span class="tc-group-label" style="width:100%"><i class="fas fa-sliders"></i> دیگر</span>
+              <button class="chip-btn" data-time="0">بی‌زمان</button>
+              <button class="chip-btn" data-time="custom">سفارشی</button>
+            </div>
+            <div class="custom-time" id="customTimeBox">
+              <div>
+                <label>دقیقه (۱ تا ۱۲۰)</label>
+                <input type="number" id="customMin" min="1" max="120" value="7" />
+              </div>
+              <div>
+                <label>افزوده (ثانیه)</label>
+                <input type="number" id="customInc" min="0" max="60" value="5" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="game-main">
+          <div class="player-bar">
+            <div class="player-info">
+              <div class="player-avatar-sm">
+                <img src="images/bots/1.png" alt="بات" id="botAvatarImg" onerror="this.style.display='none'" />
+              </div>
+              <div>
+                <div class="player-name" id="botName">لوئیس</div>
+                <div class="player-rating" id="botRating">ریتینگ ۲۵۰ · غیرقابل پیش‌بینی</div>
+              </div>
+            </div>
+            <div class="timer-box" id="botTimerBox">10:00</div>
+          </div>
+
+          <div class="bot-speech" id="botSpeech">سلام! من آماده‌ام — هر وقت خواستی شروع کن.</div>
+
+          <div class="board-wrapper-engine">
+            <div id="chessboard"></div>
+          </div>
+
+          <div class="player-bar">
+            <div class="player-info">
+              <div class="player-avatar-sm">
+                <i class="fas fa-user"></i>
+              </div>
+              <div>
+                <div class="player-name">شما</div>
+                <div class="player-rating" id="userColorLabel">مهره‌های سفید</div>
+              </div>
+            </div>
+            <div class="timer-box" id="userTimerBox">10:00</div>
+          </div>
+
+          <div class="game-controls">
+            <button class="btn btn-primary" id="playBtn"><i class="fas fa-play"></i> شروع بازی</button>
+            <button class="btn btn-danger" id="resignBtn"><i class="fas fa-flag"></i> تسلیم</button>
+          </div>
+        </div>
+
+        <div class="side-card history-card">
+          <h3><i class="fas fa-history"></i> حرکات</h3>
+          <div class="history-list" id="historyList">
+            <div class="empty-history">هنوز حرکتی ثبت نشده</div>
+          </div>
+          <div class="engine-status" id="engineStatus">
+            <i class="fas fa-circle-check"></i> انجین آماده است
+          </div>
+          <div style="margin-top: 0.8rem; display: flex; gap: 0.5rem">
+            <button class="btn" style="flex: 1" id="copyPgnBtn"><i class="fas fa-copy"></i> کپی PGN</button>
+            <button class="btn" style="flex: 1" id="downloadPgnBtn"><i class="fas fa-download"></i> دانلود</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="footer-placeholder"></div>
+    </div>
+
+    <div class="result-overlay" id="resultOverlay">
+      <div class="result-card">
+        <div class="result-icon" id="resultIcon">🏆</div>
+        <div class="result-title" id="resultTitle">برد!</div>
+        <div class="result-sub" id="resultSub"></div>
+        <div class="result-stats">
+          <div class="stat-box">
+            <span class="stat-label">حرکات</span><span class="stat-value" id="resultMoves">۰</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">زمان شما</span><span class="stat-value" id="resultUserTime">۰:۰۰</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">زمان بات</span><span class="stat-value" id="resultBotTime">۰:۰۰</span>
+          </div>
+        </div>
+        <div class="result-actions">
+          <button class="btn btn-primary" id="resultRematch"><i class="fas fa-redo"></i> بازی مجدد</button>
+          <button class="btn btn-primary" id="resultReview" style="background: var(--success); border-color: var(--success-dark); box-shadow: 0 4px 0 var(--success-dark)">
+            <i class="fas fa-magnifying-glass-chart"></i> مرور بازی
+          </button>
+          <button class="btn" id="resultCopyPgn"><i class="fas fa-copy"></i> کپی PGN</button>
+          <button class="btn" id="resultClose">بستن</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script src="js/profile.js"></script>
+    <script src="js/engine-core.js"></script>
+    <script src="js/board-ui.js"></script>
+    <script src="js/gamereview.js"></script>
+    <script src="js/bots.js"></script>
+    <script src="js/engine-game.js"></script>
+  </body>
+</html>

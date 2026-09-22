@@ -1,0 +1,685 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="مقالات شطرنج ChessHub — آموزش، استراتژی، تاریخچه و نکات حرفه‌ای + انتشار مستقیم مقاله توسط کاربران" />
+    <title>ChessHub | مقالات</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%E2%99%9B%3C/text%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="lib/fontawesome/all.min.css" />
+    <link href="fonts/vazir/font-face.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+      .art-grid {
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1.2rem; margin-bottom: 2rem;
+      }
+      .art-card {
+        background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-lg);
+        padding: 1.3rem 1.2rem; cursor: pointer; transition: var(--transition-smooth);
+        box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 0.5rem;
+        position: relative; overflow: hidden;
+      }
+      .art-card::before {
+        content: ""; position: absolute; top: 0; right: 0; width: 4px; height: 100%;
+        background: var(--accent); opacity: 0; transition: var(--transition-smooth);
+      }
+      .art-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: var(--accent); }
+      .art-card:hover::before { opacity: 1; }
+      .art-card .a-icon {
+        width: 44px; height: 44px; border-radius: 12px; background: var(--accent-soft);
+        color: var(--accent); display: flex; align-items: center; justify-content: center;
+        font-size: 1.1rem; margin-bottom: 0.3rem;
+      }
+      .art-card.community .a-icon { background: #d1fae5; color: #059669; }
+      .art-card h3 { font-size: 0.95rem; font-weight: 800; color: var(--primary-dark); }
+      .art-card p { font-size: 0.76rem; color: var(--text-light); line-height: 1.9; flex: 1; }
+      .art-card .a-meta {
+        display: flex; justify-content: space-between; align-items: center;
+        font-size: 0.66rem; color: var(--text-light); font-weight: 700; flex-wrap: wrap; gap: 0.3rem;
+      }
+      .art-card .a-meta .a-read { color: var(--accent); display: inline-flex; align-items: center; gap: 0.25rem; }
+      .art-card .a-meta .a-author { color: #059669; display: inline-flex; align-items: center; gap: 0.25rem; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+      /* خواندن مقاله */
+      .art-reader {
+        position: fixed; inset: 0; background: #fff; z-index: 1200;
+        transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow-y: auto; direction: rtl;
+      }
+      .art-reader.open { transform: translateX(0); }
+      .art-reader-head {
+        position: sticky; top: 0; background: var(--primary-dark); color: #fff;
+        padding: 0.9rem 1.3rem; display: flex; justify-content: space-between; align-items: center;
+        z-index: 5; box-shadow: var(--shadow-md);
+      }
+      .art-reader-head h2 { font-size: 1rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .art-reader-head .reader-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
+      .art-reader-head button {
+        background: rgba(255,255,255,0.12); border: none; color: #fff; font-family: "Vazir";
+        padding: 0.4rem 1rem; border-radius: var(--radius-sm); cursor: pointer; font-weight: 700;
+        display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0;
+      }
+      .art-reader-head button:hover { background: var(--danger); }
+      .art-reader-body { max-width: 760px; margin: 0 auto; padding: 1.8rem 1.3rem 3rem; }
+      .art-reader-body .a-hero {
+        display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1rem;
+        font-size: 0.72rem; color: var(--text-light); font-weight: 700; flex-wrap: wrap;
+      }
+      .art-reader-body .a-hero .a-cat {
+        background: var(--accent-soft); color: var(--accent); padding: 0.2rem 0.8rem;
+        border-radius: 99px; font-size: 0.68rem;
+      }
+      .art-reader-body .a-hero .a-byuser { background: #d1fae5; color: #065f46; padding: 0.2rem 0.8rem; border-radius: 99px; font-size: 0.68rem; }
+      .art-reader-body h1 { font-size: 1.35rem; font-weight: 800; color: var(--primary-dark); margin-bottom: 1.2rem; line-height: 1.8; }
+      .art-reader-body h2 {
+        font-size: 1rem; font-weight: 800; color: var(--primary-dark);
+        margin: 1.6rem 0 0.6rem; border-right: 4px solid var(--accent); padding-right: 0.7rem;
+      }
+      .art-reader-body p { font-size: 0.86rem; line-height: 2.2; color: var(--text-dark); margin-bottom: 0.9rem; text-align: justify; }
+      .art-reader-body ul { margin: 0 0 1rem 0; padding-right: 1.3rem; }
+      .art-reader-body li { font-size: 0.84rem; line-height: 2.2; color: var(--text-dark); }
+      .art-reader-body .a-tip {
+        background: #f0fff4; border: 1px solid #c6f6d5; border-radius: var(--radius-md);
+        padding: 0.9rem 1rem; font-size: 0.8rem; line-height: 2; color: #22543d; margin: 1rem 0;
+      }
+      .art-reader-body .a-tip b { display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.3rem; }
+
+      /* بنر دعوت به نوشتن مقاله */
+      .write-cta {
+        display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+        background: linear-gradient(120deg, var(--primary-dark) 0%, var(--accent-dark) 100%);
+        border-radius: var(--radius-md); padding: 1.2rem 1.5rem; margin-bottom: 1.4rem;
+        box-shadow: var(--shadow-md); position: relative; overflow: hidden;
+      }
+      .write-cta::after {
+        content: "\f044"; font-family: "Font Awesome 6 Free"; font-weight: 900;
+        position: absolute; left: 2%; bottom: -30%; font-size: 8rem;
+        color: rgba(255,255,255,0.06); pointer-events: none; transform: rotate(-12deg);
+      }
+      .write-cta-text h3 { color: #fff; font-size: 1.05rem; font-weight: 800; margin: 0 0 0.3rem; }
+      .write-cta-text h3 i { color: #ffd166; }
+      .write-cta-text p { color: rgba(255,255,255,0.85); font-size: 0.8rem; line-height: 1.7; margin: 0; max-width: 520px; }
+      .btn-write {
+        display: inline-flex; align-items: center; gap: 0.5rem;
+        background: #fff; color: var(--accent-dark); padding: 0.65rem 1.5rem;
+        border-radius: 40px; font-family: "Vazir"; font-weight: 800; font-size: 0.85rem;
+        border: none; cursor: pointer; white-space: nowrap;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.25); transition: var(--transition-smooth); position: relative; z-index: 1;
+      }
+      .btn-write:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(0,0,0,0.3); color: var(--primary-dark); }
+
+      /* ===== دفترچه نوشتن مقاله (تمام‌صفحه) ===== */
+      .writer {
+        position: fixed; inset: 0; background: #fff; z-index: 1250;
+        transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow-y: auto; direction: rtl;
+      }
+      .writer.open { transform: translateX(0); }
+      .writer-head {
+        position: sticky; top: 0; background: var(--primary-dark); color: #fff;
+        padding: 0.9rem 1.3rem; display: flex; justify-content: space-between; align-items: center;
+        z-index: 5; box-shadow: var(--shadow-md);
+      }
+      .writer-head h2 { font-size: 1rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem; }
+      .writer-head h2 i { color: #ffd166; }
+      .writer-head button {
+        background: rgba(255,255,255,0.12); border: none; color: #fff; font-family: "Vazir";
+        padding: 0.4rem 1rem; border-radius: var(--radius-sm); cursor: pointer; font-weight: 700;
+        display: flex; align-items: center; gap: 0.4rem;
+      }
+      .writer-head button:hover { background: var(--danger); }
+      .writer-body { max-width: 720px; margin: 0 auto; padding: 1.8rem 1.3rem 3rem; }
+      .w-field { margin-bottom: 1rem; }
+      .w-field label { font-size: 0.75rem; font-weight: 800; color: var(--text-dark); display: block; margin-bottom: 0.35rem; }
+      .w-field label .req { color: var(--danger); }
+      .w-field input, .w-field select, .w-field textarea {
+        width: 100%; border: 1.5px solid var(--border); background: #f8fafc;
+        border-radius: var(--radius-sm); padding: 0.6rem 0.75rem; font-family: "Vazir";
+        font-size: 0.82rem; font-weight: 600; color: var(--text-dark); outline: none;
+        transition: var(--transition-smooth); resize: vertical; box-sizing: border-box;
+      }
+      .w-field input:focus, .w-field select:focus, .w-field textarea:focus { border-color: var(--accent); background: #fff; }
+      .w-field textarea { min-height: 320px; line-height: 2.1; }
+      .w-hint {
+        font-size: 0.68rem; color: var(--text-light); line-height: 2; background: #f8fafc;
+        border-radius: var(--radius-sm); padding: 0.65rem 0.85rem; margin-top: 0.45rem;
+      }
+      .w-hint b { color: var(--accent); }
+      .w-row { display: flex; gap: 0.8rem; flex-wrap: wrap; }
+      .w-row .w-field { flex: 1; min-width: 200px; }
+      .w-actions { display: flex; gap: 0.7rem; margin-top: 1.2rem; flex-wrap: wrap; }
+      .w-actions button {
+        font-family: "Vazir"; font-weight: 800; border-radius: 40px; cursor: pointer;
+        padding: 0.65rem 1.9rem; font-size: 0.85rem; transition: var(--transition-smooth);
+        border: 1px solid var(--border); background: #f1f5f9; color: var(--text-dark);
+        display: inline-flex; align-items: center; gap: 0.45rem;
+      }
+      .w-actions button.primary { background: var(--accent); color: #fff; border-color: var(--accent-dark); box-shadow: var(--shadow-sm); }
+      .w-actions button.primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
+      .w-actions button.primary:disabled { opacity: 0.6; cursor: wait; transform: none; }
+      .w-note {
+        font-size: 0.7rem; color: var(--text-light); line-height: 2; margin-top: 1rem;
+        background: #f0fff4; border: 1px solid #c6f6d5; border-radius: var(--radius-sm);
+        padding: 0.7rem 0.9rem; color: #22543d;
+      }
+      .w-note b { color: #059669; }
+
+      .art-empty {
+        grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--text-light);
+        font-size: 0.8rem; line-height: 2.2;
+      }
+      .art-empty i { font-size: 2rem; display: block; margin-bottom: 0.6rem; opacity: 0.5; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div id="header-placeholder"></div>
+
+      <section class="app-hero">
+        <h1><i class="fas fa-newspaper"></i> مقالات شطرنج</h1>
+        <p>آموزش، استراتژی و تاریخچه — به زبان ساده، برای پیشرفت واقعی</p>
+      </section>
+
+      <!-- ✍️ نوشتن مقاله — انتشار مستقیم برای همه‌ی کاربران -->
+      <div class="write-cta" id="writeCta">
+        <div class="write-cta-text">
+          <h3><i class="fas fa-pen-nib"></i> تو هم می‌توانی مقاله بنویسی!</h3>
+          <p>
+            مقاله‌ات را همین‌جا بنویس و بلافاصله منتشر کن — بدون بررسی و منتظرماندن،
+            با نام خودت و برای نمایش به همه‌ی کاربران سایت.
+          </p>
+        </div>
+        <button class="btn-write" id="writeOpenBtn"><i class="fas fa-feather-pointed"></i> نوشتن مقاله جدید</button>
+        <button class="btn-write" type="button" onclick="ContribGuide.open('articles')" style="background:transparent;border:2px solid rgba(255,255,255,0.65);color:#fff;box-shadow:none"><i class="fas fa-circle-question"></i> راهنما</button>
+      </div>
+
+      <div class="art-grid" id="artGrid"></div>
+
+      <div id="footer-placeholder"></div>
+    </div>
+
+    <!-- ===== خواندن مقاله ===== -->
+    <div class="art-reader" id="artReader">
+      <div class="art-reader-head">
+        <h2 id="readerTitle"></h2>
+        <div class="reader-actions">
+          <button id="readerEdit" style="display:none"><i class="fas fa-pen"></i> ویرایش</button>
+          <button id="readerDelete" style="display:none"><i class="fas fa-trash-alt"></i> حذف</button>
+          <button id="readerClose"><i class="fas fa-xmark"></i> بستن</button>
+        </div>
+      </div>
+      <div class="art-reader-body" id="readerBody"></div>
+    </div>
+
+    <!-- ===== دفترچه نوشتن مقاله ===== -->
+    <div class="writer" id="writer">
+      <div class="writer-head">
+        <h2 id="writerHeadTitle"><i class="fas fa-feather-pointed"></i> نوشتن مقاله جدید</h2>
+        <button id="writerClose"><i class="fas fa-xmark"></i> بستن</button>
+      </div>
+      <div class="writer-body">
+        <div class="w-row">
+          <div class="w-field">
+            <label>نام نویسنده <span class="req">*</span></label>
+            <input type="text" id="wAuthor" maxlength="40" readonly placeholder="پروفایل تو" style="background:#f3f5fa;color:#6b7590" />
+            <div class="w-hint">👤 نام تو از پروفایلی که در شروع انتخاب کردی می‌آید و در کل سایت یکسان است.</div>
+          </div>
+          <div class="w-field">
+            <label>دسته‌بندی</label>
+            <select id="wCat">
+              <option value="مبانی">مبانی</option>
+              <option value="تاکتیک">تاکتیک</option>
+              <option value="آخربازی">آخربازی</option>
+              <option value="گشایش">گشایش</option>
+              <option value="استراتژی">استراتژی</option>
+              <option value="تاریخچه">تاریخچه</option>
+              <option value="پیشرفت">پیشرفت و روانشناسی</option>
+              <option value="سایر">سایر</option>
+            </select>
+          </div>
+        </div>
+        <div class="w-field">
+          <label>عنوان مقاله <span class="req">*</span></label>
+          <input type="text" id="wTitle" maxlength="120" placeholder="مثلاً: راز حمله به شاه در پرتگاه وزیر" />
+        </div>
+        <div class="w-field">
+          <label>توضیح کوتاه (نمایش روی کارت) <span class="req">*</span></label>
+          <textarea id="wDesc" maxlength="300" style="min-height:70px" placeholder="در یک تا دو جمله بگو خواننده با خوندن این مقاله چه چیزی یاد می‌گیرد…"></textarea>
+        </div>
+        <div class="w-field">
+          <label>متن مقاله <span class="req">*</span></label>
+          <textarea id="wBody" maxlength="40000" placeholder="مقاله‌ات را این‌جا بنویس…"></textarea>
+          <div class="w-hint">
+            <b>راهنمای قالب‌بندی ساده:</b>
+            خطی که با <b>##</b> شروع شود → تیتر فرعی &nbsp;|&nbsp;
+            خطی که با <b>-</b> شروع شود → فهرست گلوله‌ای &nbsp;|&nbsp;
+            خط خالی → پاراگراف جدید.
+            هر خط عادی یک پاراگراف کامل مقاله است.
+          </div>
+        </div>
+        <div class="w-actions">
+          <button class="primary" id="wPublish"><i class="fas fa-paper-plane"></i> انتشار برای همه</button>
+          <button id="wCancel">انصراف</button>
+        </div>
+        <div class="w-note">
+          <b>انتشار مستقیم:</b> مقاله بلافاصله با نام تو برای <b>همه‌ی کاربران سایت</b> در همین صفحه نمایش داده می‌شود.
+          فقط خودت (با همین نام نویسنده) می‌توانی بعداً آن را <b>ویرایش</b> یا <b>حذف</b> کنی. لطفاً محتوای خودت را بنویس.
+        </div>
+      </div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script src="js/author.js"></script>
+    <script src="js/profile.js"></script>
+    <script src="js/contrib-guide.js"></script>
+    <script>
+      (function () {
+        "use strict";
+        const FA = "۰۱۲۳۴۵۶۷۸۹";
+        function fa(n) { return String(n).replace(/\d/g, function (d) { return FA[+d]; }); }
+        function $(id) { return document.getElementById(id); }
+        function escapeHtml(v) {
+          return String(v == null ? "" : v)
+            .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+        function currentUser() {
+          return (window.ChessHubAuthor && window.ChessHubAuthor.name) || "";
+        }
+
+        // ═══════════ مقالات پایه (جزئی از کد سایت) ═══════════
+        const ARTICLES = [
+          {
+            id: "opening-principles",
+            icon: "fa-chess-board",
+            cat: "مبانی",
+            read: 5,
+            title: "پنج اصل طلایی گشایش — چرا وسط بازی خوب نمی‌رسی؟",
+            desc: "اگر تا حرکت دهم همیشه در موقعیت بدی هستی، تقصیر از «حفظ‌کردن» است. این پنج اصل را بلد باش، دیگر لازم نیست گشایش‌ها را حفظ کنی.",
+            body: `
+              <h1>پنج اصل طلایی گشایش</h1>
+              <p>بیشتر بازیکنان آماتور به‌جای فهمیدن اصول گشایش، سعی می‌کنند دنباله‌ی حرکات را حفظ کنند. مشکل اینجاست که حریف یک حرکت خارج از کتاب بزند، همه‌چیز به‌هم می‌ریزد. وقتی اصول را بفهمی، حتی در موقعیت‌های ناآشنا هم بهترین — یا نزدیک به بهترین — حرکت را پیدا می‌کنی.</p>
+              <h2>۱. کنترل مرکز</h2>
+              <p>خانه‌های e4، d4، e5 و d5 قلب تخته هستند. مهره‌ای که مرکز را کنترل کند، به هر دو جناح دسترسی دارد و سریع‌تر جابه‌جا می‌شود. حرکت ۱.e4 یا ۱.d4 دقیقاً به همین دلیل محبوب‌ترین اولین حرکات‌اند: هم مرکز را اشغال می‌کنند و هم راه فیل و وزیر را باز می‌کنند.</p>
+              <h2>۲. توسعه‌ی سریع مهره‌ها</h2>
+              <p>اسب‌ها و فیل‌ها را در چند حرکت اول وارد بازی کن. یک قاعده‌ی ساده: قبل از حرکت دهم، هر دو اسب و هر دو فیل باید از خانه‌های اول خارج شده باشند. هر مهره‌ای که در خانه‌ی اول مانده، «بازیکنِ نیمه‌حاضر» است — یعنی عملاً با یک مهره‌ی کم بازی می‌کنی.</p>
+              <h2>۳. زود شاه را امن کن</h2>
+              <p>قلعه‌کردن (Castling) هم شاه را به گوشه‌ی امن می‌برد و هم رخ را وارد بازی می‌کند. اگر کیش‌ومات‌های بازیکنان مبتدی را بررسی کنی، می‌بینی که اکثرشان در موقعیت‌هایی رخ داده که شاه وسط تخته گیر افتاده بود. قاعده: تا جای ممکن تا حرکت دهم قلعه کن.</p>
+              <h2>۴. مهره‌ی هم‌نام را دو بار حرکت نده</h2>
+              <p>هر حرکتی که مهره‌ی توسعه‌یافته را دوباره جابه‌جا کند، یک «تمپو» (باختِ زمان) است؛ حریف در همین فاصله مهره‌های خودش را توسعه می‌دهد. البته استثنا هست — اگر حریف مهره‌ات را تهدید کند یا حرکت آن برتری روشن بسازد — ولی این استثنا باید آگاهانه باشد، نه عادت.</p>
+              <h2>۵. وزیر را زود بیرون نیاور</h2>
+              <p>وزیر خطرناک‌ترین مهره است، ولی دقیقاً به همین دلیل با بیرون‌آمدن زودهنگامش حریف با توسعه‌ی اسب‌ها و فیل‌ها می‌تواند وزیرت را «کتک‌زدنی» کند و شما به ازای هر حمله‌ی وزیر، یک مهره‌ی جدید برای حریف وارد بازی می‌شود. وزیر را بعد از اتمام توسعه وارد میدان کن.</p>
+              <div class="a-tip"><b><i class="fas fa-lightbulb"></i> نکته‌ی تمرینی</b>بعد از هر باخت، حرکات ۱ تا ۱۰ را دوباره ببین و شمارش کن: چند بار مهره‌ی هم‌نام را حرکت دادی؟ چند مهره هنوز در خانه‌ی اول بود؟ همین یک عادت ساده ریتینگ را واقعاً بالا می‌برد.</div>
+            `,
+          },
+          {
+            id: "endgame-basics",
+            icon: "fa-flag-checkered",
+            cat: "آخربازی",
+            read: 6,
+            title: "آخربازی‌ها را جدی بگیر — جایی که نیم‌امتیازها ساخته می‌شوند",
+            desc: "اکثر بازیکنان وقتشان را صرف تاکتیک می‌کنند ولی بازی در حرکت چهلم برنده یا می‌بازند. راهنمای ورود عملی به دنیای آخربازی.",
+            body: `
+              <h1>آخربازی‌ها را جدی بگیر</h1>
+              <p>یک حقیقت تلخ اما ساده: تو بخش «آخربازی‌های» همین سایت بیش از صد موقعیت تمرینی داری که اکثر حریف‌هایت هرگز تمرینشان نکرده‌اند. همان‌جاست که نیم‌امتیازهای «مساوی‌نما» تبدیل به برد می‌شوند و برتری‌های یک‌پیاده‌ای نجات داده می‌شوند.</p>
+              <h2>چرا آخربازی اول یاد گرفته شود؟</h2>
+              <p>چون آخربازی «زبان پایه‌ی شطرنج» است. وقتی بفهمی پیاده‌ی گذرنده چطور می‌دوَد، اهمیت خانه‌های کلیدی را درک می‌کنی، و قدرت مطلق مهره‌ها را از نزدیک می‌بینی، فهم تو از وسط بازی هم عمیق‌تر می‌شود. کاپابلانکا از همان ابتدا با آخربازی شروع می‌کرد و توصیه‌اش هم دقیقاً همین بود.</p>
+              <h2>سه موقعیتی که باید در خواب بلد باشی</h2>
+              <ul>
+                <li><b>شاه و پیاده در برابر شاه (KPK):</b> مفهوم اوپوزیسیون (رو‌به‌رویی شاه‌ها) و مربع پیاده. اگر پیاده‌ات را بد برسانید، حتی با دو پیاده‌ی بیشتر هم مساوی می‌شود.</li>
+                <li><b>شاه و رخ در برابر شاه (KRK):</b> فشردن شاه حریف به لبه با «مثلث‌کشیدن رخ» — مات در حداکثر ۱۶ حرکت با روش فیلدافایی.</li>
+                <li><b>شاه و وزیر در برابر شاه (KQK):</b> ساده‌ترین مات اجباری؛ رخ‌ساز یا مات نزدیکِ شاه.</li>
+              </ul>
+              <h2>قانون طلایی: شاهِ فعال</h2>
+              <p>در وسط بازی شاه را پشت سنگرها پنهان می‌کنی، ولی وقتی مهره‌های سنگین از تخته رفتند، شاه تبدیل به یک مهره‌ی تقریباً هم‌ارزِ رخ می‌شود! آخربازی‌های مساوی‌نما اغلب فقط با «فعال‌تر بودن شاه» برنده می‌شوند. این مفهوم در بخش مفاهیمِ آخربازی سایت با دیاگرام زنده توضیح داده شده است.</p>
+              <div class="a-tip"><b><i class="fas fa-lightbulb"></i> تمرین پیشنهادی</b>هر روز یک درس از بخش آخربازی با «قدرت تحلیل عمیق» مربی حل کن و حتماً حباب‌های مربی را بخوان — تحلیل خط اصلی را نشان می‌دهد که چرا حرکت درست، درست است.</div>
+            `,
+          },
+          {
+            id: "tactics-vision",
+            icon: "fa-bolt",
+            cat: "تاکتیک",
+            read: 4,
+            title: "چشمِ تاکتیکی — چطور الگوها را قبل از حریف ببینی؟",
+            desc: "پین، چنگال، کیش دوگانه و حذف دفاع — چهار الگویی که ۸۰٪ تاکتیک‌های واقعی را می‌سازند و روش درست حل پازل.",
+            body: `
+              <h1>چشمِ تاکتیکی</h1>
+              <p>تاکتیک یعنی سواری کوتاه‌مدت: سریالی از حرکات اجباری که به سود مادی یا حمله‌ی مستقیم می‌رسد. خبر خوب این است که تاکتیک‌ها از الگوهای محدودی ساخته می‌شوند و مغز با دیدنِ تکراری یاد می‌گیرد — دقیقاً مثل تشخیص چهره.</p>
+              <h2>چهار الگوی پایه</h2>
+              <ul>
+                <li><b>چنگال (Fork):</b> یک مهره دو هدف را هم‌زمان تهدید می‌کند؛ حریف فقط یکی را نجات می‌دهد. اسب مشهورترین چنگال‌زن است.</li>
+                <li><b>پین (Pin):</b> مهره‌ای به شاه یا مهره‌ی ارزشمندترش چسبیده و نمی‌تواند جابه‌جا شود؛ بعد همان مهره را با بقیه‌ی ارتش محاصره می‌کنی.</li>
+                <li><b>کیش دوگانه (Double Check):</b> نادر اما مرگبار — دو مهره هم‌زمان کیش می‌کنند و تنها راه نجات، حرکت شاه است.</li>
+                <li><b>حذف دفاع (Removing the Defender):</b> مهم‌ترین الگوی حرفه‌ای‌ها؛ اول نگهبان را بگیر، بعد گنج را.</li>
+              </ul>
+              <h2>روش درست حل پازل</h2>
+              <p>اول «سنجاق کن»: کدام مهره‌ی حریف بی‌دفاع است؟ کدام مهره‌ی من بی‌دفاع است؟ کیش‌ها کجاست؟ بعد حرکات اجباری (کیش، گرفتن، تهدید سنگین) را دنبال کن — تاکتیک تقریباً همیشه از حرکات اجباری شروع می‌شود. در پازل عجله‌ای سایت، همین دو عادت را تمرین می‌کنی، با این تفاوت که ساعت هم تیک می‌زند تا یاد بگیری سریع هم ببینی.</p>
+              <div class="a-tip"><b><i class="fas fa-lightbulb"></i> قانون سه‌ثانیه‌ای</b>قبل از هر حرکتِ خودت، سه ثانیه صبر کن و فقط یک سؤال: «بعد از این حرکت، بدترین پاسخ حریف چیست؟» همین عادت ساده نصف فاجعه‌ها را حذف می‌کند.</div>
+            `,
+          },
+          {
+            id: "rating-mindset",
+            icon: "fa-chart-line",
+            cat: "پیشرفت",
+            read: 5,
+            title: "ریتینگ بالاتر می‌رود — اما نه با روشی که فکر می‌کنی!",
+            desc: "چرا بازی پیاپی ریتینگ را بالا نمی‌برد؟ راز واقعی پیشرفت: تحلیل درست باخت‌ها، تمرکز روی یک ضعف و مدیریت ذهن.",
+            body: `
+              <h1>ریتینگ بالاتر می‌رود — اما نه با روشی که فکر می‌کنی!</h1>
+              <p>بازی‌کردنِ پیاپی بدون تحلیل، مثل دویدن روی تردمیل است: خسته می‌شوی ولی جلو نمی‌روی. پیشرفت واقعی از «حلقه‌ی بازخورد» می‌آید: بازی → تحلیل → تمرینِ هدفمندِ همان ضعف → دوباره بازی. بخش آنالیز سایت برای دقیقاً همین حلقه ساخته شده است.</p>
+              <h2>باخت‌ها را مثل طلا ببین</h2>
+              <p>هر باخت یک نقشه‌ی رایگان از ضعف‌های توست. بعد از هر بازی ریتینگ‌دار، دکمه‌ی «مرور بازی» را بزن: انجین همه‌ی حرکات را نمره می‌دهد و فاجعه‌ها و اشتباه‌ها را با فلش سبزِ «حرکت درست» نشان می‌دهد. فقط کافی است در هر مرور، یکی-دو اشتباهِ اول را عمیق بفهمی — نه همه را.</p>
+              <h2>یک ضعف را تا ریشه برو</h2>
+              <p>اگر مرورها نشان داد همیشه در آخربازی رخ‌وپیاده می‌بازی، هفته‌ی بعد فقط آخربازی تمرین کن. اگر تاکتیک است، پازل راش. تمرکز چندجایی یعنی هیچ‌جایی. قاعده‌ی ساده: هر هفته یک «موضوع هفته».</p>
+              <h2>مدیریت تیلت (Tilt)</h2>
+              <p>دو باخت پشت‌سرهم؟ بازی را ببند. ذهن عصبانی دقیقاً همان حرکات شتاب‌زده را تکرار می‌کند که باعث باخت شد. بازیکنان حرفه‌ای هم تیلت می‌کنند؛ تفاوتشان این است که می‌دانند کی باید دست از بازی بکشند. در بازی آنلاین سایت هم همین‌طور: بعد از هر باخت، یا «بازی جدید» بزن با ذهن تازه، یا برو تمرین.</p>
+              <div class="a-tip"><b><i class="fas fa-lightbulb"></i> هدف‌گذاری درست</b>به‌جای «می‌خواهم ۱۰۰ امتیاز بگیرم» بگو «این هفته صفر فاجعه در مرور بازی‌ها». امتیاز، نتیجه‌ی فرایند است؛ خودِ فرایند را هدف بگیر.</div>
+            `,
+          },
+        ];
+
+        // ═══════════ وضعیت ═══════════
+        let communityArticles = []; // 🌍 مقالات عمومی کاربران (از سرور)
+        let currentViewing = null;  // مقاله‌ی در حال خواندن
+        let editingArticle = null;  // ✏️ مقاله‌ی در حال ویرایش (null = نوشتن مقاله‌ی جدید)
+
+        // متن خام مقاله کاربر → HTML امن (فرار کامل + قالب‌بندی ساده)
+        function formatUserBody(raw) {
+          const lines = String(raw || "").split(/\r?\n/);
+          let html = "";
+          let inList = false;
+          const closeList = function () { if (inList) { html += "</ul>"; inList = false; } };
+          lines.forEach(function (line) {
+            const t = line.trim();
+            if (!t) { closeList(); return; }
+            if (t.indexOf("###") === 0) {
+              closeList();
+              html += "<h2>" + escapeHtml(t.slice(3).trim()) + "</h2>";
+            } else if (t.indexOf("##") === 0) {
+              closeList();
+              html += "<h2>" + escapeHtml(t.slice(2).trim()) + "</h2>";
+            } else if (t.indexOf("-") === 0) {
+              if (!inList) { html += "<ul>"; inList = true; }
+              html += "<li>" + escapeHtml(t.slice(1).trim()) + "</li>";
+            } else {
+              closeList();
+              html += "<p>" + escapeHtml(t) + "</p>";
+            }
+          });
+          closeList();
+          return html;
+        }
+
+        function readMinutes(a) {
+          if (a.read) return a.read;
+          const words = String(a.body || "").split(/\s+/).filter(Boolean).length;
+          return Math.max(1, Math.round(words / 180));
+        }
+
+        // ═══════════ رندر لیست ═══════════
+        function renderArticles() {
+          const grid = $("artGrid");
+          if (!grid) return;
+          grid.innerHTML = "";
+
+          ARTICLES.forEach(function (a) {
+            grid.appendChild(buildCard(a, false));
+          });
+
+          if (!communityArticles.length) {
+            const empty = document.createElement("div");
+            empty.className = "art-empty";
+            empty.innerHTML =
+              '<i class="fas fa-feather-pointed"></i>' +
+              "هنوز هیچ مقاله‌ای توسط کاربران منتشر نشده — تو اولین نفر باش! " +
+              "با دکمه‌ی «نوشتن مقاله جدید» مقاله‌ات بلافاصله برای همه منتشر می‌شود.";
+            grid.appendChild(empty);
+            return;
+          }
+          communityArticles.forEach(function (a) {
+            grid.appendChild(buildCard(a, true));
+          });
+        }
+
+        function buildCard(a, isCommunity) {
+          const card = document.createElement("div");
+          card.className = "art-card" + (isCommunity ? " community" : "");
+          card.innerHTML =
+            '<div class="a-icon"><i class="fas ' +
+            escapeHtml(isCommunity ? a.icon || "fa-user-pen" : a.icon) +
+            '"></i></div>' +
+            "<h3>" + escapeHtml(a.title) + "</h3>" +
+            "<p>" + escapeHtml(a.desc) + "</p>" +
+            '<div class="a-meta">' +
+            "<span><i class=\"fas fa-tag\"></i> " + escapeHtml(a.cat) + "</span>" +
+            (isCommunity
+              ? '<span class="a-author"><i class="fas fa-pen-nib"></i> ' + escapeHtml(a.author || "ناشناس") + "</span>"
+              : "") +
+            '<span class="a-read"><i class="fas fa-book-open"></i> ' + fa(readMinutes(a)) + " دقیقه مطالعه</span>" +
+            "</div>";
+          card.addEventListener("click", function () { openReader(a, isCommunity); });
+          return card;
+        }
+
+        // ═══════════ خواندن ═══════════
+        function openReader(a, isCommunity) {
+          currentViewing = isCommunity ? a : null;
+          $("readerTitle").textContent = a.title;
+          let hero =
+            '<div class="a-hero"><span class="a-cat">' + escapeHtml(a.cat) + "</span>" +
+            "<span><i class='fas fa-clock'></i> " + fa(readMinutes(a)) + " دقیقه مطالعه</span>";
+          if (isCommunity) {
+            hero +=
+              '<span class="a-byuser"><i class="fas fa-globe"></i> مقاله‌ی کاربران — اثر ' +
+              escapeHtml(a.author || "ناشناس") + "</span>";
+          } else {
+            hero += "<span><i class='fas fa-chess-queen'></i> ChessHub</span>";
+          }
+          hero += "</div>";
+
+          $("readerBody").innerHTML = hero + (isCommunity ? formatUserBody(a.body) : a.body);
+
+          // ویرایش/حذف فقط توسط نویسنده‌ی همان مقاله
+          const isMine = isCommunity && currentUser() && a.author === currentUser();
+          const editBtn = $("readerEdit");
+          editBtn.style.display = isMine ? "flex" : "none";
+          editBtn.onclick = function () {
+            closeReader();
+            openWriter(a);
+          };
+          const delBtn = $("readerDelete");
+          delBtn.style.display = isMine ? "flex" : "none";
+
+          $("artReader").classList.add("open");
+          document.body.style.overflow = "hidden";
+          $("artReader").scrollTop = 0;
+        }
+
+        $("readerDelete").addEventListener("click", function () {
+          const a = currentViewing;
+          if (!a) return;
+          if (!confirm("مقاله‌ی «" + a.title + "» برای همیشه حذف شود؟")) return;
+          this.disabled = true;
+          const self = this;
+          CommunityHub.save("articles", "delete", a.serverId || a.id, { author: currentUser() })
+            .then(function () {
+              toast("🗑 مقاله حذف شد و برای دیگران هم دیگر نمایش داده نمی‌شود");
+              // حذف از نسخه‌ی محلی هم (اگر باشد)
+              try {
+                const KEY = "chesshub_user_articles";
+                const list = JSON.parse(localStorage.getItem(KEY) || "[]")
+                  .filter(function (x) { return String(x.id) !== String(a.id) && String(x.serverId || "") !== String(a.id); });
+                localStorage.setItem(KEY, JSON.stringify(list));
+              } catch (e) {}
+              communityArticles = communityArticles.filter(function (x) { return x !== a; });
+              renderArticles();
+              $("artReader").classList.remove("open");
+              document.body.style.overflow = "";
+            })
+            .catch(function (err) {
+              alert("حذف از سرور ممکن نشد: " + err.message);
+            })
+            .finally(function () { self.disabled = false; });
+        });
+
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape") {
+            if ($("artReader").classList.contains("open")) $("readerClose").click();
+            if ($("writer").classList.contains("open")) closeWriter();
+          }
+        });
+
+        // ═══════════ نوشتن / ویرایش و انتشار ═══════════
+        function closeReader() {
+          $("artReader").classList.remove("open");
+          document.body.style.overflow = "";
+        }
+
+        function setWriterMode(isEdit) {
+          $("writerHeadTitle").innerHTML = isEdit
+            ? '<i class="fas fa-pen"></i> ویرایش مقاله'
+            : '<i class="fas fa-feather-pointed"></i> نوشتن مقاله جدید';
+          $("wPublish").innerHTML = isEdit
+            ? '<i class="fas fa-save"></i> ذخیره تغییرات برای همه'
+            : '<i class="fas fa-paper-plane"></i> انتشار برای همه';
+        }
+
+        function openWriter(editItem) {
+          editingArticle = editItem || null;
+          if (editingArticle) {
+            // ✏️ حالت ویرایش — فیلدها با محتوای فعلی مقاله پر می‌شوند
+            // (نام نویسنده ثابت می‌ماند؛ سرور فقط نویسنده‌ی همان اثر را می‌پذیرد)
+            $("wAuthor").value = editingArticle.author || currentUser() || "";
+            $("wAuthor").readOnly = true;
+            $("wCat").value = editingArticle.category || "سایر";
+            $("wTitle").value = editingArticle.title || "";
+            $("wDesc").value = editingArticle.desc || "";
+            $("wBody").value = editingArticle.body || "";
+          } else {
+            // 👤 نام نویسنده از پروفایل سراسری سایت می‌آید — همیشه قفل است
+            $("wAuthor").value =
+              (window.ChessHubProfile && ChessHubProfile.name) || currentUser() || "";
+            $("wAuthor").readOnly = true;
+            $("wTitle").value = "";
+            $("wDesc").value = "";
+            $("wBody").value = "";
+          }
+          setWriterMode(!!editingArticle);
+          $("writer").classList.add("open");
+          document.body.style.overflow = "hidden";
+          setTimeout(function () { $("wTitle").focus(); }, 320);
+        }
+        function closeWriter() {
+          $("writer").classList.remove("open");
+          document.body.style.overflow = "";
+          editingArticle = null;
+          setWriterMode(false);
+        }
+        $("writeOpenBtn").addEventListener("click", function () { openWriter(null); });
+        $("writerClose").addEventListener("click", closeWriter);
+        $("wCancel").addEventListener("click", closeWriter);
+        $("readerClose").addEventListener("click", closeReader);
+
+        $("wPublish").addEventListener("click", async function () {
+          const btn = this;
+          const isEdit = !!editingArticle;
+          // 👤 نام نویسنده = پروفایل سراسری سایت (یکتا) — نه از فیلد خوانده می‌شود نه تغییر می‌کند
+          const author =
+            (window.ChessHubProfile && ChessHubProfile.name) || $("wAuthor").value.trim();
+          const title = $("wTitle").value.trim();
+          const desc = $("wDesc").value.trim();
+          const body = $("wBody").value.trim();
+          if (author.length < 2) return toast("اول پروفایلت را بساز — یک بار در شروع سایت ازت پرسیده می‌شود");
+          if (title.length < 5) return toast("عنوان مقاله خیلی کوتاه است");
+          if (desc.length < 10) return toast("توضیح کوتاه را بنویس — روی کارت مقاله نمایش داده می‌شود");
+          if (body.length < 50) return toast("متن مقاله خیلی کوتاه است — حداقل چند پاراگراف بنویس");
+
+          // نام واردشده = هویت نویسنده در سراسر سایت (دروس/گشایش‌ها هم)
+
+          const action = isEdit ? "update" : "publish";
+          const editId = isEdit ? (editingArticle.serverId || editingArticle.id) : null;
+          btn.disabled = true;
+          btn.innerHTML = isEdit
+            ? '<i class="fas fa-spinner fa-pulse"></i> در حال ذخیره…'
+            : '<i class="fas fa-spinner fa-pulse"></i> در حال انتشار…';
+          try {
+            const j = await CommunityHub.save("articles", action, editId, {
+              title: title,
+              category: $("wCat").value,
+              desc: desc,
+              body: body,
+              author: author,
+            });
+            if (j.item) {
+              if (isEdit) {
+                // جایگزینی نسخه‌ی قبلی در فهرست عمومی
+                const idx = communityArticles.findIndex(function (x) {
+                  return String(x.id) === String(j.item.id);
+                });
+                if (idx >= 0) communityArticles[idx] = j.item;
+                else communityArticles.unshift(j.item);
+              } else {
+                communityArticles.unshift(j.item);
+              }
+              // نسخه‌ی محلی برای حالت آفلاین
+              try {
+                const KEY = "chesshub_user_articles";
+                const list = JSON.parse(localStorage.getItem(KEY) || "[]");
+                const li = list.findIndex(function (x) {
+                  return String(x.id) === String(j.item.id) || String(x.serverId || "") === String(j.item.id);
+                });
+                const local = Object.assign({}, j.item, { serverId: j.item.id });
+                if (li >= 0) list[li] = local;
+                else list.unshift(local);
+                localStorage.setItem(KEY, JSON.stringify(list.slice(0, 50)));
+              } catch (e) {}
+            }
+            toast(isEdit
+              ? "✏️ تغییرات مقاله ذخیره شد — نسخه‌ی جدید برای همه‌ی کاربران سایت نمایش داده می‌شود!"
+              : "🌍 مقاله‌ات منتشر شد — الان برای همه‌ی کاربران سایت قابل مشاهده است!");
+            const saved = j.item;
+            closeWriter();
+            renderArticles();
+            if (saved) openReader(saved, true);
+          } catch (err) {
+            toast((isEdit ? "ذخیره تغییرات نشد: " : "انتشار نشد: ") + err.message);
+          } finally {
+            btn.disabled = false;
+            setWriterMode(!!editingArticle);
+          }
+        });
+
+        // 🌍 واکشی مقالات عمومی سرور
+        function refreshCommunity() {
+          if (!window.CommunityHub) return Promise.resolve();
+          return CommunityHub.fetchAll()
+            .then(function (c) {
+              communityArticles = (c.articles || []).slice();
+              renderArticles();
+            })
+            .catch(function () {
+              /* سرور در دسترس نیست — مقالات پایه نمایش داده می‌شوند */
+            });
+        }
+
+        function toast(msg) {
+          let el = document.querySelector(".settings-toast");
+          if (!el) {
+            el = document.createElement("div");
+            el.className = "settings-toast";
+            document.body.appendChild(el);
+          }
+          el.textContent = msg;
+          el.classList.add("show");
+          clearTimeout(el._t);
+          el._t = setTimeout(function () { el.classList.remove("show"); }, 2800);
+        }
+
+        // ═══════════ شروع ═══════════
+        renderArticles();
+        refreshCommunity();
+      })();
+    </script>
+  </body>
+</html>
