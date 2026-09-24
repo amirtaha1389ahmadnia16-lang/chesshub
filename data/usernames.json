@@ -2,14 +2,15 @@
   "usernames": {
     "امیرطاها": {
       "name": "امیرطاها",
-      "avatar": "images/avatars/2.png",
-      "registeredAt": 1790244834149
+      "avatar": "images/avatars/1.png",
+      "registeredAt": 1790244834149,
+      "avatarUpdatedAt": 1790247294595
     },
     "تست": {
       "name": "تست",
-      "avatar": "images/avatars/4.png",
+      "avatar": "images/avatars/5.png",
       "registeredAt": 1790246430950,
-      "avatarUpdatedAt": 1790247259427
+      "avatarUpdatedAt": 1790246711439
     }
   }
 }
