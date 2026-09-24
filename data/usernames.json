@@ -21,6 +21,11 @@
       "name": "Yasin",
       "avatar": "images/avatars/5.png",
       "registeredAt": 1790255828262
+    },
+    "moein": {
+      "name": "Moein",
+      "avatar": "images/avatars/2.png",
+      "registeredAt": 1790256493268
     }
   }
 }
