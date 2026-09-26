@@ -31,6 +31,11 @@
       "name": "امیرحسین",
       "avatar": "images/avatars/6.png",
       "registeredAt": 1790260988347
+    },
+    "hacker01": {
+      "name": "Hacker01",
+      "avatar": "images/avatars/7.png",
+      "registeredAt": 1790448753969
     }
   }
 }
