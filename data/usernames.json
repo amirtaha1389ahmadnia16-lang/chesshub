@@ -36,6 +36,11 @@
       "name": "Hacker01",
       "avatar": "images/avatars/7.png",
       "registeredAt": 1790448753969
+    },
+    "parsa": {
+      "name": "Parsa",
+      "avatar": "images/avatars/1.png",
+      "registeredAt": 1791287327491
     }
   }
 }
