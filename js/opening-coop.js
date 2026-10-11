@@ -45,6 +45,8 @@
 
   // ===== DOM refs =====
   const variantsContainer = document.getElementById("variantsContainer");
+  const importBtn = document.getElementById("importBtn");
+  const importFile = document.getElementById("importFile");
   const publishBtn = document.getElementById("publishBtn");
   const downloadBtn = document.getElementById("downloadBtn");
   const resetBtn = document.getElementById("resetBtn");
@@ -67,6 +69,7 @@
   let variantCounter = 0;
   let editingOpening = null; // گشایش در حال ویرایش (اگر حالت ویرایش فعال باشد)
   let pendingPublish = false; // ادامه‌ی انتشار پس از انتخاب نام نویسنده
+  let importedAuthor = null; // نویسنده‌ی داخل فایل JSON آپلودشده (با تأیید صریح کاربر)
 
   // ===== نام نویسنده (مشترک با بخش دروس) =====
   function currentAuthor() {
@@ -679,7 +682,8 @@
   }
 
   function doPublish() {
-    const author = currentAuthor();
+    // نویسنده: از نشست/پروفایل — مگر فایل JSON آپلود شود (با تأیید صریح کاربر)
+    const author = importedAuthor || currentAuthor();
     if (!author) {
       // اگر به هر دلیلی نام از بین رفته باشد، دوباره پرسیده می‌شود
       pendingPublish = true;
@@ -706,6 +710,7 @@
         thumbIcon: list[idx].thumbIcon || "fas fa-chess-queen",
         color: list[idx].color || "#2c7da0",
         author: author,
+        importedFile: !!importedAuthor,
         updatedAt: now,
       });
       if (!saveUserOpenings(list)) {
@@ -725,6 +730,7 @@
         thumbIcon: "fas fa-chess-queen",
         color: "#2c7da0",
         author: author,
+        importedFile: !!importedAuthor,
         createdAt: now,
         updatedAt: now,
       });
@@ -761,7 +767,9 @@
       "openings",
       serverId ? "update" : "publish",
       serverId || localItem.id,
-      payload
+      payload,
+      // 📥 اگر محتوا از فایل JSON آمده، نام نویسنده‌ی فایل حفظ می‌شود
+      localItem.importedFile ? { allowFileAuthor: true } : undefined
     )
       .then(function (j) {
         if (j.item && j.item.id) {
@@ -848,6 +856,216 @@
     );
   }
 
+  // ===== ورودی JSON (آپلود فایل استاندارد — دقیقاً یک فایل در هر بار) =====
+
+  // پاک‌سازی توکن‌های حرکت: حذف شماره‌ی حرکت (1.e4) و نتیجه (1-0)
+  function cleanMoveTokens(list) {
+    return list
+      .map((m) => String(m || "").trim())
+      .filter(Boolean)
+      .map((m) => m.replace(/^\d+\.(\.\.)?/, "").replace(/[!?]+$/, ""))
+      .filter((m) => m && !/^(1-0|0-1|1\/2-1\/2|\*)$/.test(m));
+  }
+
+  // اعتبارسنجی قانونی بودن حرکات با موتور واقعی شطرنج
+  function legalMovesCheck(movesArr) {
+    if (!window.Chess) return { ok: true }; // بدون کتابخانه — سرور و انتشار دوباره چک می‌کنند
+    let g;
+    try { g = new window.Chess(); } catch (e) { return { ok: true }; }
+    for (let i = 0; i < movesArr.length; i++) {
+      let mv = null;
+      try { mv = g.move(movesArr[i], { sloppy: true }); } catch (e) { mv = null; }
+      if (!mv) return { ok: false, bad: movesArr[i] };
+    }
+    return { ok: true };
+  }
+
+  function importJSON() {
+    importFile.value = ""; // انتخاب مجدد همان فایل هم کار کند
+    importFile.click();
+  }
+
+  function handleImportFile(file) {
+    if (!file) return;
+    if (file.size > 512 * 1024) {
+      showToast("❌ حجم فایل بیش از ۵۱۲ کیلوبایت است", "error");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onerror = function () {
+      showToast("❌ خواندن فایل ممکن نشد", "error");
+    };
+    reader.onload = function () {
+      let obj = null;
+      try { obj = JSON.parse(String(reader.result)); } catch (e) { obj = null; }
+      if (!obj || typeof obj !== "object" || Array.isArray(obj)) {
+        showToast("❌ فایل JSON معتبر نیست — این فایل خروجی «آپلود فایل JSON» همین صفحه است؟", "error");
+        return;
+      }
+      const err = validateImportedOpening(obj);
+      if (typeof err === "string") {
+        showToast("❌ " + err, "error");
+        return;
+      }
+      fillFormFromImport(err.value, obj);
+    };
+    reader.readAsText(file, "utf8");
+  }
+
+  // خروجی: رشته‌ی خطا یا {value: داده‌ی تمیز}
+  function validateImportedOpening(o) {
+    const name = String(o.name || "").trim();
+    if (name.length < 2 || name.length > 80)
+      return "نام گشایش باید بین ۲ تا ۸۰ حرف باشد";
+
+    const rawMoves = Array.isArray(o.moves)
+      ? o.moves
+      : String(o.moves || "").split(/\s+/);
+    const moves = cleanMoveTokens(rawMoves).slice(0, 40);
+    if (!moves.length)
+      return "حرکات اصلی گشایش پیدا نشد (مثلاً: e4 c5 Nf3)";
+    const lm = legalMovesCheck(moves);
+    if (!lm.ok)
+      return "حرکت غیرقانونی در حرکات اصلی: «" + lm.bad + "»";
+
+    if (!Array.isArray(o.variants) || o.variants.length === 0)
+      return "حداقل یک واریانت در فایل لازم است";
+
+    const variants = [];
+    for (let i = 0; i < Math.min(o.variants.length, 12); i++) {
+      const v = o.variants[i] || {};
+      const vname = String(v.name || "").trim();
+      if (vname.length < 2) return "نام واریانت شماره " + (i + 1) + " باید حداقل ۲ حرف باشد";
+      const vmRaw = Array.isArray(v.moves) ? v.moves : String(v.moves || "").split(/\s+/);
+      const vmoves = cleanMoveTokens(vmRaw).slice(0, 30);
+      if (!vmoves.length) return "واریانت «" + vname + "» حرکات ندارد";
+      const lm2 = legalMovesCheck(vmoves);
+      if (!lm2.ok)
+        return "حرکت غیرقانونی در واریانت «" + vname + "»: «" + lm2.bad + "»";
+      const clamp = (n) => Math.max(0, Math.min(100000, Number(n) || 0));
+      const lines = (x) =>
+        (Array.isArray(x) ? x : [])
+          .slice(0, 12)
+          .map((s) => String(s || "").trim().slice(0, 300))
+          .filter(Boolean);
+      const pops = (Array.isArray(v.popularMoves) ? v.popularMoves : [])
+        .slice(0, 10)
+        .map((p) => ({
+          san: String((p && p.san) || "").trim().slice(0, 12),
+          description: String((p && p.description) || "").trim().slice(0, 400),
+          moves: cleanMoveTokens((p && p.moves) || []).slice(0, 30),
+        }))
+        .filter((p) => p.san);
+      const traps = (Array.isArray(v.traps) ? v.traps : [])
+        .slice(0, 10)
+        .map((t) => ({
+          name: String((t && t.name) || "").trim().slice(0, 100),
+          moves: cleanMoveTokens((t && t.moves) || []).slice(0, 30),
+        }))
+        .filter((t) => t.name && t.moves.length);
+      const games = (Array.isArray(v.sampleGames) ? v.sampleGames : [])
+        .slice(0, 8)
+        .map((g) => {
+          const out = {
+            white: String((g && g.white) || "").trim().slice(0, 60),
+            black: String((g && g.black) || "").trim().slice(0, 60),
+            year: Math.max(0, Math.min(2100, Number(g && g.year) || 0)),
+            result: String((g && g.result) || "*").slice(0, 12) || "*",
+          };
+          if (g && g.pgn) out.pgn = String(g.pgn).slice(0, 20000);
+          return out;
+        })
+        .filter((g) => g.white && g.black);
+
+      variants.push({
+        name: vname.slice(0, 80),
+        moves: vmoves,
+        stats: {
+          whiteWins: clamp(v.stats && v.stats.whiteWins),
+          blackWins: clamp(v.stats && v.stats.blackWins),
+          draws: clamp(v.stats && v.stats.draws),
+        },
+        strengths: lines(v.strengths),
+        weaknesses: lines(v.weaknesses),
+        popularMoves: pops,
+        evaluation: {
+          score: String((v.evaluation && v.evaluation.score) || "0.0").slice(0, 16) || "0.0",
+          summary: String((v.evaluation && v.evaluation.summary) || "").slice(0, 600),
+        },
+        ideas: lines(v.ideas),
+        endgames: lines(v.endgames),
+        traps: traps,
+        sampleGames: games,
+      });
+    }
+    if (!variants.length) return "هیچ واریانت معتبری در فایل نیست";
+
+    let code = String(o.categoryCode || "").trim();
+    if (!AUTO_CATEGORY_NAMES[code]) code = "other";
+    const categoryName = String(o.categoryName || "").trim().slice(0, 40);
+
+    return {
+      value: {
+        name: name,
+        moves: moves,
+        categoryCode: code,
+        categoryName: categoryName,
+        variants: variants,
+      },
+    };
+  }
+
+  function fillFormFromImport(data, original) {
+    // 📥 انتخاب نویسنده — پیش‌فرض: نویسنده‌ی داخل فایل (با تأیید کاربر)
+    const fileAuthor = String(original.author || "").trim().slice(0, 40);
+    const me = currentAuthor();
+    if (fileAuthor && fileAuthor !== me) {
+      const keep =
+        confirm(
+          "نویسنده‌ی داخل فایل: «" + fileAuthor + "»\n\n" +
+            "OK = انتشار با نام نویسنده‌ی فایل («" + fileAuthor + "»)\n" +
+            "Cancel = انتشار با نام خودت" + (me ? " («" + me + "»)" : "")
+        );
+      importedAuthor = keep ? fileAuthor : me;
+    } else {
+      importedAuthor = me || fileAuthor || null;
+    }
+
+    document.getElementById("openingName").value = data.name;
+    document.getElementById("categoryCode").value = data.categoryCode;
+    document.getElementById("categoryName").value =
+      data.categoryName && data.categoryName !== AUTO_CATEGORY_NAMES[data.categoryCode]
+        ? data.categoryName
+        : "";
+    document.getElementById("openingMoves").value = data.moves.join(" ");
+
+    variantsContainer.innerHTML = "";
+    variantCounter = 0;
+    data.variants.forEach((v) => addVariant(v));
+
+    editingOpening = null;
+    editModeBanner.style.display = "none";
+    restorePublishButton();
+    try { history.replaceState(null, "", "opening-coop.html"); } catch (e) {}
+
+    updateAuthorChipWith(importedAuthor || me);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    showToast(
+      "✅ فایل JSON با موفقیت بارگذاری شد (" + data.variants.length + " واریانت) — حالا «انتشار در سایت» را بزن",
+      "success",
+      4200
+    );
+  }
+
+  function updateAuthorChipWith(name) {
+    if (name) {
+      authorChip.style.display = "flex";
+      authorChipName.textContent = name;
+    } else {
+      updateAuthorChip();
+    }
+  }
+
   // ===== ریست فرم =====
   function resetForm(needsConfirm) {
     if (needsConfirm) {
@@ -868,6 +1086,7 @@
     editingOpening = null;
     editModeBanner.style.display = "none";
     restorePublishButton();
+    importedAuthor = null;
     try {
       history.replaceState(null, "", "opening-coop.html");
     } catch (e) {}
@@ -956,6 +1175,11 @@
   // ===== دکمه‌های اصلی =====
   publishBtn.addEventListener("click", publishFlow);
   downloadBtn.addEventListener("click", exportJSON);
+  importBtn.addEventListener("click", importJSON);
+  importFile.addEventListener("change", function () {
+    // دقیقاً یک فایل در هر بار — ورودی بدون multiple است
+    if (this.files && this.files[0]) handleImportFile(this.files[0]);
+  });
   resetBtn.addEventListener("click", function () {
     resetForm(true);
   });

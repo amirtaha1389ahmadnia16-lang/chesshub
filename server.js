@@ -30,7 +30,7 @@ const zlib = require("zlib");
 
 /* ------------------------- تنظیمات ------------------------- */
 
-const VERSION = "8.1.3";
+const VERSION = "8.2.0";
 const PORT = Number(process.env.PORT) || Number(process.argv[2]) || 3000;
 const HOST = process.env.HOST || "0.0.0.0"; // Render باید روی 0.0.0.0 گوش دهد
 const ROOT = __dirname;
@@ -47,6 +47,9 @@ const COMMUNITY_LIMITS = {
 // (هم نام بازیکن در بازی آنلاین، هم نام نویسنده در دروس/گشایش‌ها/مقالات)
 const USERNAMES_FILE = path.join(ROOT, "data", "usernames.json");
 const USERNAME_RULES = { min: 2, max: 16 };
+
+// 🔐 حساب کاربری امن (رمز عبور + نشست) — v8.2
+const auth = require("./server-auth");
 
 // 🔄 ماندگاری داده‌ها با گیت‌هاب (اختیاری — با GITHUB_TOKEN فعال می‌شود)
 let dataSync = null;
@@ -425,14 +428,22 @@ function readCommunity() {
       lessons: Array.isArray(j.lessons) ? j.lessons : [],
       openings: Array.isArray(j.openings) ? j.openings : [],
       articles: Array.isArray(j.articles) ? j.articles : [],
+      deleted: j.deleted && typeof j.deleted === "object" && !Array.isArray(j.deleted) ? j.deleted : {},
     };
   } catch (e) {
-    return { lessons: [], openings: [], articles: [] };
+    return { lessons: [], openings: [], articles: [], deleted: {} };
   }
 }
 
 function writeCommunity(data) {
   fs.mkdirSync(path.dirname(COMMUNITY_FILE), { recursive: true });
+  // تومب‌سنگ‌های قدیمی‌تر از ۳۰ روز پاک می‌شوند (حذف‌ها جاودانه نمی‌مانند)
+  if (data.deleted && typeof data.deleted === "object") {
+    const cutoff = Date.now() - 30 * 24 * 3600 * 1000;
+    Object.keys(data.deleted).forEach(function (k) {
+      if ((Number(data.deleted[k]) || 0) < cutoff) delete data.deleted[k];
+    });
+  }
   fs.writeFileSync(COMMUNITY_FILE + ".tmp", JSON.stringify(data));
   fs.renameSync(COMMUNITY_FILE + ".tmp", COMMUNITY_FILE);
   if (dataSync) dataSync.pushLater("community_content.json"); // 🔄 همگام‌سازی گیت‌هاب
@@ -520,6 +531,38 @@ function cleanCommunityItem(type, item) {
   };
 }
 
+// ♟️ موتور شطرنج برای اعتبارسنجی حرکات گشایش‌ها (اختیاری — اگر کتابخانه باشد)
+let ChessCtor = null;
+try {
+  const m = require("./lib/chess.min.js");
+  ChessCtor = m.Chess || m;
+} catch (e) { ChessCtor = null; }
+
+// پاک‌سازی توکن حرکت: حذف شماره‌ی حرکت (1.e4) و نتایج (1-0)
+function cleanMoveTokenList(list, max) {
+  return (Array.isArray(list) ? list : [])
+    .map((m) => String(m == null ? "" : m).trim())
+    .filter(Boolean)
+    .map((m) => m.replace(/^\d+\.(\.\.)?/, "").replace(/[!?]+$/, ""))
+    .filter((m) => m && !/^(1-0|0-1|1\/2-1\/2|\*)$/.test(m))
+    .slice(0, max);
+}
+
+// قانونی بودن توالی حرکات با موتور واقعی — خروجی: null یا پیام خطا
+function validateMovesLegality(moves, label) {
+  if (!ChessCtor) return null; // بدون کتابخانه — مانند قبل
+  let g;
+  try { g = new ChessCtor(); } catch (e) { return null; }
+  for (let i = 0; i < moves.length; i++) {
+    let mv = null;
+    try { mv = g.move(moves[i], { sloppy: true }); } catch (e) { mv = null; }
+    if (!mv) {
+      return "حرکت غیرقانونی در " + label + ": «" + moves[i] + "» (حرکت‌ها را با نماد استاندارد انگلیسی بنویس)";
+    }
+  }
+  return null;
+}
+
 function validateCommunityItem(type, c) {
   if (type === "lessons") {
     if (c.title.length < 3) return "عنوان درس خیلی کوتاه است";
@@ -531,6 +574,17 @@ function validateCommunityItem(type, c) {
     if (c.name.length < 2) return "نام گشایش خیلی کوتاه است";
     if (!c.moves.length) return "حرکات اصلی گشایش نامعتبر است";
     if (!c.variants.length) return "حداقل یک واریانت معتبر لازم است";
+    // ♟️ اعتبارسنجی موتور شطرنج — حرکت‌های خلاف قوانین ذخیره نمی‌شوند
+    const mainMoves = cleanMoveTokenList(c.moves, 40);
+    const verr0 = validateMovesLegality(mainMoves, "حرکات اصلی");
+    if (verr0) return verr0;
+    for (let i = 0; i < c.variants.length; i++) {
+      const v = c.variants[i];
+      const vm = cleanMoveTokenList(v.moves, 30);
+      if (!vm.length) return "واریانت «" + v.name + "» حرکات ندارد";
+      const verr = validateMovesLegality(vm, "واریانت «" + v.name + "»");
+      if (verr) return verr;
+    }
     return null;
   }
   if (c.title.length < 5) return "عنوان مقاله خیلی کوتاه است";
@@ -569,6 +623,180 @@ function notFoundPage(res) {
       '<body><div class="box"><h1>♔ ۴۰۴</h1><p>این صفحه در چوب‌های ChessHub پیدا نشد!</p>' +
       '<a href="/">بازگشت به خانه</a></div></body></html>'
   );
+}
+
+/* ---------------------- کمکی‌های auth ----------------------- */
+
+// آی‌پی واقعی کلاینت (پشت پروکسی Render)
+function clientIP(req) {
+  const xf = req.headers["x-forwarded-for"];
+  if (typeof xf === "string" && xf.length) return xf.split(",")[0].trim();
+  return (req.socket && req.socket.remoteAddress) || "unknown";
+}
+
+// خواندن امن بدنه‌ی JSON با سقف حجم
+function readJSONBody(req, maxBytes) {
+  return new Promise(function (resolve, reject) {
+    let raw = "";
+    let aborted = false;
+    req.on("data", function (c) {
+      if (aborted) return;
+      raw += c;
+      if (raw.length > maxBytes) { aborted = true; try { req.destroy(); } catch (e) {} reject(new Error("حجم درخواست بیش از حد مجاز است")); }
+    });
+    req.on("end", function () {
+      if (aborted) return;
+      try { resolve(JSON.parse(raw || "{}")); }
+      catch (e) { reject(new Error("بدنه‌ی درخواست JSON معتبر نیست")); }
+    });
+    req.on("error", reject);
+  });
+}
+
+// ذخیره‌ی حساب‌ها (میان‌بر تمیز)
+function writeAccountsSafe(map) { auth.saveAccounts(map); }
+
+// ثبت نام کاربر تازه در رجیستری قدیمی هم انجام می‌شود (سازگاری صفحات فعلی)
+function mirrorUsernameToRegistry(name, avatar) {
+  const map = readUsernames();
+  const key = normUsername(name);
+  if (!Object.prototype.hasOwnProperty.call(map, key)) {
+    map[key] = { name: name, avatar: avatar || "", registeredAt: Date.now() };
+    writeUsernames(map);
+  }
+  return map[key] || null;
+}
+
+/* ---------------- مسیرهای حساب کاربری (v8.2) ---------------- */
+
+function handleAuthAPI(req, res, pathname, query) {
+  // در صورت نبود پارامتر query، از آدرس درخواست بساز
+  if (!query) {
+    try {
+      query = new URL(req.url, "http://localhost").searchParams;
+    } catch (e) {
+      query = new URLSearchParams();
+    }
+  }
+  const ip = clientIP(req);
+
+  // محدودیت نرخ روی همه‌ی مسیرهای حساب — ضد اسپم و ضد بروت‌فورس
+  if (!auth.rateLimit("auth:" + ip, 40, 10 * 60 * 1000)) {
+    return sendJSON(res, 429, { ok: false, error: "درخواست‌های زیاد — چند دقیقه بعد دوباره تلاش کن" });
+  }
+
+  // 📝 ثبت‌نام — «بدون رمز عبور ممکن نیست»
+  if (pathname === "/api/auth/register" && req.method === "POST") {
+    readJSONBody(req, 16 * 1024)
+      .then(function (body) {
+        const v = validateUsername(body.name);
+        if (v.error) return sendJSON(res, 400, { ok: false, error: v.error });
+        const avatar = cleanText(body.avatar, 300);
+        if (avatar && !/^(https?:\/\/|images\/)/i.test(avatar)) {
+          return sendJSON(res, 400, { ok: false, error: "آواتار نامعتبر است" });
+        }
+        if (!body.password || String(body.password).length === 0) {
+          return sendJSON(res, 400, { ok: false, error: "رمز عبور الزامی است — بدون رمز عبور نمی‌توانی ثبت‌نام کنی" });
+        }
+        // نامی که در رجیستری قدیمی هست ولی حساب ندارد → باید از «ارتقا» استفاده کند
+        const regMap = readUsernames();
+        if (Object.prototype.hasOwnProperty.call(regMap, normUsername(v.name)) && !auth.accountExists(v.name)) {
+          return sendJSON(res, 409, {
+            ok: false,
+            error: "این نام کاربری از قبل متعلق به توست — در پنجره‌ی ورود، گزینه‌ی «انتخاب رمز عبور» را بزن",
+            needUpgrade: true,
+          });
+        }
+        const r = auth.registerAccount(v.name, body.password, avatar);
+        if (!r.ok) return sendJSON(res, r.status || 400, { ok: false, error: r.error });
+        mirrorUsernameToRegistry(r.record.name, r.record.avatar);
+        log(`حساب جدید ساخته شد: «${r.record.name}»`);
+        return sendJSON(res, 200, {
+          ok: true,
+          token: r.token,
+          profile: auth.publicProfile(r.record),
+          note: "✅ از اطلاعات فعلی سایت یک نسخه‌ی پشتیبان در گیت‌هاب نگهداری می‌شود",
+        });
+      })
+      .catch(function (e) { sendJSON(res, 400, { ok: false, error: e.message }); });
+    return;
+  }
+
+  // 🔑 ورود
+  if (pathname === "/api/auth/login" && req.method === "POST") {
+    readJSONBody(req, 16 * 1024)
+      .then(function (body) {
+        const r = auth.loginAccount(body.name, body.password);
+        if (!r.ok) return sendJSON(res, r.status || 401, { ok: false, error: r.error });
+        log(`ورود موفق: «${r.record.name}»`);
+        return sendJSON(res, 200, { ok: true, token: r.token, profile: auth.publicProfile(r.record) });
+      })
+      .catch(function (e) { sendJSON(res, 400, { ok: false, error: e.message }); });
+    return;
+  }
+
+  // 🔐 ارتقای حساب قدیمی — صاحب نام، برای خودش رمز انتخاب می‌کند
+  if (pathname === "/api/auth/upgrade" && req.method === "POST") {
+    readJSONBody(req, 16 * 1024)
+      .then(function (body) {
+        const v = validateUsername(body.name);
+        if (v.error) return sendJSON(res, 400, { ok: false, error: v.error });
+        if (!body.password || String(body.password).length === 0) {
+          return sendJSON(res, 400, { ok: false, error: "انتخاب رمز عبور برای این مرحله اجباری است" });
+        }
+        const r = auth.upgradeAccount(v.name, body.password, cleanText(body.avatar, 300));
+        if (!r.ok) return sendJSON(res, r.status || 400, { ok: false, error: r.error });
+        log(`حساب قدیمی ارتقا یافت: «${r.record.name}»`);
+        return sendJSON(res, 200, { ok: true, token: r.token, profile: auth.publicProfile(r.record) });
+      })
+      .catch(function (e) { sendJSON(res, 400, { ok: false, error: e.message }); });
+    return;
+  }
+
+  // 👤 اطلاعات نشست من
+  if (pathname === "/api/auth/me" && req.method === "GET") {
+    const session = auth.verifyToken(auth.tokenFromReq(req));
+    if (!session) return sendJSON(res, 401, { ok: false, error: "نشست منقضی یا نامعتبر است" });
+    const map = auth.readAccounts();
+    const rec = map[session.u];
+    if (!rec) return sendJSON(res, 401, { ok: false, error: "حساب پیدا نشد — دوباره وارد شو" });
+    return sendJSON(res, 200, { ok: true, profile: auth.publicProfile(rec) });
+  }
+
+  // 🔍 وضعیت یک نام — آیا حساب دارد؟ (برای پنجره‌ی امنیتی سایت)
+  if (pathname === "/api/auth/status" && req.method === "GET") {
+    const v = validateUsername(query.get("name"));
+    if (v.error) return sendJSON(res, 400, { ok: false, error: v.error });
+    const has = auth.accountExists(v.name);
+    let legacy = false;
+    let avatar = "";
+    const regMap = readUsernames();
+    const rec = regMap[normUsername(v.name)];
+    if (rec) { legacy = true; avatar = rec.avatar || ""; }
+    return sendJSON(res, 200, { ok: true, name: v.name, hasAccount: has, legacy: legacy, avatar: avatar });
+  }
+
+  // 🔁 تغییر رمز عبور (کاربر واردشده)
+  if (pathname === "/api/auth/change-password" && req.method === "POST") {
+    const session = auth.verifyToken(auth.tokenFromReq(req));
+    if (!session) return sendJSON(res, 401, { ok: false, error: "اول وارد حساب خودت شو" });
+    readJSONBody(req, 16 * 1024)
+      .then(function (body) {
+        const r = auth.changePassword(session, body.currentPassword, body.newPassword);
+        if (!r.ok) return sendJSON(res, r.status || 400, { ok: false, error: r.error });
+        log(`رمز عبور تغییر کرد: «${session.n}»`);
+        return sendJSON(res, 200, { ok: true });
+      })
+      .catch(function (e) { sendJSON(res, 400, { ok: false, error: e.message }); });
+    return;
+  }
+
+  // 🚪 خروج — توکن سمت کلاینت پاک می‌شود
+  if (pathname === "/api/auth/logout" && req.method === "POST") {
+    return sendJSON(res, 200, { ok: true });
+  }
+
+  return sendJSON(res, 404, { ok: false, error: "این مسیر حساب کاربری وجود ندارد" });
 }
 
 /* ---------------------- مسیرهای API ------------------------ */
@@ -642,6 +870,21 @@ function handleAPI(req, res, pathname, query) {
     if (req.method !== "POST") {
       return sendJSON(res, 405, { ok: false, error: "متد مجاز نیست" });
     }
+    // 🔐 v8.2 — انتشار فقط با حساب کاربری؛ ضد اسپم هم هست
+    // کلید محدودیت = آی‌پی + کاربر (آی‌پی مشترک مدرسه باعث محرومیت هم‌قطارها نمی‌شود)
+    const sessionForRate = auth.verifyToken(auth.tokenFromReq(req));
+    const pubKey = "pub:" + clientIP(req) + ":" + (sessionForRate ? sessionForRate.u : "anon");
+    if (!auth.rateLimit(pubKey, 12, 5 * 60 * 1000)) {
+      return sendJSON(res, 429, { ok: false, error: "تعداد انتشارها زیاد است — چند دقیقه صبر کن" });
+    }
+    const session = sessionForRate;
+    if (!session) {
+      return sendJSON(res, 401, {
+        ok: false,
+        error: "برای انتشار محتوا اول وارد حساب خودت شو (امنیت همه‌ی کاربران)",
+        needLogin: true,
+      });
+    }
     let raw = "";
     let aborted = false;
     req.on("data", (c) => {
@@ -664,23 +907,54 @@ function handleAPI(req, res, pathname, query) {
         const data = readCommunity();
         const arr = data[type];
 
-        // ❌ حذف — فقط نویسنده‌ی همان اثر
+        // 📥 مسیر ویژه‌ی «آپلود فایل JSON» — با پرچم صریحِ خود کاربر،
+        // نام نویسنده‌ی داخل فایل حفظ می‌شود (و ارجاع به آپلودکننده ثبت می‌شود)
+        let author = cleanText(session.n, 40);
+        let importedBy = null;
+        if (body.allowFileAuthor === true && body.item && body.item.author) {
+          const fileAuthor = cleanText(body.item.author, 40);
+          if (fileAuthor.length >= 2) {
+            author = fileAuthor;
+            importedBy = cleanText(session.n, 40);
+          }
+        }
+
+        // ❌ حذف — فقط نویسنده‌ی همان اثر (یا کسی که آن را آپلود کرده)
         if (action === "delete") {
           const idx = arr.findIndex((x) => String(x.id) === String(body.id));
           if (idx < 0) return sendJSON(res, 404, { ok: false, error: "اثر مورد نظر پیدا نشد" });
-          if (normAuthor(arr[idx].author) !== normAuthor(body.item && body.item.author)) {
+          const owner = normAuthor(arr[idx].author);
+          const uploader = normAuthor(arr[idx].importedBy);
+          const me = normAuthor(session.n);
+          if (owner !== me && uploader !== me) {
             return sendJSON(res, 403, { ok: false, error: "فقط نویسنده می‌تواند این اثر را حذف کند" });
           }
+          // 🪦 تومب‌سنگ — تا ادغام گیت‌هاب، اثر حذف‌شده را زنده نکند
+          data.deleted = data.deleted && typeof data.deleted === "object" ? data.deleted : {};
+          data.deleted[String(body.id)] = Date.now();
           arr.splice(idx, 1);
           writeCommunity(data);
           return sendJSON(res, 200, { ok: true, deleted: String(body.id) });
         }
 
-        // ✍️ انتشار / ویرایش
-        const author = cleanText(body.item && body.item.author, 40);
+        // ✍️ انتشار / ویرایش — نام نویسنده «سروری» است، نه از مرورگر
         if (author.length < 2) {
           return sendJSON(res, 400, { ok: false, error: "نام نویسنده الزامی است" });
         }
+
+        // 🔍 برای ویرایش: اول وجود اثر و مالکیت — بعد اعتبارسنجی محتوا
+        let editIdx = -1;
+        if (action === "update") {
+          editIdx = arr.findIndex((x) => String(x.id) === String(body.id));
+          if (editIdx < 0) return sendJSON(res, 404, { ok: false, error: "اثر مورد نظر پیدا نشد" });
+          const owner = normAuthor(arr[editIdx].author);
+          const uploader = normAuthor(arr[editIdx].importedBy);
+          const me = normAuthor(session.n);
+          if (owner !== me && uploader !== me) {
+            return sendJSON(res, 403, { ok: false, error: "فقط نویسنده می‌تواند این اثر را ویرایش کند" });
+          }
+        }
+
         const clean = cleanCommunityItem(type, body.item);
         const verr = validateCommunityItem(type, clean);
         if (verr) return sendJSON(res, 400, { ok: false, error: verr });
@@ -695,24 +969,21 @@ function handleAPI(req, res, pathname, query) {
             createdAt: Date.now(),
             updatedAt: Date.now(),
           });
+          if (importedBy) stored.importedBy = importedBy;
           arr.unshift(stored);
           writeCommunity(data);
-          log(`محتوای عمومی جدید (${type}): «${clean.title || clean.name}» اثر ${author}`);
+          log(`محتوای عمومی جدید (${type}): «${clean.title || clean.name}» اثر ${author}${importedBy ? " (آپلود توسط " + importedBy + ")" : ""}`);
           return sendJSON(res, 200, { ok: true, item: stored });
         }
 
         // action === update
-        const idx = arr.findIndex((x) => String(x.id) === String(body.id));
-        if (idx < 0) return sendJSON(res, 404, { ok: false, error: "اثر مورد نظر پیدا نشد" });
-        if (normAuthor(arr[idx].author) !== normAuthor(author)) {
-          return sendJSON(res, 403, { ok: false, error: "فقط نویسنده می‌تواند این اثر را ویرایش کند" });
-        }
-        arr[idx] = Object.assign({}, arr[idx], clean, {
+        arr[editIdx] = Object.assign({}, arr[editIdx], clean, {
           author,
           updatedAt: Date.now(),
         });
+        if (importedBy) arr[editIdx].importedBy = importedBy;
         writeCommunity(data);
-        return sendJSON(res, 200, { ok: true, item: arr[idx] });
+        return sendJSON(res, 200, { ok: true, item: arr[editIdx] });
       } catch (err) {
         sendJSON(res, 500, { ok: false, error: "خطا در ذخیره‌سازی" });
       }
@@ -726,57 +997,37 @@ function handleAPI(req, res, pathname, query) {
     if (v.error) {
       return sendJSON(res, 200, { ok: true, name: String(query.get("name") || ""), available: false, error: v.error });
     }
+    // نام باید هم در رجیستری قدیمی و هم در حساب‌های امن آزاد باشد
     const map = readUsernames();
     const taken = Object.prototype.hasOwnProperty.call(map, normUsername(v.name));
-    return sendJSON(res, 200, { ok: true, name: v.name, available: !taken });
+    const hasAccount = auth.accountExists(v.name);
+    const rec = taken ? map[normUsername(v.name)] : null;
+    return sendJSON(res, 200, {
+      ok: true,
+      name: v.name,
+      available: !taken && !hasAccount,
+      hasAccount: hasAccount,
+      avatar: rec ? rec.avatar || "" : "",
+    });
   }
 
-  // 👤 ثبت نام کاربری + پروفایل (آواتار) — هر نام فقط «یک بار» در کل سایت
+  // ⛔ ثبت نام کاربری «بدون رمز عبور» دیگر مجاز نیست (v8.2)
+  // ثبت‌نام فقط از طریق /api/auth/register با رمز عبور انجام می‌شود
   if (pathname === "/api/username/register") {
-    if (req.method !== "POST") {
-      return sendJSON(res, 405, { ok: false, error: "متد مجاز نیست" });
-    }
-    let rawU = "";
-    let abortedU = false;
-    req.on("data", (c) => {
-      rawU += c;
-      if (rawU.length > 16 * 1024) { abortedU = true; req.destroy(); }
+    return sendJSON(res, 410, {
+      ok: false,
+      error: "از نسخه‌ی ۸.۲ ثبت‌نام فقط با رمز عبور انجام می‌شود — از پنجره‌ی ورود/ثبت‌نام سایت استفاده کن",
     });
-    req.on("end", () => {
-      if (abortedU) return;
-      try {
-        const body = JSON.parse(rawU || "{}");
-        const v = validateUsername(body.name);
-        if (v.error) return sendJSON(res, 400, { ok: false, error: v.error });
-        const avatar = cleanText(body.avatar, 300);
-        if (avatar && !/^(https?:\/\/|images\/)/i.test(avatar)) {
-          return sendJSON(res, 400, { ok: false, error: "آواتار نامعتبر است" });
-        }
-        const map = readUsernames();
-        const key = normUsername(v.name);
-        if (Object.prototype.hasOwnProperty.call(map, key)) {
-          return sendJSON(res, 409, {
-            ok: false,
-            available: false,
-            error: "این نام کاربری قبلاً انتخاب شده است — نام دیگری برگزین",
-          });
-        }
-        const record = { name: v.name, avatar: avatar || "", registeredAt: Date.now() };
-        map[key] = record;
-        writeUsernames(map);
-        log(`نام کاربری جدید ثبت شد: «${v.name}»`);
-        return sendJSON(res, 200, { ok: true, profile: { name: record.name, avatar: record.avatar } });
-      } catch (err) {
-        sendJSON(res, 500, { ok: false, error: "خطا در ثبت نام کاربری" });
-      }
-    });
-    return;
   }
 
-  // 👤 تغییر آواتار (نام برای همیشه قفل است — فقط تصویر پروفایل قابل تغییر است)
+  // 👤 تغییر آواتار — فقط صاحب حساب (با نشست معتبر) (v8.2)
   if (pathname === "/api/username/avatar") {
     if (req.method !== "POST") {
       return sendJSON(res, 405, { ok: false, error: "متد مجاز نیست" });
+    }
+    const session = auth.verifyToken(auth.tokenFromReq(req));
+    if (!session) {
+      return sendJSON(res, 401, { ok: false, error: "برای تغییر آواتار اول وارد حساب خودت شو" });
     }
     let rawA = "";
     let abortedA = false;
@@ -788,27 +1039,39 @@ function handleAPI(req, res, pathname, query) {
       if (abortedA) return;
       try {
         const body = JSON.parse(rawA || "{}");
-        const v = validateUsername(body.name);
-        if (v.error) return sendJSON(res, 400, { ok: false, error: v.error });
+        // نام فقط از نشست خود کاربر — نه از بدنه‌ی درخواست (جلوگیری از دستکاری)
+        const name = session.n;
         const avatar = cleanText(body.avatar, 300);
         if (!avatar || !/^(https?:\/\/|images\/)/i.test(avatar)) {
           return sendJSON(res, 400, { ok: false, error: "آواتار نامعتبر است" });
         }
-        const map = readUsernames();
-        const key = normUsername(v.name);
-        if (!Object.prototype.hasOwnProperty.call(map, key)) {
-          return sendJSON(res, 404, { ok: false, error: "این نام کاربری ثبت نشده است" });
+        // آواتار در هر دو فایل به‌روز می‌شود (حساب + رجیستری قدیمی برای سازگاری)
+        const accMap = auth.readAccounts();
+        const accKey = auth.normName(name);
+        if (accMap[accKey]) {
+          accMap[accKey].avatar = avatar;
+          accMap[accKey].avatarUpdatedAt = Date.now();
+          writeAccountsSafe(accMap);
         }
-        map[key].avatar = avatar;
-        map[key].avatarUpdatedAt = Date.now();
-        writeUsernames(map);
-        log(`آواتار به‌روز شد: «${map[key].name}»`);
-        return sendJSON(res, 200, { ok: true, profile: { name: map[key].name, avatar: map[key].avatar } });
+        const map = readUsernames();
+        const key = normUsername(name);
+        if (Object.prototype.hasOwnProperty.call(map, key)) {
+          map[key].avatar = avatar;
+          map[key].avatarUpdatedAt = Date.now();
+          writeUsernames(map);
+        }
+        log(`آواتار به‌روز شد: «${name}»`);
+        return sendJSON(res, 200, { ok: true, profile: { name: name, avatar: avatar } });
       } catch (err) {
         sendJSON(res, 500, { ok: false, error: "خطا در تغییر آواتار" });
       }
     });
     return;
+  }
+
+  // 🔐 مسیرهای حساب کاربری امن (v8.2)
+  if (pathname.indexOf("/api/auth/") === 0) {
+    return handleAuthAPI(req, res, pathname, query);
   }
 
   if (pathname === "/api/health") {
@@ -822,6 +1085,7 @@ function handleAPI(req, res, pathname, query) {
       puzzles: list.length,
       rushPuzzles: rush.length,
       usernames: Object.keys(readUsernames()).length,
+      accounts: Object.keys(auth.readAccounts()).length,
       todayIndex: dailyIndex(list.length),
       date: new Date().toISOString().slice(0, 10),
       uptimeSeconds: Math.round(process.uptime()),
@@ -874,13 +1138,17 @@ function serveStatic(req, res, pathname) {
   const rel = path.relative(ROOT, filePath).replace(/\\/g, "/").toLowerCase();
   const BLOCKED_REL = [
     "server.js", "package.json", "package-lock.json", "render.yaml", "readme.md",
-    "online-server.js", "worklog.md", "users.json", "online_games.json",
+    "online-server.js", "server-auth.js", "data-sync.js", "worklog.md", "users.json", "online_games.json",
   ];
   if (
     rel.indexOf("data/users") === 0 ||
     rel === "data/online_games.json" ||
     rel === "data/community_content.json" ||
-    rel === "data/usernames.json"
+    rel === "data/usernames.json" ||
+    rel === "data/accounts.json" ||
+    rel === "data/secret.key" ||
+    rel === "data/accounts.json.tmp" ||
+    rel === "data/secret.key.tmp"
   ) {
     res.writeHead(403, { "Content-Type": "text/plain; charset=utf-8" });
     return res.end("403 — دسترسی مجاز نیست");
@@ -996,11 +1264,22 @@ server.keepAliveTimeout = 65000;
 server.headersTimeout = 66000;
 
 // ♟️ ماژول بازی آنلاین — WebSocket خالص روی همین سرور
+let onlineModule = null;
 try {
-  const online = require("./online-server");
-  online.attach(server);
+  onlineModule = require("./online-server");
+  onlineModule.attach(server);
 } catch (err) {
   log("هشدار: ماژول بازی آنلاین بارگذاری نشد — " + err.message);
+}
+
+// 🔄 v8.2 — بعد از ادغام اولیه‌ی گیت‌هاب، داده‌ی بازی آنلاین از دیسک دوباره
+// خوانده می‌شود تا هیچ رکوردی که توسط ادغام نجات پیدا کرده از دست نرود
+if (dataSync && onlineModule && typeof onlineModule.reloadFiles === "function") {
+  Promise.resolve(dataSync.init())
+    .then(function () {
+      try { onlineModule.reloadFiles(); } catch (e) { log("خطای بارگذاری مجدد داده‌ی بازی آنلاین: " + e.message); }
+    })
+    .catch(function () {});
 }
 
 server.on("error", (err) => {
@@ -1056,10 +1335,19 @@ server.listen(PORT, HOST, () => {
 });
 
 // خاموشی تمیز — Render هنگام دیپلوی جدید سیگنال SIGTERM می‌فرستد
+// v8.2: قبل از خاموشی، همه‌ی تغییرات در انتظار «فوراً» به گیت‌هاب کامیت می‌شوند
+// تا با ری‌استارت/دیپلوی، هیچ داده‌ای گم نشود
 function shutdown(signal) {
   log(`سیگنال ${signal} دریافت شد — خاموشی تمیز…`);
-  server.close(() => process.exit(0));
-  setTimeout(() => process.exit(0), 4000).unref();
+  let closed = false;
+  const done = () => { if (!closed) { closed = true; process.exit(0); } };
+  const flush = dataSync ? dataSync.flushNow() : Promise.resolve(false);
+  flush.then(function (pushed) {
+    if (pushed) log("آخرین تغییرات قبل از خاموشی کامیت شد ✅");
+    done();
+  }, function () { done(); });
+  server.close(() => done());
+  setTimeout(done, 6000).unref();
 }
 
 process.on("SIGTERM", () => shutdown("SIGTERM"));

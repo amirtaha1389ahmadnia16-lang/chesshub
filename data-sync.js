@@ -1,22 +1,38 @@
 /* ============================================================
-   ♛ ChessHub — ماندگاری داده‌ها با گیت‌هاب (v8)
+   ♛ ChessHub — ماندگاری داده‌ها با گیت‌هاب (v8.2 — بازنویسی کامل)
    ------------------------------------------------------------
-   مشکل: روی Render فایل‌سستم موقتی است — با هر دیپلوی/ری‌استارت،
-   ریتینگ بازیکن‌ها، تاریخچه‌ی بازی‌ها، نام‌های ثبت‌شده و محتوای
-   عمومی (data/*.json) پاک می‌شوند.
+   چرا بازنویسی؟ سه فاجعه واقعی در تاریخچه‌ی ریپو رخ داده بود:
+     ۱) بازنویسی داده‌ی کهنه: هر سرور کلِ فایل را با نسخه‌ی
+        خودش جایگزین می‌کرد → محتوای تازه‌ی یک کاربر پاک می‌شد
+        (درس «چگونه بهترین گشایش…» و «دفاع سیسیلی» دو بار پاک شدند)
+     ۲) push ناموفق = گم‌شدن همیشگی: بعد از خطای شبکه، هیچ تلاش
+        مجددی انجام نمی‌شد؛ داده فقط روی دیسک موقتی Render می‌ماند
+        و با دیپلوی بعدی نابود می‌شد
+     ۳) هر کامیت sync = یک دیپلوی Render: صف دیپلوی، قطعی‌های
+        طولانی (حس «۳۰ دقیقه تأخیر»)
 
-   راه‌حل این ماژول (اختیاری و صفر-وابستگی):
-     • اگر دو متغیر GITHUB_TOKEN و GITHUB_REPO روی Render ست شوند،
-       سرور داده‌های data/*.json را به‌صورت debounceشده در همان
-       ریپو کامیت می‌کند و در بوت بعدی برمی‌گرداند.
-     • پیام کامیت شامل [skip ci] است تا Render دیپلوی جدید نسازد
-       (وگرنه حلقه‌ی دیپلوی بی‌پایان درست می‌شد).
-     • بدون این متغیرها، همه‌چیز مثل قبل کار می‌کند — صفر تغییر.
+   راه‌حل v8.2 (صفر وابستگی، مثل قبل):
+     • کامیت گروهی: همه‌ی فایل‌های تغییرکرده در «یک» کامیت
+       (Git Trees API) — نه چند کامیت پشت‌سرهم
+     • ادغام (merge) به‌جای بازنویسی:
+         - boot: همیشه نسخه‌ی گیت‌هاب خوانده و با محلی ادغام می‌شود
+         - تداخل (۴۰۹/۴۲۲): نسخه‌ی ریموت گرفته، ادغام، بعد push
+       ادغام بر اساس id/کلید است؛ آیتم تازه‌تر با updatedAt می‌برد
+     • تومب‌سنگ (تombstone): حذف‌ها هم sync می‌شوند و ادغام
+       چیزی حذف‌شده را زنده نمی‌کند
+     • retry خودکار با backoff (تا ۶ تلاش) — داده دیگر گم نمی‌شود
+     • flush هنگام خاموشی (SIGTERM) — آخرین تغییرات قبل از دیپلوی
+       کامیت می‌شوند
+     • debounce ۱۲ ثانیه + صف API — مصرف API کم و کامیت تمیز
 
    تنظیم روی Render (Environment):
-     GITHUB_TOKEN = توکن Personal Access (دسترسی Contents: Read/Write به همین ریپو)
+     GITHUB_TOKEN = توکن Personal Access (Contents: Read/Write)
      GITHUB_REPO  = amirtaha1389ahmadnia16-lang/chesshub
      GITHUB_BRANCH = main   (اختیاری — پیش‌فرض main)
+
+   ⚠️ مهم: در render.yaml مقدار autoDeploy: false شده است؛
+   کامیت‌های sync دیگر دیپلوی نمی‌سازند. دیپلوی فقط با
+   Manual Deploy یا push کد جدید خودتان انجام می‌شود.
    ============================================================ */
 "use strict";
 
@@ -26,9 +42,20 @@ const path = require("path");
 
 const ROOT = path.join(__dirname);
 const DATA_DIR = path.join(ROOT, "data");
-const FILES = ["users.json", "online_games.json", "usernames.json", "community_content.json"];
-const PUSH_DEBOUNCE_MS = 8000;   // کامیت‌ها فشرده و کم می‌شوند
-const API_GAP_MS = 1500;         // فاصله‌ی حداقلی بین درخواست‌های API
+const FILES = [
+  "users.json",
+  "online_games.json",
+  "usernames.json",
+  "community_content.json",
+  "accounts.json",
+];
+
+const PUSH_DEBOUNCE_MS = 12000;   // جمع‌کردن تغییرات قبل از کامیت
+const API_GAP_MS = 1200;          // فاصله‌ی حداقلی بین درخواست‌های API
+const MAX_RETRIES = 6;            // تلاش مجدد push در برابر خطا
+const RETRY_BASE_MS = 4000;       // شروع backoff
+const RETRY_MAX_MS = 120000;      // سقف backoff
+const SHUTDOWN_FLUSH_MS = 3500;   // حداکثر زمان flush هنگام خاموشی
 
 const TOKEN = (process.env.GITHUB_TOKEN || "").trim();
 const REPO = (process.env.GITHUB_REPO || "").trim();
@@ -36,14 +63,16 @@ const BRANCH = (process.env.GITHUB_BRANCH || "main").trim();
 const ENABLED = !!(TOKEN && REPO);
 
 // وضعیت هر فایل
-const state = {}; // name → { sha, lastPushedHash, timer, pending, busy }
+const state = {}; // name → { dirty, busy, timer, pendingRetry }
 FILES.forEach(function (n) {
-  state[n] = { sha: null, lastPushedHash: null, timer: null, pending: false, busy: false };
+  state[n] = { dirty: false, busy: false, timer: null, pendingRetry: false };
 });
 
 let initPromise = null;
+let flushRequested = false;
 let apiQueue = [];
 let apiBusy = false;
+let batchTimer = null;
 
 function log(msg) { console.log("[Sync] " + msg); }
 
@@ -81,7 +110,7 @@ function runApi(method, apiPath, bodyObj) {
         "Accept": "application/vnd.github+json",
         "Authorization": "Bearer " + TOKEN,
       },
-      timeout: 15000,
+      timeout: 20000,
     };
     if (payload) {
       opts.headers["Content-Type"] = "application/json";
@@ -108,11 +137,7 @@ function runApi(method, apiPath, bodyObj) {
   });
 }
 
-function remotePath(name) {
-  return "/repos/" + REPO + "/contents/data/" + encodeURIComponent(name) + "?ref=" + encodeURIComponent(BRANCH);
-}
-
-/* ---------------- خواندن/نوشتن ---------------- */
+/* ---------------- خواندن/نوشتن محلی ---------------- */
 
 function localRead(name) {
   try { return fs.readFileSync(path.join(DATA_DIR, name), "utf8"); } catch (e) { return null; }
@@ -120,28 +145,11 @@ function localRead(name) {
 function localWrite(name, content) {
   try {
     fs.mkdirSync(DATA_DIR, { recursive: true });
-    fs.writeFileSync(path.join(DATA_DIR, name), content);
+    const tmp = path.join(DATA_DIR, "." + name + ".tmp");
+    fs.writeFileSync(tmp, content);
+    fs.renameSync(tmp, path.join(DATA_DIR, name));
     return true;
   } catch (e) { return false; }
-}
-// تشخیص «فایل خالی» — خروجی اولین بوت روی دیسک پاک‌شده‌ی Render
-// اگر فایل محلی وجود داشته باشد ولی خالی باشد، نباید مانع بازیابی از گیت‌هاب شود
-function isBlank(name, content) {
-  if (content == null) return true;
-  try {
-    const j = JSON.parse(content);
-    if (j == null) return true;
-    if (Array.isArray(j)) return j.length === 0;
-    if (typeof j !== "object") return false;
-    const keys = Object.keys(j);
-    if (keys.length === 0) return true; // {}
-    if (name === "usernames.json") return Object.keys(j.usernames || {}).length === 0;
-    if (name === "community_content.json")
-      return ["lessons", "openings", "articles"].every(function (k) {
-        return !(Array.isArray(j[k]) && j[k].length);
-      });
-    return false;
-  } catch (e) { return false; } // محتوای خراب → خالی حساب نکن؛ دست نزن
 }
 
 function hashOf(str) {
@@ -150,16 +158,206 @@ function hashOf(str) {
   return String(x) + ":" + str.length;
 }
 
-// در بوت: اگر فایل محلی نبود ولی در ریپو بود → بازیابی + کشِ sha برای push
+function parseJSONSafe(text) {
+  try { return JSON.parse(text); } catch (e) { return null; }
+}
+
+/* ---------------- منطق ادغام (قلب ضد-گم‌شدن داده) ---------------- */
+
+// کلید یکتا برای ادغام — همان کلیدی که خود سرور برای نام کاربری استفاده می‌کند
+function normKey(v) {
+  return String(v == null ? "" : v).trim().replace(/\s+/g, " ").toLowerCase();
+}
+
+function newerAt(a, b) {
+  return (Number(a) || 0) - (Number(b) || 0);
+}
+
+// آرایه‌ی اقلام بر اساس id (یا کلید جایگزین) ادغام می‌شود؛ تازه‌تر می‌ماند
+function mergeItemArrays(localArr, remoteArr, keyFn, timeFn) {
+  const map = {};
+  const order = [];
+  function add(item, source) {
+    if (!item || typeof item !== "object") return;
+    const k = keyFn(item);
+    if (k == null) return;
+    const sk = String(k);
+    if (!Object.prototype.hasOwnProperty.call(map, sk)) {
+      order.push(sk);
+      map[sk] = { item: item, time: timeFn(item) || 0 };
+    } else {
+      const cur = map[sk];
+      const t = timeFn(item) || 0;
+      if (t > cur.time) { cur.item = item; cur.time = t; }
+      // برابر بودن زمان → نسخه‌ی ریموت (source=remote) برنده است چون
+      // احتمالاً نتیجه‌ی سروری تازه‌تری است
+      else if (t === cur.time && source === "remote") { cur.item = item; }
+    }
+  }
+  (Array.isArray(localArr) ? localArr : []).forEach(function (x) { add(x, "local"); });
+  (Array.isArray(remoteArr) ? remoteArr : []).forEach(function (x) { add(x, "remote"); });
+  return order.map(function (k) { return map[k].item; });
+}
+
+// جمعِ دو نگاشت کلید→مقدار (usernames / accounts) — مقدار «تازه‌تر» می‌برد
+// timeFn: چه چیزی زمانِ رکورد را تعیین می‌کند (پیش‌فرض: updatedAt/registeredAt/createdAt)
+function mergeKeyMaps(localMap, remoteMap, timeFn) {
+  timeFn = timeFn || function (r) { return newerAt(r && (r.updatedAt || r.registeredAt || r.createdAt), 0); };
+  const out = {};
+  const L = localMap && typeof localMap === "object" ? localMap : {};
+  const R = remoteMap && typeof remoteMap === "object" ? remoteMap : {};
+  const keys = Object.keys(L);
+  for (let i = 0; i < keys.length; i++) {
+    const k = keys[i];
+    out[k] = L[k];
+  }
+  const rk = Object.keys(R);
+  for (let i = 0; i < rk.length; i++) {
+    const k = rk[i];
+    if (!Object.prototype.hasOwnProperty.call(out, k)) { out[k] = R[k]; continue; }
+    const a = out[k] || {};
+    const b = R[k] || {};
+    const ta = Number(timeFn(a)) || 0;
+    const tb = Number(timeFn(b)) || 0;
+    if (tb > ta) out[k] = b;
+    else if (tb === ta) {
+      // ادغام میدان‌های ساده: آواتار تازه‌تر (avatarUpdatedAt) می‌برد
+      const avA = Number(a.avatarUpdatedAt) || 0;
+      const avB = Number(b.avatarUpdatedAt) || 0;
+      const winner = Object.assign({}, a);
+      if (avB > avA && b.avatar) { winner.avatar = b.avatar; winner.avatarUpdatedAt = b.avatarUpdatedAt; }
+      if (!winner.name && b.name) winner.name = b.name;
+      out[k] = winner;
+    }
+  }
+  return out;
+}
+
+// ریتینگ بازیکن: آخرین lastSeen برنده است؛ و حذف تکراری‌های هم‌نام
+function mergeUsers(localObj, remoteObj) {
+  const merged = mergeKeyMaps(localObj, remoteObj, function (r) {
+    return newerAt(r && r.lastSeen, 0);
+  });
+  // حذف تکراری هم‌نام — جدیدترین lastSeen می‌ماند
+  const byName = {};
+  const keys = Object.keys(merged);
+  const dropped = {};
+  for (let i = 0; i < keys.length; i++) {
+    const k = keys[i];
+    const rec = merged[k];
+    if (!rec || !rec.name) continue;
+    const nk = normKey(rec.name);
+    if (!byName[nk]) { byName[nk] = k; continue; }
+    const keepKey = byName[nk];
+    const keep = merged[keepKey];
+    const aSeen = Number(keep.lastSeen) || 0;
+    const bSeen = Number(rec.lastSeen) || 0;
+    const loserKey = bSeen > aSeen ? keepKey : k;
+    const winnerKey = bSeen > aSeen ? k : keepKey;
+    if (loserKey !== winnerKey) {
+      dropped[loserKey] = true;
+      byName[nk] = winnerKey;
+    }
+  }
+  const out = {};
+  for (let i = 0; i < keys.length; i++) {
+    const k = keys[i];
+    if (!dropped[k]) out[k] = merged[k];
+  }
+  return out;
+}
+
+function mergeGames(localArr, remoteArr) {
+  return mergeItemArrays(localArr, remoteArr,
+    function (g) { return g && (g.id || g.gameId); },
+    function (g) { return (g && (g.finishedAt || g.updatedAt || g.createdAt)) || 0; });
+}
+
+function mergeCommunity(local, remote) {
+  const L = local && typeof local === "object" ? local : {};
+  const R = remote && typeof remote === "object" ? remote : {};
+
+  // تومب‌سنگ‌ها: id → زمان حذف. ادغام دو طرف؛ آیتم قدیمی‌تر از تومب‌سنگ نمی‌ماند
+  const tombs = {};
+  const lt = L.deleted && typeof L.deleted === "object" ? L.deleted : {};
+  const rt = R.deleted && typeof R.deleted === "object" ? R.deleted : {};
+  Object.keys(lt).forEach(function (k) { tombs[k] = Number(lt[k]) || 0; });
+  Object.keys(rt).forEach(function (k) {
+    if (!tombs[k] || tombs[k] < (Number(rt[k]) || 0)) tombs[k] = Number(rt[k]) || 0;
+  });
+
+  function mergeType(type) {
+    const merged = mergeItemArrays(L[type], R[type],
+      function (x) { return x && x.id; },
+      function (x) { return (x && (x.updatedAt || x.createdAt)) || 0; });
+    // اعمال تومب‌سنگ‌ها
+    return merged.filter(function (x) {
+      if (!x || !x.id) return false;
+      const t = tombs[String(x.id)];
+      if (t) {
+        const updated = (x.updatedAt || x.createdAt || 0);
+        if (updated <= t) return false; // قبل از حذف بوده → حذف معتبر است
+      }
+      return true;
+    });
+  }
+
+  return {
+    lessons: mergeType("lessons"),
+    openings: mergeType("openings"),
+    articles: mergeType("articles"),
+    deleted: tombs,
+  };
+}
+
+// ادغام دو متن JSON برای فایل مشخص — بر اساس نوع فایل
+function mergeFileContent(name, localText, remoteText) {
+  const localParsed = localText != null ? parseJSONSafe(localText) : null;
+  const remoteParsed = remoteText != null ? parseJSONSafe(remoteText) : null;
+  if (remoteText == null) return { content: localText, merged: false };
+  if (localText == null) return { content: remoteText, merged: true };
+  if (localParsed === null) return { content: remoteText, merged: true }; // محلی خراب → ریموت
+  if (remoteParsed === null) return { content: localText, merged: false }; // ریموت خراب → محلی
+  if (hashOf(JSON.stringify(localParsed)) === hashOf(JSON.stringify(remoteParsed)))
+    return { content: localText, merged: false };
+
+  let merged, out;
+  switch (name) {
+    case "community_content.json":
+      merged = mergeCommunity(localParsed, remoteParsed);
+      out = { lessons: merged.lessons, openings: merged.openings, articles: merged.articles, deleted: merged.deleted };
+      break;
+    case "usernames.json":
+      out = { usernames: mergeKeyMaps(localParsed.usernames, remoteParsed.usernames) };
+      break;
+    case "accounts.json":
+      out = { accounts: mergeKeyMaps(localParsed.accounts, remoteParsed.accounts) };
+      break;
+    case "users.json":
+      out = mergeUsers(localParsed, remoteParsed);
+      break;
+    case "online_games.json":
+      out = mergeGames(localParsed, remoteParsed);
+      break;
+    default:
+      return { content: remoteText, merged: true };
+  }
+  return { content: JSON.stringify(out), merged: true };
+}
+
+/* ---------------- خواندن ریموت ---------------- */
+
+function remotePath(name) {
+  return "/repos/" + REPO + "/contents/data/" + encodeURIComponent(name) + "?ref=" + encodeURIComponent(BRANCH);
+}
+
 function fetchRemote(name) {
   return apiCall("GET", remotePath(name))
     .then(function (j) {
-      const st = state[name];
-      st.sha = j && j.sha ? j.sha : null;
       let content = null;
       if (j && j.content) {
         content = Buffer.from(j.content, "base64").toString("utf8");
-      } else if (j && j.git_url) {
+      } else if (j && j.sha && j.git_url) {
         // فایل بزرگ‌تر از ۱مگابایت → از blob API بخوان
         return apiCall("GET", "/repos/" + REPO + "/git/blobs/" + j.sha).then(function (b) {
           return Buffer.from(b.content, "base64").toString("utf8");
@@ -168,52 +366,141 @@ function fetchRemote(name) {
       return content;
     })
     .catch(function (err) {
-      const st = state[name];
-      if (err.status === 404) { st.sha = null; return null; } // هنوز در ریپو نیست — طبیعی
+      if (err.status === 404) return null; // هنوز در ریپو نیست — طبیعی
       throw err;
     });
 }
 
-function pushFile(name) {
-  const st = state[name];
-  const content = localRead(name);
-  if (content == null) return Promise.resolve(false);
-  const h = hashOf(content);
-  if (st.lastPushedHash === h) return Promise.resolve(false); // تغییری نکرده
+/* ---------------- کامیت گروهی (Git Trees API) ----------------
+   همه‌ی فایل‌های dirty در «یک» کامیت ثبت می‌شوند:
+     GET ref → GET commit → POST tree (با base_tree) → POST commit → PATCH ref
+--------------------------------------------------------------- */
 
-  const body = {
-    message: "🔄 ChessHub data sync — " + name + " [skip ci]",
-    content: Buffer.from(content, "utf8").toString("base64"),
-    branch: BRANCH,
-  };
-  if (st.sha) body.sha = st.sha;
+function batchPush() {
+  const changed = FILES.filter(function (n) { return state[n].dirty; });
+  if (!changed.length) return Promise.resolve(false);
 
-  return apiCall("PUT", "/repos/" + REPO + "/contents/data/" + encodeURIComponent(name), body)
-    .then(function (j) {
-      st.sha = j && j.content && j.content.sha ? j.content.sha : st.sha;
-      st.lastPushedHash = h;
+  const contents = {};
+  const blobs = [];
+  changed.forEach(function (n) {
+    const c = localRead(n);
+    if (c == null) return;
+    contents[n] = c;
+    blobs.push({ path: "data/" + n, content: c });
+  });
+  if (!blobs.length) return Promise.resolve(false);
+
+  const msg =
+    "🔄 ChessHub data sync (" + blobs.length + " file" + (blobs.length > 1 ? "s" : "") + ") [skip ci]";
+
+  return apiCall("GET", "/repos/" + REPO + "/git/ref/heads/" + encodeURIComponent(BRANCH))
+    .then(function (ref) {
+      const baseSha = ref && ref.object && ref.object.sha;
+      if (!baseSha) throw new Error("مرجع شاخه پیدا نشد");
+      return apiCall("GET", "/repos/" + REPO + "/git/commits/" + baseSha).then(function (commit) {
+        return { baseSha: baseSha, baseTree: commit && commit.tree && commit.tree.sha };
+      });
+    })
+    .then(function (ctx) {
+      return apiCall("POST", "/repos/" + REPO + "/git/trees", {
+        base_tree: ctx.baseTree,
+        tree: blobs.map(function (b) {
+          return { path: b.path, mode: "100644", type: "blob", content: b.content };
+        }),
+      }).then(function (tree) { return { baseSha: ctx.baseSha, treeSha: tree && tree.sha }; });
+    })
+    .then(function (ctx) {
+      return apiCall("POST", "/repos/" + REPO + "/git/commits", {
+        message: msg,
+        tree: ctx.treeSha,
+        parents: [ctx.baseSha],
+      }).then(function (commit) { return { commitSha: commit && commit.sha }; });
+    })
+    .then(function (ctx) {
+      return apiCall("PATCH", "/repos/" + REPO + "/git/refs/heads/" + encodeURIComponent(BRANCH), {
+        sha: ctx.commitSha,
+        force: false,
+      });
+    })
+    .then(function () {
+      changed.forEach(function (n) {
+        if (contents[n] != null) state[n].dirty = false;
+      });
+      log("کامیت گروهی شد: " + blobs.map(function (b) { return b.path.replace("data/", ""); }).join(", "));
       return true;
     })
     .catch(function (err) {
-      if (err.status === 409 || err.status === 422 || err.status === 400) {
-        // sha کهنه → تازه کن و یک بار دیگر تلاش کن (آخرین نسخه برنده است)
-        return fetchRemote(name).then(function () {
-          const body2 = {
-            message: "🔄 ChessHub data sync — " + name + " (retry) [skip ci]",
-            content: Buffer.from(content, "utf8").toString("base64"),
-            branch: BRANCH,
-          };
-          if (state[name].sha) body2.sha = state[name].sha;
-          return apiCall("PUT", "/repos/" + REPO + "/contents/data/" + encodeURIComponent(name), body2)
-            .then(function (j2) {
-              st.sha = j2 && j2.content && j2.content.sha ? j2.content.sha : st.sha;
-              st.lastPushedHash = h;
-              return true;
-            });
-        });
+      if (err.status === 404 && String(err.message || "").indexOf("Ref not found") >= 0) {
+        // شاخه هنوز وجود ندارد → کامیت بدون والد (اولین کامیت) — نادر
+        throw err;
       }
       throw err;
     });
+}
+
+// تلاش مجدد با backoff — داده هرگز به‌خاطر یک خطای موقت گم نمی‌شود
+function batchPushWithRetry(attempt) {
+  attempt = attempt || 1;
+  return batchPush().catch(function (err) {
+    if (attempt >= MAX_RETRIES) {
+      log("پس از " + attempt + " تلاش ناموفق بود: " + err.message + " — داده محلی سالم است، بعداً دوباره تلاش می‌شود");
+      // تغییرات نگه داشته می‌شوند (dirty برنمی‌گردد به false) — از طریق scheduleBatch دوباره
+      FILES.forEach(function (n) { if (localRead(n) != null && state[n].pendingRetry) state[n].dirty = true; });
+      scheduleBatch(RETRY_MAX_MS);
+      throw err;
+    }
+    // تداخل ref (کسی هم‌زمان push کرده) → ریموت را ادغام کن و دوباره
+    const isConflict = err.status === 409 || err.status === 422 || err.status === 400;
+    const wait = Math.min(RETRY_BASE_MS * Math.pow(2, attempt - 1), RETRY_MAX_MS);
+    if (isConflict) {
+      log("تداخل هنگام کامیت (تلاش " + attempt + ") — ادغام با نسخه‌ی گیت‌هاب و تلاش مجدد…");
+      return mergeRemoteIntoAll().catch(function () {})
+        .then(function () { return delay(wait); })
+        .then(function () { return batchPushWithRetry(attempt + 1); });
+    }
+    log("خطای شبکه در کامیت (تلاش " + attempt + "): " + err.message + " — تلاش مجدد پس از " + Math.round(wait / 1000) + "s");
+    return delay(wait).then(function () { return batchPushWithRetry(attempt + 1); });
+  });
+}
+
+function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+function scheduleBatch(delayMs) {
+  if (!ENABLED) return;
+  if (batchTimer) return; // قبلاً زمان‌بندی شده
+  batchTimer = setTimeout(function () {
+    batchTimer = null;
+    const anyDirty = FILES.some(function (n) { return state[n].dirty; });
+    if (!anyDirty) return;
+    FILES.forEach(function (n) { state[n].pendingRetry = state[n].dirty; });
+    batchPushWithRetry(1).catch(function () {});
+  }, delayMs == null ? PUSH_DEBOUNCE_MS : delayMs);
+  if (batchTimer.unref) batchTimer.unref();
+}
+
+/* ---------------- ادغام ریموت ← محلی ---------------- */
+
+function mergeRemoteIntoAll() {
+  const results = [];
+  let chain = Promise.resolve();
+  FILES.forEach(function (name) {
+    chain = chain.then(function () {
+      return fetchRemote(name)
+        .then(function (remote) {
+          if (remote == null) return;
+          const local = localRead(name);
+          const r = mergeFileContent(name, local, remote);
+          if (r.merged && r.content != null) {
+            localWrite(name, r.content);
+            results.push(name);
+          }
+        })
+        .catch(function (e) {
+          log("خطای ادغام " + name + ": " + e.message);
+        });
+    });
+  });
+  return chain.then(function () { return results; });
 }
 
 /* ---------------- API عمومی ---------------- */
@@ -225,48 +512,75 @@ function init() {
     return initPromise;
   }
   if (initPromise) return initPromise;
-  log("فعال شد — ریپو " + REPO + " (شاخه " + BRANCH + ") — داده‌ها با هر دیپلوی زنده می‌مانند");
+  log("فعال شد (v8.2 merge-safe) — ریپو " + REPO + " (شاخه " + BRANCH + ")");
   initPromise = (async function () {
-    const fetched = [];
-    for (const name of FILES) {
-      try {
-        const remote = await fetchRemote(name);
-        const local = localRead(name);
-        if (remote != null && (local == null || isBlank(name, local))) {
-          // فایل محلی نیست یا خالی است (دیسک تازه‌ی Render) → بازیابی از گیت‌هاب
-          if (localWrite(name, remote)) {
-            state[name].lastPushedHash = hashOf(remote); // مبنای push فقط تغییرات بعدی
-            fetched.push(name);
-          }
-        } else if (local != null) {
-          state[name].lastPushedHash = hashOf(local); // محتوای فعلی مبناست
-        }
-      } catch (e) {
-        log("خطای دریافت " + name + ": " + e.message);
-      }
+    // ۱) همیشه ریموت خوانده و با محلی ادغام می‌شود — نه فقط وقتی محلی خالی است
+    let merged = [];
+    let missingRemote = [];
+    try {
+      merged = await mergeRemoteIntoAll();
+      if (merged.length) log("ادغام اولیه با گیت‌هاب: " + merged.join(", "));
+    } catch (e) {
+      log("خطای ادغام اولیه: " + e.message);
     }
-    return fetched;
+    // ۲) فایل‌هایی که در گیت‌هاب نیستند ولی محلی داده دارند → باید push شوند
+    //    (ریپوی تازه، حذف تصادفی فایل از ریپو، یا داده‌ی نجات‌یافته)
+    for (const n of FILES) {
+      const local = localRead(n);
+      if (local == null) continue;
+      const remote = await fetchRemote(n).catch(function () { return null; });
+      if (remote == null) missingRemote.push(n);
+    }
+    if (merged.length || missingRemote.length) {
+      FILES.forEach(function (n) {
+        if (localRead(n) == null) return;
+        if (missingRemote.indexOf(n) >= 0 || merged.indexOf(n) >= 0) state[n].dirty = true;
+      });
+      scheduleBatch(3000);
+    }
+    return merged;
   })();
   return initPromise;
 }
 
-// بعد از هر ذخیره‌ی محلی صدا زده می‌شود — debounce و صف
+// بعد از هر ذخیره‌ی محلی صدا زده می‌شود — debounce و کامیت گروهی
 function pushLater(name) {
   if (!ENABLED) return;
   const st = state[name];
   if (!st) return;
-  st.pending = true;
-  if (st.timer) return;
-  st.timer = setTimeout(function () {
-    st.timer = null;
-    if (!st.pending || st.busy) return;
-    st.pending = false;
-    st.busy = true;
-    pushFile(name)
-      .then(function (pushed) { if (pushed) log("کامیت شد: data/" + name); })
-      .catch(function (e) { log("خطای کامیت " + name + ": " + e.message); })
-      .then(function () { st.busy = false; });
-  }, PUSH_DEBOUNCE_MS);
+  st.dirty = true;
+  scheduleBatch();
 }
 
-module.exports = { init: init, pushLater: pushLater, enabled: function () { return ENABLED; } };
+// فوراً push کن (هنگام خاموشی سرور) — حداکثر SHUTDOWN_FLUSH_MS منتظر می‌ماند
+function flushNow() {
+  if (!ENABLED) return Promise.resolve(false);
+  if (batchTimer) { clearTimeout(batchTimer); batchTimer = null; }
+  const anyDirty = FILES.some(function (n) { return state[n].dirty; });
+  if (!anyDirty) return Promise.resolve(false);
+  FILES.forEach(function (n) { state[n].pendingRetry = state[n].dirty; });
+  const p = batchPushWithRetry(1).then(
+    function () { return true; },
+    function () { return false; }
+  );
+  // محدودیت زمانی — خاموشی نباید بیش از حد طول بکشد
+  const timeout = new Promise(function (r) { setTimeout(function () { r(false); }, SHUTDOWN_FLUSH_MS).unref(); });
+  return Promise.race([p, timeout]);
+}
+
+module.exports = {
+  init: init,
+  pushLater: pushLater,
+  flushNow: flushNow,
+  enabled: function () { return ENABLED; },
+  // 🔧 هوک تست — منطق ادغام را بدون شبکه قابل تست می‌کند
+  _test: {
+    mergeFileContent: mergeFileContent,
+    mergeCommunity: mergeCommunity,
+    mergeKeyMaps: mergeKeyMaps,
+    mergeUsers: mergeUsers,
+    mergeGames: mergeGames,
+    mergeItemArrays: mergeItemArrays,
+    normKey: normKey,
+  },
+};

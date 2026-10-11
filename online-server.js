@@ -997,4 +997,36 @@ function route(client, msg) {
   }
 }
 
-module.exports = { attach: attach };
+// 🔄 v8.2 — بارگذاری مجدد داده از دیسک بعد از ادغام گیت‌هاب.
+// به‌جای جایگزینی کورکورانه، نسخه‌ی تازه‌ترِ هر رکورد نگه داشته می‌شود
+// تا ریتینگ/آمار بازیکنانی که همین الان در حافظه‌اند از بین نرود.
+function reloadFiles() {
+  try {
+    const diskUsers = JSON.parse(fs.readFileSync(USERS_FILE, "utf8")) || {};
+    const diskGames = JSON.parse(fs.readFileSync(GAMES_FILE, "utf8")) || [];
+    let ds = null;
+    try { ds = require("./data-sync")._test; } catch (e) { ds = null; }
+    if (ds) {
+      const mergedU = ds.mergeUsers(diskUsers, users);
+      const mergedG = ds.mergeGames(diskGames, games);
+      users = mergedU;
+      games = mergedG;
+    } else {
+      // بدون data-sync: فقط کلیدهای جدید را اضافه کن
+      Object.keys(diskUsers).forEach(function (k) { if (!users[k]) users[k] = diskUsers[k]; });
+      const have = new Set(games.map(function (g) { return String(g.id || g.gameId); }));
+      diskGames.forEach(function (g) {
+        if (!have.has(String(g.id || g.gameId))) games.push(g);
+      });
+    }
+    dirtyUsers = true;
+    dirtyGames = true;
+    saveFiles(true);
+    console.log("[Online] داده‌ها پس از ادغام گیت‌هاب دوباره بارگذاری شد — " +
+      Object.keys(users).length + " بازیکن، " + games.length + " بازی");
+  } catch (e) {
+    console.error("[Online] خطای reloadFiles: " + e.message);
+  }
+}
+
+module.exports = { attach: attach, reloadFiles: reloadFiles };

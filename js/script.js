@@ -431,22 +431,58 @@ window.chPh = function (w, h, label) {
       return this._pending;
     },
 
-    // action: "publish" | "update" | "delete" — type: lessons/openings/articles
-    save(type, action, id, item) {
+    // 🔐 v8.2 — هدر نشست؛ بدون ورود، سرور انتشار را رد می‌کند
+    _headers(extra) {
+      const h = Object.assign({ "Content-Type": "application/json" }, extra || {});
+      if (window.ChessHubAuth && window.ChessHubAuth.token()) {
+        h["X-Session-Token"] = window.ChessHubAuth.token();
+      }
+      return h;
+    },
+
+    // 🛡️ v8.2 — تلاش مجدد خودکار: خطاهای شبکه/سرور شلوغ دیگر
+    // «گم‌شدن محتوا» نمی‌سازند (۳ تلاش با فاصله‌ی ۱٫۵ و ۳ ثانیه)
+    _postWithRetry(type, action, id, item, bodyExtra) {
       const self = this;
-      return fetch("/api/community/publish", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: type, action: action, id: id, item: item }),
-      })
-        .then(function (r) {
-          return r.json().catch(function () { return null; }).then(function (j) {
-            if (!r.ok || !j || !j.ok) {
-              throw new Error((j && j.error) || "خطای سرور (" + r.status + ")");
-            }
-            return j;
-          });
+      const bodyObj = { type: type, action: action, id: id, item: item };
+      if (bodyExtra && typeof bodyExtra === "object") Object.assign(bodyObj, bodyExtra);
+      const payload = JSON.stringify(bodyObj);
+      let attempt = 0;
+      function go() {
+        attempt += 1;
+        return fetch("/api/community/publish", {
+          method: "POST",
+          headers: self._headers(extra),
+          body: payload,
         })
+          .then(function (r) {
+            return r.json().catch(function () { return null; }).then(function (j) {
+              if (!r.ok || !j || !j.ok) {
+                const err = new Error((j && j.error) || "خطای سرور (" + r.status + ")");
+                err.status = r.status;
+                err.body = j;
+                throw err;
+              }
+              return j;
+            });
+          })
+          .catch(function (err) {
+            // فقط خطاهای شبکه/سرور تلاش مجدد می‌شوند؛ خطاهای کاربر (۴۰۰/۴۰۱/۴۰۳) نه
+            const retryable = !err.status || err.status >= 500 || err.status === 429;
+            if (retryable && attempt < 3) {
+              return new Promise(function (res) { setTimeout(res, attempt * 1500); }).then(go);
+            }
+            throw err;
+          });
+      }
+      return go();
+    },
+
+    // action: "publish" | "update" | "delete" — type: lessons/openings/articles
+    // bodyExtra: فیلدهای اضافه‌ی بدنه — مثلاً {allowFileAuthor:true} برای آپلود فایل JSON
+    save(type, action, id, item, bodyExtra) {
+      const self = this;
+      return this._postWithRetry(type, action, id, item, bodyExtra)
         .then(function (j) {
           // همگام‌سازی کش محلی
           if (self._cache && j.item) {

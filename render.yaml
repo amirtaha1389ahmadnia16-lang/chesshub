@@ -1,13 +1,24 @@
 # ChessHub — Render Blueprint
 # در Render: New → Blueprint → این ریپو را انتخاب کن (همه‌چیز خودکار ست می‌شود)
+#
+# ⚠️ v8.2 — مهم‌ترین تنظیم ضد-تأخیر:
+#   autoDeploy: false یعنی کامیت‌های همگام‌سازی داده (🔄 ChessHub data sync)
+#   دیگر دیپلوی نمی‌سازند. قبلاً هر کامیت داده یک دیپلوی کامل می‌ساخت و
+#   صف دیپلوی‌ها سایت را ۳۰ دقیقه و بیشتر از دسترس خارج می‌کرد.
+#   دیپلوی فقط وقتی انجام می‌شود که «خودت» کد جدید push کنی و در داشبورد
+#   Render دکمه‌ی Manual Deploy را بزنی (یا Blueprint را Apply کنی).
 services:
   - type: web
     name: chesshub
     runtime: node
     plan: free
+    autoDeploy: false
     buildCommand: npm install
     startCommand: npm start
     healthCheckPath: /api/health
     envVars:
       - key: NODE_VERSION
         value: "20"
+      # 🔄 ماندگاری داده — این دو را در داشبورد Render هم ست کن:
+      #   GITHUB_TOKEN = توکن Personal Access (Contents: Read/Write)
+      #   GITHUB_REPO  = amirtaha1389ahmadnia16-lang/chesshub

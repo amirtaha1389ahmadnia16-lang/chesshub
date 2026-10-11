@@ -142,9 +142,14 @@ window.ChessHubProfile = (function () {
 
   async function serverAvatar(name, avatar) {
     try {
+      const headers = { "Content-Type": "application/json" };
+      // v8.2 — سرور تغییر آواتار فقط با نشست صاحب حساب قبول می‌کند
+      if (window.ChessHubAuth && window.ChessHubAuth.token()) {
+        headers["X-Session-Token"] = window.ChessHubAuth.token();
+      }
       const r = await fetch("api/username/avatar", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: headers,
         body: JSON.stringify({ name: name, avatar: avatar }),
       });
       return r.json();
@@ -156,6 +161,21 @@ window.ChessHubProfile = (function () {
   // پروفایل‌هایی که آفلاین ثبت شده‌اند → بعد از رسیدن سرور، خودکار ثبت می‌شوند
   async function retryPendingSync() {
     if (!_profile || !_profile.pendingSync) return;
+    // v8.2 — با سیستم حساب: ثبت‌نام از پنجره‌ی امنیتی انجام می‌شود؛
+    // وقتی کاربر وارد شد، پروفایل محلی با حساب همگام و پرچم برداشته می‌شود
+    if (window.ChessHubAuth) {
+      const cur = window.ChessHubAuth.current();
+      if (cur && normEq(cur.name, _profile.name)) {
+        const merged = {
+          name: cur.name,
+          avatar: cur.avatar || _profile.avatar,
+        };
+        _profile = merged;
+        store(_profile);
+        writeAuthorCompat(_profile.name);
+      }
+      return;
+    }
     const res = await serverRegister(_profile.name, _profile.avatar).catch(function () {
       return null;
     });
@@ -163,6 +183,9 @@ window.ChessHubProfile = (function () {
       delete _profile.pendingSync;
       store(_profile);
     }
+  }
+  function normEq(a, b) {
+    return String(a || "").trim().replace(/\s+/g, " ").toLowerCase() === String(b || "").trim().replace(/\s+/g, " ").toLowerCase();
   }
 
   /* ---------------- استایل سراسری ---------------- */
@@ -575,7 +598,12 @@ window.ChessHubProfile = (function () {
   function boot() {
     injectCSS();
     if (!_profile) {
-      openOnboarding();
+      // v8.2 — اگر auth.js صفحه را می‌پوشاند، پنجره‌ی امنیتی خودش
+      // ثبت‌نام (نام + رمز + پروفایل) را انجام می‌دهد؛ اینجا فقط
+      // برای صفحات بدون auth.js راه‌اندازی قدیمی اجرا می‌شود
+      if (!window.ChessHubAuth) {
+        openOnboarding();
+      }
     } else {
       retryPendingSync();
     }

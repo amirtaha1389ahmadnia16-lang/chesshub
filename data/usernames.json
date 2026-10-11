@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "usernames": {
     "امیرطاها": {
       "name": "امیرطاها",
@@ -43,4 +44,7 @@
       "registeredAt": 1791287327491
     }
   }
+=======
+  "usernames": {}
+>>>>>>> 877a62c (update files)
 }
