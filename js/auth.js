@@ -679,6 +679,12 @@ window.ChessHubAuth = (function () {
     let skipped = false;
     try { skipped = !!sessionStorage.getItem(SKIP_KEY); } catch (e) {}
 
+    // 🎮 v8.3 — وسط بازی (مثلاً رفرش در صفحه‌ی بازی آنلاین) پنجره‌ی
+    // تمام‌صفحه خودکار باز نمی‌شود تا بازی به‌هم نخورد؛ فقط یک توست
+    // راهنما + دکمه‌ی «ورود / ثبت‌نام» در هدر در دسترس است.
+    let ingame = false;
+    try { ingame = sessionStorage.getItem("chesshub_ingame") === "1"; } catch (e) {}
+
     if (session) {
       // اعتبارسنجی توکن با سرور
       fetchJSON("api/auth/me", { cache: "no-store", headers: { "X-Session-Token": session.token } }, 9000)
@@ -695,7 +701,11 @@ window.ChessHubAuth = (function () {
           } else if (r.status === 401) {
             storeSession(null);
             session = null;
-            if (!skipped) decideAndOpen(false);
+            if (ingame) {
+              toast("⚠️ نشستت منقضی شده — بعد از بازی با دکمه‌ی «ورود / ثبت‌نام» وارد شو", 5000);
+            } else if (!skipped) {
+              decideAndOpen(false);
+            }
           } else {
             // خطای سرور — نشست محلی معتبر بماند
           }
@@ -705,7 +715,14 @@ window.ChessHubAuth = (function () {
         });
     } else if (!skipped) {
       // کمی صبر تا صفحه آماده شود (هدر و پروفایل)
-      setTimeout(function () { decideAndOpen(false); }, 450);
+      setTimeout(function () {
+        if (ingame) {
+          // 🎮 در بازی هستی — پنجره‌ی مسدودکننده باز نمی‌شود
+          toast("👋 برای امنیت بیشتر و ذخیره‌ی بازی‌ها، با دکمه‌ی «ورود / ثبت‌نام» حسابت بساز", 5200);
+        } else {
+          decideAndOpen(false);
+        }
+      }, 450);
     }
 
     watchProfileModal();
@@ -724,9 +741,12 @@ window.ChessHubAuth = (function () {
         storeSession(null);
         if (t) fetch("api/auth/logout", { method: "POST", headers: { "X-Session-Token": t } }).catch(function () {});
         try { sessionStorage.removeItem(SKIP_KEY); } catch (e) {}
+        try { sessionStorage.removeItem("chesshub_ingame"); } catch (e) {}
+        try { sessionStorage.removeItem("chesshub_last_game"); } catch (e) {}
         toast("🚪 از حساب خارج شدی — برای انتشار محتوا دوباره وارد شو");
         document.dispatchEvent(new CustomEvent("chesshub:auth-changed", { detail: { name: null } }));
-        setTimeout(function () { decideAndOpen(false); }, 600);
+        // 🎯 v8.3 — دیگر پنجره خودکار باز نمی‌شود؛ در هدر به‌جای پروفایل
+        // دکمه‌ی «ورود / ثبت‌نام» می‌آید و با کلیک، پنل باز می‌شود
       } catch (e) {}
     },
     requireAuth: function (reason) {
@@ -735,9 +755,21 @@ window.ChessHubAuth = (function () {
       if (reason) toast(reason, 3600);
       return false;
     },
+    // 🚪 v8.3 — باز کردن دستی پنجره‌ی ورود/ثبت‌نام (دکمه‌ی هدر بعد از خروج)
+    openPanel: function () {
+      decideAndOpen(false);
+      return true;
+    },
     onUnauthorized: function () {
       session = null;
       storeSession(null);
+      // 🎮 v8.3 — وسط بازی، پنجره‌ی تمام‌صفحه بازی را خراب نمی‌کند
+      let ingame = false;
+      try { ingame = sessionStorage.getItem("chesshub_ingame") === "1"; } catch (e) {}
+      if (ingame) {
+        toast("⚠️ نشستت منقضی شده — بعد از بازی از دکمه‌ی «ورود / ثبت‌نام» وارد شو", 5000);
+        return;
+      }
       openGate(readProfile() && readProfile().name ? "login" : "register");
       if (gateEl) showErr("نشستت منقضی شده — دوباره وارد شو");
     },

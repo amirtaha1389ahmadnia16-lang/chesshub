@@ -30,7 +30,7 @@ const zlib = require("zlib");
 
 /* ------------------------- تنظیمات ------------------------- */
 
-const VERSION = "8.2.0";
+const VERSION = "8.3.0";
 const PORT = Number(process.env.PORT) || Number(process.argv[2]) || 3000;
 const HOST = process.env.HOST || "0.0.0.0"; // Render باید روی 0.0.0.0 گوش دهد
 const ROOT = __dirname;
@@ -1077,6 +1077,9 @@ function handleAPI(req, res, pathname, query) {
   if (pathname === "/api/health") {
     const list = loadPuzzles();
     const rush = loadRushPuzzles();
+    // 🎮 v8.3 — تعداد بازی‌های در جریان (برای پایش)
+    let activeGameCount = 0;
+    try { activeGameCount = onlineModule && onlineModule._test ? onlineModule._test.activeCount() : 0; } catch (e) { activeGameCount = 0; }
     return sendJSON(res, 200, {
       ok: true,
       status: "healthy",
@@ -1086,6 +1089,7 @@ function handleAPI(req, res, pathname, query) {
       rushPuzzles: rush.length,
       usernames: Object.keys(readUsernames()).length,
       accounts: Object.keys(auth.readAccounts()).length,
+      activeGames: activeGameCount,
       todayIndex: dailyIndex(list.length),
       date: new Date().toISOString().slice(0, 10),
       uptimeSeconds: Math.round(process.uptime()),
@@ -1143,10 +1147,12 @@ function serveStatic(req, res, pathname) {
   if (
     rel.indexOf("data/users") === 0 ||
     rel === "data/online_games.json" ||
+    rel === "data/active_games.json" ||
     rel === "data/community_content.json" ||
     rel === "data/usernames.json" ||
     rel === "data/accounts.json" ||
     rel === "data/secret.key" ||
+    rel === "data/secret.key.enc" ||
     rel === "data/accounts.json.tmp" ||
     rel === "data/secret.key.tmp"
   ) {
@@ -1193,6 +1199,29 @@ function serveStatic(req, res, pathname) {
       "X-Frame-Options": "SAMEORIGIN",
       "Referrer-Policy": "strict-origin-when-cross-origin",
     };
+
+    // 🔒 v8.3 — هدرهای امنیتی stronger:
+    //  • CSP: همه‌چیز فقط از خود سایت؛ inline مجاز (۴ صفحه اسکریپت داخلی دارند)
+    //  • 'wasm-unsafe-eval' برای موتور Stockfish (WASM)
+    //  • worker-src blob: برای کارگرهای موتور
+    headers["Content-Security-Policy"] = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob: https:",
+      "font-src 'self' data:",
+      "connect-src 'self' ws: wss:",
+      "media-src 'self' blob:",
+      "worker-src 'self' blob:",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "frame-ancestors 'self'",
+    ].join("; ");
+    if (ext === ".html") {
+      headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=(), payment=()";
+      headers["Cross-Origin-Opener-Policy"] = "same-origin";
+    }
 
     fs.readFile(filePath, (readErr, data) => {
       if (readErr) {
@@ -1274,9 +1303,11 @@ try {
 
 // 🔄 v8.2 — بعد از ادغام اولیه‌ی گیت‌هاب، داده‌ی بازی آنلاین از دیسک دوباره
 // خوانده می‌شود تا هیچ رکوردی که توسط ادغام نجات پیدا کرده از دست نرود
+// 🔐 v8.3 — کلید امضای توکن هم ممکن است از گیت‌هاب برگردد (نشست‌ها پایدار می‌مانند)
 if (dataSync && onlineModule && typeof onlineModule.reloadFiles === "function") {
   Promise.resolve(dataSync.init())
     .then(function () {
+      try { if (auth.reloadTokenSecret) auth.reloadTokenSecret(); } catch (e) {}
       try { onlineModule.reloadFiles(); } catch (e) { log("خطای بارگذاری مجدد داده‌ی بازی آنلاین: " + e.message); }
     })
     .catch(function () {});

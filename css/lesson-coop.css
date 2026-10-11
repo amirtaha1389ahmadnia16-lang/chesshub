@@ -1144,3 +1144,71 @@
 }
 
 
+
+/* ============================================
+   v8.3 — کادر خطاهای فایل آپلودشده
+   ============================================ */
+.import-error-box {
+  background: #fff5f5;
+  border: 1.5px solid #f6c9c9;
+  border-right: 5px solid #e05252;
+  border-radius: 14px;
+  padding: 0.9rem 1rem;
+  margin-bottom: 1.1rem;
+  direction: rtl;
+}
+.import-error-title {
+  font-weight: 800;
+  color: #b3282d;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+#importErrorList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+#importErrorList li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  font-size: 0.78rem;
+  color: #7a2c2e;
+  background: #fff;
+  border: 1px solid #f3d7d7;
+  border-radius: 10px;
+  padding: 0.45rem 0.7rem;
+  margin-bottom: 0.4rem;
+  line-height: 1.9;
+}
+#importErrorList li > button {
+  flex: 0 0 auto;
+  border: 1.5px solid #dcd4f7;
+  background: #f6f5fd;
+  color: #4c3f9e;
+  border-radius: 9px;
+  padding: 0.25rem 0.65rem;
+  font-family: inherit;
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+#importErrorList li > button:hover {
+  background: #efecfd;
+}
+.import-error-note {
+  font-size: 0.72rem;
+  color: #9a6a6a;
+  margin-top: 0.5rem;
+  line-height: 1.9;
+}
+.chmi-bad-input {
+  border-color: #e05252 !important;
+  background: #fff5f5 !important;
+  box-shadow: 0 0 0 3px rgba(224, 82, 82, 0.12);
+}

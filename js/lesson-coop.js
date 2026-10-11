@@ -796,6 +796,57 @@
     importFile.click();
   }
 
+  // ===== 🆕 v8.3 — کادر خطاهای فایل آپلودشده (بالای فرم) =====
+  const importErrorBox = document.getElementById("importErrorBox");
+  const importErrorList = document.getElementById("importErrorList");
+
+  function faNum(n) {
+    return String(n).replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[+d]);
+  }
+
+  function showImportErrors(problems) {
+    if (!importErrorBox || !importErrorList) return;
+    importErrorList.innerHTML = "";
+    const list = problems || [];
+    list.forEach(function (p) {
+      const li = document.createElement("li");
+      const span = document.createElement("span");
+      span.textContent = p.msg;
+      li.appendChild(span);
+      if (p.find) {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.textContent = "نمایش در فرم";
+        b.addEventListener("click", function () {
+          const el = p.find();
+          if (!el) return;
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+          el.classList.remove("chmi-bad-input");
+          void el.offsetWidth;
+          el.classList.add("chmi-bad-input");
+          try { el.focus({ preventScroll: true }); } catch (e) {}
+          setTimeout(function () { el.classList.remove("chmi-bad-input"); }, 3000);
+        });
+        li.appendChild(b);
+      }
+      importErrorList.appendChild(li);
+    });
+    importErrorBox.style.display = list.length ? "block" : "none";
+  }
+
+  function flagBadInput(el, msg) {
+    if (!el) return;
+    el.classList.add("chmi-bad-input");
+    if (msg) el.title = msg;
+    el.addEventListener(
+      "input",
+      function onFix() {
+        el.classList.remove("chmi-bad-input");
+        el.removeEventListener("input", onFix);
+      }
+    );
+  }
+
   function handleImportFile(file) {
     if (!file) return;
     if (file.size > 512 * 1024) {
@@ -813,28 +864,43 @@
         showToast("❌ فایل JSON معتبر نیست — این فایل خروجی «خروجی JSON» همین صفحه است؟", "error");
         return;
       }
-      const err = validateImportedLesson(obj);
-      if (typeof err === "string") {
-        showToast("❌ " + err, "error");
-        return;
-      }
-      fillFormFromImport(err.value, obj);
+      // 🆕 v8.3 — فایل همیشه بارگذاری می‌شود؛ خطاها همه با هم در کادر
+      // بالای فرم فهرست می‌شوند تا کاربر همان‌ها را اصلاح کند
+      const plan = buildImportPlan(obj);
+      fillFormFromImport(plan.data, obj, plan.problems);
     };
     reader.readAsText(file, "utf8");
   }
 
-  // خروجی: رشته‌ی خطا یا {value: داده‌ی تمیز}
-  function validateImportedLesson(o) {
+  // خروجی: { data, problems } — همه‌ی خطاها جمع می‌شوند؛ فایل رد نمی‌شود
+  function buildImportPlan(o) {
+    const problems = [];
+    const titleFind = function () { return document.getElementById("lessonTitle"); };
+    const descFind = function () { return document.getElementById("lessonDescription"); };
+
     const title = String(o.title || "").trim();
-    if (title.length < 3) return "عنوان درس باید حداقل ۳ حرف باشد";
-    if (title.length > 120) return "عنوان درس حداکثر ۱۲۰ حرف است";
+    if (title.length < 3 || title.length > 120) {
+      problems.push({
+        msg: "عنوان درس باید بین ۳ تا ۱۲۰ حرف باشد" + (title ? " (الان " + faNum(title.length) + " حرف)" : " (خالی است)"),
+        find: titleFind,
+      });
+    }
 
     const description = String(o.description || "").trim();
-    if (description.length < 5) return "توضیحات درس باید حداقل ۵ حرف باشد";
-    if (description.length > 400) return "توضیحات درس حداکثر ۴۰۰ حرف است";
+    if (description.length < 5 || description.length > 400) {
+      problems.push({
+        msg: "توضیحات درس باید بین ۵ تا ۴۰۰ حرف باشد" + (description ? " (الان " + faNum(description.length) + " حرف)" : " (خالی است)"),
+        find: descFind,
+      });
+    }
 
     const content = sanitizeLessonHtml(o.content, 80000);
-    if (content.trim().length < 20) return "محتوای درس خیلی کوتاه است (حداقل ۲۰ حرف)";
+    if (content.trim().length < 20) {
+      problems.push({
+        msg: "محتوای درس خیلی کوتاه است (حداقل ۲۰ حرف) — در ویرایشگر محتوا کاملش کن",
+        find: function () { return document.getElementById("editorArea") || document.getElementById("lessonTitle"); },
+      });
+    }
 
     // دسته‌بندی و سطح — فقط مقادیر مجاز فرم
     const catSelect = document.getElementById("lessonCategory");
@@ -847,6 +913,12 @@
     const level = lvlOptions.indexOf(String(o.level || "").trim()) >= 0
       ? String(o.level).trim()
       : lvlOptions[0];
+    if (o.category && catOptions.indexOf(String(o.category).trim()) < 0) {
+      problems.push({
+        msg: "دسته‌بندی «" + String(o.category).slice(0, 30) + "» در سایت وجود ندارد — «" + catOptions[0] + "» گذاشته شد؛ خودت عوضش کن",
+        find: function () { return catSelect; },
+      });
+    }
 
     const duration = String(o.duration || "").trim().slice(0, 40) || "۱۰ دقیقه";
     const thumbIcon = ICONS.indexOf(String(o.thumbIcon || "").trim()) >= 0
@@ -857,7 +929,7 @@
       : "#2c7da0";
 
     return {
-      value: {
+      data: {
         title: title,
         category: category,
         level: level,
@@ -867,10 +939,11 @@
         thumbIcon: thumbIcon,
         color: color,
       },
+      problems: problems,
     };
   }
 
-  function fillFormFromImport(data, original) {
+  function fillFormFromImport(data, original, problems) {
     // 📥 انتخاب نویسنده — پیش‌فرض: نویسنده‌ی داخل فایل (با تأیید کاربر)
     const fileAuthor = String(original.author || "").trim().slice(0, 40);
     const me = currentAuthor();
@@ -912,7 +985,24 @@
       updateAuthorChip();
     }
     window.scrollTo({ top: 0, behavior: "smooth" });
-    showToast("✅ فایل JSON با موفقیت بارگذاری شد — حالا «انتشار در سایت» را بزن");
+
+    // 🆕 v8.3 — علامت‌گذاری فیلدهای خطادار + کادر خطا بالای فرم
+    const probs = problems || [];
+    probs.forEach(function (p) {
+      if (!p.find) return;
+      const el = p.find();
+      if (el) flagBadInput(el, p.msg);
+    });
+    showImportErrors(probs);
+
+    if (probs.length) {
+      showToast(
+        "⚠️ فایل بارگذاری شد اما " + faNum(probs.length) + " خطا دارد — کادر بالای فرم را ببین و اصلاح کن",
+        "warning"
+      );
+    } else {
+      showToast("✅ فایل JSON با موفقیت بارگذاری شد — حالا «انتشار در سایت» را بزن");
+    }
   }
 
   // ===== ریست فرم =====
@@ -947,6 +1037,7 @@
     selectedTableCell = null;
     editingLesson = null;
     importedAuthor = null;
+    showImportErrors([]); // 🆕 v8.3 — کادر خطا هم پاک شود
     editModeBanner.style.display = "none";
     restorePublishButton();
     try {

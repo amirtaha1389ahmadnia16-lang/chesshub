@@ -123,12 +123,16 @@
       connectRetry = 0;
       const saved = savedProfile() || {};
       const g = window.ChessHubProfile && ChessHubProfile.has() ? ChessHubProfile.profile : null;
+      // 🔐 v8.3 — توکن حساب سایت هم می‌رود: هویت بازیکن = خودِ حساب،
+      // پس بعد از رفرش/تعویض دستگاه همان بازیکن شناخته می‌شود و بازی ادامه می‌یابد
+      const token = (window.ChessHubAuth && ChessHubAuth.token()) || "";
       ws.send(
         JSON.stringify({
           t: "auth",
-          userId: saved.userId || null,
-          name: (g && g.name) || saved.name || null,
-          avatar: (g && g.avatar) || saved.avatar || null,
+          token: token,
+          userId: token ? null : saved.userId || null,
+          name: token ? null : (g && g.name) || saved.name || null,
+          avatar: token ? null : (g && g.avatar) || saved.avatar || null,
         })
       );
     };
@@ -184,6 +188,7 @@
       case "gameStart": return onGameStart(msg);
       case "position": return onPosition(msg);
       case "gameEnd": return onGameEnd(msg);
+      case "resumeGone": return; // 🎮 بازی قبلی دیگر وجود ندارد — نرمال
       case "drawOffered": return openModal("drawModal");
       case "drawDeclined": return toast("حریف مساوی را رد کرد");
       case "opponentDisconnected": return onOppDisconnect(msg.seconds);
@@ -219,11 +224,13 @@
     myProfile = profile;
     myUserId = profile.userId;
     // ذخیره‌ی userId محلی
-    const saved = savedProfile() || {};
-    saved.userId = profile.userId;
-    if (!saved.name) saved.name = profile.name;
-    if (!saved.avatar) saved.avatar = profile.avatar;
-    storeProfile(saved);
+    try {
+      const saved = savedProfile() || {};
+      saved.userId = profile.userId;
+      if (!saved.name) saved.name = profile.name;
+      if (!saved.avatar) saved.avatar = profile.avatar;
+      storeProfile(saved);
+    } catch (e) {}
     renderMyProfile();
     // 👤 همگام‌سازی با پروفایل سراسری سایت — نام بازیکن = نام کاربری یکتای سایت
     const g = window.ChessHubProfile && ChessHubProfile.has() ? ChessHubProfile.profile : null;
@@ -231,11 +238,28 @@
       send({ t: "updateProfile", name: g.name, avatar: g.avatar || profile.avatar });
     }
     const modal = $("profileModal");
-    if (!saved.name && !g) {
+    if (!myProfile.name && !g) {
       openModal("profileModal"); // فالبک — در حالت عادی پروفایل سراسری همیشه هست
     }
+
+    // 🎮 v8.3 — پشتیبانِ پیوستن خودکار: اگر سرور بازی‌ای برای ما نفرستاد
+    // ولی ما بعد از رفرش شناسه‌ی بازی را داریم، صریحاً «ادامه» می‌خواهیم
+    if (connect._resumeTimer) clearTimeout(connect._resumeTimer);
+    connect._gotGame = false;
+    connect._resumeTimer = setTimeout(function () {
+      if (connect._gotGame || !authed) return;
+      let lastGame = null;
+      try { lastGame = sessionStorage.getItem("chesshub_last_game"); } catch (e) {}
+      if (lastGame && !curGameId) send({ t: "resume", gameId: lastGame });
+    }, 1200);
+    if (curGameId) {
+      try { sessionStorage.setItem("chesshub_ingame", "1"); } catch (e) {}
+    }
+
     send({ t: "listUsers" });
     send({ t: "listLive" });
+    send({ t: "leaderboard" });
+    send({ t: "myGames" });
   }
 
   function renderMyProfile() {
@@ -470,6 +494,8 @@
   }
 
   function onGameStart(msg) {
+    if (connect._resumeTimer) { clearTimeout(connect._resumeTimer); connect._resumeTimer = null; }
+    connect._gotGame = true; // 🎮 v8.3 — پیوستن خودکار انجام شد؛ resume لازم نیست
     closeModal("inviteModal");
     setSearching(false);
     curGameId = msg.gameId;
@@ -483,6 +509,11 @@
     lastServerClock = Date.now();
     posStarted = false;
 
+    // 🎮 v8.3 — نشست صفحه: بعد از رفرش می‌دانیم در بازی بودیم
+    try {
+      sessionStorage.setItem("chesshub_last_game", msg.gameId);
+      sessionStorage.setItem("chesshub_ingame", "1");
+    } catch (e) {}
     $("olMenu").style.display = "none";
     $("olGame").classList.add("show");
     $("olSpectHud").classList.remove("show");
@@ -587,8 +618,10 @@
     refreshBoard();
     updateClockUI();
     updateActionButtons(msg.moveCount || 0);
-    // ⏱ شمارش معکوس لغو خودکار (قبل از دو حرکت کامل)
-    if (typeof msg.abortIn === "number" && msg.abortIn > 0 && (msg.moveCount || 0) < 2 && !isSpectating) {
+    // ⏱ v8.3 — شمارش معکوس بازگشت حریف از روی position (بعد از رفرش خودم)
+    if (typeof msg.reconnectIn === "number" && msg.reconnectIn > 0) {
+      setStatus("حریف قطع شد — " + fa(Math.ceil(msg.reconnectIn)) + " ثانیه تا برد تو…", true);
+    } else if (typeof msg.abortIn === "number" && msg.abortIn > 0 && (msg.moveCount || 0) < 2 && !isSpectating) {
       setStatus("⏱ اگر نوبت‌دار تا " + fa(Math.ceil(msg.abortIn)) + " ثانیه حرکت نکند، بازی خودکار لغو می‌شود", true);
     } else if (!game.game_over()) {
       if (isSpectating) {
@@ -647,6 +680,11 @@
     if (msg.gameId !== curGameId) return;
     stopLocalTick();
     lastGameEnd = msg;
+    // 🎮 v8.3 — بازی تمام شد → فلگ در-بازی برداشته می‌شود (گیت امنیتی آزاد)
+    try {
+      sessionStorage.removeItem("chesshub_ingame");
+      sessionStorage.removeItem("chesshub_last_game");
+    } catch (e) {}
     send({ t: "leaderboard" }); // 🏆 رفرش بی‌صدا جدول بعد از هر بازی تمام‌شده
     const won =
       (myColor === "w" && msg.result === "1-0") ||
@@ -701,6 +739,11 @@
     if (isSpectating) send({ t: "unSpectate" });
     curGameId = null;
     isSpectating = false;
+    // 🎮 v8.3 — خروج از صفحه‌ی بازی → فلگ‌های نشست پاک می‌شوند
+    try {
+      sessionStorage.removeItem("chesshub_ingame");
+      sessionStorage.removeItem("chesshub_last_game");
+    } catch (e) {}
     send({ t: "listUsers" });
     send({ t: "listLive" });
   }

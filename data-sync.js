@@ -48,6 +48,10 @@ const FILES = [
   "usernames.json",
   "community_content.json",
   "accounts.json",
+  // v8.3 — بازی‌های در جریان (بقا پس از دیپلوی) + کلید امضای توکن
+  // (رمزگذاری‌شده — نشست‌ها با دیپلوی باطل نمی‌شوند)
+  "active_games.json",
+  "secret.key.enc",
 ];
 
 const PUSH_DEBOUNCE_MS = 12000;   // جمع‌کردن تغییرات قبل از کامیت
@@ -273,6 +277,25 @@ function mergeGames(localArr, remoteArr) {
     function (g) { return (g && (g.finishedAt || g.updatedAt || g.createdAt)) || 0; });
 }
 
+// 🎮 v8.3 — بازی‌های «در جریان»: برنده = نسخه‌ای که آخرین رویداد را داشته
+// (lastTick / updatedAt)؛ کلید = id بازی
+function mergeActiveGames(localArr, remoteArr) {
+  return mergeItemArrays(localArr, remoteArr,
+    function (g) { return g && g.id; },
+    function (g) { return Math.max(Number(g && g.lastTick) || 0, Number(g && g.updatedAt) || 0); });
+}
+
+// 🔑 v8.3 — کلید امضای توکن (رمزگذاری‌شده): برنده = نسخه‌ی با ts بزرگ‌تر.
+// هر دو طرف از یک گذرواژه‌ی واحد رمزگشایی می‌کنند؛ مهم فقط این است که
+// «یک» کلید واحد در کل سیستم زندگی کند.
+function mergeSecretEnc(localText, remoteText) {
+  const lp = parseJSONSafe(localText);
+  const rp = parseJSONSafe(remoteText);
+  if (!rp) return localText;
+  if (!lp) return remoteText;
+  return (Number(rp.ts) || 0) >= (Number(lp.ts) || 0) ? remoteText : localText;
+}
+
 function mergeCommunity(local, remote) {
   const L = local && typeof local === "object" ? local : {};
   const R = remote && typeof remote === "object" ? remote : {};
@@ -339,6 +362,11 @@ function mergeFileContent(name, localText, remoteText) {
     case "online_games.json":
       out = mergeGames(localParsed, remoteParsed);
       break;
+    case "active_games.json":
+      out = mergeActiveGames(localParsed, remoteParsed);
+      break;
+    case "secret.key.enc":
+      return { content: mergeSecretEnc(localText, remoteText), merged: true };
     default:
       return { content: remoteText, merged: true };
   }
@@ -580,6 +608,8 @@ module.exports = {
     mergeKeyMaps: mergeKeyMaps,
     mergeUsers: mergeUsers,
     mergeGames: mergeGames,
+    mergeActiveGames: mergeActiveGames,
+    mergeSecretEnc: mergeSecretEnc,
     mergeItemArrays: mergeItemArrays,
     normKey: normKey,
   },

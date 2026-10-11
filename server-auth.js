@@ -70,23 +70,119 @@ function writeAccounts(map) {
   if (dataSync) dataSync.pushLater("accounts.json");
 }
 
-/* ---------------- کلید امضای توکن ---------------- */
+/* ---------------- کلید امضای توکن ----------------
+   🔑 v8.3 — کلید باید «پایدار» بماند وگرنه با هر ری‌استارت/دیپلوی
+   همه‌ی نشست‌ها باطل می‌شوند و همه مجبور به ورود دوباره می‌شوند.
+   ترتیب منابع کلید:
+     ۱) متغیر محیطی CHESSHUB_TOKEN_SECRET (بهترین — در Render پایدار است)
+     ۲) فایل data/secret.key (متن ساده — برای محلی)
+     ۳) فایل data/secret.key.enc (رمزگذاری‌شده — با data-sync از گیت‌هاب
+        بازمی‌گردد؛ دیسک Render موقتی است ولی گیت‌هاب ماندگار!)
+     ۴) کلید تازه ساخته می‌شود + هر دو فایل نوشته می‌شوند
+   گذرواژه‌ی رمزگذاری: متغیر CHESSHUB_KEY_PASSPHRASE یا پیش‌فرض داخلی.
+   (ریپو عمومی است؛ با گذرواژه‌ی پیش‌فرض لایه‌ی امنیتی «جابه‌جایی» است —
+   برای امنیت کامل در داشبورد Render متغیرها را ست کن.)
+-------------------------------------------------- */
+
+const ENC_FILE = path.join(DATA_DIR, "secret.key.enc");
+const KEY_PASSPHRASE =
+  (process.env.CHESSHUB_KEY_PASSPHRASE || "").trim() ||
+  "chesshub-token-vault-v8.3::amirtaha";
 
 let tokenSecret = null;
-function getTokenSecret() {
-  if (tokenSecret) return tokenSecret;
+let tokenSecretSource = "";
+
+function encryptForRepo(plainText) {
+  const salt = crypto.randomBytes(16);
+  const key = crypto.scryptSync(KEY_PASSPHRASE, salt, 32, { N: 16384, r: 8, p: 1 });
+  const iv = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv("aes-256-gcm", key, iv);
+  const enc = Buffer.concat([cipher.update(String(plainText), "utf8"), cipher.final()]);
+  return JSON.stringify({
+    v: 1,
+    ts: Date.now(),
+    salt: salt.toString("base64"),
+    iv: iv.toString("base64"),
+    tag: cipher.getAuthTag().toString("base64"),
+    data: enc.toString("base64"),
+  });
+}
+
+function decryptFromRepo(jsonText) {
   try {
-    const s = fs.readFileSync(SECRET_FILE, "utf8").trim();
-    if (s.length >= 32) { tokenSecret = s; return tokenSecret; }
-  } catch (e) { /* نبود — ساخته می‌شود */ }
-  tokenSecret = crypto.randomBytes(32).toString("hex");
+    const j = JSON.parse(String(jsonText));
+    if (!j || j.v !== 1 || !j.salt || !j.iv || !j.tag || !j.data) return null;
+    const salt = Buffer.from(j.salt, "base64");
+    const key = crypto.scryptSync(KEY_PASSPHRASE, salt, 32, { N: 16384, r: 8, p: 1 });
+    const decipher = crypto.createDecipheriv("aes-256-gcm", key, Buffer.from(j.iv, "base64"));
+    decipher.setAuthTag(Buffer.from(j.tag, "base64"));
+    const dec = Buffer.concat([decipher.update(Buffer.from(j.data, "base64")), decipher.final()]);
+    const s = dec.toString("utf8").trim();
+    return s.length >= 32 ? s : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function writeKeyFiles(secret) {
   try {
     fs.mkdirSync(DATA_DIR, { recursive: true });
-    fs.writeFileSync(SECRET_FILE, tokenSecret, { mode: 0o600 });
+    fs.writeFileSync(SECRET_FILE, secret, { mode: 0o600 });
+    fs.writeFileSync(ENC_FILE, encryptForRepo(secret), { mode: 0o600 });
+    if (dataSync) { try { dataSync.pushLater("secret.key.enc"); } catch (e) {} }
   } catch (e) {
     console.error("[Auth] خطا در ذخیره‌ی کلید امضا: " + e.message);
   }
+}
+
+function getTokenSecret() {
+  if (tokenSecret) return tokenSecret;
+  // ۱) متغیر محیطی — پایدارترین گزینه روی Render
+  const envKey = (process.env.CHESSHUB_TOKEN_SECRET || "").trim();
+  if (envKey.length >= 32) {
+    tokenSecret = envKey;
+    tokenSecretSource = "env";
+    return tokenSecret;
+  }
+  // ۲) فایل ساده
+  try {
+    const s = fs.readFileSync(SECRET_FILE, "utf8").trim();
+    if (s.length >= 32) { tokenSecret = s; tokenSecretSource = "file"; return tokenSecret; }
+  } catch (e) { /* نبود */ }
+  // ۳) نسخه‌ی رمزگذاری‌شده (مثلاً بازگشته از گیت‌هاب)
+  try {
+    const s = decryptFromRepo(fs.readFileSync(ENC_FILE, "utf8"));
+    if (s) {
+      tokenSecret = s;
+      tokenSecretSource = "repo-encrypted";
+      try { fs.writeFileSync(SECRET_FILE, s, { mode: 0o600 }); } catch (e) {}
+      return tokenSecret;
+    }
+  } catch (e) { /* نبود */ }
+  // ۴) کلید تازه + ذخیره در هر دو شکل
+  tokenSecret = crypto.randomBytes(32).toString("hex");
+  tokenSecretSource = "generated";
+  writeKeyFiles(tokenSecret);
   return tokenSecret;
+}
+
+// بعد از این‌که data-sync نسخه‌ی گیت‌هاب را آورد صدا زده می‌شود —
+// اگر کلید فعلی «تازه ساخته‌شده» باشد ولی کلید معتبرِ قدیمی از ریپو
+// آمده باشد، همان قدیمی برنده است تا نشست‌ها با دیپلوی نمیرند.
+function reloadTokenSecret() {
+  if (tokenSecret && tokenSecretSource !== "generated") return false;
+  try {
+    const raw = fs.readFileSync(ENC_FILE, "utf8");
+    const s = decryptFromRepo(raw);
+    if (s && s !== tokenSecret) {
+      tokenSecret = s;
+      tokenSecretSource = "repo-encrypted";
+      try { fs.writeFileSync(SECRET_FILE, s, { mode: 0o600 }); } catch (e) {}
+      console.log("[Auth] کلید امضای توکن از گیت‌هاب بازیابی شد — نشست‌ها پایدار می‌مانند ✅");
+      return true;
+    }
+  } catch (e) { /* فایل هنوز نیست */ }
+  return false;
 }
 
 /* ---------------- هش رمز عبور ---------------- */
@@ -344,6 +440,7 @@ module.exports = {
   issueToken: issueToken,
   verifyToken: verifyToken,
   tokenFromReq: tokenFromReq,
+  reloadTokenSecret: reloadTokenSecret,
   // حساب‌ها
   registerAccount: registerAccount,
   loginAccount: loginAccount,
@@ -362,5 +459,13 @@ module.exports = {
   recordLoginFail: recordLoginFail,
   clearLoginFails: clearLoginFails,
   // برای تست
-  _test: { hashPassword: hashPassword, verifyPassword: verifyPassword, signToken: signToken },
+  _test: {
+    hashPassword: hashPassword,
+    verifyPassword: verifyPassword,
+    signToken: signToken,
+    encryptForRepo: encryptForRepo,
+    decryptFromRepo: decryptFromRepo,
+    reloadTokenSecret: reloadTokenSecret,
+    secretSource: function () { return tokenSecretSource; },
+  },
 };

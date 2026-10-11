@@ -166,7 +166,7 @@
   }
 
   // ===== Toast =====
-  function showToast(text, type = "success") {
+  function showToast(text, type = "success", duration = 4000) {
     const toast = document.getElementById("toast");
     if (!toast) return;
     toast.textContent = text;
@@ -174,7 +174,7 @@
     clearTimeout(toast._timeout);
     toast._timeout = setTimeout(
       () => toast.classList.remove("show"),
-      4000
+      duration
     );
   }
 
@@ -682,6 +682,17 @@
   }
 
   function doPublish() {
+    // 🆕 v8.3 — قبل از انتشار، همه‌ی فیلدهای حرکت اعتبارسنجی می‌شوند؛
+    // حرکت غیرقانونی اجازه‌ی انتشار نمی‌گیرد و کادر خطا بالا نشان داده می‌شود
+    const moveProblems = validateAllMoveFields();
+    if (moveProblems.length) {
+      showImportErrors(moveProblems);
+      showToast("❌ حرکات نامعتبر اصلاح نشده‌اند — کادر بالای فرم را ببین", "error", 5000);
+      const firstBad = document.querySelector(".chmi-bad-input");
+      if (firstBad) firstBad.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+
     // نویسنده: از نشست/پروفایل — مگر فایل JSON آپلود شود (با تأیید صریح کاربر)
     const author = importedAuthor || currentAuthor();
     if (!author) {
@@ -880,6 +891,211 @@
     return { ok: true };
   }
 
+  // PGN (با/بدون شماره) را تا جای ممکن می‌خواند؛ تعداد حرکت معتبر برمی‌گرداند
+  function loadPgnSloppy(g, text) {
+    const before = g.history().length;
+    let ok = false;
+    try { ok = g.load_pgn(String(text), { sloppy: true }); } catch (e) { ok = false; }
+    if (ok) return g.history().length - before;
+    // ⚠️ chess.js ممکن است تا نیمه راه اعمال کرده باشد — وضعیت را پاک کن
+    if (g.history().length > before) g.reset();
+    const tokens = String(text)
+      .replace(/\[[^\]]*\]/g, " ")
+      .replace(/\{[^}]*\}/g, " ")
+      .replace(/\([^)]*\)/g, " ")
+      .replace(/\d+\.(\.\.)?/g, " ")
+      .replace(/(1-0|0-1|1\/2-1\/2|\*)/g, " ")
+      .split(/[\s,;]+/)
+      .filter(Boolean);
+    let n = 0;
+    for (let i = 0; i < tokens.length; i++) {
+      const t = tokens[i].replace(/^\d+\.(\.\.)?/, "").replace(/[!?]+$/, "");
+      if (!t || /^(1-0|0-1|1\/2-1\/2|\*)$/.test(t)) continue;
+      let mv = null;
+      try { mv = g.move(t, { sloppy: true }); } catch (e) { mv = null; }
+      if (!mv) break;
+      n++;
+    }
+    return n;
+  }
+
+  function faNum(n) {
+    return String(n).replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[+d]);
+  }
+
+  // ===== 🆕 v8.3 — دکمه‌ی «ورود با تخته / PGN» کنار همه‌ی فیلدهای حرکت =====
+  function fieldTitleFor(input) {
+    const cls = input.className || "";
+    if (input.id === "openingMoves") return "حرکات اصلی";
+    if (cls.indexOf("variant-moves") >= 0) return "حرکات واریانت";
+    if (cls.indexOf("trap-moves") >= 0) return "حرکات تله";
+    if (cls.indexOf("pop-move-moves") >= 0) return "حرکات پرتکرار";
+    if (cls.indexOf("game-pgn") >= 0) return "حرکات PGN (نمونه‌بازی)";
+    return "ورود حرکات";
+  }
+
+  function ensureBoardButton(input) {
+    if (!input || input._chmiBtn) return;
+    if (!window.ChessHubMoveInput) return;
+    const parent = input.parentElement;
+    if (!parent) return;
+    const mode = (input.className || "").indexOf("game-pgn") >= 0 ? "pgn" : "moves";
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "chmi-field-btn" + (input.tagName === "TEXTAREA" ? " textarea" : "");
+    btn.title = "ورود با تخته / چسباندن PGN";
+    btn.textContent = "♟";
+    btn.addEventListener("click", function (e) {
+      e.preventDefault();
+      window.ChessHubMoveInput.open({
+        target: input,
+        mode: mode,
+        title: fieldTitleFor(input),
+      });
+    });
+    input._chmiBtn = btn;
+    try {
+      const wrap = document.createElement("span");
+      wrap.className = "chmi-inputwrap";
+      wrap.style.cssText = "position:relative;display:block";
+      parent.insertBefore(wrap, input);
+      wrap.appendChild(input);
+      wrap.appendChild(btn);
+      input.style.paddingLeft = "2.7rem";
+    } catch (e) {}
+  }
+
+  function wireBoardButtons() {
+    ["#openingMoves", ".variant-moves", ".trap-moves", ".pop-move-moves", ".game-pgn"].forEach(
+      function (sel) {
+        document.querySelectorAll(sel).forEach(ensureBoardButton);
+      }
+    );
+  }
+
+  // با هر تغییر DOM (واریانت/تله/نمونه‌بازی تازه) دکمه‌ی تخته هم می‌آید
+  if (typeof MutationObserver !== "undefined") {
+    let wireTimer = null;
+    new MutationObserver(function () {
+      clearTimeout(wireTimer);
+      wireTimer = setTimeout(wireBoardButtons, 150);
+    }).observe(document.body, { childList: true, subtree: true });
+  }
+
+  // ===== 🆕 v8.3 — کادر خطاهای فایل آپلودشده (بالای فرم) =====
+  const importErrorBox = document.getElementById("importErrorBox");
+  const importErrorList = document.getElementById("importErrorList");
+
+  function showImportErrors(problems) {
+    if (!importErrorBox || !importErrorList) return;
+    importErrorList.innerHTML = "";
+    const list = problems || [];
+    list.forEach(function (p) {
+      const li = document.createElement("li");
+      const span = document.createElement("span");
+      span.textContent = p.msg;
+      li.appendChild(span);
+      if (p.find) {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.textContent = "نمایش در فرم";
+        b.addEventListener("click", function () {
+          const el = p.find();
+          if (!el) return;
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+          el.classList.remove("chmi-bad-input");
+          void el.offsetWidth;
+          el.classList.add("chmi-bad-input");
+          try { el.focus({ preventScroll: true }); } catch (e) {}
+          setTimeout(function () { el.classList.remove("chmi-bad-input"); }, 3000);
+        });
+        li.appendChild(b);
+      }
+      importErrorList.appendChild(li);
+    });
+    importErrorBox.style.display = list.length ? "block" : "none";
+    if (list.length && importErrorBox) {
+      importErrorBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }
+
+  function flagBadInput(el, msg) {
+    if (!el) return;
+    el.classList.add("chmi-bad-input");
+    if (msg) el.title = msg;
+    el.addEventListener(
+      "input",
+      function onFix() {
+        el.classList.remove("chmi-bad-input");
+        el.removeEventListener("input", onFix);
+      }
+    );
+  }
+
+  // یابنده‌های محل خطا در فرم — بعد از پر شدن فرم اجرا می‌شوند
+  function variantFinder(vi, sel) {
+    return function () {
+      const entry = document.querySelectorAll(".variant-entry")[vi];
+      return entry ? entry.querySelector(sel) : null;
+    };
+  }
+  function subFinder(vi, containerSel, si, sel) {
+    return function () {
+      const entry = document.querySelectorAll(".variant-entry")[vi];
+      if (!entry) return null;
+      const box = entry.querySelector(containerSel);
+      if (!box) return null;
+      const sub = box.querySelectorAll(".sub-entry")[si];
+      return sub ? sub.querySelector(sel) : null;
+    };
+  }
+
+  // اعتبارسنجی هنگام انتشار — حرکت غیرقانونی اجازه‌ی انتشار نمی‌گیرد
+  function validateAllMoveFields() {
+    const problems = [];
+    const checks = [
+      { sel: "#openingMoves", label: "حرکات اصلی" },
+      { sel: ".variant-moves", label: "حرکات واریانت" },
+      { sel: ".trap-moves", label: "حرکات تله" },
+      { sel: ".pop-move-moves", label: "حرکات پرتکرار" },
+    ];
+    checks.forEach(function (c) {
+      document.querySelectorAll(c.sel).forEach(function (el, i) {
+        const v = el.value.trim();
+        if (!v) return;
+        const tokens = cleanMoveTokens(v.split(/\s+/));
+        const lm = legalMovesCheck(tokens);
+        if (!lm.ok) {
+          const idx = tokens.indexOf(lm.bad);
+          problems.push({
+            msg:
+              c.label + (i ? " #" + faNum(i + 1) : "") +
+              ": حرکت غیرقانونی «" + lm.bad + "»" +
+              (idx >= 0 ? " (حرکت شماره " + faNum(idx + 1) + ")" : ""),
+            find: function () { return el; },
+          });
+          flagBadInput(el, "حرکت غیرقانونی: " + lm.bad);
+        }
+      });
+    });
+    document.querySelectorAll(".game-pgn").forEach(function (el, i) {
+      const v = el.value.trim();
+      if (!v) return;
+      let g = null;
+      try { g = new window.Chess(); } catch (e) { g = null; }
+      if (!g) return;
+      const n = loadPgnSloppy(g, v);
+      if (!n) {
+        problems.push({
+          msg: "حرکات PGN نمونه‌بازی #" + faNum(i + 1) + ": هیچ حرکت معتبری خوانده نشد",
+          find: function () { return el; },
+        });
+        flagBadInput(el, "PGN خوانده نشد");
+      }
+    });
+    return problems;
+  }
+
   function importJSON() {
     importFile.value = ""; // انتخاب مجدد همان فایل هم کار کند
     importFile.click();
@@ -902,80 +1118,149 @@
         showToast("❌ فایل JSON معتبر نیست — این فایل خروجی «آپلود فایل JSON» همین صفحه است؟", "error");
         return;
       }
-      const err = validateImportedOpening(obj);
-      if (typeof err === "string") {
-        showToast("❌ " + err, "error");
-        return;
-      }
-      fillFormFromImport(err.value, obj);
+      // 🆕 v8.3 — فایل «همیشه» بارگذاری می‌شود؛ خطاها در کادر بالای فرم
+      // فهرست می‌شوند تا کاربر همان‌ها را اصلاح کند (نه رد شدن کل فایل)
+      const plan = buildImportPlan(obj);
+      fillFormFromImport(plan.data, obj, plan.problems);
     };
     reader.readAsText(file, "utf8");
   }
 
-  // خروجی: رشته‌ی خطا یا {value: داده‌ی تمیز}
-  function validateImportedOpening(o) {
+  // خروجی: { data: داده برای فرم، problems: فهرست کامل خطاها }
+  // برخلاف قبل، اولین خطا کل فایل را رد نمی‌کند — همه‌ی خطاها جمع می‌شوند
+  function buildImportPlan(o) {
+    const problems = [];
     const name = String(o.name || "").trim();
-    if (name.length < 2 || name.length > 80)
-      return "نام گشایش باید بین ۲ تا ۸۰ حرف باشد";
+    if (name.length < 2 || name.length > 80) {
+      problems.push({
+        msg: "نام گشایش" + (name ? " «" + name.slice(0, 30) + "»" : "") + " باید بین ۲ تا ۸۰ حرف باشد",
+        find: function () { return document.getElementById("openingName"); },
+      });
+    }
 
-    const rawMoves = Array.isArray(o.moves)
-      ? o.moves
-      : String(o.moves || "").split(/\s+/);
+    // حرکات اصلی
+    const rawMoves = Array.isArray(o.moves) ? o.moves : String(o.moves || "").split(/\s+/);
     const moves = cleanMoveTokens(rawMoves).slice(0, 40);
-    if (!moves.length)
-      return "حرکات اصلی گشایش پیدا نشد (مثلاً: e4 c5 Nf3)";
-    const lm = legalMovesCheck(moves);
-    if (!lm.ok)
-      return "حرکت غیرقانونی در حرکات اصلی: «" + lm.bad + "»";
+    const mainFind = function () { return document.getElementById("openingMoves"); };
+    if (!moves.length) {
+      problems.push({ msg: "حرکات اصلی گشایش پیدا نشد (مثلاً: e4 c5 Nf3)", find: mainFind });
+    } else {
+      const lm = legalMovesCheck(moves);
+      if (!lm.ok) {
+        const idx = moves.indexOf(lm.bad);
+        problems.push({
+          msg: "حرکت غیرقانونی در حرکات اصلی: «" + lm.bad + "»" + (idx >= 0 ? " (حرکت شماره " + faNum(idx + 1) + ")" : ""),
+          find: mainFind,
+        });
+      }
+    }
 
-    if (!Array.isArray(o.variants) || o.variants.length === 0)
-      return "حداقل یک واریانت در فایل لازم است";
+    if (!Array.isArray(o.variants) || o.variants.length === 0) {
+      problems.push({ msg: "هیچ واریانتی در فایل نیست — حداقل یک واریانت لازم است", find: null });
+    }
 
+    // واریانت‌ها — هر مشکل جداگانه ثبت می‌شود
     const variants = [];
-    for (let i = 0; i < Math.min(o.variants.length, 12); i++) {
-      const v = o.variants[i] || {};
+    (Array.isArray(o.variants) ? o.variants : []).slice(0, 12).forEach(function (v, vi) {
+      v = v || {};
       const vname = String(v.name || "").trim();
-      if (vname.length < 2) return "نام واریانت شماره " + (i + 1) + " باید حداقل ۲ حرف باشد";
+      const vn = "واریانت " + faNum(vi + 1) + (vname ? " («" + vname + "»)" : "");
+      if (vname.length < 2) {
+        problems.push({ msg: vn + ": نام باید حداقل ۲ حرف باشد", find: variantFinder(vi, ".variant-name") });
+      }
       const vmRaw = Array.isArray(v.moves) ? v.moves : String(v.moves || "").split(/\s+/);
       const vmoves = cleanMoveTokens(vmRaw).slice(0, 30);
-      if (!vmoves.length) return "واریانت «" + vname + "» حرکات ندارد";
-      const lm2 = legalMovesCheck(vmoves);
-      if (!lm2.ok)
-        return "حرکت غیرقانونی در واریانت «" + vname + "»: «" + lm2.bad + "»";
+      if (!vmoves.length) {
+        problems.push({ msg: vn + ": حرکات واریانت پیدا نشد", find: variantFinder(vi, ".variant-moves") });
+      } else {
+        const lm2 = legalMovesCheck(vmoves);
+        if (!lm2.ok) {
+          const idx = vmoves.indexOf(lm2.bad);
+          problems.push({
+            msg: vn + ": حرکت غیرقانونی «" + lm2.bad + "»" + (idx >= 0 ? " (حرکت شماره " + faNum(idx + 1) + ")" : ""),
+            find: variantFinder(vi, ".variant-moves"),
+          });
+        }
+      }
       const clamp = (n) => Math.max(0, Math.min(100000, Number(n) || 0));
       const lines = (x) =>
         (Array.isArray(x) ? x : [])
           .slice(0, 12)
           .map((s) => String(s || "").trim().slice(0, 300))
           .filter(Boolean);
+
+      // حرکات پرتکرار — اول ساخته می‌شوند، بعد خطای هر کدام جداگانه چک می‌شود
+      // (⚠️ ارجاع به آرایه در حین map = خطای TDZ — به همین دلیل دو مرحله‌ای است)
       const pops = (Array.isArray(v.popularMoves) ? v.popularMoves : [])
         .slice(0, 10)
-        .map((p) => ({
-          san: String((p && p.san) || "").trim().slice(0, 12),
-          description: String((p && p.description) || "").trim().slice(0, 400),
-          moves: cleanMoveTokens((p && p.moves) || []).slice(0, 30),
-        }))
+        .map((p) => {
+          p = p || {};
+          return {
+            san: String(p.san || "").trim().slice(0, 12),
+            description: String(p.description || "").trim().slice(0, 400),
+            moves: cleanMoveTokens(Array.isArray(p.moves) ? p.moves : String(p.moves || "").split(/\s+/)).slice(0, 30),
+          };
+        })
         .filter((p) => p.san);
+      pops.forEach(function (p, pi) {
+        if (!p.moves.length) return;
+        const lm3 = legalMovesCheck(p.moves);
+        if (!lm3.ok) {
+          problems.push({
+            msg: vn + " — حرکت پرتکرار «" + p.san + "»: حرکت غیرقانونی «" + lm3.bad + "»",
+            find: subFinder(vi, ".popular-moves-container", pi, ".pop-move-moves"),
+          });
+        }
+      });
+
+      // تله‌ها — اول ساخته می‌شوند، بعد چک می‌شوند
       const traps = (Array.isArray(v.traps) ? v.traps : [])
         .slice(0, 10)
-        .map((t) => ({
-          name: String((t && t.name) || "").trim().slice(0, 100),
-          moves: cleanMoveTokens((t && t.moves) || []).slice(0, 30),
-        }))
+        .map((t) => {
+          t = t || {};
+          return {
+            name: String(t.name || "").trim().slice(0, 100),
+            moves: cleanMoveTokens(Array.isArray(t.moves) ? t.moves : String(t.moves || "").split(/\s+/)).slice(0, 30),
+          };
+        })
         .filter((t) => t.name && t.moves.length);
+      traps.forEach(function (t, ti) {
+        const lm4 = legalMovesCheck(t.moves);
+        if (!lm4.ok) {
+          const idx = t.moves.indexOf(lm4.bad);
+          problems.push({
+            msg: vn + " — تله «" + t.name + "»: حرکت غیرقانونی «" + lm4.bad + "»" + (idx >= 0 ? " (حرکت شماره " + faNum(idx + 1) + ")" : ""),
+            find: subFinder(vi, ".traps-container", ti, ".trap-moves"),
+          });
+        }
+      });
+
+      // نمونه‌بازی‌ها — PGN ناخوانا جدا گزارش می‌شود
       const games = (Array.isArray(v.sampleGames) ? v.sampleGames : [])
         .slice(0, 8)
         .map((g) => {
+          g = g || {};
           const out = {
-            white: String((g && g.white) || "").trim().slice(0, 60),
-            black: String((g && g.black) || "").trim().slice(0, 60),
-            year: Math.max(0, Math.min(2100, Number(g && g.year) || 0)),
-            result: String((g && g.result) || "*").slice(0, 12) || "*",
+            white: String(g.white || "").trim().slice(0, 60),
+            black: String(g.black || "").trim().slice(0, 60),
+            year: Math.max(0, Math.min(2100, Number(g.year) || 0)),
+            result: String(g.result || "*").slice(0, 12) || "*",
           };
-          if (g && g.pgn) out.pgn = String(g.pgn).slice(0, 20000);
+          if (g.pgn) out.pgn = String(g.pgn).slice(0, 20000);
           return out;
         })
         .filter((g) => g.white && g.black);
+      games.forEach(function (g, gi) {
+        if (!g.pgn || !g.pgn.trim()) return;
+        let pg = null;
+        try { pg = new window.Chess(); } catch (e) { pg = null; }
+        if (pg && !loadPgnSloppy(pg, g.pgn)) {
+          problems.push({
+            msg: vn + " — نمونه‌بازی «" + (g.white || "?") + " در برابر " + (g.black || "?") + "»: PGN حرکت معتبری ندارد",
+            find: subFinder(vi, ".games-container", gi, ".game-pgn"),
+          });
+        }
+      });
 
       variants.push({
         name: vname.slice(0, 80),
@@ -997,25 +1282,28 @@
         traps: traps,
         sampleGames: games,
       });
+    });
+    if (!variants.length) {
+      problems.push({ msg: "هیچ واریانت معتبری در فایل نیست", find: null });
     }
-    if (!variants.length) return "هیچ واریانت معتبری در فایل نیست";
 
     let code = String(o.categoryCode || "").trim();
     if (!AUTO_CATEGORY_NAMES[code]) code = "other";
     const categoryName = String(o.categoryName || "").trim().slice(0, 40);
 
     return {
-      value: {
+      data: {
         name: name,
         moves: moves,
         categoryCode: code,
         categoryName: categoryName,
         variants: variants,
       },
+      problems: problems,
     };
   }
 
-  function fillFormFromImport(data, original) {
+  function fillFormFromImport(data, original, problems) {
     // 📥 انتخاب نویسنده — پیش‌فرض: نویسنده‌ی داخل فایل (با تأیید کاربر)
     const fileAuthor = String(original.author || "").trim().slice(0, 40);
     const me = currentAuthor();
@@ -1050,11 +1338,30 @@
 
     updateAuthorChipWith(importedAuthor || me);
     window.scrollTo({ top: 0, behavior: "smooth" });
-    showToast(
-      "✅ فایل JSON با موفقیت بارگذاری شد (" + data.variants.length + " واریانت) — حالا «انتشار در سایت» را بزن",
-      "success",
-      4200
-    );
+
+    // 🆕 v8.3 — علامت‌گذاری فیلدهای خطادار + کادر خطا بالای فرم
+    const probs = problems || [];
+    probs.forEach(function (p) {
+      if (!p.find) return;
+      const el = p.find();
+      if (el) flagBadInput(el, p.msg);
+    });
+    showImportErrors(probs);
+    wireBoardButtons();
+
+    if (probs.length) {
+      showToast(
+        "⚠️ فایل بارگذاری شد اما " + faNum(probs.length) + " خطا دارد — کادر بالای فرم را ببین و اصلاح کن",
+        "warning",
+        5200
+      );
+    } else {
+      showToast(
+        "✅ فایل JSON با موفقیت بارگذاری شد (" + data.variants.length + " واریانت) — حالا «انتشار در سایت» را بزن",
+        "success",
+        4200
+      );
+    }
   }
 
   function updateAuthorChipWith(name) {
@@ -1087,6 +1394,7 @@
     editModeBanner.style.display = "none";
     restorePublishButton();
     importedAuthor = null;
+    showImportErrors([]); // 🆕 v8.3 — کادر خطا هم پاک شود
     try {
       history.replaceState(null, "", "opening-coop.html");
     } catch (e) {}
@@ -1226,6 +1534,9 @@
     if (!variantsContainer.children.length) {
       addVariant();
     }
+
+    // 🆕 v8.3 — دکمه‌ی ورود با تخته کنار همه‌ی فیلدهای حرکت
+    setTimeout(wireBoardButtons, 200);
 
     console.log(
       "✅ ChessHub Cooperation - Openings loaded successfully"

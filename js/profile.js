@@ -504,7 +504,10 @@ window.ChessHubProfile = (function () {
 
   function renderChip() {
     if (!chipEl) return;
-    if (_profile) {
+    // 🔐 v8.3 — وقتی کاربر از حساب خارج است، به‌جای پروفایل دکمه‌ی
+    // «ورود / ثبت‌نام» نشان داده می‌شود؛ کلیک → پنل ورود/ثبت‌نام
+    const loggedIn = !!(window.ChessHubAuth && ChessHubAuth.isLoggedIn());
+    if (_profile && (loggedIn || !window.ChessHubAuth)) {
       const av = _profile.avatar
         ? '<img src="' + esc(_profile.avatar) + '" alt="">'
         : '<span class="chp-av-empty"><i class="fas fa-user"></i></span>';
@@ -512,7 +515,7 @@ window.ChessHubProfile = (function () {
         av + "<span>" + esc(_profile.name) + "</span>";
     } else {
       chipEl.innerHTML =
-        '<span class="chp-av-empty"><i class="fas fa-user-plus"></i></span><span>انتخاب پروفایل</span>';
+        '<span class="chp-av-empty"><i class="fas fa-user-plus"></i></span><span>ورود / ثبت‌نام</span>';
     }
   }
 
@@ -531,11 +534,20 @@ window.ChessHubProfile = (function () {
     chipEl.className = "chp-chip";
     chipEl.title = "پروفایل تو — در کل سایت یکسان است";
     chipEl.addEventListener("click", function () {
-      if (window.ChessHubProfile.has()) openInfo();
-      else openOnboarding();
+      const loggedIn = !!(window.ChessHubAuth && ChessHubAuth.isLoggedIn());
+      if (loggedIn && window.ChessHubProfile.has()) openInfo();
+      else if (window.ChessHubAuth && ChessHubAuth.openPanel) {
+        // 🔐 v8.3 — خروج/بدون حساب → پنل ورود و ثبت‌نام
+        ChessHubAuth.openPanel();
+      } else openOnboarding();
     });
     flex.appendChild(chipEl);
     renderChip();
+    // 🔐 v8.3 — با هر تغییر حساب (ورود/خروج) چیپ هدر دوباره رندر می‌شود
+    if (window.ChessHubAuth && ChessHubAuth.onChange) {
+      ChessHubAuth.onChange(function () { renderChip(); });
+    }
+    document.addEventListener("chesshub:auth-changed", function () { renderChip(); });
     return true;
   }
 
