@@ -86,9 +86,13 @@
   }
 
   // فقط درس‌های خودِ کاربر قابل ویرایش/حذف‌اند
+  // (مطابق مجوز سرور: نویسنده یا آپلودکننده‌ی فایل)
   function isOwn(lesson) {
     const author = currentUser();
-    return !!author && !lesson.isBuiltin && lesson.author === author;
+    if (!author || lesson.isBuiltin) return false;
+    if (lesson.author === author) return true;
+    // 📥 کسی که فایل JSON را آپلود کرده هم حق مدیریت دارد (importedBy)
+    return !!lesson.importedBy && lesson.importedBy === author;
   }
 
   // ---------- داده ----------
@@ -260,30 +264,47 @@
   function deleteLesson(lesson) {
     if (!confirm("درس «" + lesson.title + "» برای همیشه حذف شود؟")) return;
 
-    // اگر روی سرور منتشر شده، اول از سرور هم حذف شود (فقط نویسنده مجاز است)
+    const removeLocally = function () {
+      // ⚠️ پیش‌نویس محلی ممکن است id متفاوتی داشته باشد (u_… با serverId= srv_…)
+      // — با هر دو شناسه فیلتر می‌شود تا پس از رفرش دوباره ظاهر نشود
+      const sid = String(lesson.serverId || "");
+      const list = loadUserLessons().filter(
+        (l) => String(l.id) !== String(lesson.id) &&
+               String(l.serverId || "") !== String(lesson.id) &&
+               (!sid || String(l.id) !== sid)
+      );
+      if (!saveUserLessons(list)) {
+        alert("ذخیره‌سازی ممکن نشد؛ حافظه‌ی مرورگر در دسترس نیست.");
+        return;
+      }
+      loadAll();
+      renderGrid();
+      refreshCommunity();
+    };
+
+    // اگر روی سرور منتشر شده، اول از سرور حذف شود؛
+    // ⚠️ حذف محلی فقط بعد از موفقیت سرور انجام می‌شود — وگرنه درس محلی
+    // پاک می‌شد ولی نسخه‌ی عمومی روی سرور می‌ماند (تجربه‌ی گمراه‌کننده)
     if (window.CommunityHub && CommunityHub.isSynced(lesson)) {
       CommunityHub.save("lessons", "delete", lesson.serverId || lesson.id, {
         author: currentUser(),
       })
         .then(function () {
           showToast("🗑 درس از سرور هم حذف شد و برای همه قابل مشاهده نیست", "success");
+          removeLocally();
         })
         .catch(function (err) {
-          alert("حذف از سرور ممکن نشد: " + err.message);
-          return;
+          // ۴۰۴ یعنی قبلاً از سرور حذف شده — همین حالا محلی را پاک کن
+          if (err && err.status === 404) { removeLocally(); return; }
+          alert(
+            "حذف از سرور ممکن نشد: " + (err && err.message ? err.message : "خطای نامشخص") +
+            "\nدرس در همین مرورگر دست‌نخورده ماند — بعداً دوباره تلاش کن."
+          );
         });
-    }
-
-    const list = loadUserLessons().filter(
-      (l) => String(l.id) !== String(lesson.id)
-    );
-    if (!saveUserLessons(list)) {
-      alert("ذخیره‌سازی ممکن نشد؛ حافظه‌ی مرورگر در دسترس نیست.");
       return;
     }
-    loadAll();
-    renderGrid();
-    refreshCommunity();
+
+    removeLocally();
   }
 
   function showToast(msg, kind) {

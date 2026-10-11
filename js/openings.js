@@ -326,8 +326,12 @@
 
     // ✏️ دکمه‌های ویرایش/حذف فقط برای نویسنده‌ی همان گشایش —
     // گشایش‌های عمومیِ بقیه فقط خواندنی‌اند
+    // (مطابق مجوز سرور: نویسنده یا آپلودکننده‌ی فایل JSON)
+    const me = currentUser();
     const canManage =
-      opening.isUser && currentUser() && opening.author === currentUser();
+      opening.isUser && me &&
+      (opening.author === me ||
+       (!!opening.importedBy && opening.importedBy === me));
     const userActions = canManage
       ? '<span class="card-actions">' +
         '<button class="card-action-btn edit" data-act="edit" title="ویرایش این گشایش"><i class="fas fa-edit"></i></button>' +
@@ -421,33 +425,50 @@
     )
       return;
 
-    // اگر روی سرور منتشر شده، از سرور هم حذف شود (فقط نویسنده)
+    const removeLocally = function () {
+      // ⚠️ پیش‌نویس محلی ممکن است id متفاوتی داشته باشد (u_… با serverId= srv_…)
+      // — با هر دو شناسه فیلتر می‌شود تا پس از رفرش دوباره ظاهر نشود
+      const sid = String(opening.serverId || "");
+      const list = loadUserOpenings().filter(
+        (o) => String(o.id) !== String(opening.id) &&
+               String(o.serverId || "") !== String(opening.id) &&
+               (!sid || String(o.id) !== sid)
+      );
+      try {
+        localStorage.setItem(USER_OPENINGS_KEY, JSON.stringify(list));
+      } catch (e) {
+        alert("ذخیره‌سازی ممکن نشد؛ حافظه‌ی مرورگر در دسترس نیست.");
+        return;
+      }
+      communityOpenings = communityOpenings.filter(
+        (o) => String(o.id) !== String(opening.id) &&
+               (!sid || String(o.id) !== sid)
+      );
+      renderList();
+    };
+
+    // اگر روی سرور منتشر شده، از سرور هم حذف شود (فقط نویسنده)؛
+    // ⚠️ حذف محلی فقط بعد از موفقیت سرور — وگرنه نسخه‌ی عمومی سرور می‌ماند
     if (window.CommunityHub && CommunityHub.isSynced(opening)) {
       CommunityHub.save("openings", "delete", opening.serverId || opening.id, {
         author: currentUser(),
       })
         .then(function () {
           showToast("🗑 گشایش از سرور هم حذف شد", "success");
+          removeLocally();
         })
         .catch(function (err) {
-          alert("حذف از سرور ممکن نشد: " + err.message);
-          return;
+          // ۴۰۴ یعنی قبلاً از سرور حذف شده — محلی را پاک کن
+          if (err && err.status === 404) { removeLocally(); return; }
+          alert(
+            "حذف از سرور ممکن نشد: " + (err && err.message ? err.message : "خطای نامشخص") +
+            "\nگشایش در همین مرورگر دست‌نخورده ماند — بعداً دوباره تلاش کن."
+          );
         });
-    }
-
-    const list = loadUserOpenings().filter(
-      (o) => String(o.id) !== String(opening.id)
-    );
-    try {
-      localStorage.setItem(USER_OPENINGS_KEY, JSON.stringify(list));
-    } catch (e) {
-      alert("ذخیره‌سازی ممکن نشد؛ حافظه‌ی مرورگر در دسترس نیست.");
       return;
     }
-    communityOpenings = communityOpenings.filter(
-      (o) => String(o.id) !== String(opening.id)
-    );
-    renderList();
+
+    removeLocally();
   }
 
   function showToast(msg, kind) {

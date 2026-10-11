@@ -692,6 +692,7 @@
       if (firstBad) firstBad.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
+    showImportErrors([]); // ✅ همه‌ی حرکات معتبرند — کادر خطاهای قدیمی پاک شود
 
     // نویسنده: از نشست/پروفایل — مگر فایل JSON آپلود شود (با تأیید صریح کاربر)
     const author = importedAuthor || currentAuthor();
@@ -717,11 +718,13 @@
         list.unshift(Object.assign({}, editingOpening));
         idx = 0;
       }
+      // 📥 اگر آپلودکننده اثر نویسنده‌ی دیگر را ویرایش می‌کند، نام نویسنده‌ی اصلی حفظ می‌شود
+      const keepAuthor = !!list[idx].author && list[idx].author !== author;
       list[idx] = Object.assign({}, list[idx], data, {
         thumbIcon: list[idx].thumbIcon || "fas fa-chess-queen",
         color: list[idx].color || "#2c7da0",
-        author: author,
-        importedFile: !!importedAuthor,
+        author: keepAuthor ? list[idx].author : author,
+        importedFile: !!importedAuthor || keepAuthor,
         updatedAt: now,
       });
       if (!saveUserOpenings(list)) {
@@ -742,6 +745,8 @@
         color: "#2c7da0",
         author: author,
         importedFile: !!importedAuthor,
+        // 📥 آپلودکننده ثبت می‌شود تا بعداً ویرایش/حذف برای او هم باز باشد
+        importedBy: importedAuthor ? (currentAuthor() || null) : null,
         createdAt: now,
         updatedAt: now,
       });
@@ -1023,13 +1028,24 @@
     if (!el) return;
     el.classList.add("chmi-bad-input");
     if (msg) el.title = msg;
+    // select هم رویداد change می‌فرستد نه input — هر دو گوش داده می‌شوند
     el.addEventListener(
       "input",
       function onFix() {
         el.classList.remove("chmi-bad-input");
         el.removeEventListener("input", onFix);
+        el.removeEventListener("change", onChange);
+        // ✅ همه‌ی فیلدهای خطادار اصلاح شدند → کادر خطا هم پنهان شود
+        if (!document.querySelector(".chmi-bad-input")) showImportErrors([]);
       }
     );
+    var onChange = function () {
+      el.classList.remove("chmi-bad-input");
+      el.removeEventListener("input", onFix);
+      el.removeEventListener("change", onChange);
+      if (!document.querySelector(".chmi-bad-input")) showImportErrors([]);
+    };
+    el.addEventListener("change", onChange);
   }
 
   // یابنده‌های محل خطا در فرم — بعد از پر شدن فرم اجرا می‌شوند
@@ -1412,7 +1428,8 @@
     if (!editId) return;
 
     const opening = loadUserOpenings().find(
-      (o) => String(o.id) === String(editId)
+      (o) => String(o.id) === String(editId) ||
+             String(o.serverId || "") === String(editId)
     );
     if (!opening) {
       // 🔁 در این دستگاه نیست — شاید گشایش عمومی سرور باشد
@@ -1440,15 +1457,38 @@
   }
 
   function applyEditMode(opening) {
-    // فقط نویسنده‌ی همان گشایش حق ویرایش دارد
+    // نویسنده‌ی همان گشایش (یا آپلودکننده‌ی فایل — مطابق مجوز سرور) حق ویرایش دارد
     const author = currentAuthor();
-    if (author && opening.author && opening.author !== author) {
-      showToast(
-        "⚠️ فقط نویسنده‌ی گشایش می‌تواند آن را ویرایش کند",
-        "warning"
-      );
+    const isAllowed = !author || !opening.author ||
+      opening.author === author || opening.importedBy === author;
+
+    if (!isAllowed && window.CommunityHub &&
+        (opening.serverId || String(opening.id || "").indexOf("srv_") === 0)) {
+      // 🔄 شاید آپلودکننده‌ی فایل باشی — مجوز واقعی از نسخه‌ی سرور چک می‌شود
+      CommunityHub.fetchAll(true).then(function (c) {
+        const remote = (c.openings || []).find(function (x) {
+          return String(x.id) === String(opening.serverId || opening.id);
+        });
+        if (remote && (remote.author === author || remote.importedBy === author)) {
+          opening.importedBy = remote.importedBy || author;
+          doApplyEditMode(opening);
+        } else {
+          showToast("⚠️ فقط نویسنده‌ی گشایش می‌تواند آن را ویرایش کند", "warning");
+        }
+      }).catch(function () {
+        showToast("⚠️ فقط نویسنده‌ی گشایش می‌تواند آن را ویرایش کند", "warning");
+      });
       return;
     }
+
+    if (!isAllowed) {
+      showToast("⚠️ فقط نویسنده‌ی گشایش می‌تواند آن را ویرایش کند", "warning");
+      return;
+    }
+    doApplyEditMode(opening);
+  }
+
+  function doApplyEditMode(opening) {
 
     editingOpening = opening;
 
@@ -1526,6 +1566,12 @@
   document.addEventListener("DOMContentLoaded", function () {
     variantsContainer.innerHTML = "";
     variantCounter = 0;
+
+    // ♟ پیش‌بارگذاری مهره‌های دلخواه کاربر — تخته‌ی «ورود با تخته»
+    // از همان اول با مجموعه‌ی انتخابی کاربر نمایش داده می‌شود
+    if (window.ChessUtils && window.ChessUtils.loadPieces) {
+      try { window.ChessUtils.loadPieces(); } catch (e) {}
+    }
 
     updateAuthorChip();
     loadEditingOpening();

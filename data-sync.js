@@ -333,8 +333,64 @@ function mergeCommunity(local, remote) {
   };
 }
 
+// 🔧 v8.2.1 — ترمیم متن‌های دارای نشانگر تداخل گیت
+// (فاجعه‌ی واقعی: فایل community_content.json با نشانگرهای
+//  <<<<<<< / ======= / >>>>>>> کامیت شد و محتوای عمومی پنهان شد.
+//  حالا هر دو نسخه‌ی متعارض خوانده و «اجتماع» آن‌ها ساخته می‌شود)
+function unionValues(a, b) {
+  if (a === undefined) return b;
+  if (b === undefined) return a;
+  if (Array.isArray(a) && Array.isArray(b)) {
+    const out = [];
+    const seen = {};
+    const keyOf = function (o) {
+      if (!o || typeof o !== "object") return null;
+      if (o.id != null && o.id !== "") return "id:" + String(o.id);
+      if (o.name != null && o.name !== "") return "name:" + String(o.name).trim().toLowerCase();
+      return null;
+    };
+    const timeOf = function (o) { return (o && (o.updatedAt || o.createdAt || o.lastSeen || o.registeredAt || o.finishedAt)) || 0; };
+    a.concat(b).forEach(function (x) {
+      if (!x || typeof x !== "object") { out.push(x); return; }
+      const k = keyOf(x);
+      if (k == null) { out.push(x); return; }
+      if (!seen[k]) { seen[k] = { item: x, t: timeOf(x) }; out.push(x); return; }
+      const t = timeOf(x);
+      if (t > seen[k].t) {
+        seen[k].item = x; seen[k].t = t;
+        for (let i = 0; i < out.length; i++) {
+          if (out[i] && typeof out[i] === "object" && keyOf(out[i]) === k) { out[i] = x; break; }
+        }
+      }
+    });
+    return out;
+  }
+  if (a && b && typeof a === "object" && typeof b === "object" && !Array.isArray(a) && !Array.isArray(b)) {
+    const out = Object.assign({}, a);
+    Object.keys(b).forEach(function (k) { out[k] = unionValues(a[k], b[k]); });
+    return out;
+  }
+  return b;
+}
+
+function repairConflictText(text) {
+  text = String(text == null ? "" : text);
+  if (text.indexOf("<<<<<<<") < 0) return text;
+  const m = text.match(/^\s*<{7}[^\n]*\n([\s\S]*?)\n={7}\n([\s\S]*?)\n>{7}[^\n]*\n?$/);
+  if (!m) return text;
+  const a = parseJSONSafe(m[1].trim());
+  const b = parseJSONSafe(m[2].trim());
+  if (a === null && b === null) return text;
+  if (a === null) return m[2].trim();
+  if (b === null) return m[1].trim();
+  return JSON.stringify(unionValues(a, b));
+}
+
 // ادغام دو متن JSON برای فایل مشخص — بر اساس نوع فایل
 function mergeFileContent(name, localText, remoteText) {
+  // 🔧 اول نشانگرهای تداخل گیت (اگر باشند) ترمیم می‌شوند — بعد ادغام عادی
+  if (localText != null) localText = repairConflictText(localText);
+  if (remoteText != null) remoteText = repairConflictText(remoteText);
   const localParsed = localText != null ? parseJSONSafe(localText) : null;
   const remoteParsed = remoteText != null ? parseJSONSafe(remoteText) : null;
   if (remoteText == null) return { content: localText, merged: false };
@@ -604,6 +660,8 @@ module.exports = {
   // 🔧 هوک تست — منطق ادغام را بدون شبکه قابل تست می‌کند
   _test: {
     mergeFileContent: mergeFileContent,
+    repairConflictText: repairConflictText,
+    unionValues: unionValues,
     mergeCommunity: mergeCommunity,
     mergeKeyMaps: mergeKeyMaps,
     mergeUsers: mergeUsers,

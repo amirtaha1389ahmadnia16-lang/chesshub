@@ -138,9 +138,24 @@ window.ChessHubMoveInput = (function () {
   function close() {
     if (!active) return;
     try { if (active.board && active.board.destroy) active.board.destroy(); } catch (e) {}
+    if (active._pieceSetHandler) {
+      document.removeEventListener("pieceSetChanged", active._pieceSetHandler);
+      active._pieceSetHandler = null;
+    }
     if (active.overlay) active.overlay.remove();
     document.body.style.overflow = "";
     active = null;
+  }
+
+  // ♟ مهره‌های دلخواه کاربر — تصاویر همان مجموعه‌ای که در تنظیمات انتخاب کرده
+  // (قبلاً روی صفحه‌ی همکاری گلیف یونیکد نشان داده می‌شد چون تصاویر
+  //  هیچ‌وقت پیش‌بارگذاری نمی‌شدند — اکنون با مجموعه‌ی انتخابی کاربر می‌آید)
+  function ensureUserPieces(cb) {
+    const U = window.ChessUtils;
+    if (U && U.loadPieces) {
+      try { U.loadPieces().then(function () { if (cb) cb(); }); return; } catch (e) {}
+    }
+    if (cb) cb();
   }
 
   function refreshUI() {
@@ -269,6 +284,17 @@ window.ChessHubMoveInput = (function () {
         autoQueen: false, // ترفیع پرسیده می‌شود (برای تله‌ها مهم است)
       });
       active.board.build();
+      // ♟ مهره‌های دلخواه کاربر — بعد از آماده‌شدن تصاویر، تخته با همان مجموعه بازسازی می‌شود
+      ensureUserPieces(function () {
+        if (active && active.board) { active.board.build(); renderBoard(); }
+      });
+      // تغییر مجموعه مهره در حین باز بودن مودال → بازسازی زنده
+      active._pieceSetHandler = function () {
+        ensureUserPieces(function () {
+          if (active && active.board) { active.board.build(); renderBoard(); }
+        });
+      };
+      document.addEventListener("pieceSetChanged", active._pieceSetHandler);
     } else {
       el.boardEl.innerHTML =
         '<div style="grid-column:1/-1;display:flex;align-items:center;justify-content:center;padding:1rem;color:#b3282d;font-size:.8rem">js/board-ui.js بارگذاری نشده است</div>';

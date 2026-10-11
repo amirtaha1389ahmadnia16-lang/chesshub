@@ -452,7 +452,10 @@ window.chPh = function (w, h, label) {
         attempt += 1;
         return fetch("/api/community/publish", {
           method: "POST",
-          headers: self._headers(extra),
+          // ⚠️ رفع باگ «extra is not defined» — این خطا کل انتشار/ویرایش/حذف
+          // (درس، گشایش، مقاله) را قبل از رسیدن به سرور می‌خواباند.
+          // bodyExtra فیلدهای «بدنه» است، نه هدر — هدرها همان پیش‌فرض + توکن نشست.
+          headers: self._headers(),
           body: payload,
         })
           .then(function (r) {

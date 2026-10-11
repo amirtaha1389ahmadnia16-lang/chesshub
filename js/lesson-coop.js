@@ -625,6 +625,7 @@
 
     const data = collectLessonData();
     if (!validateLessonData(data)) return;
+    showImportErrors([]); // ✅ اعتبارسنجی رد شد — کادر خطاهای قدیمی پاک شود
 
     const now = Date.now();
     const list = loadUserLessons();
@@ -638,9 +639,11 @@
         list.unshift(Object.assign({}, editingLesson));
         idx = 0;
       }
+      // 📥 اگر آپلودکننده اثر نویسنده‌ی دیگر را ویرایش می‌کند، نام نویسنده‌ی اصلی حفظ می‌شود
+      const keepAuthor = !!list[idx].author && list[idx].author !== author;
       list[idx] = Object.assign({}, list[idx], data, {
-        author: author,
-        importedFile: !!importedAuthor,
+        author: keepAuthor ? list[idx].author : author,
+        importedFile: !!importedAuthor || keepAuthor,
         updatedAt: now,
       });
       if (!saveUserLessons(list)) {
@@ -656,6 +659,8 @@
         id: "u_" + now,
         author: author,
         importedFile: !!importedAuthor,
+        // 📥 آپلودکننده ثبت می‌شود تا بعداً ویرایش/حذف برای او هم باز باشد
+        importedBy: importedAuthor ? (currentAuthor() || null) : null,
         createdAt: now,
         updatedAt: now,
       });
@@ -838,13 +843,24 @@
     if (!el) return;
     el.classList.add("chmi-bad-input");
     if (msg) el.title = msg;
+    // select هم رویداد change می‌فرستد نه input — هر دو گوش داده می‌شوند
     el.addEventListener(
       "input",
       function onFix() {
         el.classList.remove("chmi-bad-input");
         el.removeEventListener("input", onFix);
+        el.removeEventListener("change", onChange);
+        // ✅ همه‌ی فیلدهای خطادار اصلاح شدند → کادر خطا هم پنهان شود
+        if (!document.querySelector(".chmi-bad-input")) showImportErrors([]);
       }
     );
+    var onChange = function () {
+      el.classList.remove("chmi-bad-input");
+      el.removeEventListener("input", onFix);
+      el.removeEventListener("change", onChange);
+      if (!document.querySelector(".chmi-bad-input")) showImportErrors([]);
+    };
+    el.addEventListener("change", onChange);
   }
 
   function handleImportFile(file) {
@@ -1057,7 +1073,8 @@
     if (!editId) return;
 
     const lesson = loadUserLessons().find(
-      (l) => String(l.id) === String(editId)
+      (l) => String(l.id) === String(editId) ||
+             String(l.serverId || "") === String(editId)
     );
     if (!lesson) {
       // 🔁 درس در این دستگاه ذخیره نیست — شاید روی سرور عمومی باشد
@@ -1083,12 +1100,38 @@
   }
 
   function applyEditMode(lesson) {
-    // فقط نویسنده‌ی همان درس حق ویرایش دارد
+    // نویسنده‌ی همان درس (یا آپلودکننده‌ی فایل — مطابق مجوز سرور) حق ویرایش دارد
     const author = currentAuthor();
-    if (author && lesson.author && lesson.author !== author) {
+    const isAllowed = !author || !lesson.author ||
+      lesson.author === author || lesson.importedBy === author;
+
+    if (!isAllowed && window.CommunityHub &&
+        (lesson.serverId || String(lesson.id || "").indexOf("srv_") === 0)) {
+      // 🔄 شاید آپلودکننده‌ی فایل باشی — مجوز واقعی از نسخه‌ی سرور چک می‌شود
+      CommunityHub.fetchAll(true).then(function (c) {
+        const remote = (c.lessons || []).find(function (x) {
+          return String(x.id) === String(lesson.serverId || lesson.id);
+        });
+        if (remote && (remote.author === author || remote.importedBy === author)) {
+          lesson.importedBy = remote.importedBy || author;
+          doApplyEditMode(lesson);
+        } else {
+          showToast("⚠️ فقط نویسنده‌ی درس می‌تواند آن را ویرایش کند", "warning");
+        }
+      }).catch(function () {
+        showToast("⚠️ فقط نویسنده‌ی درس می‌تواند آن را ویرایش کند", "warning");
+      });
+      return;
+    }
+
+    if (!isAllowed) {
       showToast("⚠️ فقط نویسنده‌ی درس می‌تواند آن را ویرایش کند", "warning");
       return;
     }
+    doApplyEditMode(lesson);
+  }
+
+  function doApplyEditMode(lesson) {
 
     editingLesson = lesson;
 

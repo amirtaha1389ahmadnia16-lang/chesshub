@@ -421,9 +421,72 @@ function hexColor(v, fb) {
   return /^#[0-9a-fA-F]{6}$/.test(String(v || "")) ? v : fb;
 }
 
+/* ------------- ترمیم خودکار فایل‌های داده‌ی خراب (تداخل گیت) -------------
+   اگر فایل نشانگرهای تداخل داشته باشد (<<<<<<< / ======= / >>>>>>>)،
+   هر دو نسخه خوانده و «اجتماع» آن‌ها برمی‌گردد — هیچ داده‌ای دور ریخته
+   نمی‌شود. این همان فاجعه‌ای بود که محتوای عمومی سایت را پنهان کرده بود:
+   فایل community_content.json با نشانگر تداخل کامیت شد و readCommunity
+   بی‌صدا [] برمی‌گرداند. حالا سرور خودش ترمیم و ذخیره می‌کند.
+-------------------------------------------------------------------------- */
+function repairConflictedJSONText(text) {
+  text = String(text == null ? "" : text);
+  // الگوی کامل: <<<<<<< x \n A \n ======= \n B \n >>>>>>> y
+  const m = text.match(/^\s*<{7}[^\n]*\n([\s\S]*?)\n={7}\n([\s\S]*?)\n>{7}[^\n]*\n?$/);
+  if (!m) return null;
+  function safe(t) { try { return JSON.parse(t); } catch (e) { return null; } }
+  const a = safe(m[1].trim());
+  const b = safe(m[2].trim());
+  if (a === null && b === null) return null;
+  if (a === null) return b;
+  if (b === null) return a;
+  // اجتماع دو شیء — آرایه‌ها بر اساس id/name ادغام می‌شوند (تازه‌تر می‌ماند)
+  function union(a, b) {
+    if (a === undefined) return b;
+    if (b === undefined) return a;
+    if (Array.isArray(a) && Array.isArray(b)) {
+      const out = [];
+      const seen = {};
+      const keyOf = function (o) {
+        if (!o || typeof o !== "object") return null;
+        if (o.id != null && o.id !== "") return "id:" + String(o.id);
+        if (o.name != null && o.name !== "") return "name:" + String(o.name).trim().toLowerCase();
+        return null;
+      };
+      const timeOf = function (o) { return (o && (o.updatedAt || o.createdAt || o.lastSeen)) || 0; };
+      a.concat(b).forEach(function (x) {
+        if (!x || typeof x !== "object") { out.push(x); return; }
+        const k = keyOf(x);
+        if (k == null) { out.push(x); return; }
+        if (!seen[k]) { seen[k] = { item: x, t: timeOf(x) }; out.push(x); return; }
+        const t = timeOf(x);
+        if (t > seen[k].t) {
+          seen[k].item = x; seen[k].t = t;
+          for (let i = 0; i < out.length; i++) {
+            if (out[i] && typeof out[i] === "object" && keyOf(out[i]) === k) { out[i] = x; break; }
+          }
+        }
+      });
+      return out;
+    }
+    if (a && b && typeof a === "object" && typeof b === "object" && !Array.isArray(a) && !Array.isArray(b)) {
+      const out = Object.assign({}, a);
+      Object.keys(b).forEach(function (k) { out[k] = union(a[k], b[k]); });
+      return out;
+    }
+    return b;
+  }
+  return union(a, b);
+}
+
 function readCommunity() {
+  let raw = null;
   try {
-    const j = JSON.parse(fs.readFileSync(COMMUNITY_FILE, "utf8"));
+    raw = fs.readFileSync(COMMUNITY_FILE, "utf8");
+  } catch (e) {
+    return { lessons: [], openings: [], articles: [], deleted: {} };
+  }
+  try {
+    const j = JSON.parse(raw);
     return {
       lessons: Array.isArray(j.lessons) ? j.lessons : [],
       openings: Array.isArray(j.openings) ? j.openings : [],
@@ -431,6 +494,24 @@ function readCommunity() {
       deleted: j.deleted && typeof j.deleted === "object" && !Array.isArray(j.deleted) ? j.deleted : {},
     };
   } catch (e) {
+    // 🔧 ترمیم خودکار — فایل نشانگر تداخل گیت دارد یا خراب است
+    const repaired = repairConflictedJSONText(raw);
+    if (repaired && (repaired.lessons || repaired.openings || repaired.articles)) {
+      const fixed = {
+        lessons: Array.isArray(repaired.lessons) ? repaired.lessons : [],
+        openings: Array.isArray(repaired.openings) ? repaired.openings : [],
+        articles: Array.isArray(repaired.articles) ? repaired.articles : [],
+        deleted: repaired.deleted && typeof repaired.deleted === "object" && !Array.isArray(repaired.deleted) ? repaired.deleted : {},
+      };
+      try {
+        fs.writeFileSync(COMMUNITY_FILE + ".tmp", JSON.stringify(fixed));
+        fs.renameSync(COMMUNITY_FILE + ".tmp", COMMUNITY_FILE);
+        log("🔧 community_content.json خودکار ترمیم شد — " +
+          fixed.lessons.length + " درس، " + fixed.openings.length + " گشایش، " + fixed.articles.length + " مقاله بازیابی شد");
+        if (dataSync) dataSync.pushLater("community_content.json");
+      } catch (e2) {}
+      return fixed;
+    }
     return { lessons: [], openings: [], articles: [], deleted: {} };
   }
 }
@@ -680,9 +761,21 @@ function handleAuthAPI(req, res, pathname, query) {
   }
   const ip = clientIP(req);
 
-  // محدودیت نرخ روی همه‌ی مسیرهای حساب — ضد اسپم و ضد بروت‌فورس
-  if (!auth.rateLimit("auth:" + ip, 40, 10 * 60 * 1000)) {
-    return sendJSON(res, 429, { ok: false, error: "درخواست‌های زیاد — چند دقیقه بعد دوباره تلاش کن" });
+  // 🔐 محدودیت نرخ هوشمند (اصلاح واقعی: قبلاً «همه‌ی» مسیرهای حساب در یک
+  // سطل مشترک بودند — هر بار باز کردن صفحه /api/auth/me می‌خورد و در یک
+  // اینترنت مشترک (مدرسه) سطل پر می‌شد و همه قفل می‌شدند. حالا فقط
+  // عملیات‌های رمزمحور سخت محدود می‌شوند؛ me/status خفیف‌اند.)
+  const AUTH_SENSITIVE = ["/api/auth/register", "/api/auth/login", "/api/auth/upgrade", "/api/auth/change-password"];
+  if (AUTH_SENSITIVE.indexOf(pathname) >= 0) {
+    // ضد بروت‌فورس — ۳۰ تلاش رمز در ۱۰ دقیقه برای هر آی‌پی
+    if (!auth.rateLimit("auth:" + ip, 30, 10 * 60 * 1000)) {
+      return sendJSON(res, 429, { ok: false, error: "درخواست‌های زیاد — چند دقیقه بعد دوباره تلاش کن" });
+    }
+  } else {
+    // ضد طوفان درخواست — کاربر عادی هرگز نمی‌خورد (حدود ۰٫۷ درخواست/ثانیه)
+    if (!auth.rateLimit("authlight:" + ip, 400, 10 * 60 * 1000)) {
+      return sendJSON(res, 429, { ok: false, error: "درخواست‌های زیاد — چند دقیقه بعد دوباره تلاش کن" });
+    }
   }
 
   // 📝 ثبت‌نام — «بدون رمز عبور ممکن نیست»

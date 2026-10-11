@@ -481,8 +481,10 @@
 
           $("readerBody").innerHTML = hero + (isCommunity ? formatUserBody(a.body) : a.body);
 
-          // ویرایش/حذف فقط توسط نویسنده‌ی همان مقاله
-          const isMine = isCommunity && currentUser() && a.author === currentUser();
+          // ویرایش/حذف فقط توسط نویسنده‌ی همان مقاله (یا آپلودکننده‌ی فایل — مطابق مجوز سرور)
+          const me = currentUser();
+          const isMine = isCommunity && me &&
+            (a.author === me || (!!a.importedBy && a.importedBy === me));
           const editBtn = $("readerEdit");
           editBtn.style.display = isMine ? "flex" : "none";
           editBtn.onclick = function () {
