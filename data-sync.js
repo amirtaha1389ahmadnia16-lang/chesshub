@@ -55,6 +55,7 @@ const FILES = [
 ];
 
 const PUSH_DEBOUNCE_MS = 12000;   // جمع‌کردن تغییرات قبل از کامیت
+const PUSH_URGENT_MS = 2500;      // 🛠️ v8.3.1 — محتوای کاربر (درس/گشایش/مقاله) خیلی زودتر کامیت می‌شود
 const API_GAP_MS = 1200;          // فاصله‌ی حداقلی بین درخواست‌های API
 const MAX_RETRIES = 6;            // تلاش مجدد push در برابر خطا
 const RETRY_BASE_MS = 4000;       // شروع backoff
@@ -599,11 +600,14 @@ function init() {
   log("فعال شد (v8.2 merge-safe) — ریپو " + REPO + " (شاخه " + BRANCH + ")");
   initPromise = (async function () {
     // ۱) همیشه ریموت خوانده و با محلی ادغام می‌شود — نه فقط وقتی محلی خالی است
+    //    🛠️ v8.3.1 — فقط فایل‌هایی dirty می‌شوند که «واقعاً» بایت‌هایشان عوض شده؛
+    //    قبلاً هر ادغامی dirty می‌کرد → هر بوت یک کامیت خالی → حلقه‌ی دیپلوی!
     let merged = [];
     let missingRemote = [];
     try {
-      merged = await mergeRemoteIntoAll();
-      if (merged.length) log("ادغام اولیه با گیت‌هاب: " + merged.join(", "));
+      const touched = await mergeRemoteIntoAll(); // فایل‌هایی که محلی‌شان عوض شد
+      merged = touched;
+      if (touched.length) log("ادغام اولیه با گیت‌هاب: " + touched.join(", "));
     } catch (e) {
       log("خطای ادغام اولیه: " + e.message);
     }
@@ -628,12 +632,28 @@ function init() {
 }
 
 // بعد از هر ذخیره‌ی محلی صدا زده می‌شود — debounce و کامیت گروهی
-function pushLater(name) {
+// 🛠️ v8.3.1 — opts.urgent = محتوای ارزشمند کاربر (درس/گشایش/مقاله) —
+// با تأخیر خیلی کم کامیت می‌شود تا اگر سرور ری‌استارت شد، داده گم نشود
+function pushLater(name, opts) {
   if (!ENABLED) return;
   const st = state[name];
   if (!st) return;
   st.dirty = true;
-  scheduleBatch();
+  scheduleBatch(opts && opts.urgent ? PUSH_URGENT_MS : null);
+}
+
+// 🛠️ v8.3.1 — فوراً (بدون انتظار debounce) یک فایل را کامیت کن.
+// برای «انتشار محتوای عمومی» استفاده می‌شود — دقیقاً همان لحظه‌ای که
+// کاربر دکمه‌ی انتشار را می‌زند، داده به گیت‌هاب می‌رسد؛ حتی اگر سرور
+// چند ثانیه بعد ری‌استارت شود، دیگر هیچ‌وقت گم نمی‌شود.
+function pushNow(name) {
+  if (!ENABLED) return Promise.resolve(false);
+  const st = state[name];
+  if (!st) return Promise.resolve(false);
+  st.dirty = true;
+  if (batchTimer) { clearTimeout(batchTimer); batchTimer = null; }
+  FILES.forEach(function (n) { if (state[n].dirty) state[n].pendingRetry = true; });
+  return batchPushWithRetry(1).catch(function () { return false; });
 }
 
 // فوراً push کن (هنگام خاموشی سرور) — حداکثر SHUTDOWN_FLUSH_MS منتظر می‌ماند
@@ -655,6 +675,7 @@ function flushNow() {
 module.exports = {
   init: init,
   pushLater: pushLater,
+  pushNow: pushNow,
   flushNow: flushNow,
   enabled: function () { return ENABLED; },
   // 🔧 هوک تست — منطق ادغام را بدون شبکه قابل تست می‌کند

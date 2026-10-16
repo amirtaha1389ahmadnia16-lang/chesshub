@@ -133,7 +133,9 @@
               '<button class="gr-btn" id="grNext" title="بعدی"><i class="fas fa-step-forward"></i></button>' +
               '<button class="gr-btn" id="grLast" title="آخر"><i class="fas fa-fast-forward"></i></button>' +
               '<span class="gr-counter" id="grCounter">۰/۰</span>' +
+              '<button class="gr-btn" id="grResetLine" title="بازگشت به خط اصلی بازی" style="display:none"><i class="fas fa-rotate-left"></i> خط اصلی</button>' +
             "</div>" +
+            '<div class="gr-hint" id="grMoveHint" style="font-size:.72rem;color:#8b93a7;line-height:1.8;margin-top:.35rem">♟ مهره‌ها را بکشید (یا بزنید) — از موقعیت فعلی حرکت جدید ثبت و تحلیل می‌شود؛ بعد PGN جدید را کپی/دانلود کنید.</div>' +
           "</div>" +
           '<div class="gr-panel">' +
             '<div class="gr-summary" id="grSummary"><div class="gr-loading"><i class="fas fa-spinner fa-pulse"></i> انجین دارد بازی را تحلیل می‌کند…</div></div>' +
@@ -199,14 +201,22 @@
     const myEpoch = ++R.epoch;
     for (let i = 0; i < fens.length; i++) {
       if (R.closed || myEpoch !== R.epoch) return;
-      const budget = analysisBudget(fens[i]);
-      const r = await ChessEngine.ask(fens[i], { movetime: budget.movetime, depth: budget.depth, skill: 20 });
-      if (R.closed || myEpoch !== R.epoch) return;
-      reps.push({
-        cp: r.score ? cpOf(r.score) : null,
-        best: r.bestUci || null,
-        pv: (r.pv || []).slice(0, 8),
-      });
+      // 🛠️ v8.3.1 — حافظه‌ی تحلیل موقعیت‌ها: موقعیت تکراری دوباره به انجین
+      // داده نمی‌شود (بعد از «شاخه‌زدن» با حرکت دستی، تحلیل خط اصلی از
+      // حافظه فوراً برمی‌گردد — نه از صفر)
+      let rep = R.posMemo[fens[i]];
+      if (!rep) {
+        const budget = analysisBudget(fens[i]);
+        const r = await ChessEngine.ask(fens[i], { movetime: budget.movetime, depth: budget.depth, skill: 20 });
+        if (R.closed || myEpoch !== R.epoch) return;
+        rep = {
+          cp: r && r.score ? cpOf(r.score) : null,
+          best: (r && r.bestUci) || null,
+          pv: ((r && r.pv) || []).slice(0, 8),
+        };
+        R.posMemo[fens[i]] = rep;
+      }
+      reps.push(rep);
       const pct = Math.round(((i + 1) / fens.length) * 100);
       $("grProgFill").style.width = pct + "%";
       $("grProgText").textContent = "تحلیل موقعیت " + fa(i + 1) + " از " + fa(fens.length) + "…";
@@ -406,8 +416,10 @@
     }
 
     // فلش بهترین حرکت — وقتی حرکتِ بازی‌شده از بهترین بدتر بوده
+    // 🛠️ v8.3.1 — R.judged ممکن است وسط تحلیل (مثلاً بعد از «بازگشت به خط
+    // اصلی») موقتاً null باشد — بدون گارد، کل showPosition می‌شکست
     R.board.clearArrows();
-    const played = idx > 0 ? R.judged[idx - 1] : null;
+    const played = idx > 0 && R.judged ? R.judged[idx - 1] : null;
     if (played && played.best && played.uci !== played.best && rep) {
       R.board.drawArrows([{ from: played.best.slice(0, 2), to: played.best.slice(2, 4), color: "#38a169" }]);
     }
@@ -430,6 +442,164 @@
     stopAuto();
     showPosition();
   }
+
+  /* ---------- ♟ v8.3.1 — حرکت تعاملی روی تخته‌ی مرور (کشیدن/زدن) ----------
+     قبلاً تخته‌ی مرور «فقط نمایشی» بود (canMove=false) — کاربر نمی‌توانست
+     از هر موقعیتی ادامه دهد. حالا مثل بقیه‌ی سایت:
+       • مهره را بکشید/بزنید → از همان موقعیتِ نمایش‌داده‌شده ادامه می‌یابد
+       • حرکت جدید به خط بازی اضافه و فوراً تحلیل و نمره‌دهی می‌شود
+       • کپی/دانلود PGN خط جدید در دسترس است
+     ------------------------------------------------------------ */
+  function reviewAttempt(from, to, promo) {
+    if (!R || R.closed || !R.viewGame) return false;
+    let mv = null;
+    try { mv = R.viewGame.move({ from: from, to: to, promotion: promo || "q" }); } catch (e) { mv = null; }
+    if (!mv) return false;
+    branchAt(R.idx, from + to + (mv.promotion || ""), mv.san);
+    return true;
+  }
+
+  function isBranched() {
+    if (!R) return false;
+    const a = R.cfg.moves || [];
+    const b = R.origMoves || [];
+    return a.length !== b.length || a.join(" ") !== b.join(" ");
+  }
+
+  function updateBranchedUI() {
+    const btn = $("grResetLine");
+    if (btn) btn.style.display = isBranched() ? "" : "none";
+  }
+
+  // شاخه‌زدن از موقعیت idx با حرکت uci — خط بازی تا همین‌جا برش می‌خورد
+  // و حرکت تازه اضافه می‌شود؛ تحلیل خط قبلی در posMemo محفوظ می‌ماند.
+  function branchAt(idx, uci, san) {
+    if (!R) return;
+    stopAuto();
+    R.cfg.moves = (R.cfg.moves || []).slice(0, idx).concat([uci]);
+    R.idx = idx + 1;
+    if (!R.reps || !R.judged) {
+      // تحلیل اولیه هنوز تمام نشده — خط جدید از نو تحلیل می‌شود؛
+      // موقعیت‌های تکراری از posMemo فوراً برمی‌گردند (بدون انجین)
+      R.reps = null; R.judged = null; R.fens = null;
+      showPosition();
+      updateBranchedUI();
+      const box = $("grProgWrap"), txt = $("grProgText");
+      if (box && txt) { box.classList.remove("done"); txt.textContent = "در صف تحلیل…"; }
+      analyzeMoves(R.cfg, applyAnalysis);
+      return;
+    }
+    if (R.fens) R.fens = R.fens.slice(0, idx + 1);
+    R.judged = R.judged.slice(0, idx);
+    R.reps = R.reps.slice(0, idx + 1);
+    analyzeNewLeaf(uci, san);
+  }
+
+  // اعمال نتیجه‌ی تحلیل کامل — fens با خطِ «فعلی» بازسازی می‌شود
+  function applyAnalysis(data) {
+    if (!R || R.closed) return;
+    R.reps = data.reps;
+    R.judged = data.judged;
+    const fens = [];
+    const g0 = new Chess();
+    if (R.cfg.startFen) g0.load(R.cfg.startFen);
+    fens.push(g0.fen());
+    const gt = new Chess();
+    if (R.cfg.startFen) gt.load(R.cfg.startFen);
+    (R.cfg.moves || []).forEach(function (u) {
+      try { gt.move({ from: u.slice(0, 2), to: u.slice(2, 4), promotion: u[4] || "q" }); fens.push(gt.fen()); } catch (e) {}
+    });
+    R.fens = fens;
+    const box = $("grProgWrap"), txt = $("grProgText");
+    if (box && txt) { box.classList.add("done"); txt.textContent = "تحلیل کامل شد — " + fa((data.judged || []).length) + " حرکت نمره گرفت"; }
+    renderSummary();
+    showPosition();
+    updateBranchedUI();
+  }
+
+  // تحلیل سبک فقط برای موقعیت جدیدِ انتهای خط — بدون تحلیل دوباره‌ی کل بازی
+  async function analyzeNewLeaf(uci, san) {
+    if (!R || R.closed) return;
+    const i = (R.judged || []).length;      // ایندکس حرکت تازه (۰-پایه)
+    const g = R.viewGame;
+    const fen = g.fen();
+    const myEpoch = ++R.epoch;              // تحلیلِ کاملِ در جریان را باطل کن
+    const box = $("grProgWrap");
+    const txt = $("grProgText");
+    if (box && txt) { box.classList.remove("done"); txt.textContent = "تحلیل موقعیت جدید…"; }
+
+    let rep = R.posMemo[fen];
+    if (!rep) {
+      const budget = analysisBudget(fen);
+      let r = null;
+      try { r = await ChessEngine.ask(fen, { movetime: budget.movetime, depth: budget.depth, skill: 20 }); } catch (e) { r = null; }
+      if (R.closed || myEpoch !== R.epoch) return;
+      rep = {
+        cp: r && r.score ? cpOf(r.score) : null,
+        best: (r && r.bestUci) || null,
+        pv: ((r && r.pv) || []).slice(0, 8),
+      };
+      R.posMemo[fen] = rep;
+    }
+    if (!R.reps) R.reps = [];
+    if (!R.fens) R.fens = [];
+    R.reps.push(rep);
+    R.fens.push(fen);
+
+    // نمره‌گذاری حرکت تازه — همان منطق analyzeMoves
+    const before = R.reps[i] ? R.reps[i].cp : null;
+    const after = rep.cp != null ? -rep.cp : null;
+    let kind = "good";
+    try { if (g.in_checkmate()) kind = "best"; } catch (e) {}
+    if (kind !== "best") {
+      const prevBest = R.reps[i] ? R.reps[i].best : null;
+      if (i < 8 && Math.abs(before || 0) < 60 && Math.abs((after || 0) - (before || 0)) < 40) {
+        kind = "book";
+      } else if (before == null || after == null) {
+        kind = "good";
+      } else if (prevBest && uci === prevBest) {
+        kind = "best";
+      } else {
+        const delta = before - after;
+        const isWinning = before >= 250;
+        if (delta <= 25) kind = "excellent";
+        else if (delta <= 80) kind = "good";
+        else if (delta <= 180) kind = "inaccuracy";
+        else if (delta <= 400) kind = "mistake";
+        else kind = "blunder";
+        if (isWinning && after < 120 && after > -250) kind = delta > 250 ? "blunder" : "mistake";
+      }
+    }
+    if (!R.judged) R.judged = [];
+    R.judged.push({
+      i: i, san: san || uci, uci: uci, kind: kind,
+      before: before, after: after, best: R.reps[i] ? R.reps[i].best : null,
+      bestSan: (R.reps[i] && R.reps[i].best && R.reps[i].best !== uci)
+        ? ((uciToSanObj(R.fens[i] || fen, R.reps[i].best) || {}).san || null) : null,
+      color: (R.fens[i] || "w w").split(" ")[1] === "b" ? "b" : "w",
+    });
+
+    if (box && txt) { box.classList.add("done"); txt.textContent = "تحلیل موقعیت جدید کامل شد — " + fa((R.judged || []).length) + " حرکت نمره گرفت"; }
+    renderSummary();
+    showPosition();
+    updateBranchedUI();
+  }
+
+  // بازگشت به خط اصلی بازی
+  function resetToMainLine() {
+    if (!R || R.closed) return;
+    R.cfg.moves = (R.origMoves || []).slice();
+    R.reps = null; R.judged = null; R.fens = null;
+    R.idx = clamp(R.idx, 0, R.cfg.moves.length);
+    stopAuto();
+    showPosition();
+    updateBranchedUI();
+    const box = $("grProgWrap");
+    const txt = $("grProgText");
+    if (box && txt) { box.classList.remove("done"); txt.textContent = "در صف تحلیل…"; }
+    analyzeMoves(R.cfg, applyAnalysis);
+  }
+
   function startAuto() {
     if (R.auto) return;
     $("grPlay").innerHTML = '<i class="fas fa-pause"></i>';
@@ -505,18 +675,23 @@
       fens: null,
       auto: null,
       viewGame: null,
+      // ♟ v8.3.1 — حرکت تعاملی روی تخته‌ی مرور
+      origMoves: ((cfg && cfg.moves) || []).slice(), // خط اصلی برای «بازگشت»
+      posMemo: {}, // حافظه‌ی تحلیل موقعیت‌ها (fen → {cp,best,pv})
     };
     const ov = buildOverlay(R.cfg);
     R.ov = ov;
 
-    // تخته فقط نمایشی (بدون تعامل)
+    // ♟ v8.3.1 — تخته حالا «تعاملی» است — مثل بقیه‌ی سایت:
+    // کشیدن/زدن مهره‌ها از هر موقعیتِ نمایش‌داده‌شده کار می‌کند و
+    // حرکت جدید به خط بازی اضافه و همان لحظه تحلیل می‌شود.
     R.board = ChessBoardUI.create({
       boardEl: $("grBoard"),
       arrowsEl: $("grArrows"),
       getGame: function () { return R.viewGame; },
-      canMove: function () { return false; },
-      userColor: function () { return "w"; },
-      onAttempt: function () { return false; },
+      canMove: function () { return !!R && !R.closed && !R.auto; },
+      userColor: function () { return R.viewGame ? R.viewGame.turn() : "w"; },
+      onAttempt: function (from, to, promo) { return reviewAttempt(from, to, promo); },
     });
     R.viewGame = new Chess();
     if (R.cfg.startFen) R.viewGame.load(R.cfg.startFen);
@@ -538,6 +713,7 @@
         startAuto();
       }
     });
+    $("grResetLine").addEventListener("click", resetToMainLine);
     $("grMoves").addEventListener("click", function (e) {
       const b = e.target.closest(".gr-move");
       if (b) nav(parseInt(b.dataset.i, 10) || 0);
@@ -563,26 +739,7 @@
     $("grProgText").textContent = "در صف تحلیل…";
 
     // شروع تحلیل
-    const fensCollector = [];
-    const g0 = new Chess();
-    if (R.cfg.startFen) g0.load(R.cfg.startFen);
-    fensCollector.push(g0.fen());
-    const gt = new Chess();
-    if (R.cfg.startFen) gt.load(R.cfg.startFen);
-    (R.cfg.moves || []).forEach(function (u) {
-      try { gt.move({ from: u.slice(0, 2), to: u.slice(2, 4), promotion: u[4] || "q" }); fensCollector.push(gt.fen()); } catch (e) {}
-    });
-
-    analyzeMoves(R.cfg, function (data) {
-      if (!R || R.closed) return;
-      R.reps = data.reps;
-      R.judged = data.judged;
-      R.fens = fensCollector;
-      $("grProgWrap").classList.add("done");
-      $("grProgText").textContent = "تحلیل کامل شد — " + fa((data.judged || []).length) + " حرکت نمره گرفت";
-      renderSummary();
-      showPosition();
-    });
+    analyzeMoves(R.cfg, applyAnalysis);
   }
 
   function grKey(e) {

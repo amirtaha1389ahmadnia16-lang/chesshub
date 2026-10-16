@@ -1219,10 +1219,26 @@ function reloadFiles() {
         }, RESTORE_GRACE_MS);
       });
     }
-    dirtyUsers = true;
-    dirtyGames = true;
+    // 🛠️ v8.3.1 — قبلاً اینجا «بدون هیچ شرطی» dirtyUsers/dirtyGames=true و
+    // saveFiles(true) اجباری اجرا می‌شد؛ یعنی «هر بوتِ سرور» دو-سه فایل را
+    // دوباره می‌نوشت و به گیت‌هاب push می‌کرد — حتی وقتی هیچ چیزی عوض نشده بود.
+    // نتیجه: کامیت خالی بعد از هر بوت → اگر autoDeploy روشن باشد، هر کامیت یک
+    // دیپلوی تازه → ری‌استارت دوباره → حلقه‌ی بی‌نهایت دیپلوی/ری‌استارت!
+    // حالا فقط وقتی محتوای ادغام‌شده با دیسک «واقعاً» فرق دارد ذخیره/push می‌شود.
+    let usersChanged = false;
+    let gamesChanged = false;
+    try {
+      const diskUsersRaw = fs.readFileSync(USERS_FILE, "utf8");
+      usersChanged = JSON.stringify(users) !== JSON.stringify(JSON.parse(diskUsersRaw));
+    } catch (e) { usersChanged = true; }
+    try {
+      const diskGamesRaw = fs.readFileSync(GAMES_FILE, "utf8");
+      gamesChanged = JSON.stringify(games) !== JSON.stringify(JSON.parse(diskGamesRaw));
+    } catch (e) { gamesChanged = true; }
+    if (usersChanged) dirtyUsers = true;
+    if (gamesChanged) dirtyGames = true;
     if (restoredNow) dirtyActive = true;
-    saveFiles(true);
+    saveFiles(false); // فقط فایل‌های واقعاً تغییریافته نوشته و push می‌شوند
     console.log("[Online] داده‌ها پس از ادغام گیت‌هاب دوباره بارگذاری شد — " +
       Object.keys(users).length + " بازیکن، " + games.length + " بازی" +
       (restoredNow ? "، " + restoredNow + " بازی در جریان بازیابی شد" : ""));

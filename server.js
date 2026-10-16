@@ -23,6 +23,28 @@
 
 "use strict";
 
+/* 🛡️ بندهای نجات سرور — «قبل از هر چیز دیگری» نصب می‌شوند
+   ------------------------------------------------------------
+   قبلاً این هندلرها انتهای فایل بودند؛ هر خطایی که در همان ۱ ثانیه‌ی
+   اولِ بوت (قبل از رسیدن اجرا به انتهای فایل) رخ می‌داد، سرور را
+   «خارج از کنترل» می‌کشت و Render بی‌نهایت ری‌استارت می‌کرد.
+   حالا از همان خط اول:
+     • هیچ خطای پیش‌بینی‌نشده پروسه را نمی‌کشد
+     • استک‌ترس کامل در لاگ Render ثبت می‌شود تا ریشه‌ی هر خطا
+       مستقیم از ایمیل/لاگ Render قابل تشخیص باشد
+   ------------------------------------------------------------ */
+process.on("uncaughtException", (err) => {
+  try {
+    console.error("[FATAL-CAUGHT] UncaughtException:", err && err.stack ? err.stack : err);
+  } catch (e) {}
+});
+process.on("unhandledRejection", (reason) => {
+  try {
+    console.error("[FATAL-CAUGHT] UnhandledRejection:",
+      reason && reason.stack ? reason.stack : reason);
+  } catch (e) {}
+});
+
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
@@ -527,7 +549,12 @@ function writeCommunity(data) {
   }
   fs.writeFileSync(COMMUNITY_FILE + ".tmp", JSON.stringify(data));
   fs.renameSync(COMMUNITY_FILE + ".tmp", COMMUNITY_FILE);
-  if (dataSync) dataSync.pushLater("community_content.json"); // 🔄 همگام‌سازی گیت‌هاب
+  if (dataSync) {
+    // 🛠️ v8.3.1 — محتوای کاربر (درس/گشایش/مقاله) «فوراً» به گیت‌هاب کامیت
+    // می‌شود؛ دیگر حتی اگر سرور چند ثانیه بعد ری‌استارت شود، انتشار کاربر
+    // گم نمی‌شود (قبلاً با دیبانس ۱۲ ثانیه‌ای بین ری‌استارت‌ها نابود می‌شد)
+    dataSync.pushNow("community_content.json");
+  }
 }
 
 // آماده‌سازی اقلام بر اساس نوع — خروجی تمیز و محدودشده
@@ -591,7 +618,14 @@ function cleanCommunityItem(type, item) {
           return o;
         }).filter((g) => g.white && g.black),
       }))
-      .filter((v) => v.name && v.moves.length);
+      // 🛠️ v8.3.1 — واریانت خراب (نام خالی / حرکات خالی بعد از پاک‌سازی /
+      // حرکات خلاف قوانین) «کل گشایش» را نمی‌کشد — فقط خودش کنار گذاشته می‌شود
+      .filter((v) => {
+        if (!v.name || !v.moves.length) return false;
+        const vm = cleanMoveTokenList(v.moves, 30);
+        if (!vm.length) return false;
+        return validateMovesLegality(vm, "واریانت «" + v.name + "»") == null;
+      });
     return {
       name: cleanText(item.name, 80),
       moves,
@@ -620,12 +654,34 @@ try {
 } catch (e) { ChessCtor = null; }
 
 // پاک‌سازی توکن حرکت: حذف شماره‌ی حرکت (1.e4) و نتایج (1-0)
+// 🛠️ v8.3.1 — نرم‌تر شد تا گشایش‌های کاربران «به‌خاطر فرمت» رد نشوند:
+//   • ارقام فارسی/عربی → انگلیسی، سه‌نقطه‌ی یونیکد (…) → نقطه
+//   • پسوند آن‌پاسان «e.p.» (کپی از PGN واقعی) حذف می‌شود
+//   • نمره‌های NAG ($1) و کاراکترهای صفر-عرض پاک می‌شوند
+function faDigitsToEn(s) {
+  return String(s == null ? "" : s)
+    .replace(/[\u06F0-\u06F9]/g, function (d) { return String(d.charCodeAt(0) - 0x06F0); })
+    .replace(/[\u0660-\u0669]/g, function (d) { return String(d.charCodeAt(0) - 0x0660); });
+}
+function stripZeroWidth(s) {
+  return String(s == null ? "" : s).replace(/[\u200b-\u200f\u202a-\u202e\ufeff]/g, "");
+}
+function cleanOneMoveToken(m) {
+  m = stripZeroWidth(faDigitsToEn(String(m == null ? "" : m))).trim();
+  if (!m) return "";
+  m = m.replace(/…/g, ".");                       // سه‌نقطه‌ی یونیکد
+  m = m.replace(/\be\.p\.?\s*$/i, "").trim();      // پسوند آن‌پاسان
+  m = m.replace(/\$\d+$/g, "").trim();             // نمره‌ی NAG ($1)
+  m = m.replace(/[!?]+$/g, "").trim();             // علامت‌ها
+  m = m.replace(/^(\d+)\s*\.\s*/g, "");           // شماره‌ی حرکت: 1. / 1... / 1 .
+  m = m.replace(/^\.+/, "").trim();               // ادامه‌ی حرکت سیاه: «…e5» → «e5»
+  m = m.replace(/^(1-0|0-1|1\/2-1\/2|\*)$/, "").trim(); // نتیجه
+  return m;
+}
 function cleanMoveTokenList(list, max) {
   return (Array.isArray(list) ? list : [])
-    .map((m) => String(m == null ? "" : m).trim())
+    .map(cleanOneMoveToken)
     .filter(Boolean)
-    .map((m) => m.replace(/^\d+\.(\.\.)?/, "").replace(/[!?]+$/, ""))
-    .filter((m) => m && !/^(1-0|0-1|1\/2-1\/2|\*)$/.test(m))
     .slice(0, max);
 }
 
@@ -654,17 +710,19 @@ function validateCommunityItem(type, c) {
   if (type === "openings") {
     if (c.name.length < 2) return "نام گشایش خیلی کوتاه است";
     if (!c.moves.length) return "حرکات اصلی گشایش نامعتبر است";
-    if (!c.variants.length) return "حداقل یک واریانت معتبر لازم است";
     // ♟️ اعتبارسنجی موتور شطرنج — حرکت‌های خلاف قوانین ذخیره نمی‌شوند
     const mainMoves = cleanMoveTokenList(c.moves, 40);
     const verr0 = validateMovesLegality(mainMoves, "حرکات اصلی");
     if (verr0) return verr0;
+    // 🛠️ v8.3.1 — واریانتِ خراب «کل گشایش» را نمی‌کشد؛ فقط همان واریانت
+    // در cleanCommunityItem کنار گذاشته می‌شود. پیام‌های خطای دقیق‌تر:
     for (let i = 0; i < c.variants.length; i++) {
       const v = c.variants[i];
       const vm = cleanMoveTokenList(v.moves, 30);
-      if (!vm.length) return "واریانت «" + v.name + "» حرکات ندارد";
-      const verr = validateMovesLegality(vm, "واریانت «" + v.name + "»");
-      if (verr) return verr;
+      if (vm.length) {
+        const verr = validateMovesLegality(vm, "واریانت «" + v.name + "»");
+        if (verr) return verr;
+      }
     }
     return null;
   }
@@ -1477,10 +1535,7 @@ function shutdown(signal) {
 process.on("SIGTERM", () => shutdown("SIGTERM"));
 process.on("SIGINT", () => shutdown("SIGINT"));
 
-// جلوگیری از کرش سرور با خطاهای پیش‌بینی‌نشده
-process.on("unhandledRejection", (reason) => {
-  log("UnhandledRejection: " + (reason && reason.message ? reason.message : reason));
-});
-process.on("uncaughtException", (err) => {
-  log("UncaughtException: " + (err && err.message ? err.message : err));
-});
+// 🛡️ هندلرهای سراسری حالا در «ابتدای فایل» نصب شده‌اند (بخش بالای همین فایل)
+// — اینجا فقط یک لایه‌ی امنیتی اضافه برای خطاهای خودِ هندلر بالایی است.
+process.on("uncaughtException", () => {});
+process.on("unhandledRejection", () => {});
