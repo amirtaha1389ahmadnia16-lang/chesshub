@@ -1,50 +1,14 @@
 {
-<<<<<<< HEAD
   "usernames": {
-    "امیرطاها": {
-      "name": "امیرطاها",
-      "avatar": "images/avatars/1.png",
-      "registeredAt": 1790244834149,
-      "avatarUpdatedAt": 1790247653100
+    "prb26926": {
+      "name": "prb26926",
+      "avatar": "",
+      "registeredAt": 1791826927076
     },
-    "تست": {
-      "name": "تست",
-      "avatar": "images/avatars/7.png",
-      "registeredAt": 1790246430950,
-      "avatarUpdatedAt": 1790247977278
-    },
-    "amir rnj": {
-      "name": "Amir Rnj",
-      "avatar": "images/avatars/4.png",
-      "registeredAt": 1790249035899
-    },
-    "yasin": {
-      "name": "Yasin",
+    "رضا": {
+      "name": "رضا",
       "avatar": "images/avatars/5.png",
-      "registeredAt": 1790255828262
-    },
-    "moein": {
-      "name": "Moein",
-      "avatar": "images/avatars/2.png",
-      "registeredAt": 1790256493268
-    },
-    "امیرحسین": {
-      "name": "امیرحسین",
-      "avatar": "images/avatars/6.png",
-      "registeredAt": 1790260988347
-    },
-    "hacker01": {
-      "name": "Hacker01",
-      "avatar": "images/avatars/7.png",
-      "registeredAt": 1790448753969
-    },
-    "parsa": {
-      "name": "Parsa",
-      "avatar": "images/avatars/1.png",
-      "registeredAt": 1791287327491
+      "registeredAt": 1792355492581
     }
   }
-=======
-  "usernames": {}
->>>>>>> 877a62c (update files)
 }
