@@ -1,1 +1,24 @@
-{"usernames":{"prb26926":{"name":"prb26926","avatar":"","registeredAt":1791826927076},"رضا":{"name":"رضا","avatar":"images/avatars/5.png","registeredAt":1792355492581},"شطرنج خمام":{"name":"شطرنج خمام","avatar":"images/avatars/2.png","registeredAt":1792423292866}}}
+{
+  "usernames": {
+    "prb26926": {
+      "name": "prb26926",
+      "avatar": "",
+      "registeredAt": 1791826927076
+    },
+    "رضا": {
+      "name": "رضا",
+      "avatar": "images/avatars/5.png",
+      "registeredAt": 1792355492581
+    },
+    "شطرنج خمام": {
+      "name": "شطرنج خمام",
+      "avatar": "images/avatars/2.png",
+      "registeredAt": 1792423292866
+    },
+    "n.b": {
+      "name": "n.b",
+      "avatar": "images/avatars/4.png",
+      "registeredAt": 1792425920709
+    }
+  }
+}
