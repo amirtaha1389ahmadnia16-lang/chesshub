@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>ChessHub | ورود</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%E2%99%9B%3C/text%3E%3C/svg%3E"
+    />
+    <link href="fonts/vazir/font-face.css" rel="stylesheet" />
+    <link rel="stylesheet" href="lib/fontawesome/all.min.css" />
+    <style>
+      :root {
+        --white: #ffffff;
+        --gray-bg: #f4f6fa;
+        --gray-border: #dbe1ea;
+        --gray-text: #5b6577;
+        --gray-light: #8a94a6;
+        --blue-dark: #0e2a55;
+        --blue-dark-hover: #0a2143;
+        --blue-light: #3b82f6;
+        --blue-tint: #eaf2fe;
+        --blue-border-tint: #c9dcfa;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: "Vazir", Vazirmatn, Tahoma, sans-serif;
+        direction: rtl;
+        min-height: 100vh;
+        min-height: 100svh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.2rem;
+        background-color: var(--gray-bg);
+        background-image:
+          conic-gradient(
+            rgba(59, 130, 246, 0.055) 90deg,
+            transparent 90deg 180deg,
+            rgba(59, 130, 246, 0.055) 180deg 270deg,
+            transparent 270deg
+          );
+        background-size: 64px 64px;
+        color: var(--blue-dark);
+        position: relative;
+        overflow-x: hidden;
+      }
+      /* تزئین پس‌زمینه — فقط بصری، بدون متن */
+      .deco {
+        position: fixed;
+        color: rgba(59, 130, 246, 0.07);
+        font-size: 22rem;
+        line-height: 1;
+        pointer-events: none;
+        user-select: none;
+        z-index: 0;
+      }
+      .deco.d2 { bottom: -7rem; left: -3rem; transform: rotate(12deg); font-size: 18rem; }
+
+      .auth-card {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-width: 420px;
+        background: var(--white);
+        border: 1px solid var(--gray-border);
+        border-radius: 20px;
+        box-shadow: 0 16px 48px rgba(14, 42, 85, 0.1);
+        padding: 1.8rem 1.7rem 1.5rem;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.6rem;
+        margin-bottom: 1.2rem;
+      }
+      .brand-mark {
+        width: 44px;
+        height: 44px;
+        border-radius: 13px;
+        background: var(--blue-dark);
+        color: var(--white);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        flex: 0 0 auto;
+      }
+      .brand-name {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: var(--blue-dark);
+        letter-spacing: 0.02em;
+      }
+
+      .tabs {
+        display: flex;
+        background: #eef1f7;
+        border-radius: 12px;
+        padding: 4px;
+        margin-bottom: 1.1rem;
+      }
+      .tab {
+        flex: 1;
+        padding: 0.6rem;
+        border: none;
+        background: transparent;
+        border-radius: 9px;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: var(--gray-text);
+        transition: all 0.15s;
+      }
+      .tab.active {
+        background: var(--blue-dark);
+        color: var(--white);
+        box-shadow: 0 3px 10px rgba(14, 42, 85, 0.22);
+      }
+
+      .msg {
+        display: none;
+        align-items: flex-start;
+        gap: 0.5rem;
+        background: var(--blue-tint);
+        border: 1px solid var(--blue-border-tint);
+        border-radius: 11px;
+        padding: 0.65rem 0.85rem;
+        color: var(--blue-dark);
+        font-size: 0.82rem;
+        font-weight: 600;
+        line-height: 1.9;
+        margin-bottom: 0.9rem;
+        text-align: right;
+      }
+      .msg.show { display: flex; }
+      .msg i { margin-top: 0.3rem; color: var(--blue-light); flex: 0 0 auto; }
+
+      .field { margin-bottom: 0.85rem; }
+      .field label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--gray-text);
+        margin-bottom: 0.35rem;
+        text-align: right;
+      }
+      .input-wrap { position: relative; }
+      .field-icon {
+        position: absolute;
+        right: 0.85rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--gray-light);
+        font-size: 0.9rem;
+        pointer-events: none;
+      }
+      .input-wrap input {
+        width: 100%;
+        padding: 0.72rem 2.4rem 0.72rem 2.4rem;
+        border: 1.5px solid var(--gray-border);
+        border-radius: 11px;
+        font-size: 1rem;
+        font-family: inherit;
+        outline: none;
+        background: var(--white);
+        color: var(--blue-dark);
+        transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+      }
+      .input-wrap input::placeholder { color: #a8b0bd; }
+      .input-wrap input:focus {
+        border-color: var(--blue-light);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14);
+      }
+      .input-wrap input.invalid {
+        border-color: var(--blue-dark);
+        background: #f7faff;
+      }
+      .err {
+        display: none;
+        font-size: 0.74rem;
+        font-weight: 600;
+        color: var(--blue-dark);
+        margin-top: 0.3rem;
+        text-align: right;
+      }
+      .err.show { display: block; }
+      .err i { color: var(--blue-light); font-size: 0.72rem; }
+
+      .eye {
+        position: absolute;
+        left: 0.55rem;
+        top: 50%;
+        transform: translateY(-50%);
+        border: none;
+        background: none;
+        cursor: pointer;
+        color: var(--gray-light);
+        font-size: 0.9rem;
+        padding: 0.35rem;
+      }
+      .eye:hover { color: var(--blue-light); }
+
+      .submit {
+        width: 100%;
+        margin-top: 0.4rem;
+        padding: 0.85rem;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        background: var(--blue-dark);
+        color: var(--white);
+        font-size: 1rem;
+        font-weight: 800;
+        font-family: inherit;
+        transition: background 0.15s, transform 0.12s;
+      }
+      .submit:hover:not(:disabled) { background: var(--blue-dark-hover); }
+      .submit:active:not(:disabled) { transform: translateY(1px); }
+      .submit:disabled { opacity: 0.55; cursor: not-allowed; }
+
+      .switch-row {
+        margin-top: 0.9rem;
+        text-align: center;
+        font-size: 0.82rem;
+        color: var(--gray-text);
+      }
+      .switch-row a {
+        color: var(--blue-light);
+        cursor: pointer;
+        font-weight: 700;
+        text-decoration: none;
+      }
+      .switch-row a:hover { text-decoration: underline; }
+
+      /* حالت ارتقای حساب قدیمی */
+      .up-preview {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        background: var(--blue-tint);
+        border-radius: 12px;
+        padding: 0.65rem 0.85rem;
+        margin-bottom: 0.8rem;
+      }
+      .up-preview img {
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        object-fit: cover;
+        background: var(--white);
+        border: 2px solid var(--blue-border-tint);
+      }
+      .up-preview span { font-weight: 800; color: var(--blue-dark); font-size: 0.95rem; }
+      .up-note {
+        font-size: 0.82rem;
+        color: var(--gray-text);
+        line-height: 1.9;
+        margin: 0 0 0.9rem;
+        text-align: right;
+      }
+
+      [hidden] { display: none !important; }
+
+      @media (max-width: 480px) {
+        body { padding: 0.8rem; align-items: flex-start; }
+        .auth-card { padding: 1.4rem 1.1rem 1.2rem; margin-top: 4vh; }
+        .deco { font-size: 13rem; }
+        .deco.d2 { bottom: -4rem; left: -2.5rem; }
+      }
+    </style>
+  </head>
+  <body>
+    <i class="fas fa-chess-king deco d2" aria-hidden="true"></i>
+
+    <main class="auth-card">
+      <div class="brand">
+        <span class="brand-mark"><i class="fas fa-chess-king"></i></span>
+        <span class="brand-name">ChessHub</span>
+      </div>
+
+      <div class="tabs" id="tabs">
+        <button class="tab active" id="tabLogin" type="button">ورود</button>
+        <button class="tab" id="tabRegister" type="button">ثبت‌نام</button>
+      </div>
+
+      <div class="msg" id="msg" role="alert" aria-live="polite">
+        <i class="fas fa-circle-info" id="msgIcon"></i>
+        <span id="msgText"></span>
+      </div>
+
+      <!-- ورود -->
+      <form id="loginForm" novalidate>
+        <div class="field">
+          <label for="loginId">ایمیل یا نام کاربری</label>
+          <div class="input-wrap">
+            <i class="fas fa-user field-icon"></i>
+            <input
+              id="loginId"
+              type="text"
+              autocomplete="username"
+              spellcheck="false"
+              placeholder="you@example.com یا نام کاربری"
+            />
+          </div>
+          <div class="err" id="err-loginId"></div>
+        </div>
+        <div class="field">
+          <label for="loginPw">رمز عبور</label>
+          <div class="input-wrap">
+            <i class="fas fa-lock field-icon"></i>
+            <input id="loginPw" type="password" autocomplete="current-password" placeholder="رمز عبور" />
+            <button class="eye" type="button" data-for="loginPw" aria-label="نمایش رمز">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+          <div class="err" id="err-loginPw"></div>
+        </div>
+        <button class="submit" type="submit" id="loginBtn">ورود</button>
+        <div class="switch-row">حساب نداری؟ <a id="goRegister">ثبت‌نام</a></div>
+      </form>
+
+      <!-- ثبت‌نام -->
+      <form id="registerForm" novalidate hidden>
+        <div class="field">
+          <label for="regEmail">ایمیل</label>
+          <div class="input-wrap">
+            <i class="fas fa-envelope field-icon"></i>
+            <input id="regEmail" type="email" autocomplete="email" spellcheck="false" placeholder="you@example.com" />
+          </div>
+          <div class="err" id="err-regEmail"></div>
+        </div>
+        <div class="field">
+          <label for="regName">نام کاربری</label>
+          <div class="input-wrap">
+            <i class="fas fa-user field-icon"></i>
+            <input id="regName" type="text" maxlength="16" autocomplete="username" spellcheck="false" placeholder="مثلاً amirtaha" />
+          </div>
+          <div class="err" id="err-regName"></div>
+        </div>
+        <div class="field">
+          <label for="regPw">رمز عبور</label>
+          <div class="input-wrap">
+            <i class="fas fa-lock field-icon"></i>
+            <input id="regPw" type="password" autocomplete="new-password" placeholder="حداقل ۶ کاراکتر" />
+            <button class="eye" type="button" data-for="regPw" aria-label="نمایش رمز">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+          <div class="err" id="err-regPw"></div>
+        </div>
+        <div class="field">
+          <label for="regPw2">تکرار رمز عبور</label>
+          <div class="input-wrap">
+            <i class="fas fa-lock field-icon"></i>
+            <input id="regPw2" type="password" autocomplete="new-password" placeholder="تکرار رمز عبور" />
+            <button class="eye" type="button" data-for="regPw2" aria-label="نمایش رمز">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+          <div class="err" id="err-regPw2"></div>
+        </div>
+        <button class="submit" type="submit" id="regBtn">ثبت‌نام</button>
+        <div class="switch-row">حساب داری؟ <a id="goLogin">ورود</a></div>
+      </form>
+
+      <!-- ارتقای حساب قدیمی -->
+      <div id="upgradePane" hidden>
+        <div class="up-preview">
+          <img id="upAvatar" alt="" hidden />
+          <span id="upName"></span>
+        </div>
+        <p class="up-note">برای این نام قبلاً رمزی ثبت نشده — یک رمز انتخاب کن.</p>
+        <form id="upgradeForm" novalidate>
+          <div class="field">
+            <label for="upPw">رمز عبور</label>
+            <div class="input-wrap">
+              <i class="fas fa-lock field-icon"></i>
+              <input id="upPw" type="password" autocomplete="new-password" placeholder="حداقل ۶ کاراکتر" />
+              <button class="eye" type="button" data-for="upPw" aria-label="نمایش رمز">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+            <div class="err" id="err-upPw"></div>
+          </div>
+          <div class="field">
+            <label for="upPw2">تکرار رمز عبور</label>
+            <div class="input-wrap">
+              <i class="fas fa-lock field-icon"></i>
+              <input id="upPw2" type="password" autocomplete="new-password" placeholder="تکرار رمز عبور" />
+              <button class="eye" type="button" data-for="upPw2" aria-label="نمایش رمز">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+            <div class="err" id="err-upPw2"></div>
+          </div>
+          <button class="submit" type="submit" id="upBtn">ذخیره رمز و ورود</button>
+          <div class="switch-row"><a id="upBack">این حساب مال من نیست</a></div>
+        </form>
+      </div>
+    </main>
+
+    <script src="js/auth.js"></script>
+    <script src="js/login.js"></script>
+  </body>
+</html>

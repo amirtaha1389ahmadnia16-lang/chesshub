@@ -40,6 +40,7 @@ const MAX_FAILED_LOGINS = 5;
 const LOCKOUT_MS = 10 * 60 * 1000;
 
 const PASSWORD_RULES = { min: 6, max: 64 };
+const DEFAULT_AVATAR = "images/avatars/1.png"; // 🎯 پروفایل پیش‌فرض برای حساب‌های جدید
 
 let dataSync = null;
 try { dataSync = require("./data-sync"); } catch (e) { dataSync = null; }
@@ -260,6 +261,28 @@ function normName(v) {
   return String(v == null ? "" : v).trim().replace(/\s+/g, " ").toLowerCase();
 }
 
+// ✉️ v9 — ایمیل: نرمال‌سازی + اعتبارسنجی (خروجی: ایمیل معتبر یا null)
+const EMAIL_RE = /^[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9.-]{1,190}\.[A-Za-z]{2,24}$/;
+function normEmail(v) {
+  const s = String(v == null ? "" : v).trim().toLowerCase();
+  return EMAIL_RE.test(s) ? s : null;
+}
+
+function emailTaken(map, em) {
+  for (const k in map) {
+    if (Object.prototype.hasOwnProperty.call(map, k) && map[k] && map[k].email === em) return true;
+  }
+  return false;
+}
+
+// یافتن حساب با ایمیل
+function accountByEmail(map, em) {
+  for (const k in map) {
+    if (Object.prototype.hasOwnProperty.call(map, k) && map[k] && map[k].email === em) return { key: k, rec: map[k] };
+  }
+  return null;
+}
+
 function validatePassword(pw, name) {
   const p = String(pw == null ? "" : pw);
   if (p.length < PASSWORD_RULES.min) return "رمز عبور باید حداقل ۶ حرف باشد";
@@ -327,21 +350,26 @@ function accountExists(name) {
   return Object.prototype.hasOwnProperty.call(map, normName(name));
 }
 
-// ثبت‌نام جدید — رمز عبور «الزامی» است
-function registerAccount(name, password, avatar) {
+// ثبت‌نام جدید — رمز عبور و ایمیل «الزامی» است
+// (بدون آواتار → خودکار پروفایل پیش‌فرض اول تخصیص داده می‌شود)
+function registerAccount(name, password, avatar, email) {
   const map = readAccounts();
   const key = normName(name);
   if (!key) return { error: "نام کاربری الزامی است" };
   if (Object.prototype.hasOwnProperty.call(map, key)) {
     return { error: "این نام کاربری قبلاً ثبت شده است — وارد شو یا نام دیگری برگزین", status: 409 };
   }
+  const em = normEmail(email);
+  if (!em) return { error: "ایمیل معتبر نیست", status: 400 };
+  if (emailTaken(map, em)) return { error: "این ایمیل قبلاً ثبت شده است", status: 409 };
   const perr = validatePassword(password, name);
   if (perr) return { error: perr, status: 400 };
 
   const { salt, hash } = hashPassword(password);
   const rec = {
     name: String(name).trim().replace(/\s+/g, " "),
-    avatar: String(avatar || "").slice(0, 300),
+    avatar: String(avatar || DEFAULT_AVATAR).slice(0, 300),
+    email: em,
     salt: salt,
     hash: hash,
     createdAt: Date.now(),
@@ -352,15 +380,32 @@ function registerAccount(name, password, avatar) {
   return { ok: true, record: rec, token: issueToken(rec.name) };
 }
 
-// ورود — نام + رمز
-function loginAccount(name, password) {
-  const key = normName(name);
-  if (!key) return { error: "نام کاربری و رمز عبور را وارد کن", status: 400 };
+// ورود — «ایمیل یا نام کاربری» + رمز (v9)
+function loginAccount(identifier, password) {
+  const raw = String(identifier == null ? "" : identifier).trim();
+  if (!raw) return { error: "ایمیل یا نام کاربری و رمز عبور را وارد کن", status: 400 };
+  const map = readAccounts();
+  let key = null;
+  let rec = null;
+  if (raw.indexOf("@") >= 0) {
+    // ورود با ایمیل
+    const em = normEmail(raw);
+    if (!em) return { error: "ایمیل معتبر نیست", status: 400 };
+    const found = accountByEmail(map, em);
+    if (!found) {
+      return { error: "نام کاربری یا رمز عبور اشتباه است", status: 401 };
+    }
+    key = found.key;
+    rec = found.rec;
+  } else {
+    // ورود با نام کاربری (مثل قبل)
+    key = normName(raw);
+    if (!key) return { error: "ایمیل یا نام کاربری و رمز عبور را وارد کن", status: 400 };
+    rec = map[key];
+  }
   if (isLoginLocked(key)) {
     return { error: "به‌خاطر تلاش‌های ناموفق، این حساب موقتاً قفل شده — ۱۰ دقیقه بعد دوباره امتحان کن", status: 423 };
   }
-  const map = readAccounts();
-  const rec = map[key];
   if (!rec || !verifyPassword(password, rec.salt, rec.hash)) {
     recordLoginFail(key);
     return { error: "نام کاربری یا رمز عبور اشتباه است", status: 401 };
@@ -394,7 +439,7 @@ function upgradeAccount(name, password, avatar) {
   const { salt, hash } = hashPassword(password);
   const rec = {
     name: legacy.name,
-    avatar: avatar || legacy.avatar || "",
+    avatar: avatar || legacy.avatar || DEFAULT_AVATAR,
     salt: salt,
     hash: hash,
     createdAt: (legacy.registeredAt || Date.now()),
@@ -425,11 +470,12 @@ function changePassword(tokenPayload, currentPw, newPw) {
 }
 
 // پروفایل عمومی امن — هرگز salt/hash بیرون نمی‌رود
+// (آواتار خالی → پروفایل پیش‌فرض اول)
 function publicProfile(rec) {
   if (!rec) return null;
   return {
     name: rec.name,
-    avatar: rec.avatar || "",
+    avatar: rec.avatar || DEFAULT_AVATAR,
     createdAt: rec.createdAt || 0,
     lastLoginAt: rec.lastLoginAt || 0,
   };
@@ -452,6 +498,7 @@ module.exports = {
   publicProfile: publicProfile,
   // نرمال‌سازی
   normName: normName,
+  normEmail: normEmail,
   validatePassword: validatePassword,
   // محدودسازی
   rateLimit: rateLimit,

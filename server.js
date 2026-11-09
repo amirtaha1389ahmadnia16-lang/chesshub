@@ -858,7 +858,8 @@ function handleAuthAPI(req, res, pathname, query) {
             needUpgrade: true,
           });
         }
-        const r = auth.registerAccount(v.name, body.password, avatar);
+        // ✉️ v9 — ایمیل الزامی؛ آواتار خالی → پروفایل پیش‌فرض در server-auth
+        const r = auth.registerAccount(v.name, body.password, avatar, body.email);
         if (!r.ok) return sendJSON(res, r.status || 400, { ok: false, error: r.error });
         mirrorUsernameToRegistry(r.record.name, r.record.avatar);
         log(`حساب جدید ساخته شد: «${r.record.name}»`);
