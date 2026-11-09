@@ -1,0 +1,96 @@
+/* ============================================================
+   ♛ ChessHub — theme.css | منبع واحد طراحی کل سایت (v9.2)
+   ------------------------------------------------------------
+   این فایل تنها منبع رنگ‌ها، فونت و قواعد پایهٔ تمام‌صفحه است.
+   • همهٔ صفحات سایت (به‌همراه css/style.css) و صفحهٔ ورود
+     (login.html) از همین متغیرها تغذیه می‌کنند — بدون تکرار.
+   • پالت: سفید / خاکستری / آبی تیره (#0e2a55) / آبی روشن (#3b82f6)
+   • رنگ‌های سبز/قرمز/کهربا فقط «عملکردی» هستند (موفقیت/خطا/هشدار)
+   ============================================================ */
+
+/* ---------- ۱) پالت مشترک (تک‌منبع) ---------- */
+:root {
+  --primary: #0e2a55;
+  --primary-dark: #0a1f42;
+  --primary-light: #1c3a6e;
+  --secondary: #f4f6fa;
+  --accent: #3b82f6;
+  --accent-dark: #2563eb;
+  --accent-light: #93c5fd;
+  --accent-soft: #eaf2fe;
+  --gold: #3b82f6;
+  --gold-soft: #eaf2fe;
+  --text-dark: #17203a;
+  --text-light: #5b6577;
+  --success: #2f9e6e;
+  --success-dark: #26825a;
+  --danger: #e05252;
+  --warning: #d69e2e;
+  --purple: #3b82f6;
+  --border: #dbe1ea;
+
+  --shadow-sm: 0 1px 2px 0 rgba(23, 32, 58, 0.05), 0 1px 6px rgba(23, 32, 58, 0.04);
+  --shadow-md: 0 6px 16px -4px rgba(14, 42, 85, 0.12), 0 2px 5px rgba(14, 42, 85, 0.06);
+  --shadow-lg: 0 14px 34px -8px rgba(14, 42, 85, 0.18), 0 5px 12px rgba(14, 42, 85, 0.07);
+  --shadow-board: 0 14px 30px rgba(10, 31, 66, 0.22), 0 4px 10px rgba(10, 31, 66, 0.14);
+
+  --radius-xl: 20px;
+  --radius-lg: 14px;
+  --radius-md: 10px;
+  --radius-sm: 8px;
+  --board-light: #f0d9b5;
+  --board-dark: #b58863;
+  --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* نام‌های قدیمی صفحهٔ ورود (login.html) — مقدار از همین منبع */
+  --white: #ffffff;
+  --gray-bg: #f4f6fa;
+  --gray-border: #dbe1ea;
+  --gray-text: #5b6577;
+  --gray-light: #8a94a6;
+  --blue-dark: #0e2a55;
+  --blue-dark-hover: #0a2143;
+  --blue-light: #3b82f6;
+  --blue-tint: #eaf2fe;
+  --blue-border-tint: #c9dcfa;
+}
+
+/* ---------- ۲) ریست پایه ---------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Vazir", Vazirmatn, Tahoma, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* ---------- ۳) تمام‌صفحه — استفاده از تمام عرض/ارتفاع ---------- */
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  overflow-x: clip;
+  background:
+    radial-gradient(1200px 400px at 85% -100px, rgba(59, 130, 246, 0.07), transparent 60%),
+    #f4f6fa;
+  color: var(--text-dark);
+  line-height: 1.6;
+  direction: rtl;
+  font-weight: 500;
+  -webkit-tap-highlight-color: transparent;
+}
+
+a { text-decoration: none; }
+img { max-width: 100%; }
+button { font-family: inherit; }
+
+::selection {
+  background: var(--accent);
+  color: #fff;
+}

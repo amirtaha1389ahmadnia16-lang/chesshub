@@ -39,12 +39,12 @@ window.ChessHubMoveInput = (function () {
     "box-shadow:0 30px 80px rgba(0,0,0,.4);padding:1.1rem 1.2rem 1rem;box-sizing:border-box}" +
     ".chmi-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.7rem}" +
     ".chmi-title{font-weight:800;color:#17203a;font-size:1.02rem}" +
-    ".chmi-close{border:none;background:#f1f0fa;color:#4c3f9e;width:34px;height:34px;border-radius:11px;" +
+    ".chmi-close{border:none;background:#f1f4f9;color:#2563eb;width:34px;height:34px;border-radius:11px;" +
     "cursor:pointer;font-size:1rem}" +
-    ".chmi-tabs{display:flex;background:#f1f0fa;border-radius:12px;padding:4px;margin-bottom:.8rem;gap:4px}" +
+    ".chmi-tabs{display:flex;background:#f1f4f9;border-radius:12px;padding:4px;margin-bottom:.8rem;gap:4px}" +
     ".chmi-tab{flex:1;padding:.55rem;border:none;background:transparent;border-radius:9px;cursor:pointer;" +
     "font-family:inherit;font-size:.84rem;font-weight:700;color:#6b7590}" +
-    ".chmi-tab.active{background:#fff;color:#4c3f9e;box-shadow:0 2px 8px rgba(76,63,158,.15)}" +
+    ".chmi-tab.active{background:#fff;color:#2563eb;box-shadow:0 2px 8px rgba(37,99,235,.15)}" +
     ".chmi-body{display:flex;gap:1rem;flex-wrap:wrap}" +
     ".chmi-boardcol{flex:0 0 300px;max-width:100%}" +
     ".chmi-board{display:grid;grid-template-columns:repeat(8,1fr);aspect-ratio:1;width:100%;direction:ltr;" +
@@ -54,7 +54,7 @@ window.ChessHubMoveInput = (function () {
     ".chmi-board .square.light{background:#f0d9b5}" +
     ".chmi-board .square.dark{background:#b58863}" +
     ".chmi-board .square.last-move::after{content:'';position:absolute;inset:0;background:rgba(255,213,79,.5)}" +
-    ".chmi-board .square.selected::after{content:'';position:absolute;inset:0;background:rgba(109,91,208,.45)}" +
+    ".chmi-board .square.selected::after{content:'';position:absolute;inset:0;background:rgba(59,130,246,.45)}" +
     ".chmi-board .square.check::after{content:'';position:absolute;inset:0;background:radial-gradient(circle,rgba(229,57,53,.85) 15%,rgba(229,57,53,.25) 60%,transparent 72%)}" +
     ".chmi-board .square.dot::before{content:'';position:absolute;width:30%;height:30%;border-radius:50%;" +
     "background:rgba(20,20,20,.28);z-index:2}" +
@@ -75,7 +75,7 @@ window.ChessHubMoveInput = (function () {
     ".chmi-history{background:#f7f7fc;border:1.5px solid #e3e7f0;border-radius:12px;padding:.5rem .7rem;" +
     "min-height:120px;max-height:170px;overflow-y:auto;font-size:.84rem;line-height:2;direction:ltr;" +
     "text-align:left;font-family:monospace;color:#333}" +
-    ".chmi-history .chmi-turn{color:#4c3f9e;font-weight:800;margin-right:.35rem}" +
+    ".chmi-history .chmi-turn{color:#2563eb;font-weight:800;margin-right:.35rem}" +
     ".chmi-pgnbox{background:#f7f7fc;border:1.5px solid #e3e7f0;border-radius:12px;padding:.5rem .7rem;" +
     "min-height:64px;max-height:110px;overflow-y:auto;font-size:.8rem;line-height:1.9;direction:ltr;" +
     "text-align:left;font-family:monospace;color:#333;word-break:break-word}" +
@@ -84,11 +84,11 @@ window.ChessHubMoveInput = (function () {
     "font-family:inherit;font-size:.83rem;font-weight:800;transition:transform .12s,opacity .15s}" +
     ".chmi-btn:hover:not(:disabled){transform:translateY(-1px)}" +
     ".chmi-btn:disabled{opacity:.4;cursor:not-allowed}" +
-    ".chmi-btn.undo{background:#fff;color:#4c3f9e;border:1.5px solid #dcd4f7}" +
+    ".chmi-btn.undo{background:#fff;color:#2563eb;border:1.5px solid #c9dcfa}" +
     ".chmi-btn.restart{background:#fff;color:#b3282d;border:1.5px solid #f6c9c9}" +
     ".chmi-btn.flip{background:#fff;color:#6b7590;border:1.5px solid #e3e7f0;min-width:80px;flex:0}" +
-    ".chmi-btn.apply{background:linear-gradient(135deg,#6d5bd0,#4c3f9e);color:#fff;padding:.75rem}" +
-    ".chmi-btn.cancel{background:#f1f0fa;color:#4c3f9e}" +
+    ".chmi-btn.apply{background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;padding:.75rem}" +
+    ".chmi-btn.cancel{background:#f1f4f9;color:#2563eb}" +
     ".chmi-pgntab{display:none;flex-direction:column;gap:.6rem}" +
     ".chmi-pgntab.show{display:flex}" +
     ".chmi-boardtab{display:none;flex-direction:column;gap:.6rem}" +
@@ -96,7 +96,7 @@ window.ChessHubMoveInput = (function () {
     ".chmi-pgntextarea{width:100%;box-sizing:border-box;min-height:130px;padding:.7rem .8rem;border:1.5px solid #e3e7f0;" +
     "border-radius:12px;font-family:monospace;font-size:.85rem;direction:ltr;text-align:left;resize:vertical;" +
     "outline:none;background:#fafbfe;color:#17203a;line-height:1.8}" +
-    ".chmi-pgntextarea:focus{border-color:#6d5bd0;background:#fff}" +
+    ".chmi-pgntextarea:focus{border-color:#3b82f6;background:#fff}" +
     ".chmi-hint{font-size:.72rem;color:#9aa3b8;line-height:1.9}" +
     ".chmi-status{font-size:.78rem;line-height:1.9;min-height:1.3em}" +
     ".chmi-status.err{color:#e05252}.chmi-status.ok{color:#2f9e6e}" +

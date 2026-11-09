@@ -207,24 +207,8 @@ window.ChessHubAuth = (function () {
     }
   }
 
-  /* ---------------- دکمه‌ی خروج در مودال پروفایل ---------------- */
-  function watchProfileModal() {
-    if (typeof MutationObserver === "undefined") return;
-    const obs = new MutationObserver(function () {
-      const ov = document.querySelector(".chp-info-overlay.open");
-      if (!ov || ov.querySelector("#chaLogoutBtn")) return;
-      const actions = ov.querySelector(".chp-info-actions");
-      if (!actions) return;
-      if (!session) return;
-      const b = document.createElement("button");
-      b.id = "chaLogoutBtn";
-      b.className = "chp-info-change";
-      b.innerHTML = '<i class="fas fa-right-from-bracket"></i> خروج از حساب';
-      b.addEventListener("click", function () { api.logout(); ov.remove(); });
-      actions.appendChild(b);
-    });
-    obs.observe(document.body, { childList: true, subtree: true });
-  }
+  /* دکمهٔ «خروج از حساب» به‌صورت دائم در مودال پروفایل قرار دارد
+     (js/profile.js → openInfo) و همین‌جا logout() را صدا می‌زند. */
 
   /* ---------------- راه‌اندازی ---------------- */
   function boot() {
@@ -272,8 +256,6 @@ window.ChessHubAuth = (function () {
       .catch(function () {
         /* آفلاین — نشست محلی بماند */
       });
-
-    watchProfileModal();
   }
 
   /* ---------------- API سراسری ---------------- */

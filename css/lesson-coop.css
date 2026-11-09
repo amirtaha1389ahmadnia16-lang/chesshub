@@ -1187,9 +1187,9 @@
 }
 #importErrorList li > button {
   flex: 0 0 auto;
-  border: 1.5px solid #dcd4f7;
+  border: 1.5px solid #c9dcfa;
   background: #f6f5fd;
-  color: #4c3f9e;
+  color: #2563eb;
   border-radius: 9px;
   padding: 0.25rem 0.65rem;
   font-family: inherit;
@@ -1199,7 +1199,7 @@
   white-space: nowrap;
 }
 #importErrorList li > button:hover {
-  background: #efecfd;
+  background: #eaf2fe;
 }
 .import-error-note {
   font-size: 0.72rem;

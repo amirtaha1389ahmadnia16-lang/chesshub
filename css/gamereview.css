@@ -286,7 +286,7 @@
 .k-ina   { background: rgba(214, 158, 46, 0.12) !important; color: #975a16 !important; }
 .k-mis   { background: rgba(246, 173, 85, 0.16) !important; color: #c05621 !important; }
 .k-blun  { background: rgba(229, 62, 62, 0.12) !important; color: var(--danger, #e53e3e) !important; }
-.k-book  { background: rgba(128, 90, 213, 0.1) !important; color: var(--purple, #805ad5) !important; }
+.k-book  { background: rgba(59, 130, 246, 0.1) !important; color: var(--purple, #3b82f6) !important; }
 
 /* ---------- نمودار ---------- */
 .gr-graph-wrap {

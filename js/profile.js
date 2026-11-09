@@ -198,55 +198,57 @@ window.ChessHubProfile = (function () {
     "scrollbar-width:none}" +
     ".chp-card::-webkit-scrollbar{display:none}" +
     ".chp-logo{width:64px;height:64px;border-radius:18px;margin:0 auto .7rem;display:flex;align-items:center;justify-content:center;" +
-    "background:linear-gradient(135deg,#6d5bd0,#4c3f9e);color:#fff;font-size:1.8rem;box-shadow:0 10px 24px rgba(109,91,208,.35)}" +
+    "background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;font-size:1.8rem;box-shadow:0 10px 24px rgba(59,130,246,.35)}" +
     ".chp-card h2{margin:0 0 .4rem;color:#17203a;font-size:1.25rem;font-weight:800}" +
-    ".chp-card h2 i{color:#6d5bd0}" +
+    ".chp-card h2 i{color:#3b82f6}" +
     ".chp-sub{color:#6b7590;font-size:.82rem;line-height:1.9;margin:0 0 1.1rem}" +
-    ".chp-sub b{color:#4c3f9e}" +
+    ".chp-sub b{color:#2563eb}" +
     ".chp-field{text-align:right;margin-bottom:.9rem}" +
     ".chp-field label{display:block;font-size:.8rem;font-weight:700;color:#17203a;margin-bottom:.4rem}" +
     ".chp-input{width:100%;box-sizing:border-box;padding:.7rem .9rem;border:1.5px solid #e3e7f0;border-radius:12px;" +
     "font-size:.95rem;font-family:inherit;outline:none;transition:border .15s;background:#fafbfe;color:#17203a}" +
-    ".chp-input:focus{border-color:#6d5bd0;background:#fff}" +
+    ".chp-input:focus{border-color:#3b82f6;background:#fff}" +
     ".chp-status{font-size:.75rem;margin-top:.35rem;min-height:1.2em;line-height:1.7}" +
     ".chp-status.free{color:#2f9e6e}.chp-status.taken{color:#e05252}.chp-status.invalid{color:#e05252}" +
     ".chp-status.offline{color:#c07d1a}" +
     ".chp-avatars{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem}" +
     ".chp-avatars img{width:100%;aspect-ratio:1;border-radius:14px;cursor:pointer;border:2.5px solid transparent;" +
-    "background:#efecfd;transition:transform .12s,border-color .12s;object-fit:cover;padding:2px;box-sizing:border-box}" +
+    "background:#eaf2fe;transition:transform .12s,border-color .12s;object-fit:cover;padding:2px;box-sizing:border-box}" +
     ".chp-avatars img:hover{transform:translateY(-2px)}" +
-    ".chp-avatars img.active{border-color:#6d5bd0;box-shadow:0 4px 14px rgba(109,91,208,.35)}" +
+    ".chp-avatars img.active{border-color:#3b82f6;box-shadow:0 4px 14px rgba(59,130,246,.35)}" +
     ".chp-btn{width:100%;margin-top:1.1rem;padding:.85rem;border:none;border-radius:14px;cursor:pointer;" +
-    "background:linear-gradient(135deg,#6d5bd0,#4c3f9e);color:#fff;font-size:1rem;font-weight:800;font-family:inherit;" +
+    "background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;font-size:1rem;font-weight:800;font-family:inherit;" +
     "transition:opacity .15s,transform .12s}" +
     ".chp-btn:hover:not(:disabled){transform:translateY(-1px)}" +
     ".chp-btn:disabled{opacity:.45;cursor:not-allowed}" +
     ".chp-note{font-size:.7rem;color:#9aa3b8;margin-top:.7rem;line-height:1.8}" +
     /* چیپ پروفایل در هدر */
-    ".chp-chip{display:flex;align-items:center;gap:.45rem;background:#efecfd;border:1px solid #e3e7f0;border-radius:999px;" +
+    ".chp-chip{display:flex;align-items:center;gap:.45rem;background:#eaf2fe;border:1px solid #e3e7f0;border-radius:999px;" +
     "padding:.25rem .8rem .25rem .45rem;cursor:pointer;font-family:inherit;transition:box-shadow .15s;align-self:center;height:40px}" +
-    ".chp-chip:hover{box-shadow:0 3px 12px rgba(109,91,208,.25)}" +
-    ".chp-chip img{width:30px;height:30px;border-radius:50%;object-fit:cover;background:#dcd4f7}" +
-    ".chp-chip .chp-av-empty{width:30px;height:30px;border-radius:50%;background:#dcd4f7;display:flex;align-items:center;justify-content:center;color:#6d5bd0;font-size:.8rem}" +
-    ".chp-chip span{font-size:.78rem;font-weight:700;color:#4c3f9e;white-space:nowrap;max-width:120px;overflow:hidden;text-overflow:ellipsis}" +
+    ".chp-chip:hover{box-shadow:0 3px 12px rgba(59,130,246,.25)}" +
+    ".chp-chip img{width:30px;height:30px;border-radius:50%;object-fit:cover;background:#c9dcfa}" +
+    ".chp-chip .chp-av-empty{width:30px;height:30px;border-radius:50%;background:#c9dcfa;display:flex;align-items:center;justify-content:center;color:#3b82f6;font-size:.8rem}" +
+    ".chp-chip span{font-size:.78rem;font-weight:700;color:#2563eb;white-space:nowrap;max-width:120px;overflow:hidden;text-overflow:ellipsis}" +
     /* مودال اطلاعات پروفایل + مودال تغییر آواتار */
     ".chp-info-overlay{position:fixed;inset:0;z-index:99998;display:none;align-items:center;justify-content:center;background:rgba(16,26,48,.55);padding:1rem}" +
     ".chp-info-overlay.open{display:flex}" +
     ".chp-info-card{background:#fff;border-radius:20px;max-width:380px;width:100%;padding:1.6rem;text-align:center;font-family:inherit;" +
     "max-height:92vh;overflow-y:auto;scrollbar-width:none}" +
     ".chp-info-card::-webkit-scrollbar{display:none}" +
-    ".chp-info-card img{width:76px;height:76px;border-radius:50%;object-fit:cover;border:3px solid #efecfd;margin-bottom:.6rem}" +
+    ".chp-info-card img{width:76px;height:76px;border-radius:50%;object-fit:cover;border:3px solid #eaf2fe;margin-bottom:.6rem}" +
     ".chp-info-card h3{margin:0 0 .2rem;color:#17203a;font-size:1.05rem}" +
     ".chp-info-card p{color:#6b7590;font-size:.78rem;line-height:2;margin:.4rem 0 1rem}" +
-    ".chp-info-card p b{color:#4c3f9e}" +
+    ".chp-info-card p b{color:#2563eb}" +
     ".chp-info-actions{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap}" +
-    ".chp-info-close{padding:.6rem 1.6rem;border:none;border-radius:12px;background:linear-gradient(135deg,#6d5bd0,#4c3f9e);" +
+    ".chp-info-close{padding:.6rem 1.6rem;border:none;border-radius:12px;background:linear-gradient(135deg,#3b82f6,#2563eb);" +
     "color:#fff;font-weight:700;font-family:inherit;cursor:pointer;font-size:.85rem;transition:transform .12s}" +
     ".chp-info-close:hover{transform:translateY(-1px)}" +
     ".chp-info-close:disabled{opacity:.45;cursor:not-allowed}" +
-    ".chp-info-change{padding:.6rem 1.4rem;border:1.5px solid #6d5bd0;border-radius:12px;background:#fff;color:#4c3f9e;" +
+    ".chp-info-change{padding:.6rem 1.4rem;border:1.5px solid #3b82f6;border-radius:12px;background:#fff;color:#2563eb;" +
     "font-weight:700;font-family:inherit;cursor:pointer;font-size:.85rem;transition:background .12s,transform .12s}" +
-    ".chp-info-change:hover{background:#f4f1fe;transform:translateY(-1px)}" +
+    ".chp-info-change:hover{background:#eff5ff;transform:translateY(-1px)}" +
+    ".chp-info-logout{border-color:rgba(224,82,82,.55);color:var(--danger,#e05252)}" +
+    ".chp-info-logout:hover{background:#fdf1f1}" +
     ".chp-av-cancel{background:none;border:none;color:#9aa3b8;font-family:inherit;font-size:.75rem;margin-top:.7rem;cursor:pointer;text-decoration:underline}" +
     "@media(max-width:480px){.chp-card{padding:1.3rem 1rem}.chp-avatars{grid-template-columns:repeat(4,1fr);gap:.45rem}" +
     ".chp-info-card{padding:1.3rem 1rem}}";
@@ -558,7 +560,7 @@ window.ChessHubProfile = (function () {
     ov.className = "chp-info-overlay open";
     const av = _profile.avatar
       ? '<img src="' + esc(_profile.avatar) + '" alt="">'
-      : '<div class="chp-av-empty" style="width:76px;height:76px;border-radius:50%;background:#dcd4f7;display:flex;align-items:center;justify-content:center;margin:0 auto .6rem"><i class="fas fa-user" style="color:#6d5bd0;font-size:1.6rem"></i></div>';
+      : '<div class="chp-av-empty" style="width:76px;height:76px;border-radius:50%;background:#c9dcfa;display:flex;align-items:center;justify-content:center;margin:0 auto .6rem"><i class="fas fa-user" style="color:#3b82f6;font-size:1.6rem"></i></div>';
     ov.innerHTML =
       '<div class="chp-info-card">' +
       av +
@@ -567,6 +569,10 @@ window.ChessHubProfile = (function () {
       '<div class="chp-info-actions">' +
       '<button class="chp-info-close">باشه</button>' +
       '<button class="chp-info-change" id="chpInfoAv"><i class="fas fa-sync-alt"></i> تغییر آواتار</button>' +
+      // دکمهٔ خروج از حساب — فقط وقتی نشست فعال دارد (انتقال مستقیم به صفحهٔ ورود)
+      (window.ChessHubAuth && typeof ChessHubAuth.isLoggedIn === "function" && ChessHubAuth.isLoggedIn()
+        ? '<button class="chp-info-change chp-info-logout" id="chpLogoutBtn"><i class="fas fa-right-from-bracket"></i> خروج از حساب</button>'
+        : "") +
       "</div>" +
       "</div>";
     document.body.appendChild(ov);
@@ -575,6 +581,10 @@ window.ChessHubProfile = (function () {
       if (e.target.id === "chpInfoAv" || (e.target.parentElement && e.target.parentElement.id === "chpInfoAv")) {
         ov.remove();
         openAvatarChange();
+      }
+      if (e.target.id === "chpLogoutBtn" || (e.target.parentElement && e.target.parentElement.id === "chpLogoutBtn")) {
+        ov.remove();
+        if (window.ChessHubAuth && typeof ChessHubAuth.logout === "function") ChessHubAuth.logout();
       }
     });
   }

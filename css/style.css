@@ -1,89 +1,24 @@
 /* ============================================================
    ♛ ChessHub — Pro Edition
    فایل استایل واحد کل سایت (همه‌ی صفحات از این استفاده می‌کنند)
-   ساختار: ریست → هدر/فوتر → هیرو/آمار → کارت‌ها → تخته → پازل
+   ساختار: هدر/فوتر → هیرو/آمار → کارت‌ها → تخته → پازل
            → مودال ترفیع → تنظیمات → ۲۹ تم → انیمیشن → ریسپانسیو
+   پالت رنگی، فونت و قواعد پایهٔ تمام‌صفحه در «css/theme.css» است
+   (منبع واحد مشترک با صفحهٔ ورود) — اینجا فقط چیدمان صفحات است.
    ============================================================ */
-
-/* ---------- ۱) ریست و متغیرها ---------- */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Vazir", Vazirmatn, Tahoma, sans-serif;
-}
-
-:root {
-  --primary: #1e2a44;
-  --primary-dark: #101a30;
-  --primary-light: #33436b;
-  --secondary: #f4f6fb;
-  --accent: #6d5bd0;
-  --accent-dark: #4c3f9e;
-  --accent-light: #a89bf0;
-  --accent-soft: #efecfd;
-  --gold: #d9a441;
-  --gold-soft: #fdf3e0;
-  --text-dark: #17203a;
-  --text-light: #6b7590;
-  --success: #2f9e6e;
-  --success-dark: #26825a;
-  --danger: #e05252;
-  --warning: #d69e2e;
-  --purple: #805ad5;
-  --border: #e3e7f0;
-
-  --shadow-sm: 0 1px 2px 0 rgba(23, 32, 58, 0.05), 0 1px 6px rgba(23, 32, 58, 0.04);
-  --shadow-md: 0 6px 16px -4px rgba(23, 32, 58, 0.12), 0 2px 5px rgba(23, 32, 58, 0.06);
-  --shadow-lg: 0 14px 34px -8px rgba(23, 32, 58, 0.18), 0 5px 12px rgba(23, 32, 58, 0.07);
-  --shadow-board: 0 14px 30px rgba(16, 26, 48, 0.22), 0 4px 10px rgba(16, 26, 48, 0.14);
-
-  --radius-xl: 20px;
-  --radius-lg: 14px;
-  --radius-md: 10px;
-  --radius-sm: 8px;
-  --board-light: #f0d9b5;
-  --board-dark: #b58863;
-  --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  background:
-    radial-gradient(1200px 400px at 85% -100px, rgba(109, 91, 208, 0.07), transparent 60%),
-    radial-gradient(900px 380px at 5% -80px, rgba(217, 164, 65, 0.06), transparent 60%),
-    #eef1f8;
-  color: var(--text-dark);
-  line-height: 1.6;
-  direction: rtl;
-  padding: 1rem;
-  min-height: 100vh;
-  font-weight: 500;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-a { text-decoration: none; }
-img { max-width: 100%; }
-button { font-family: inherit; }
-
-::selection {
-  background: var(--accent);
-  color: #fff;
-}
 
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+/* ---------- تمام‌عرض: استفاده از تمام عرض صفحه ---------- */
+.container {
+  max-width: 100%;
+  margin: 0;
+  width: 100%;
+  padding-inline: clamp(0.6rem, 2vw, 1.6rem);
 }
 
 /* اسکرول‌بار: به مرورگر سپرده شده است (استایل سفارشی نداریم)؛
@@ -144,7 +79,7 @@ button { font-family: inherit; }
 
 .logo h1 i {
   color: var(--accent);
-  filter: drop-shadow(0 2px 5px rgba(109, 91, 208, 0.4));
+  filter: drop-shadow(0 2px 5px rgba(59, 130, 246, 0.4));
   -webkit-text-fill-color: var(--accent);
 }
 
@@ -209,9 +144,9 @@ button { font-family: inherit; }
 }
 
 .nav-list li a.active {
-  background: linear-gradient(135deg, var(--accent-soft), rgba(168, 155, 240, 0.18));
+  background: linear-gradient(135deg, var(--accent-soft), rgba(147, 197, 253, 0.25));
   color: var(--accent-dark);
-  box-shadow: inset 0 0 0 1px rgba(109, 91, 208, 0.22);
+  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.22);
 }
 
 .dropdown { position: relative; }
@@ -328,9 +263,9 @@ button { font-family: inherit; }
    ============================================ */
 .app-hero {
   background:
-    radial-gradient(700px 300px at 90% -60px, rgba(168, 155, 240, 0.22), transparent 60%),
-    radial-gradient(560px 260px at 8% 110%, rgba(217, 164, 65, 0.14), transparent 60%),
-    linear-gradient(135deg, #101a30 0%, #1e2a44 55%, #2b2f57 100%);
+    radial-gradient(700px 300px at 90% -60px, rgba(59, 130, 246, 0.2), transparent 60%),
+    radial-gradient(560px 260px at 8% 110%, rgba(59, 130, 246, 0.12), transparent 60%),
+    linear-gradient(135deg, #0a1f42 0%, #0e2a55 55%, #16345f 100%);
   border-radius: var(--radius-xl);
   padding: 2rem 1.5rem;
   margin-bottom: 1.4rem;
@@ -368,7 +303,7 @@ button { font-family: inherit; }
   right: -20%;
   width: 70%;
   height: 220%;
-  background: radial-gradient(circle, rgba(168, 155, 240, 0.16) 0%, transparent 65%);
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.14) 0%, transparent 65%);
   pointer-events: none;
 }
 
@@ -386,7 +321,7 @@ button { font-family: inherit; }
 }
 
 .app-hero h1 .highlight {
-  color: #f3c96e;
+  color: var(--accent-light);
   position: relative;
 }
 
@@ -398,7 +333,7 @@ button { font-family: inherit; }
   bottom: 2px;
   height: 3px;
   border-radius: 3px;
-  background: rgba(243, 201, 110, 0.55);
+  background: rgba(147, 197, 253, 0.6);
 }
 
 .app-hero p {
@@ -437,7 +372,7 @@ button { font-family: inherit; }
 .app-hero .btn-primary {
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
   color: #fff;
-  box-shadow: 0 4px 0 var(--accent-dark), 0 8px 18px rgba(109, 91, 208, 0.4);
+  box-shadow: 0 4px 0 var(--accent-dark), 0 8px 18px rgba(59, 130, 246, 0.4);
 }
 
 .app-hero .btn-primary:hover {
@@ -529,10 +464,10 @@ button { font-family: inherit; }
   font-weight: 600;
 }
 
-.stat-card:nth-child(1) .icon { color: var(--warning); background: #fffbeb; }
-.stat-card:nth-child(2) .icon { color: var(--accent); background: var(--accent-soft); }
-.stat-card:nth-child(3) .icon { color: var(--success); background: #f0fff4; }
-.stat-card:nth-child(4) .icon { color: var(--purple); background: #faf5ff; }
+.stat-card:nth-child(1) .icon { color: var(--accent); background: var(--accent-soft); }
+.stat-card:nth-child(2) .icon { color: var(--primary); background: #e8edf6; }
+.stat-card:nth-child(3) .icon { color: var(--accent-dark); background: var(--accent-soft); }
+.stat-card:nth-child(4) .icon { color: var(--primary-light); background: #e8edf6; }
 
 /* ============================================
    ۶) گرید اصلی و کارت‌ها
@@ -581,13 +516,13 @@ button { font-family: inherit; }
   background: var(--accent);
   color: white;
   border: 1px solid var(--accent-dark);
-  box-shadow: 0 4px 0 var(--accent-dark), 0 4px 12px rgba(109, 91, 208, 0.35);
+  box-shadow: 0 4px 0 var(--accent-dark), 0 4px 12px rgba(59, 130, 246, 0.35);
 }
 
 .btn-primary:hover {
   background: #7f70e0;
   transform: translateY(-1px);
-  box-shadow: 0 5px 0 var(--accent-dark), 0 6px 15px rgba(109, 91, 208, 0.4);
+  box-shadow: 0 5px 0 var(--accent-dark), 0 6px 15px rgba(59, 130, 246, 0.4);
 }
 
 .btn-primary:active {
@@ -596,14 +531,14 @@ button { font-family: inherit; }
 }
 
 .btn-hint {
-  background: #fffbeb;
-  border-color: #fbd38d;
-  color: #744210;
+  background: var(--accent-soft);
+  border-color: var(--blue-border-tint);
+  color: var(--primary);
 }
 
 .btn-hint:hover {
-  background: #feebc8;
-  border-color: #d69e2e;
+  background: #dbe9fd;
+  border-color: var(--accent-light);
 }
 
 .btn:disabled {
@@ -857,8 +792,8 @@ button { font-family: inherit; }
 /* 🎯 چیپ فعال: آیکن باید سفید شود وگرنه روی پس‌زمینه‌ی accent محو می‌شود */
 .chip.active i { color: #ffffff !important; }
 
-.chip.gold { background: #fffbeb; border-color: #fbd38d; }
-.chip.gold i { color: var(--warning); }
+.chip.gold { background: var(--accent-soft); border-color: var(--blue-border-tint); }
+.chip.gold i { color: var(--accent); }
 
 .daily-puzzle-card > p {
   font-size: 0.8rem;
@@ -914,7 +849,7 @@ button { font-family: inherit; }
 
 .message.success { background: #c6f6d5; color: #22543d; border-color: #9ae6b4; }
 .message.error { background: #fed7d7; color: #742a2a; border-color: #feb2b2; }
-.message.hint { background: #feebc8; color: #744210; border-color: #fbd38d; }
+.message.hint { background: var(--accent-soft); color: var(--primary); border-color: var(--blue-border-tint); }
 .message.info { background: #bee3f8; color: #2a4365; border-color: #90cdf4; }
 .message.lock { background: #fed7d7; color: #742a2a; border-color: #feb2b2; }
 .message.empty { background: transparent; border-color: transparent; }
@@ -988,7 +923,11 @@ button { font-family: inherit; }
   gap: 0.45rem;
 }
 
-.features-card h3 i { color: var(--warning); }
+.features-card h3 i { color: var(--accent); }
+
+/* کارت امکانات: توزیع یکنواخت ردیف‌ها در ارتفاع کارت (هم‌قد شدن با کارت کناری) */
+.features-card { display: flex; flex-direction: column; }
+.features-card .features-list { flex: 1; align-content: space-evenly; }
 
 .features-list {
   display: grid;
@@ -1102,7 +1041,7 @@ button { font-family: inherit; }
   gap: 0.4rem;
 }
 
-.btn-promo:hover { background: #7f70e0; transform: translateY(-1px); }
+.btn-promo:hover { background: var(--accent-dark); transform: translateY(-1px); }
 
 .btn-promo:active {
   transform: translateY(3px);
@@ -1110,14 +1049,14 @@ button { font-family: inherit; }
 }
 
 .btn-promo.accent {
-  background: var(--success);
-  box-shadow: 0 4px 0 var(--success-dark);
+  background: var(--primary);
+  box-shadow: 0 4px 0 var(--primary-dark);
   color: #fff;
 }
 
-.btn-promo.accent:hover { background: #48bb78; }
+.btn-promo.accent:hover { background: var(--primary-light); }
 
-.btn-promo.accent:active { box-shadow: 0 1px 0 var(--success-dark); }
+.btn-promo.accent:active { box-shadow: 0 1px 0 var(--primary-dark); }
 
 /* ============================================
    ۱۱) مودال ترفیع پیاده
@@ -1260,7 +1199,7 @@ button { font-family: inherit; }
 .theme-btn.active {
   border-color: var(--accent);
   background: var(--accent-soft);
-  box-shadow: 0 0 0 3px rgba(109, 91, 208, 0.2);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
 .theme-btn .theme-preview {
@@ -1331,7 +1270,7 @@ button { font-family: inherit; }
 .piece-btn.active {
   border-color: var(--accent);
   background: var(--accent-soft);
-  box-shadow: 0 0 0 3px rgba(109, 91, 208, 0.2);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
 .piece-btn .piece-preview {
