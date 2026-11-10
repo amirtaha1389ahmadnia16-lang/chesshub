@@ -211,11 +211,14 @@ window.ChessHubProfile = (function () {
     ".chp-status{font-size:.75rem;margin-top:.35rem;min-height:1.2em;line-height:1.7}" +
     ".chp-status.free{color:#2f9e6e}.chp-status.taken{color:#e05252}.chp-status.invalid{color:#e05252}" +
     ".chp-status.offline{color:#c07d1a}" +
-    ".chp-avatars{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem}" +
-    ".chp-avatars img{width:100%;aspect-ratio:1;border-radius:14px;cursor:pointer;border:2.5px solid transparent;" +
-    "background:#eaf2fe;transition:transform .12s,border-color .12s;object-fit:cover;padding:2px;box-sizing:border-box}" +
+    ".chp-avatars{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-top:.9rem}" +
+    ".chp-avatars img{width:100%;aspect-ratio:1;border-radius:16px;cursor:pointer;border:3px solid transparent;" +
+    "background:#eaf2fe;transition:transform .12s,border-color .12s,box-shadow .12s;object-fit:cover;padding:3px;box-sizing:border-box}" +
     ".chp-avatars img:hover{transform:translateY(-2px)}" +
-    ".chp-avatars img.active{border-color:#3b82f6;box-shadow:0 4px 14px rgba(59,130,246,.35)}" +
+    ".chp-avatars img.active{border-color:#3b82f6;transform:scale(1.06);box-shadow:0 8px 20px rgba(59,130,246,.4)}" +
+    /* پیش‌نمایش بزرگ آواتار انتخاب‌شده (مودال تغییر آواتار) */
+    ".chp-info-card img.chp-av-preview{width:96px;height:96px;margin:.2rem auto .9rem;border-radius:50%;" +
+    "border:3px solid #c9dcfa;box-shadow:0 10px 24px rgba(59,130,246,.28);background:#eaf2fe;object-fit:cover}" +
     ".chp-btn{width:100%;margin-top:1.1rem;padding:.85rem;border:none;border-radius:14px;cursor:pointer;" +
     "background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;font-size:1rem;font-weight:800;font-family:inherit;" +
     "transition:opacity .15s,transform .12s}" +
@@ -232,25 +235,19 @@ window.ChessHubProfile = (function () {
     /* مودال اطلاعات پروفایل + مودال تغییر آواتار */
     ".chp-info-overlay{position:fixed;inset:0;z-index:99998;display:none;align-items:center;justify-content:center;background:rgba(16,26,48,.55);padding:1rem}" +
     ".chp-info-overlay.open{display:flex}" +
-    ".chp-info-card{background:#fff;border-radius:20px;max-width:380px;width:100%;padding:1.6rem;text-align:center;font-family:inherit;" +
+    ".chp-info-card{background:#fff;border-radius:20px;max-width:410px;width:100%;padding:1.6rem;text-align:center;font-family:inherit;" +
     "max-height:92vh;overflow-y:auto;scrollbar-width:none}" +
     ".chp-info-card::-webkit-scrollbar{display:none}" +
     ".chp-info-card img{width:76px;height:76px;border-radius:50%;object-fit:cover;border:3px solid #eaf2fe;margin-bottom:.6rem}" +
     ".chp-info-card h3{margin:0 0 .2rem;color:#17203a;font-size:1.05rem}" +
-    ".chp-info-card p{color:#6b7590;font-size:.78rem;line-height:2;margin:.4rem 0 1rem}" +
-    ".chp-info-card p b{color:#2563eb}" +
     ".chp-info-actions{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap}" +
-    ".chp-info-close{padding:.6rem 1.6rem;border:none;border-radius:12px;background:linear-gradient(135deg,#3b82f6,#2563eb);" +
-    "color:#fff;font-weight:700;font-family:inherit;cursor:pointer;font-size:.85rem;transition:transform .12s}" +
-    ".chp-info-close:hover{transform:translateY(-1px)}" +
-    ".chp-info-close:disabled{opacity:.45;cursor:not-allowed}" +
     ".chp-info-change{padding:.6rem 1.4rem;border:1.5px solid #3b82f6;border-radius:12px;background:#fff;color:#2563eb;" +
     "font-weight:700;font-family:inherit;cursor:pointer;font-size:.85rem;transition:background .12s,transform .12s}" +
     ".chp-info-change:hover{background:#eff5ff;transform:translateY(-1px)}" +
     ".chp-info-logout{border-color:rgba(224,82,82,.55);color:var(--danger,#e05252)}" +
     ".chp-info-logout:hover{background:#fdf1f1}" +
     ".chp-av-cancel{background:none;border:none;color:#9aa3b8;font-family:inherit;font-size:.75rem;margin-top:.7rem;cursor:pointer;text-decoration:underline}" +
-    "@media(max-width:480px){.chp-card{padding:1.3rem 1rem}.chp-avatars{grid-template-columns:repeat(4,1fr);gap:.45rem}" +
+    "@media(max-width:480px){.chp-card{padding:1.3rem 1rem}.chp-avatars{grid-template-columns:repeat(4,1fr);gap:.6rem}" +
     ".chp-info-card{padding:1.3rem 1rem}}";
 
   function injectCSS() {
@@ -457,23 +454,25 @@ window.ChessHubProfile = (function () {
     card.setAttribute("role", "dialog");
     card.setAttribute("aria-modal", "true");
     card.setAttribute("aria-label", "تغییر آواتار");
+    let picked = _profile.avatar || "";
     card.innerHTML =
       "<h3>تغییر آواتار</h3>" +
-      '<p>نام کاربری <b>' + esc(_profile.name) + "</b> برای همیشه ثابت است — فقط تصویر پروفایلت را می‌توانی عوض کنی.</p>" +
+      /* پیش‌نمایش بزرگ آواتار انتخاب‌شده */
+      '<img class="chp-av-preview" id="chpAvPreview" src="' + (picked || window.chFb(_profile.name || "?")) + '" alt="">' +
       '<div class="chp-avatars" id="chpAvPick"></div>' +
-      '<div class="chp-info-actions" style="margin-top:1rem">' +
-      '<button class="chp-info-close" id="chpAvSave" disabled>ذخیره آواتار</button>' +
-      '<button class="chp-info-change" id="chpAvCancel">انصراف</button>' +
-      "</div>";
+      '<button class="chp-btn" id="chpAvSave" disabled><i class="fas fa-check"></i> ذخیره آواتار</button>' +
+      '<button class="chp-av-cancel" id="chpAvCancel">انصراف</button>';
     ov.appendChild(card);
     document.body.appendChild(ov);
 
-    let picked = _profile.avatar || "";
     const saveBtn = card.querySelector("#chpAvSave");
+    const previewImg = card.querySelector("#chpAvPreview");
+    avatarFallback(previewImg, _profile.name);
     buildAvatarGrid(card.querySelector("#chpAvPick"), {
       selected: picked,
       onSelect: function (src) {
         picked = src;
+        previewImg.src = src;
         saveBtn.disabled = picked === _profile.avatar;
       },
     });
@@ -565,9 +564,7 @@ window.ChessHubProfile = (function () {
       '<div class="chp-info-card">' +
       av +
       "<h3>" + esc(_profile.name) + "</h3>" +
-      "<p>این پروفایل توست — در <b>بازی آنلاین</b> (با ریتینگ)، و به‌عنوان نام نویسنده در <b>مقالات</b>، <b>دروس</b> و <b>گشایش‌ها</b> با همین نام نمایش داده می‌شود.<br>نام کاربری ثابت است؛ فقط آواتار قابل تغییر است.</p>" +
       '<div class="chp-info-actions">' +
-      '<button class="chp-info-close">باشه</button>' +
       '<button class="chp-info-change" id="chpInfoAv"><i class="fas fa-sync-alt"></i> تغییر آواتار</button>' +
       // دکمهٔ خروج از حساب — فقط وقتی نشست فعال دارد (انتقال مستقیم به صفحهٔ ورود)
       (window.ChessHubAuth && typeof ChessHubAuth.isLoggedIn === "function" && ChessHubAuth.isLoggedIn()
@@ -577,7 +574,7 @@ window.ChessHubProfile = (function () {
       "</div>";
     document.body.appendChild(ov);
     ov.addEventListener("click", function (e) {
-      if (e.target === ov || e.target.classList.contains("chp-info-close")) ov.remove();
+      if (e.target === ov) ov.remove();
       if (e.target.id === "chpInfoAv" || (e.target.parentElement && e.target.parentElement.id === "chpInfoAv")) {
         ov.remove();
         openAvatarChange();

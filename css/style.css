@@ -18,6 +18,8 @@
   max-width: 100%;
   margin: 0;
   width: 100%;
+  /* فاصلهٔ بالای هدر — یکسان در همهٔ صفحات (موبایل هم کمتر ولی دیده می‌شود) */
+  padding-top: clamp(0.7rem, 1.6vw, 1.1rem);
   padding-inline: clamp(0.6rem, 2vw, 1.6rem);
 }
 
@@ -262,49 +264,23 @@
    ۴) بنر اصلی (app-hero)
    ============================================ */
 .app-hero {
-  background:
-    radial-gradient(700px 300px at 90% -60px, rgba(59, 130, 246, 0.2), transparent 60%),
-    radial-gradient(560px 260px at 8% 110%, rgba(59, 130, 246, 0.12), transparent 60%),
-    linear-gradient(135deg, #0a1f42 0%, #0e2a55 55%, #16345f 100%);
+  /* همان پس‌زمینهٔ صفحهٔ ورود — از متغیرهای مشترک theme.css */
+  background-color: var(--gray-bg);
+  background-image: var(--checker-pattern);
+  background-size: var(--checker-size);
   border-radius: var(--radius-xl);
-  padding: 2rem 1.5rem;
+  padding: 2.2rem 1.5rem;
   margin-bottom: 1.4rem;
   text-align: center;
-  color: #fff;
+  color: var(--blue-dark);
   position: relative;
   overflow: hidden;
-  box-shadow: var(--shadow-lg);
-  border: 1px solid #2b3552;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--gray-border);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-}
-
-/* واترمارک مهره وزیر در پس‌زمینه */
-.app-hero::after {
-  content: "\f445";
-  font-family: "Font Awesome 6 Free";
-  font-weight: 900;
-  position: absolute;
-  left: -1.5rem;
-  bottom: -3.2rem;
-  font-size: 12rem;
-  line-height: 1;
-  color: rgba(255, 255, 255, 0.05);
-  pointer-events: none;
-  transform: rotate(-12deg);
-}
-
-.app-hero::before {
-  content: "";
-  position: absolute;
-  top: -60%;
-  right: -20%;
-  width: 70%;
-  height: 220%;
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.14) 0%, transparent 65%);
-  pointer-events: none;
 }
 
 .app-hero h1 {
@@ -321,7 +297,7 @@
 }
 
 .app-hero h1 .highlight {
-  color: var(--accent-light);
+  color: var(--blue-light);
   position: relative;
 }
 
@@ -333,17 +309,17 @@
   bottom: 2px;
   height: 3px;
   border-radius: 3px;
-  background: rgba(147, 197, 253, 0.6);
+  background: rgba(59, 130, 246, 0.45);
 }
 
 .app-hero p {
   font-size: clamp(0.85rem, 1.6vw, 1rem);
-  opacity: 0.82;
+  color: var(--gray-text);
   max-width: 560px;
   margin: 0 auto;
   position: relative;
   z-index: 1;
-  font-weight: 400;
+  font-weight: 500;
 }
 
 .app-hero .hero-buttons {
@@ -386,14 +362,14 @@
 }
 
 .app-hero .btn-outline {
-  background: rgba(255, 255, 255, 0.06);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: var(--white);
+  color: var(--blue-dark);
+  border: 1px solid var(--gray-border);
 }
 
 .app-hero .btn-outline:hover {
-  background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(255, 255, 255, 0.55);
+  background: var(--blue-tint);
+  border-color: var(--blue-light);
   transform: translateY(-1px);
 }
 
@@ -557,15 +533,6 @@
 /* ============================================
    ۷) تخته شطرنج
    ============================================ */
-.board-container {
-  width: 100%;
-  max-width: 100%;
-  margin: 0 auto 0.9rem;
-  background: linear-gradient(145deg, #2a3441, #1a202c);
-  padding: 9px;
-  border-radius: 14px;
-  box-shadow: var(--shadow-board);
-}
 
 #chessboard, .chessboard, #gameBoard, #variantBoard, #trapBoard {
   direction: ltr !important;
@@ -731,50 +698,8 @@
 }
 
 /* ============================================
-   ۸) رابط پازل روزانه
+   ۸) چیپ‌ها و پیام‌های سیستمی (مشترک بین صفحات)
    ============================================ */
-.daily-puzzle-card { text-align: center; }
-
-.puzzle-card-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  margin-bottom: 0.35rem;
-}
-
-.daily-puzzle-card h2 {
-  color: var(--primary-dark);
-  font-size: 1.12rem;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-}
-
-.daily-puzzle-card h2 i { color: var(--accent); }
-
-.puzzle-date {
-  font-size: 0.66rem;
-  font-weight: 700;
-  color: var(--text-light);
-  background: var(--secondary);
-  border: 1px solid var(--border);
-  padding: 0.22rem 0.65rem;
-  border-radius: 99px;
-  white-space: nowrap;
-}
-
-.puzzle-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  justify-content: center;
-  margin-bottom: 0.65rem;
-  min-height: 24px;
-}
-
 .chip {
   display: inline-flex;
   align-items: center;
@@ -794,44 +719,6 @@
 
 .chip.gold { background: var(--accent-soft); border-color: var(--blue-border-tint); }
 .chip.gold i { color: var(--accent); }
-
-.daily-puzzle-card > p {
-  font-size: 0.8rem;
-  color: var(--text-light);
-  margin-bottom: 0.75rem;
-}
-
-.daily-puzzle-card > p strong { color: var(--accent); }
-
-.puzzle-progress {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  margin: 0.9rem 0 0.8rem;
-}
-
-.puzzle-progress-bar {
-  flex: 1;
-  height: 8px;
-  background: #e2e8f0;
-  border-radius: 99px;
-  overflow: hidden;
-}
-
-.puzzle-progress-fill {
-  height: 100%;
-  width: 0;
-  background: linear-gradient(90deg, var(--accent), var(--accent-light));
-  border-radius: 99px;
-  transition: width 0.45s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.puzzle-progress-text {
-  font-size: 0.67rem;
-  font-weight: 700;
-  color: var(--text-light);
-  white-space: nowrap;
-}
 
 /* پیام‌های سیستم */
 .message {
@@ -853,60 +740,6 @@
 .message.info { background: #bee3f8; color: #2a4365; border-color: #90cdf4; }
 .message.lock { background: #fed7d7; color: #742a2a; border-color: #feb2b2; }
 .message.empty { background: transparent; border-color: transparent; }
-
-/* جعبه پیروزی پس از حل پازل */
-.puzzle-solved {
-  display: none;
-  margin-top: 0.9rem;
-  background: linear-gradient(135deg, #f0fff4, #e6ffed);
-  border: 1px solid #9ae6b4;
-  border-radius: var(--radius-md);
-  padding: 0.9rem 1rem;
-  text-align: right;
-}
-
-.puzzle-solved.show {
-  display: block;
-  animation: fadeUp 0.4s ease both;
-}
-
-.puzzle-solved .solved-title {
-  font-weight: 800;
-  color: #22543d;
-  font-size: 0.9rem;
-  margin-bottom: 0.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.puzzle-solved .solved-title i { color: var(--warning); }
-
-.puzzle-solved .solved-stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  margin-bottom: 0.6rem;
-}
-
-.puzzle-solved .solved-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.74rem;
-  font-weight: 700;
-  color: var(--accent);
-  background: #fff;
-  border: 1px solid var(--border);
-  padding: 0.4rem 0.9rem;
-  border-radius: 99px;
-  transition: var(--transition-smooth);
-}
-
-.puzzle-solved .solved-link:hover {
-  background: var(--accent-soft);
-  border-color: var(--accent-light);
-}
 
 /* ============================================
    ۹) کارت امکانات
@@ -1546,7 +1379,6 @@
   }
 
   .card { padding: 1.2rem; }
-  .board-container { padding: 7px; border-radius: 12px; }
 
   .features-list { gap: 0.5rem; }
   .feature i { font-size: 1.25rem; }
@@ -1609,9 +1441,6 @@
 
   .main-card-grid { gap: 0.8rem; }
   .card { padding: 1rem; border-radius: var(--radius-md); }
-
-  .puzzle-card-head { justify-content: center; }
-  .puzzle-date { display: none; }
 
   .features-list { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
   .feature { padding: 0.65rem 0.2rem; }

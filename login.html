@@ -12,7 +12,7 @@
     <link href="fonts/vazir/font-face.css" rel="stylesheet" />
     <link rel="stylesheet" href="lib/fontawesome/all.min.css" />
     <!-- پالت/فونت/قواعد پایه از منبع واحد مشترک کل سایت -->
-    <link rel="stylesheet" href="css/theme.css?v=9.2" />
+    <link rel="stylesheet" href="css/theme.css?v=9.3" />
     <style>
       * { box-sizing: border-box; }
       html, body { margin: 0; padding: 0; }
@@ -26,30 +26,13 @@
         justify-content: center;
         padding: 1.2rem;
         background-color: var(--gray-bg);
-        background-image:
-          conic-gradient(
-            rgba(59, 130, 246, 0.055) 90deg,
-            transparent 90deg 180deg,
-            rgba(59, 130, 246, 0.055) 180deg 270deg,
-            transparent 270deg
-          );
-        background-size: 64px 64px;
+        /* همان الگوی شطرنجی مشترک — از متغیرهای theme.css */
+        background-image: var(--checker-pattern);
+        background-size: var(--checker-size);
         color: var(--blue-dark);
         position: relative;
         overflow-x: hidden;
       }
-      /* تزئین پس‌زمینه — فقط بصری، بدون متن */
-      .deco {
-        position: fixed;
-        color: rgba(59, 130, 246, 0.07);
-        font-size: 22rem;
-        line-height: 1;
-        pointer-events: none;
-        user-select: none;
-        z-index: 0;
-      }
-      .deco.d2 { bottom: -7rem; left: -3rem; transform: rotate(12deg); font-size: 18rem; }
-
       .auth-card {
         position: relative;
         z-index: 1;
@@ -261,14 +244,10 @@
       @media (max-width: 480px) {
         body { padding: 0.8rem; align-items: flex-start; }
         .auth-card { padding: 1.4rem 1.1rem 1.2rem; margin-top: 4vh; }
-        .deco { font-size: 13rem; }
-        .deco.d2 { bottom: -4rem; left: -2.5rem; }
       }
     </style>
   </head>
   <body>
-    <i class="fas fa-chess-king deco d2" aria-hidden="true"></i>
-
     <main class="auth-card">
       <div class="brand">
         <span class="brand-mark"><i class="fas fa-chess-king"></i></span>
@@ -396,7 +375,7 @@
       </div>
     </main>
 
-    <script src="js/auth.js?v=9.2"></script>
-    <script src="js/login.js?v=9.2"></script>
+    <script src="js/auth.js?v=9.3"></script>
+    <script src="js/login.js?v=9.3"></script>
   </body>
 </html>
