@@ -6,17 +6,17 @@
     <meta name="description" content="مرور حرفه‌ای بازی شطرنج با انجین Stockfish — تحلیل حرکت به حرکت" />
     <title>ChessHub | مرور بازی</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%E2%99%9B%3C/text%3E%3C/svg%3E" />
-    <link rel="stylesheet" href="css/theme.css?v=10.0" />
+    <link rel="stylesheet" href="css/theme.css?v=10.7" />
     <link rel="stylesheet" href="lib/fontawesome/all.min.css" />
     <link href="fonts/vazir/font-face.css" rel="stylesheet" />
-    <link rel="stylesheet" href="css/style.css?v=10.0" />
-    <link rel="stylesheet" href="css/gamereview.css?v=10.0" />
+    <link rel="stylesheet" href="css/style.css?v=10.7" />
+    <link rel="stylesheet" href="css/gamereview.css?v=10.7" />
     <script src="lib/chess.min.js"></script>
   </head>
   <!-- جهت اسکرول‌بار: html با جهت ltr → اسکرول‌بار سمت راست؛
        محتوا با body dir=rtl → چیدمان طبیعی فارسی -->
   <body dir="rtl" class="grev-body">
-    <!-- نوار بالا — دکمهٔ بستن فقط سمت چپ -->
+    <!-- نوار بالا — عنوان مرور (بدون دکمهٔ بازگشت؛ خروج با دکمهٔ مرورگر) -->
     <header class="grev-topbar">
       <div class="grev-title">
         <i class="fas fa-magnifying-glass-chart"></i>
@@ -25,9 +25,6 @@
           <span id="grSub"></span>
         </div>
       </div>
-      <button class="grev-close" id="grCloseBtn">
-        <i class="fas fa-arrow-right"></i> بازگشت
-      </button>
     </header>
 
     <main class="grev-page">
@@ -84,19 +81,19 @@
           <div class="gr-graph-wrap"><canvas id="grGraph" height="90"></canvas></div>
           <div class="gr-moves" id="grMoves"></div>
           <div class="gr-actions">
-            <button class="gr-btn" id="grCopyPgn"><i class="fas fa-copy"></i> کپی PGN</button>
-            <button class="gr-btn" id="grDlPgn"><i class="fas fa-download"></i> دانلود PGN</button>
+            <button class="btn-pgn" id="grCopyPgn"><i class="fas fa-copy"></i> کپی PGN</button>
+            <button class="btn-pgn soft" id="grDlPgn"><i class="fas fa-download"></i> دانلود PGN</button>
           </div>
         </div>
       </div>
     </main>
 
-    <script src="js/script.js?v=10.0"></script>
-    <script src="js/profile.js?v=10.0"></script>
-    <script src="js/auth.js?v=10.0"></script>
-    <script src="js/engine-core.js?v=10.0"></script>
-    <script src="js/board-ui.js?v=10.0"></script>
-    <script src="js/gamereview.js?v=10.0"></script>
+    <script src="js/script.js?v=10.7"></script>
+    <script src="js/profile.js?v=10.7"></script>
+    <script src="js/auth.js?v=10.7"></script>
+    <script src="js/engine-core.js?v=10.7"></script>
+    <script src="js/board-ui.js?v=10.7"></script>
+    <script src="js/gamereview.js?v=10.7"></script>
     <script>
       (function () {
         "use strict";

@@ -11,6 +11,9 @@
          خروجی: { move:{from,to,promotion}|null,
                   score:{type:'cp'|'mate',value}|null,   ← از دید نوبت‌دار
                   pv:[uci...], bestUci }
+     ChessEngine.stream(fen, opts, onUpdate, onDone) → {stop()}
+         تحلیل بی‌نهایت (go infinite) با به‌روزرسانی لحظه‌ای خطوط MultiPV
+         onUpdate({depth, lines:{1:{score,pv},2:...}, score, pv})
      ChessEngine.isAvailable() / isReady()
      ChessEngine.cpOf(score)        ← تبدیل به سانتی‌پیاده (مات هم لحاظ می‌شود)
      ChessEngine.onReady(cb)
@@ -147,13 +150,41 @@
       const sm = line.match(/score (cp|mate) (-?\d+)/);
       if (sm) job.score = { type: sm[1], value: parseInt(sm[2], 10) };
       const pi = line.indexOf(" pv ");
+      let pv = null;
       if (pi > 0) {
-        const pv = line
+        pv = line
           .slice(pi + 4)
           .trim()
           .split(/\s+/)
           .filter(function (t) { return /^[a-h][1-8][a-h][1-8][qrbn]?$/.test(t); });
         if (pv.length) job.pv = pv;
+      }
+      // 🔴 تحلیل استریمی: عمق + هر خط MultiPV به‌صورت زنده گزارش می‌شود
+      if (job.streaming) {
+        const dm = line.match(/\bdepth (\d+)/);
+        if (dm) job.lastDepth = parseInt(dm[1], 10);
+        const mp = line.match(/\bmultipv (\d+)/);
+        const idx = mp ? parseInt(mp[1], 10) : 1;
+        if (!job.lines) job.lines = {};
+        const prev = job.lines[idx] || {};
+        job.lines[idx] = {
+          multipv: idx,
+          depth: job.lastDepth || prev.depth || 0,
+          score: sm
+            ? { type: sm[1], value: parseInt(sm[2], 10) }
+            : prev.score || null,
+          pv: pv && pv.length ? pv : prev.pv || [],
+        };
+        if (job.onUpdate) {
+          try {
+            job.onUpdate({
+              depth: job.lastDepth || 0,
+              lines: job.lines,
+              score: job.score,
+              pv: job.pv,
+            });
+          } catch (e) {}
+        }
       }
       return;
     }
@@ -176,6 +207,8 @@
           score: job.score || null,
           pv: job.pv || [],
           bestUci: move ? bm : null,
+          depth: job.lastDepth || 0,
+          lines: job.lines || null,
         });
       }
       pump();
@@ -198,6 +231,9 @@
     worker.postMessage("position fen " + job.fen);
     worker.postMessage(job.go);
     clearTimeout(watchdog);
+    // ⏱ سگ‌منت‌گارد فقط برای تحلیل‌های زمان‌دار؛ تحلیل استریمی «بی‌نهایت» است
+    // و نباید بعد از ۸ ثانیه کشته شود — با stop() کاربر/ناوبری تمام می‌شود.
+    if (job.streaming) return;
     watchdog = setTimeout(function () {
       const j = queue.shift();
       busy = false;
@@ -234,6 +270,43 @@
     });
   }
 
+  // تحلیل استریمی بی‌نهایت — هرچه کاربر صبر کند عمق بالاتر می‌رود؛
+  // هر خط MultiPV لحظه‌ای به onUpdate گزارش می‌شود. خروجی: {stop()}
+  function stream(fen, opts, onUpdate, onDone) {
+    opts = opts || {};
+    const handle = { stopped: false, _job: null, stop: null };
+    handle.stop = function () {
+      if (handle.stopped) return;
+      handle.stopped = true;
+      try { if (worker) worker.postMessage("stop"); } catch (e) {}
+    };
+    init();
+    if (typeof Worker === "undefined") {
+      if (onDone) onDone(null);
+      return handle;
+    }
+    const job = {
+      fen: fen,
+      go: "go infinite",
+      skill: opts.skill == null ? 20 : opts.skill,
+      multiPV: opts.multiPV || 3,
+      streaming: true,
+      onUpdate: onUpdate || null,
+      resolve: function (data) {
+        if (onDone) onDone(data);
+      },
+      score: null,
+      pv: [],
+      movetimeMs: 0,
+      lines: null,
+      lastDepth: 0,
+    };
+    handle._job = job;
+    queue.push(job);
+    pump();
+    return handle;
+  }
+
   // امتیاز انجین (از دید نوبت‌دار) → سانتی‌پیاده؛ مات هم فاصله‌اش لحاظ می‌شود
   function cpOf(score) {
     if (!score) return 0;
@@ -246,6 +319,7 @@
   window.ChessEngine = {
     init: init,
     ask: ask,
+    stream: stream,
     cpOf: cpOf,
     flush: flush,
     isReady: function () { return ready; },

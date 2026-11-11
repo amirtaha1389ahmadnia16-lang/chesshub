@@ -6,10 +6,10 @@
     <meta name="description" content="مقالات شطرنج ChessHub — آموزش، استراتژی، تاریخچه و نکات حرفه‌ای + انتشار مستقیم مقاله توسط کاربران" />
     <title>ChessHub | مقالات</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%E2%99%9B%3C/text%3E%3C/svg%3E" />
-    <link rel="stylesheet" href="css/theme.css?v=9.4" />
+    <link rel="stylesheet" href="css/theme.css?v=10.7" />
     <link rel="stylesheet" href="lib/fontawesome/all.min.css" />
     <link href="fonts/vazir/font-face.css" rel="stylesheet" />
-    <link rel="stylesheet" href="css/style.css?v=9.4" />
+    <link rel="stylesheet" href="css/style.css?v=10.7" />
     <style>
       .art-grid {
         display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -42,13 +42,15 @@
       .art-card .a-meta .a-read { color: var(--accent); display: inline-flex; align-items: center; gap: 0.25rem; }
       .art-card .a-meta .a-author { color: #059669; display: inline-flex; align-items: center; gap: 0.25rem; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-      /* خواندن مقاله */
+      /* خواندن مقاله — ظرف اسکرول ltr تا اسکرول‌بار سمت راست باشد
+         و جهت اسکرول در RTL برعکس نشود؛ محتوا rtl می‌ماند */
       .art-reader {
         position: fixed; inset: 0; background: #fff; z-index: 1200;
         transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        overflow-y: auto; direction: rtl;
+        overflow-y: auto; direction: ltr; overscroll-behavior: contain;
       }
       .art-reader.open { transform: translateX(0); }
+      .art-reader-head, .art-reader-body { direction: rtl; }
       .art-reader-head {
         position: sticky; top: 0; background: var(--primary-dark); color: #fff;
         padding: 0.9rem 1.3rem; display: flex; justify-content: space-between; align-items: center;
@@ -110,13 +112,14 @@
       }
       .btn-write:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(0,0,0,0.3); color: var(--primary-dark); }
 
-      /* ===== دفترچه نوشتن مقاله (تمام‌صفحه) ===== */
+      /* ===== دفترچه نوشتن مقاله (تمام‌صفحه) — ظرف اسکرول ltr ===== */
       .writer {
         position: fixed; inset: 0; background: #fff; z-index: 1250;
         transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        overflow-y: auto; direction: rtl;
+        overflow-y: auto; direction: ltr; overscroll-behavior: contain;
       }
       .writer.open { transform: translateX(0); }
+      .writer-head, .writer-body { direction: rtl; }
       .writer-head {
         position: sticky; top: 0; background: var(--primary-dark); color: #fff;
         padding: 0.9rem 1.3rem; display: flex; justify-content: space-between; align-items: center;
@@ -142,6 +145,15 @@
       }
       .w-field input:focus, .w-field select:focus, .w-field textarea:focus { border-color: var(--accent); background: #fff; }
       .w-field textarea { min-height: 320px; line-height: 2.1; }
+      /* پیش‌نمایش آیکن انتخاب‌شده — همان مجموعهٔ «گشایش همکاری» */
+      .w-icon-row { display: flex; align-items: center; gap: 0.6rem; }
+      .w-icon-row select { flex: 1; }
+      .w-icon-preview {
+        width: 46px; height: 46px; flex-shrink: 0; border-radius: 12px;
+        background: var(--accent-soft); color: var(--accent);
+        display: flex; align-items: center; justify-content: center; font-size: 1.15rem;
+        border: 1.5px solid var(--blue-border-tint);
+      }
       .w-hint {
         font-size: 0.68rem; color: var(--text-light); line-height: 2; background: #f8fafc;
         border-radius: var(--radius-sm); padding: 0.65rem 0.85rem; margin-top: 0.45rem;
@@ -241,6 +253,14 @@
           </div>
         </div>
         <div class="w-field">
+          <label>آیکن کارت مقاله</label>
+          <div class="w-icon-row">
+            <select id="wIcon"></select>
+            <span class="w-icon-preview" id="wIconPreview"><i class="fas fa-book-open"></i></span>
+          </div>
+          <div class="w-hint">آیکن کارت را از همان مجموعهٔ آیکن‌های «گشایش همکاری» انتخاب کن.</div>
+        </div>
+        <div class="w-field">
           <label>عنوان مقاله <span class="req">*</span></label>
           <input type="text" id="wTitle" maxlength="120" placeholder="مثلاً: راز حمله به شاه در پرتگاه وزیر" />
         </div>
@@ -270,11 +290,11 @@
       </div>
     </div>
 
-    <script src="js/script.js?v=9.4"></script>
+    <script src="js/script.js?v=10.7"></script>
     <script src="js/author.js"></script>
-    <script src="js/profile.js?v=9.4"></script>
-    <script src="js/auth.js?v=9.4"></script>
-    <script src="js/contrib-guide.js?v=9.4"></script>
+    <script src="js/profile.js?v=10.7"></script>
+    <script src="js/auth.js?v=10.7"></script>
+    <script src="js/contrib-guide.js?v=10.7"></script>
     <script>
       (function () {
         "use strict";
@@ -381,6 +401,48 @@
           },
         ];
 
+        // ═══════════ آیکن‌های «گشایش همکاری» — دقیقاً همان ۲۰ آیکن ═══════════
+        const COOP_ICONS = [
+          "fas fa-book-open",
+          "fas fa-chess-queen",
+          "fas fa-chess-king",
+          "fas fa-chess-rook",
+          "fas fa-chess-bishop",
+          "fas fa-chess-knight",
+          "fas fa-chess-pawn",
+          "fas fa-chess-board",
+          "fas fa-flag-checkered",
+          "fas fa-crown",
+          "fas fa-shield-alt",
+          "fas fa-bolt",
+          "fas fa-fire",
+          "fas fa-brain",
+          "fas fa-crosshairs",
+          "fas fa-bullseye",
+          "fas fa-graduation-cap",
+          "fas fa-puzzle-piece",
+          "fas fa-lightbulb",
+          "fas fa-star",
+        ];
+
+        function initIconSelect() {
+          const sel = $("wIcon");
+          if (!sel) return;
+          COOP_ICONS.forEach(function (ic) {
+            const o = document.createElement("option");
+            o.value = ic;
+            o.textContent = ic.replace("fas fa-", "").replace(/-/g, " ");
+            sel.appendChild(o);
+          });
+          sel.addEventListener("change", updateIconPreview);
+        }
+
+        function updateIconPreview() {
+          const el = $("wIconPreview");
+          if (!el) return;
+          el.innerHTML = '<i class="' + ($("wIcon").value || COOP_ICONS[0]) + '"></i>';
+        }
+
         // ═══════════ وضعیت ═══════════
         let communityArticles = []; // 🌍 مقالات عمومی کاربران (از سرور)
         let currentViewing = null;  // مقاله‌ی در حال خواندن
@@ -449,7 +511,7 @@
           card.className = "art-card" + (isCommunity ? " community" : "");
           card.innerHTML =
             '<div class="a-icon"><i class="fas ' +
-            escapeHtml(isCommunity ? a.icon || "fa-user-pen" : a.icon) +
+            escapeHtml(isCommunity ? a.icon || COOP_ICONS[0] : a.icon) +
             '"></i></div>' +
             "<h3>" + escapeHtml(a.title) + "</h3>" +
             "<p>" + escapeHtml(a.desc) + "</p>" +
@@ -557,6 +619,8 @@
             $("wAuthor").value = editingArticle.author || currentUser() || "";
             $("wAuthor").readOnly = true;
             $("wCat").value = editingArticle.category || "سایر";
+            $("wIcon").value = editingArticle.icon || COOP_ICONS[0];
+            updateIconPreview();
             $("wTitle").value = editingArticle.title || "";
             $("wDesc").value = editingArticle.desc || "";
             $("wBody").value = editingArticle.body || "";
@@ -565,6 +629,8 @@
             $("wAuthor").value =
               (window.ChessHubProfile && ChessHubProfile.name) || currentUser() || "";
             $("wAuthor").readOnly = true;
+            $("wIcon").value = COOP_ICONS[0];
+            updateIconPreview();
             $("wTitle").value = "";
             $("wDesc").value = "";
             $("wBody").value = "";
@@ -611,6 +677,7 @@
             const j = await CommunityHub.save("articles", action, editId, {
               title: title,
               category: $("wCat").value,
+              icon: $("wIcon").value || COOP_ICONS[0],
               desc: desc,
               body: body,
               author: author,
@@ -681,6 +748,7 @@
         }
 
         // ═══════════ شروع ═══════════
+        initIconSelect();
         renderArticles();
         refreshCommunity();
       })();

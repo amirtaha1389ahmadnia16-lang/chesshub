@@ -52,6 +52,9 @@
       flipped: false,
       destroyed: false,
       prevPieces: null,   // نقشهٔ مهره‌ها در رندر قبلی (برای انیمیشن)
+      engineArrows: [],   // فلش‌های برنامه (بهترین حرکت انجین و…)
+      userArrows: [],     // فلش‌های خودِ کاربر (کشیدن با کلیک راست)
+      arrowDrag: null,    // ژست کشیدن فلش با کلیک راست
     };
 
     function game() { return opts.getGame ? opts.getGame() : null; }
@@ -239,39 +242,61 @@
       if (x.selected !== undefined) { /* رندر با انتخاب بیرونی */ }
     }
 
-    /* ---------- فلش‌ها (SVG) ---------- */
+    /* ---------- فلش‌ها (SVG) ----------
+       دو لایه: فلش‌های برنامه (انجین) + فلش‌های کاربر (کلیک راست) */
     function squareToXY(name) {
       let file = name.charCodeAt(0) - 97;
       let rank = parseInt(name[1], 10) - 1;
       if (S.flipped) { file = 7 - file; rank = 7 - rank; }
       return { x: (file + 0.5) * 12.5, y: (7 - rank + 0.5) * 12.5 };
     }
-    function clearArrows() {
+    function drawOneArrow(a, isUser) {
+      const p1 = squareToXY(a.from);
+      const p2 = squareToXY(a.to);
+      const dx = p2.x - p1.x, dy = p2.y - p1.y;
+      const len = Math.sqrt(dx * dx + dy * dy) || 1;
+      const x1 = p1.x + (dx / len) * 2.6, y1 = p1.y + (dy / len) * 2.6;
+      const x2 = p2.x - (dx / len) * 2.2, y2 = p2.y - (dy / len) * 2.2;
+      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line.setAttribute("x1", x1); line.setAttribute("y1", y1);
+      line.setAttribute("x2", x2); line.setAttribute("y2", y2);
+      line.setAttribute("stroke", a.color || (isUser ? "rgba(56,161,105,0.85)" : "#38a169"));
+      line.setAttribute("stroke-width", isUser ? "2.1" : "1.9");
+      line.setAttribute("class", "arrow-line");
+      line.setAttribute("marker-end", "url(#ah)");
+      line.setAttribute("opacity", a.opacity || "0.88");
+      arrowsEl.appendChild(line);
+    }
+    function redrawArrows() {
       if (!arrowsEl) return;
       arrowsEl.innerHTML =
         '<defs><marker id="ah" markerWidth="4" markerHeight="4" refX="2.2" refY="2" orient="auto">' +
         '<path d="M0,0 L4,2 L0,4 z" fill="context-stroke"></path></marker></defs>';
+      S.engineArrows.forEach(function (a) { drawOneArrow(a, false); });
+      S.userArrows.forEach(function (a) { drawOneArrow(a, true); });
+      if (S.arrowDrag && S.arrowDrag.to && S.arrowDrag.to !== S.arrowDrag.from) {
+        drawOneArrow({ from: S.arrowDrag.from, to: S.arrowDrag.to, color: "rgba(56,161,105,0.6)" }, true);
+      }
+    }
+    function clearArrows() {
+      S.engineArrows = [];
+      redrawArrows();
     }
     function drawArrows(arrows) {
-      if (!arrowsEl) return;
-      clearArrows();
-      (arrows || []).forEach(function (a) {
-        const p1 = squareToXY(a.from);
-        const p2 = squareToXY(a.to);
-        const dx = p2.x - p1.x, dy = p2.y - p1.y;
-        const len = Math.sqrt(dx * dx + dy * dy) || 1;
-        const x1 = p1.x + (dx / len) * 2.6, y1 = p1.y + (dy / len) * 2.6;
-        const x2 = p2.x - (dx / len) * 2.2, y2 = p2.y - (dy / len) * 2.2;
-        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-        line.setAttribute("x1", x1); line.setAttribute("y1", y1);
-        line.setAttribute("x2", x2); line.setAttribute("y2", y2);
-        line.setAttribute("stroke", a.color || "#38a169");
-        line.setAttribute("stroke-width", "1.9");
-        line.setAttribute("class", "arrow-line");
-        line.setAttribute("marker-end", "url(#ah)");
-        line.setAttribute("opacity", "0.88");
-        arrowsEl.appendChild(line);
+      S.engineArrows = (arrows || []).slice();
+      redrawArrows();
+    }
+    function clearUserArrows() {
+      S.userArrows = [];
+      redrawArrows();
+    }
+    function toggleUserArrow(from, to) {
+      const i = S.userArrows.findIndex(function (a) {
+        return a.from === from && a.to === to;
       });
+      if (i >= 0) S.userArrows.splice(i, 1);
+      else S.userArrows.push({ from: from, to: to });
+      redrawArrows();
     }
 
     /* ---------- ترفیع ---------- */
@@ -376,7 +401,16 @@
     }
 
     function onPointerDown(e) {
-      if (S.press || S.destroyed) return;
+      if (S.destroyed) return;
+      // کشیدن فلش با کلیک راست — سبک لایچس/چس‌دات‌کام
+      if (e.pointerType === "mouse" && e.button === 2 && arrowsEl) {
+        const sqElR = e.target && e.target.closest ? e.target.closest(".square") : null;
+        if (!sqElR || !boardEl.contains(sqElR)) return;
+        e.preventDefault();
+        S.arrowDrag = { from: sqElR.dataset.square, to: null, pointerId: e.pointerId };
+        return;
+      }
+      if (S.press) return;
       if (e.pointerType === "mouse" && e.button !== 0) return;
       const sqEl = e.target && e.target.closest ? e.target.closest(".square") : null;
       if (!sqEl || !boardEl.contains(sqEl)) return;
@@ -409,6 +443,13 @@
     }
 
     function onPointerMove(e) {
+      // پیش‌نمایش زندهٔ فلش در حال کشیدن
+      if (S.arrowDrag) {
+        if (e.pointerId !== S.arrowDrag.pointerId) return;
+        S.arrowDrag.to = squareAt(e.clientX, e.clientY);
+        redrawArrows();
+        return;
+      }
       const p = S.press;
       if (!p || e.pointerId !== p.pointerId || p.consumed || S.destroyed) return;
       const dx = e.clientX - p.startX;
@@ -444,6 +485,23 @@
     }
 
     function onPointerUp(e) {
+      // پایان کشیدن فلش — کلیک راست روی همان خانه = پاک‌کردن فلش‌های کاربر
+      if (S.arrowDrag) {
+        if (e.pointerId !== undefined && e.pointerId !== S.arrowDrag.pointerId) return;
+        const drag = S.arrowDrag;
+        S.arrowDrag = null;
+        const to = squareAt(e.clientX, e.clientY) || drag.to;
+        if (!to || to === drag.from) {
+          clearUserArrows();
+        } else {
+          toggleUserArrow(drag.from, to);
+          if (opts.onArrow) {
+            try { opts.onArrow(drag.from, to); } catch (err) {}
+          }
+        }
+        redrawArrows();
+        return;
+      }
       const p = S.press;
       if (!p || e.pointerId !== p.pointerId || S.destroyed) return;
       S.press = null;
@@ -464,6 +522,11 @@
     }
 
     function onPointerCancel(e) {
+      if (S.arrowDrag && (!e || e.pointerId === undefined || e.pointerId === S.arrowDrag.pointerId)) {
+        S.arrowDrag = null;
+        redrawArrows();
+        return;
+      }
       const p = S.press;
       if (!p) return;
       if (e && e.pointerId !== undefined && e.pointerId !== p.pointerId) return;
@@ -487,7 +550,7 @@
     }
     boardEl.addEventListener("contextmenu", function (e) { e.preventDefault(); });
 
-    clearArrows();
+    redrawArrows();
 
     return {
       build: build,
@@ -498,10 +561,12 @@
       select: function (sq) { S.selected = sq; render({}); },
       drawArrows: drawArrows,
       clearArrows: clearArrows,
+      clearUserArrows: clearUserArrows,
       setSelectedExternal: function (sq) { S.selected = sq; },
       destroy: function () {
         S.destroyed = true;
         cancelPress();
+        S.arrowDrag = null;
       },
     };
   }

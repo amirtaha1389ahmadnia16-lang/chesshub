@@ -15,39 +15,45 @@
 window.ContribGuide = (function () {
   "use strict";
 
-  /* ---------------- استایل ---------------- */
+  /* ---------------- استایل — دقیقاً هم‌سبک کادر «ذخیره تنظیمات» (gh-dialog) ---------------- */
   const CSS =
     ".cgu-overlay{position:fixed;inset:0;z-index:99990;display:none;align-items:center;justify-content:center;" +
-    "background:rgba(16,26,48,.62);padding:1rem;font-family:inherit}" +
+    "background:rgba(16,26,48,.55);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);padding:1rem;font-family:inherit}" +
     ".cgu-overlay.open{display:flex}" +
-    ".cgu-card{background:#fff;border-radius:20px;max-width:680px;width:100%;max-height:88vh;display:flex;flex-direction:column;" +
-    "box-shadow:0 30px 80px rgba(0,0,0,.4);overflow:hidden}" +
-    ".cgu-head{display:flex;align-items:center;gap:.6rem;padding:1rem 1.3rem;" +
-    "background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff}" +
-    ".cgu-head i{font-size:1.2rem}" +
-    ".cgu-head h3{margin:0;font-size:1rem;font-weight:800;flex:1}" +
-    ".cgu-close{background:rgba(255,255,255,.18);border:none;color:#fff;width:34px;height:34px;border-radius:10px;" +
-    "cursor:pointer;font-size:1rem;flex-shrink:0}" +
-    ".cgu-close:hover{background:rgba(255,255,255,.32)}" +
-    ".cgu-body{padding:1.2rem 1.4rem 1.4rem;overflow-y:auto;text-align:right;color:#17203a;line-height:2.1;font-size:.85rem}" +
-    ".cgu-sec{margin-bottom:1.15rem}" +
+    ".cgu-card{background:#fff;border-radius:20px;max-width:640px;width:100%;max-height:88dvh;display:flex;flex-direction:column;" +
+    "box-shadow:0 14px 34px -8px rgba(14,42,85,.18),0 30px 80px rgba(0,0,0,.3);overflow:hidden;border:1px solid #dbe1ea;" +
+    "text-align:center;animation:cguIn .25s cubic-bezier(.4,0,.2,1) both}" +
+    "@keyframes cguIn{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}" +
+    ".cgu-head{padding:1.5rem 1.4rem 0;display:flex;flex-direction:column;align-items:center;gap:.7rem}" +
+    ".cgu-head .cgu-badge{width:60px;height:60px;border-radius:18px;display:flex;align-items:center;justify-content:center;" +
+    "background:var(--accent-soft,#eaf2fe);color:var(--accent,#3b82f6);font-size:1.5rem}" +
+    ".cgu-head h3{margin:0;font-size:1.05rem;font-weight:800;color:#0e2a55}" +
+    ".cgu-head .cgu-sub{margin:0;font-size:.78rem;color:#5b6577;font-weight:600;line-height:1.9}" +
+    ".cgu-close{position:absolute;top:14px;inset-inline-start:14px;background:#f1f5f9;border:none;color:#5b6577;" +
+    "width:34px;height:34px;border-radius:10px;cursor:pointer;font-size:.95rem;display:flex;align-items:center;justify-content:center}" +
+    ".cgu-close:hover{background:#fef2f2;color:#e05252}" +
+    ".cgu-card{position:relative}" +
+    ".cgu-body{padding:1.1rem 1.5rem 1.2rem;overflow-y:auto;text-align:right;color:#17203a;line-height:2.1;font-size:.83rem}" +
+    ".cgu-sec{background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:.85rem 1rem;margin-bottom:.8rem}" +
     ".cgu-sec:last-child{margin-bottom:0}" +
-    ".cgu-sec h4{margin:0 0 .45rem;font-size:.92rem;font-weight:800;color:#2563eb;display:flex;align-items:center;gap:.4rem}" +
-    ".cgu-sec h4 i{font-size:.85rem}" +
+    ".cgu-sec h4{margin:0 0 .45rem;font-size:.86rem;font-weight:800;color:#0e2a55;display:flex;align-items:center;gap:.45rem}" +
+    ".cgu-sec h4 i{font-size:.8rem;color:#3b82f6}" +
     ".cgu-sec p{margin:0 0 .4rem;color:#3c465e}" +
     ".cgu-sec ul{margin:.2rem 0 .4rem;padding-right:1.2rem;color:#3c465e}" +
     ".cgu-sec li{margin-bottom:.3rem}" +
     ".cgu-sec b{color:#17203a}" +
     "code.cgu-m{direction:ltr;unicode-bidi:isolate;display:inline-block;background:#eaf2fe;border:1px solid #c9dcfa;" +
     "color:#2563eb;border-radius:7px;padding:.05rem .45rem;font-weight:700;font-size:.8rem;margin:0 .15rem;font-family:monospace}" +
-    ".cgu-tip{background:#eef8f2;border:1px solid #cdebdb;border-radius:12px;padding:.6rem .9rem;margin-top:.4rem;" +
-    "color:#23684a;font-size:.78rem;line-height:2}" +
-    ".cgu-warn{background:#fdf3ec;border:1px solid #f6d9c4;border-radius:12px;padding:.6rem .9rem;margin-top:.4rem;" +
-    "color:#8a4b1f;font-size:.78rem;line-height:2}" +
-    ".cgu-foot{padding:.8rem 1.3rem;border-top:1px solid #e3e7f0;text-align:left}" +
-    ".cgu-ok{padding:.55rem 1.5rem;border:none;border-radius:12px;cursor:pointer;" +
-    "background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;font-weight:700;font-family:inherit;font-size:.85rem}" +
-    "@media(max-width:520px){.cgu-card{max-height:92vh}.cgu-body{padding:1rem;font-size:.8rem}}";
+    ".cgu-tip{background:#eef8f2;border:1px solid #cdebdb;border-radius:12px;padding:.6rem .9rem;margin-top:.5rem;" +
+    "color:#23684a;font-size:.76rem;line-height:2}" +
+    ".cgu-warn{background:#fdf3ec;border:1px solid #f6d9c4;border-radius:12px;padding:.6rem .9rem;margin-top:.5rem;" +
+    "color:#8a4b1f;font-size:.76rem;line-height:2}" +
+    ".cgu-foot{padding:.9rem 1.4rem 1.2rem;border-top:1px solid #e3e7f0;display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap}" +
+    ".cgu-ok{display:inline-flex;align-items:center;gap:.45rem;padding:.6rem 1.6rem;border:none;border-radius:12px;cursor:pointer;" +
+    "background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;font-weight:800;font-family:inherit;font-size:.84rem;" +
+    "box-shadow:0 5px 14px -4px rgba(59,130,246,.55);transition:all .2s ease}" +
+    ".cgu-ok:hover{transform:translateY(-1px);filter:brightness(1.07)}" +
+    "@media(max-width:520px){.cgu-card{max-height:92dvh}.cgu-body{padding:1rem;font-size:.8rem}}";
 
   function injectCSS() {
     if (document.getElementById("cgu-style")) return;
@@ -193,13 +199,14 @@ window.ContribGuide = (function () {
     overlayEl.className = "cgu-overlay";
     overlayEl.innerHTML =
       '<div class="cgu-card" role="dialog" aria-modal="true">' +
-      '<div class="cgu-head">' +
-      '<i class="fas fa-circle-question" id="cguIcon"></i>' +
-      '<h3 id="cguTitle">راهنما</h3>' +
       '<button class="cgu-close" id="cguClose" aria-label="بستن"><i class="fas fa-xmark"></i></button>' +
+      '<div class="cgu-head">' +
+      '<div class="cgu-badge"><i class="fas fa-circle-question" id="cguIcon"></i></div>' +
+      '<h3 id="cguTitle">راهنما</h3>' +
+      '<p class="cgu-sub">هر چیز که برای نوشتن و انتشار لازم داری، ساده و کوتاه</p>' +
       "</div>" +
       '<div class="cgu-body" id="cguBody"></div>' +
-      '<div class="cgu-foot"><button class="cgu-ok" id="cguOk">متوجه شدم</button></div>' +
+      '<div class="cgu-foot"><button class="cgu-ok" id="cguOk"><i class="fas fa-check"></i> متوجه شدم</button></div>' +
       "</div>";
     document.body.appendChild(overlayEl);
     overlayEl.addEventListener("click", function (e) {

@@ -558,8 +558,9 @@
     $("grPw").innerHTML = '<i class="fas fa-chess-king" style="color:#e2e8f0"></i> ' + (R.cfg.white || "سفید");
     $("grPb").innerHTML = '<i class="fas fa-chess-king" style="color:#1a202c"></i> ' + (R.cfg.black || "سیاه");
 
-    // رویدادها
-    $("grCloseBtn").addEventListener("click", R.pageMode ? closeNav : close);
+    // رویدادها — دکمهٔ «بازگشت» از صفحهٔ مستقل حذف شده است؛ فقط اورلی مودال دکمهٔ بستن دارد
+    const closeBtn = $("grCloseBtn");
+    if (closeBtn) closeBtn.addEventListener("click", R.pageMode ? closeNav : close);
     $("grFirst").addEventListener("click", function () { nav(0); });
     $("grPrev").addEventListener("click", function () { nav(R.idx - 1); });
     $("grNext").addEventListener("click", function () { nav(R.idx + 1); });

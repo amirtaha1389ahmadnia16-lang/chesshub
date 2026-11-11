@@ -168,7 +168,7 @@
       box.style.marginBottom = "1rem";
       box.innerHTML =
         '<div class="ol-panel-title" style="color:var(--danger)"><i class="fas fa-plug-circle-xmark"></i> اتصال به سرور برقرار نشد</div>' +
-        '<p style="font-size:0.8rem;color:var(--text-light);line-height:2">سرور بازی آنلاین در دسترس نیست. سایت را از طریق سرور اصلی اجرا کن (<b>node server.js</b>) یا روی Render دیپلوی شده باشد، بعد دوباره تلاش کن.</p>' +
+        '<p style="font-size:0.8rem;color:var(--text-light);line-height:2">سرور بازی آنلاین در دسترس نیست — اتصال اینترنت را بررسی کن و دوباره تلاش کن.</p>' +
         '<button class="ol-btn primary" id="retryConn"><i class="fas fa-rotate-right"></i> تلاش مجدد</button>';
       menu.insertBefore(box, menu.firstChild);
       box.querySelector("#retryConn").addEventListener("click", function () {

@@ -12,7 +12,7 @@
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%E2%99%9B%3C/text%3E%3C/svg%3E"
     />
-    <link rel="stylesheet" href="css/theme.css?v=10.0" />
+    <link rel="stylesheet" href="css/theme.css?v=10.7" />
     <link
       href="fonts/vazir/font-face.css"
       rel="stylesheet"
@@ -21,7 +21,7 @@
       rel="stylesheet"
       href="lib/fontawesome/all.min.css"
     />
-    <link rel="stylesheet" href="css/style.css?v=10.0" />
+    <link rel="stylesheet" href="css/style.css?v=10.7" />
   </head>
   <body>
     <div class="container">
@@ -42,7 +42,7 @@
           <div class="card-icon"><i class="fas fa-palette"></i></div>
           <div>
             <h2 class="card-title">رنگ صفحهٔ بازی</h2>
-            <p class="card-sub">۴ تم حرفه‌ای برای تخته شطرنج</p>
+            <p class="card-sub">۱۰ تم حرفه‌ای برای تخته شطرنج</p>
           </div>
         </div>
         <div class="theme-grid" id="themeGrid"></div>
@@ -54,7 +54,7 @@
           <div class="card-icon"><i class="fas fa-chess-queen"></i></div>
           <div>
             <h2 class="card-title">مهره‌ها</h2>
-            <p class="card-sub">مجموعهٔ مورد علاقه‌ات را انتخاب کن</p>
+            <p class="card-sub">۹ مجموعهٔ حرفه‌ای — پیش‌نمایش روی تم انتخابی</p>
           </div>
         </div>
         <div id="pieceSetsContainer"></div>
@@ -95,13 +95,14 @@
           <div class="card-icon"><i class="fas fa-microchip"></i></div>
           <div>
             <h2 class="card-title">دانلود انجین</h2>
-            <p class="card-sub">انجین‌های اصل Stockfish (WASM) — یک بار دانلود، برای همیشه در مرورگر ذخیره می‌شود</p>
+            <p class="card-sub">۵ انجین اصل Stockfish (WASM) — یک بار دانلود، برای همیشه در مرورگر ذخیره می‌شود</p>
           </div>
         </div>
+        <div class="engine-active-box" id="engineActiveBox"></div>
         <div id="engineList"></div>
         <p class="engine-note">
           <i class="fas fa-circle-info"></i>
-          انجین دانلودشده در IndexedDB مرورگر ذخیره می‌شود و در «مرور بازی» استفاده می‌شود. اگر هیچ انجینی دانلود نشده باشد، مرور بازی با نسخهٔ سبک داخلی اجرا می‌شود.
+          انجین‌های دانلودشده در IndexedDB مرورگر ذخیره می‌شوند و فقط «انجین فعال» انتخاب‌شده در بالا، در تحلیل و مرور بازی استفاده می‌شود. اگر هیچ انجینی دانلود نشده باشد، مرور بازی با نسخهٔ سبک داخلی اجرا می‌شود.
         </p>
       </div>
 
@@ -147,8 +148,8 @@
 
     <div class="settings-toast" id="settingsToast"></div>
 
-    <script src="js/script.js?v=10.0"></script>
-    <script src="js/profile.js?v=10.0"></script>
-    <script src="js/auth.js?v=10.0"></script>
+    <script src="js/script.js?v=10.7"></script>
+    <script src="js/profile.js?v=10.7"></script>
+    <script src="js/auth.js?v=10.7"></script>
   </body>
 </html>

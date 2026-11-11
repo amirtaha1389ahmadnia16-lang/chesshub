@@ -6,11 +6,11 @@
     <meta name="description" content="پایگاه بازی‌های استادان بزرگ شطرنج - بیش از ۳۰ استاد بزرگ و هزاران بازی معروف" />
     <title>ChessHub | پایگاه بازی‌ها</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%E2%99%9B%3C/text%3E%3C/svg%3E" />
-    <link rel="stylesheet" href="css/theme.css?v=10.0" />
+    <link rel="stylesheet" href="css/theme.css?v=10.7" />
     <link rel="stylesheet" href="lib/fontawesome/all.min.css" />
     <link href="fonts/vazir/font-face.css" rel="stylesheet" />
-    <link rel="stylesheet" href="css/style.css?v=10.0" />
-    <link rel="stylesheet" href="css/gamereview.css?v=10.0" />
+    <link rel="stylesheet" href="css/style.css?v=10.7" />
+    <link rel="stylesheet" href="css/gamereview.css?v=10.7" />
     <script src="lib/chess.min.js"></script>
     <style>
       /* اسکرول‌بار اورلی‌ها سمت راست: ظرف اسکرول ltr، محتوا rtl */
@@ -313,6 +313,76 @@
         color: var(--text-light);
         font-size: 0.9rem;
       }
+
+      /* ⚪⚫ نوار درصد برد/باخت — سفید و سیاه */
+      .wld-stats {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: var(--radius-md);
+        padding: 0.9rem 1rem;
+        margin-bottom: 1.2rem;
+        box-shadow: var(--shadow-sm);
+      }
+      .wld-stats .wld-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        margin-bottom: 0.55rem;
+      }
+      .wld-stats .wld-title {
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: var(--primary-dark);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+      .wld-stats .wld-title i { color: var(--accent); }
+      .wld-stats .wld-legend {
+        display: flex;
+        gap: 0.7rem;
+        font-size: 0.68rem;
+        font-weight: 800;
+        color: var(--text-light);
+        flex-wrap: wrap;
+      }
+      .wld-stats .wld-legend span { display: inline-flex; align-items: center; gap: 0.3rem; }
+      .wld-stats .wld-legend .dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+      .wld-stats .wld-legend .dot.w { background: #f8fafc; border: 1.5px solid #cbd5e0; }
+      .wld-stats .wld-legend .dot.d { background: #94a3b8; }
+      .wld-stats .wld-legend .dot.b { background: #1a202c; }
+      .wld-bar {
+        display: flex;
+        height: 18px;
+        border-radius: 99px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        background: #f1f5f9;
+      }
+      .wld-bar .seg {
+        height: 100%;
+        min-width: 0;
+        transition: width 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+      }
+      .wld-bar .seg.white { background: linear-gradient(180deg, #ffffff, #e8eef7); }
+      .wld-bar .seg.draw { background: linear-gradient(180deg, #a3adc2, #8b95ab); }
+      .wld-bar .seg.black { background: linear-gradient(180deg, #2d3748, #1a202c); }
+      .wld-nums {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 0.45rem;
+        font-size: 0.7rem;
+        font-weight: 800;
+        direction: ltr;
+      }
+      .wld-nums .n-w { color: #475569; }
+      .wld-nums .n-d { color: #64748b; }
+      .wld-nums .n-b { color: #1a202c; }
+      .wld-nums .pct { font-size: 0.8rem; font-weight: 900; }
+      .wld-nums small { font-weight: 700; color: var(--text-light); margin-inline-start: 0.25rem; }
       .loading-state { text-align: center; padding: 2rem; color: var(--text-light); }
       .loading-state i {
         font-size: 2rem;
@@ -519,6 +589,27 @@
         </button>
       </div>
       <div class="overlay-scroll">
+        <!-- ⚪⚫ نوار درصد برد سفید / مساوی / برد سیاه -->
+        <div class="wld-stats" id="wldStats" style="display:none">
+          <div class="wld-head">
+            <span class="wld-title"><i class="fas fa-chart-simple"></i> درصد نتایج بازی‌ها</span>
+            <div class="wld-legend">
+              <span><i class="dot w"></i> برد سفید</span>
+              <span><i class="dot d"></i> مساوی</span>
+              <span><i class="dot b"></i> برد سیاه</span>
+            </div>
+          </div>
+          <div class="wld-bar">
+            <div class="seg white" id="wldWhite" style="width:0%"></div>
+            <div class="seg draw" id="wldDraw" style="width:0%"></div>
+            <div class="seg black" id="wldBlack" style="width:0%"></div>
+          </div>
+          <div class="wld-nums">
+            <span class="n-w"><span class="pct" id="wldWhitePct">۰٪</span><small id="wldWhiteN"></small></span>
+            <span class="n-d"><span class="pct" id="wldDrawPct">۰٪</span><small id="wldDrawN"></small></span>
+            <span class="n-b"><span class="pct" id="wldBlackPct">۰٪</span><small id="wldBlackN"></small></span>
+          </div>
+        </div>
         <!-- فیلتر حرفه‌ای -->
         <div class="filter-bar">
           <button class="f-chip" id="favOnlyChip"><i class="fas fa-heart"></i> فقط مورد علاقه</button>
@@ -587,9 +678,9 @@
       </div>
     </div>
 
-    <script src="js/script.js?v=10.0"></script>
-    <script src="js/profile.js?v=10.0"></script>
-    <script src="js/auth.js?v=10.0"></script>
+    <script src="js/script.js?v=10.7"></script>
+    <script src="js/profile.js?v=10.7"></script>
+    <script src="js/auth.js?v=10.7"></script>
     <script>
       (function () {
         "use strict";
@@ -901,7 +992,7 @@
               pendingAutoOpen = null;
               if (gamesListContainer) {
                 gamesListContainer.innerHTML =
-                  `<div class="no-games">فایل PGN «pgn/${player.file}» پیدا نشد — فایل بازی‌های این استاد را در پوشه‌ی pgn/ قرار بده تا این‌جا نمایش داده شود.</div>`;
+                  '<div class="no-games"><i class="fas fa-triangle-exclamation" style="font-size:1.6rem;display:block;margin-bottom:0.5rem;color:#cbd5e0"></i>بازی‌های این استاد در دسترس نیست — اتصال را بررسی کن و دوباره تلاش کن.</div>';
               }
             });
         }
@@ -1030,11 +1121,45 @@
           listObserver.observe(listSentinel);
         }
 
+        // ⚪⚫ محاسبه و نمایش درصد برد سفید / مساوی / برد سیاه — همیشه با فیلتر جاری
+        function renderWldStats(games) {
+          const wrap = document.getElementById("wldStats");
+          if (!wrap) return;
+          if (!games.length) { wrap.style.display = "none"; return; }
+          let w = 0, d = 0, b = 0;
+          games.forEach(function (g) {
+            if (g.result === "1-0") w++;
+            else if (g.result === "0-1") b++;
+            else d++;
+          });
+          const total = games.length;
+          const pw = Math.round((w / total) * 100);
+          const pb = Math.round((b / total) * 100);
+          const pd = Math.max(0, 100 - pw - pb);
+          const seg = function (id, v) {
+            const el = document.getElementById(id);
+            if (el) el.style.width = v + "%";
+          };
+          seg("wldWhite", pw); seg("wldDraw", pd); seg("wldBlack", pb);
+          const pct = function (id, v) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = faNum(v) + "٪";
+          };
+          pct("wldWhitePct", pw); pct("wldDrawPct", pd); pct("wldBlackPct", pb);
+          const n = function (id, v) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = v ? "(" + faNum(v) + " بازی)" : "";
+          };
+          n("wldWhiteN", w); n("wldDrawN", d); n("wldBlackN", b);
+          wrap.style.display = "block";
+        }
+
         function renderGamesList(games) {
           if (!gamesListContainer) return;
           filteredGames = games;
           const rc = document.getElementById("resultsCount");
           if (rc) rc.textContent = faNum(games.length) + " بازی";
+          renderWldStats(games);
           renderedCount = 0;
           gamesListContainer.innerHTML = "";
           if (!games.length) {

@@ -57,20 +57,31 @@ window.chPh = function (w, h, label) {
      کاتالوگ‌های رسمی تنظیمات — تنها گزینه‌های مجاز
      ============================================ */
 
-  // ۴ تم رنگی تخته — دقیقاً همین‌ها، به همین ترتیب (آیکون ۲×۲ شطرنجی)
+  // 🎨 ۱۰ تم رنگی تخته — دقیقاً همین‌ها، به همین ترتیب (آیکون ۲×۲ شطرنجی)
   const THEME_CATALOG = [
-    { id: "1", name: "Meadow",   light: "#eeeed2", dark: "#769656" },
-    { id: "2", name: "Ocean",    light: "#eae9d2", dark: "#4b7399" },
-    { id: "3", name: "Classic",  light: "#f0d9b5", dark: "#b58863" },
-    { id: "4", name: "Charcoal", light: "#717b8e", dark: "#2b323f" },
+    { id: "1",  name: "Wood",     light: "#ecc79b", dark: "#c7703c" },
+    { id: "2",  name: "Ocean",    light: "#eae9d2", dark: "#4b7399" },
+    { id: "3",  name: "Classic",  light: "#f0d9b5", dark: "#b58863" },
+    { id: "4",  name: "Charcoal", light: "#717b8e", dark: "#2b323f" },
+    { id: "5",  name: "Meadow",   light: "#eeeed2", dark: "#769656" },
+    { id: "6",  name: "Ice",      light: "#cddbe2", dark: "#7b9eb3" },
+    { id: "7",  name: "Stone",    light: "#cac8bf", dark: "#52514e" },
+    { id: "8",  name: "Violet",   light: "#efefef", dark: "#8877b7" },
+    { id: "9",  name: "Coral",    light: "#f0d8bf", dark: "#ba5546" },
+    { id: "10", name: "Forest",   light: "#efefec", dark: "#33684b" },
   ];
 
-  // ۴ مجموعه مهره — دقیقاً همین‌ها، به همین ترتیب
+  // ♟️ ۹ مجموعه مهره — دقیقاً همین‌ها، به همین ترتیب
   const PIECE_SETS = [
-    { id: "alpha",   name: "Alpha" },
-    { id: "classic", name: "Classic" },
-    { id: "neo",     name: "Neo" },
-    { id: "glass",   name: "Glass" },
+    { id: "alpha",     name: "Alpha" },
+    { id: "classic",   name: "Classic" },
+    { id: "g08ph",     name: "G08ph" },
+    { id: "game_room", name: "Game Room" },
+    { id: "glass",     name: "Glass" },
+    { id: "light",     name: "Light" },
+    { id: "neo",       name: "Neo" },
+    { id: "neo_wood",  name: "Neo Wood" },
+    { id: "ocean",     name: "Ocean" },
   ];
 
   const VALID_THEMES = THEME_CATALOG.map(function (t) { return t.id; });
@@ -610,15 +621,12 @@ window.chPh = function (w, h, label) {
       return true;
     } catch (error) {
       console.error("خطا در بارگذاری " + url + ":", error.message);
-      // حالت file:// یا بدون سرور — پیام راهنمای ملایم
+      // پیام راهنمای ملایم برای کاربر
       if (element) {
         element.innerHTML =
           '<div class="component-error">' +
           '<i class="fas fa-triangle-exclamation"></i>' +
-          "برای نمایش کامل سایت، پروژه را با سرور اجرا کن: " +
-          "<b>node server.js</b> یا Live Server — (" +
-          url +
-          " بارگذاری نشد)" +
+          "ارتباط با سرور برقرار نشد — اتصال اینترنت را بررسی کن و صفحه را دوباره بارگذاری کن." +
           "</div>";
       }
       return false;
@@ -1178,21 +1186,28 @@ window.chPh = function (w, h, label) {
   const ENGINE_PROMPT_KEY = "chesshub_engine_prompt_dismissed";
   const ENGINE_DEFAULT_ID = "sf18lite";
 
-  // کاتالوگ رسمی انجین‌ها — فقط نسخه‌های single (سازگار با همهٔ هاست‌ها)
+  // کاتالوگ رسمی انجین‌ها — ۵ انجین (نسخه‌های رسمی single؛ سازگار با همهٔ هاست‌ها)
   const ENGINE_CATALOG = [
     {
-      id: "sf19", label: "Stockfish 19", version: "19.0.1", sizeBytes: 94600000,
+      id: "sf19", label: "Stockfish 19", version: "19.0.1", sizeBytes: 95200000,
       desc: "جدیدترین و قوی‌ترین نسخهٔ رسمی — NNUE کامل",
       tag: "قوی‌ترین",
       js: "https://unpkg.com/stockfish@19.0.1/bin/stockfish-19-single.js",
       wasm: "https://unpkg.com/stockfish@19.0.1/bin/stockfish-19-single.wasm",
     },
     {
-      id: "sf18", label: "Stockfish 18", version: "18.0.8", sizeBytes: 107800000,
+      id: "sf18", label: "Stockfish 18", version: "18.0.8", sizeBytes: 108000000,
       desc: "نسخهٔ پایدار و بسیار قوی — NNUE کامل",
       tag: "پایدار",
       js: "https://unpkg.com/stockfish@18.0.8/bin/stockfish-18-single.js",
       wasm: "https://unpkg.com/stockfish@18.0.8/bin/stockfish-18-single.wasm",
+    },
+    {
+      id: "sf19lite", label: "Stockfish 19 Lite", version: "19.0.1", sizeBytes: 1900000,
+      desc: "سبک‌ترین نسخهٔ رسمی ۱۹ — دانلود سریع، شروع آنی",
+      tag: "سریع",
+      js: "https://unpkg.com/stockfish@19.0.1/bin/stockfish-19-lite-single.js",
+      wasm: "https://unpkg.com/stockfish@19.0.1/bin/stockfish-19-lite-single.wasm",
     },
     {
       id: "sf18lite", label: "Stockfish 18 Lite", version: "18.0.8", sizeBytes: 7300000,
@@ -1200,6 +1215,13 @@ window.chPh = function (w, h, label) {
       tag: "پیشنهادی",
       js: "https://unpkg.com/stockfish@18.0.8/bin/stockfish-18-lite-single.js",
       wasm: "https://unpkg.com/stockfish@18.0.8/bin/stockfish-18-lite-single.wasm",
+    },
+    {
+      id: "sf16", label: "Stockfish 16", version: "16.0.0", sizeBytes: 620000,
+      desc: "نسخهٔ کلاسیک فوق‌سبک — برای دستگاه‌های قدیمی‌تر",
+      tag: "فوق‌سبک",
+      js: "https://unpkg.com/stockfish@16.0.0/src/stockfish-nnue-16-single.js",
+      wasm: "https://unpkg.com/stockfish@16.0.0/src/stockfish-nnue-16-single.wasm",
     },
   ];
 
@@ -1518,15 +1540,52 @@ window.chPh = function (w, h, label) {
   /* ---- بخش «دانلود انجین» در صفحهٔ تنظیمات ---- */
   function initEngineSection() {
     const box = document.getElementById("engineList");
+    const activeBox = document.getElementById("engineActiveBox");
     if (!box) return;
 
     function sizeFa(bytes) {
-      return faNum(Math.max(1, Math.round(bytes / 1048576))) + " مگابایت";
+      if (bytes < 1048576) return "کمتر از ۱ مگابایت";
+      return faNum(Math.round(bytes / 1048576)) + " مگابایت";
+    }
+
+    /* ---- کادر «انجین فعال» — فقط انجین انتخاب‌شده در آنالیز استفاده می‌شود ---- */
+    function renderActiveBox(downloaded) {
+      if (!activeBox) return;
+      if (!downloaded.length) {
+        activeBox.innerHTML =
+          '<div class="ea-ico"><i class="fas fa-bolt"></i></div>' +
+          '<div class="ea-label">انجین فعال<small>هنوز هیچ انجینی دانلود نشده — آنالیز با انجین سبک داخلی اجرا می‌شود</small></div>' +
+          '<span class="engine-select" style="display:flex;align-items:center;color:var(--text-light)"><i class="fas fa-circle-info" style="margin-inline-end:0.4rem"></i> اول یک انجین دانلود کن</span>';
+        return;
+      }
+      const active = EngineStore.activeId();
+      const validActive = downloaded.indexOf(active) >= 0 ? active : downloaded[0];
+      let html =
+        '<div class="ea-ico"><i class="fas fa-bolt"></i></div>' +
+        '<div class="ea-label">انجین فعال<small>فقط همین انجین در تحلیل‌ها و مرور بازی استفاده می‌شود</small></div>' +
+        '<select class="engine-select" id="engineActiveSelect" aria-label="انتخاب انجین فعال">';
+      ENGINE_CATALOG.forEach(function (eng) {
+        if (downloaded.indexOf(eng.id) < 0) return;
+        html += '<option value="' + eng.id + '"' + (eng.id === validActive ? " selected" : "") + ">" +
+          eng.label + " — v" + eng.version + "</option>";
+      });
+      html += "</select>";
+      activeBox.innerHTML = html;
+      const sel = document.getElementById("engineActiveSelect");
+      if (sel) {
+        sel.addEventListener("change", function () {
+          EngineStore.setActive(this.value);
+          Sound.play("select");
+          const m = EngineStore.meta(this.value);
+          toast("انجین فعال: " + (m ? m.label : this.value));
+        });
+      }
     }
 
     function render() {
       EngineStore.listDownloaded().then(function (downloaded) {
         const active = EngineStore.activeId();
+        renderActiveBox(downloaded);
         box.innerHTML = "";
         ENGINE_CATALOG.forEach(function (eng) {
           const isDone = downloaded.indexOf(eng.id) >= 0;
