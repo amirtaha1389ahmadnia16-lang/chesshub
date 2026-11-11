@@ -112,7 +112,10 @@
     lastMove = { from: mv.from, to: mv.to };
     const tc = parseTime(selectedTime);
     if (tc.inc) userTime += tc.inc;
-    window.ChessHub && ChessHub.Sound.play("move");
+    // 🎵 صدای درست: کیش > گرفتن مهره > حرکت عادی
+    if (window.ChessHub) {
+      ChessHub.Sound.play(game.in_check() ? "check" : mv.captured ? "capture" : "move");
+    }
     refresh();
     updateHistory();
     updateTimers();
@@ -132,6 +135,7 @@
     speak("think");
     const fen = game.fen();
     const mv = await BotBrain.getMove(fen, selectedBot, game);
+    let botCaptured = false;
     botThinking = false;
     setEngineStatus(false);
     if (!isActive || gameEnded) return;
@@ -144,15 +148,21 @@
       game.move({ from: fb.from, to: fb.to, promotion: fb.promotion || "q" });
       uciMoves.push(fb.from + fb.to + (fb.promotion || ""));
       lastMove = { from: fb.from, to: fb.to };
+      botCaptured = !!fb.captured;
     } else {
       uciMoves.push(mv.from + mv.to + (mv.promotion || ""));
       lastMove = { from: applied.from, to: applied.to };
+      botCaptured = !!applied.captured;
       if (applied.captured) speak("capture");
       else if (applied.san.indexOf("+") >= 0) speak("check");
     }
     const tc = parseTime(selectedTime);
     if (tc.inc) botTime += tc.inc;
     refresh();
+    // 🎵 صدای حرکت بات — کیش > گرفتن > عادی
+    if (window.ChessHub) {
+      ChessHub.Sound.play(game.in_check() ? "check" : botCaptured ? "capture" : "move");
+    }
     updateHistory();
     updateTimers();
     if (!checkGameEnd()) updateTimers();
@@ -226,6 +236,8 @@
     if (reason !== "checkmate" && reason !== "timeout" && reason !== "resign" && userWon === null) {
       speak(userWon === true ? "win" : "draw");
     }
+    // 🎵 صدای پایان بازی — برد / باخت (مساوی بی‌صدا)
+    if (window.ChessHub) ChessHub.Sound.play(userWon === true ? "win" : userWon === false ? "lose" : null);
 
     $("resultIcon").textContent = icon;
     $("resultTitle").textContent = title;

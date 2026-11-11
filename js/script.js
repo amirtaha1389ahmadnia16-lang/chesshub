@@ -7,7 +7,7 @@
    ۳) سیستم تنظیمات (localStorage: chesshub_settings)
    ۴) ChessUtils — پیش‌بارگذاری مهره‌ها، مودال ترفیع، صداها
    ۵) درگ‌ودراپ مهره‌ها — هم ماوس (ویندوز) هم لمس (موبایل) + کلیک‌کلیک
-   ۶) منطق صفحه تنظیمات (۲۹ تم + مجموعه‌های مهره)
+   ۶) منطق صفحه تنظیمات (کاتالوگ رسمی تم‌ها و مهره‌ها)
    ============================================================ */
 
 (function () {
@@ -48,16 +48,58 @@ window.chPh = function (w, h, label) {
 
   const defaultSettings = {
     pieceSet: "neo",
-    theme: "1",
+    theme: "3",
     sound: true,
+    volume: 70,
   };
 
+  /* ============================================
+     کاتالوگ‌های رسمی تنظیمات — تنها گزینه‌های مجاز
+     ============================================ */
+
+  // ۱۰ تم رنگی تخته — دقیقاً همین‌ها، به همین ترتیب
+  const THEME_CATALOG = [
+    { id: "1",  name: "Amber Wood", light: "#ecc79b", dark: "#c7703c" },
+    { id: "2",  name: "Ocean Blue", light: "#eae9d2", dark: "#4b7399" },
+    { id: "3",  name: "Classic",    light: "#f0d9b5", dark: "#b58863" },
+    { id: "4",  name: "Charcoal",   light: "#717b8e", dark: "#2b323f" },
+    { id: "5",  name: "Meadow",     light: "#eeeed2", dark: "#769656" },
+    { id: "6",  name: "Frost",      light: "#cddbe2", dark: "#7b9eb3" },
+    { id: "7",  name: "Stone",      light: "#cac8bf", dark: "#52514e" },
+    { id: "8",  name: "Violet",     light: "#efefef", dark: "#8877b7" },
+    { id: "9",  name: "Coral",      light: "#f0d8bf", dark: "#ba5546" },
+    { id: "10", name: "Forest",     light: "#efefec", dark: "#33684b" },
+  ];
+
+  // ۹ مجموعه مهره — دقیقاً همین‌ها، به همین ترتیب
+  const PIECE_SETS = [
+    { id: "alpha",     name: "Alpha" },
+    { id: "classic",   name: "Classic" },
+    { id: "g08ph",     name: "G08PH" },
+    { id: "game_room", name: "Game Room" },
+    { id: "glass",     name: "Glass" },
+    { id: "light",     name: "Light" },
+    { id: "neo",       name: "Neo" },
+    { id: "neo_wood",  name: "Neo Wood" },
+    { id: "ocean",     name: "Ocean" },
+  ];
+
+  const VALID_THEMES = THEME_CATALOG.map(function (t) { return t.id; });
+  const VALID_PIECE_SETS = PIECE_SETS.map(function (p) { return p.id; });
+
   function loadSettings() {
+    const s = { ...defaultSettings };
     try {
       const saved = localStorage.getItem("chesshub_settings");
-      if (saved) return { ...defaultSettings, ...JSON.parse(saved) };
+      if (saved) Object.assign(s, JSON.parse(saved));
     } catch (e) {}
-    return { ...defaultSettings };
+    // اعتبارسنجی — مقدار ذخیره‌شدهٔ قدیمی که دیگر در کاتالوگ نیست → پیشفرض
+    if (VALID_THEMES.indexOf(s.theme) < 0) s.theme = defaultSettings.theme;
+    if (VALID_PIECE_SETS.indexOf(s.pieceSet) < 0) s.pieceSet = defaultSettings.pieceSet;
+    const vol = Number(s.volume);
+    s.volume = isNaN(vol) ? defaultSettings.volume : Math.max(0, Math.min(100, vol));
+    s.sound = s.sound !== false;
+    return s;
   }
 
   function saveSettings(settings) {
@@ -88,8 +130,7 @@ window.chPh = function (w, h, label) {
   // اعمال سریع تم ذخیره‌شده هنگام بوت (قبل از هر رندری)
   function applySavedThemeEarly() {
     const settings = loadSettings();
-    const theme = settings.theme || "1";
-    document.body.classList.add(`theme-${theme}`);
+    document.body.classList.add(`theme-${settings.theme}`);
   }
 
   function toggleSound(enabled) {
@@ -110,19 +151,24 @@ window.chPh = function (w, h, label) {
   }
 
   function getCurrentPieceSet() {
-    return loadSettings().pieceSet || "neo";
+    return loadSettings().pieceSet;
   }
 
   function getCurrentTheme() {
-    return loadSettings().theme || "1";
+    return loadSettings().theme;
   }
 
   /* ============================================
      ۲) موتور صدا (Web Audio — بدون هیچ فایل خارجی)
+     صدای طبیعی و خشکِ نشستن مهره روی تخته — جدا برای
+     حرکت / گرفتن مهره / کیش / برد / باخت + کنترل صدا
      ============================================ */
 
   const Sound = {
     _ctx: null,
+    _master: null,
+    _noiseBuf: null,
+    _tempVol: null, // فقط در صفحه تنظیمات — پیش‌نمایش زندهٔ ولوم
 
     enabled() {
       return loadSettings().sound !== false;
@@ -135,12 +181,63 @@ window.chPh = function (w, h, label) {
           const AC = window.AudioContext || window.webkitAudioContext;
           if (!AC) return null;
           this._ctx = new AC();
+          this._master = this._ctx.createGain();
+          this._master.connect(this._ctx.destination);
         }
         if (this._ctx.state === "suspended") this._ctx.resume();
+        // ولوم کاربر — سقف کلی پایین نگه داشته می‌شود تا هیچ‌وقت تند نباشد
+        const vol = this._tempVol != null ? this._tempVol : loadSettings().volume;
+        this._master.gain.value = 0.42 * (0.3 + 0.7 * (vol / 100));
         return this._ctx;
       } catch (e) {
         return null;
       }
+    },
+
+    _noise(ctx) {
+      // بافر نویز سفید کوتاه — برای بدنهٔ «کلیکِ» ضربه
+      if (!this._noiseBuf) {
+        const len = Math.floor(ctx.sampleRate * 0.12);
+        this._noiseBuf = ctx.createBuffer(1, len, ctx.sampleRate);
+        const data = this._noiseBuf.getChannelData(0);
+        for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+      }
+      return this._noiseBuf;
+    },
+
+    // ضربهٔ خشکِ چوبی = بدنهٔ نویز باندپس‌شده + تامپِ سینوسی با پیچ افت‌کننده
+    _knock(at, freq, vol, dur) {
+      const ctx = this._ctx;
+      try {
+        // ۱) کلیک — نویز فیلترشده با افت خیلی سریع
+        const src = ctx.createBufferSource();
+        src.buffer = this._noise(ctx);
+        const bp = ctx.createBiquadFilter();
+        bp.type = "bandpass";
+        bp.frequency.value = freq * 4.4;
+        bp.Q.value = 1.3;
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(vol, at);
+        g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+        src.connect(bp);
+        bp.connect(g);
+        g.connect(this._master);
+        src.start(at);
+        src.stop(at + dur + 0.02);
+
+        // ۲) تامپ چوبی — سینوس کوتاه که پیچش پایین می‌آید
+        const osc = ctx.createOscillator();
+        const og = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq * 2.1, at);
+        osc.frequency.exponentialRampToValueAtTime(freq * 0.7, at + dur);
+        og.gain.setValueAtTime(vol * 0.9, at);
+        og.gain.exponentialRampToValueAtTime(0.0001, at + dur * 1.2);
+        osc.connect(og);
+        og.connect(this._master);
+        osc.start(at);
+        osc.stop(at + dur * 1.25 + 0.02);
+      } catch (e) {}
     },
 
     _tone(freq, at, dur, type, vol) {
@@ -154,7 +251,7 @@ window.chPh = function (w, h, label) {
         gain.gain.exponentialRampToValueAtTime(vol, at + 0.012);
         gain.gain.exponentialRampToValueAtTime(0.0001, at + dur);
         osc.connect(gain);
-        gain.connect(ctx.destination);
+        gain.connect(this._master);
         osc.start(at);
         osc.stop(at + dur + 0.03);
       } catch (e) {}
@@ -163,20 +260,35 @@ window.chPh = function (w, h, label) {
     play(name) {
       const ctx = this._ensure();
       if (!ctx) return;
-      const t = ctx.currentTime;
+      const t = ctx.currentTime + 0.001;
 
       if (name === "move") {
-        this._tone(240, t, 0.07, "triangle", 0.16);
+        // نشستن مهره — یک ضربهٔ کوتاه و خشک
+        this._knock(t, 180, 0.5, 0.055);
+      } else if (name === "capture") {
+        // گرفتن مهره — دو ضربهٔ محکم پشت‌سرهم
+        this._knock(t, 160, 0.62, 0.05);
+        this._knock(t + 0.055, 128, 0.52, 0.07);
+      } else if (name === "check") {
+        // کیش — همان ضربه + تیک هشدار ظریف
+        this._knock(t, 200, 0.5, 0.05);
+        this._tone(1180, t + 0.05, 0.07, "sine", 0.10);
+        this._tone(880, t + 0.12, 0.09, "sine", 0.09);
       } else if (name === "select") {
-        this._tone(430, t, 0.045, "sine", 0.09);
+        this._tone(520, t, 0.04, "sine", 0.07);
       } else if (name === "correct") {
-        this._tone(620, t, 0.09, "sine", 0.15);
-        this._tone(930, t + 0.09, 0.13, "sine", 0.15);
+        this._tone(660, t, 0.08, "sine", 0.12);
+        this._tone(990, t + 0.085, 0.12, "sine", 0.12);
       } else if (name === "wrong") {
-        this._tone(150, t, 0.17, "sawtooth", 0.12);
+        this._tone(210, t, 0.13, "sine", 0.11);
+        this._tone(155, t + 0.1, 0.16, "sine", 0.10);
       } else if (name === "win") {
         [523, 659, 784, 1046].forEach((f, i) => {
-          this._tone(f, t + i * 0.1, 0.15, "sine", 0.14);
+          this._tone(f, t + i * 0.09, 0.16, "sine", 0.11);
+        });
+      } else if (name === "lose") {
+        [392, 311, 262].forEach((f, i) => {
+          this._tone(f, t + i * 0.12, 0.18, "sine", 0.10);
         });
       }
     },
@@ -681,62 +793,44 @@ window.chPh = function (w, h, label) {
   }
 
   /* ============================================
-     ۷) منطق صفحه تنظیمات (۲۹ تم + مجموعه‌های مهره)
+     ۷) منطق صفحه تنظیمات — کاتالوگ رسمی
+     ۱۰ تم رنگی + ۹ مجموعه مهره + کارت صدا + Guard
      ============================================ */
-
-  const THEME_CATALOG = [
-    { id: "1",  light: "#f3f3f4", dark: "#6a9b41" },
-    { id: "2",  light: "#ecc79b", dark: "#c7703c" },
-    { id: "3",  light: "#eae9d2", dark: "#4b7399" },
-    { id: "4",  light: "#f0d9b5", dark: "#b58863" },
-    { id: "5",  light: "#ffffff", dark: "#fcd8dd" },
-    { id: "6",  light: "#e0b88f", dark: "#854d2d" },
-    { id: "7",  light: "#ba8d51", dark: "#6f3b29" },
-    { id: "8",  light: "#717b8e", dark: "#2b323f" },
-    { id: "9",  light: "#eeeed2", dark: "#769656" },
-    { id: "10", light: "#cddbe2", dark: "#7b9eb3" },
-    { id: "11", light: "#dcdcdc", dark: "#ababab" },
-    { id: "12", light: "#dce6e6", dark: "#9ea6a1" },
-    { id: "13", light: "#beb7a0", dark: "#726d68" },
-    { id: "14", light: "#e0e0e0", dark: "#6e6f6f" },
-    { id: "15", light: "#cccccc", dark: "#6c625f" },
-    { id: "16", light: "#fce4b2", dark: "#d08b18" },
-    { id: "17", light: "#cac8bf", dark: "#52514e" },
-    { id: "18", light: "#efefef", dark: "#8877b7" },
-    { id: "19", light: "#f0d8bf", dark: "#ba5546" },
-    { id: "20", light: "#aca8a1", dark: "#4f4d4b" },
-    { id: "21", light: "#edc9a2", dark: "#d3a36a" },
-    { id: "22", light: "#efefef", dark: "#c2d7e2" },
-    { id: "23", light: "#b89a75", dark: "#6e4e37" },
-    { id: "24", light: "#efefec", dark: "#33684b" },
-    { id: "25", light: "#efefef", dark: "#ababab" },
-    { id: "26", light: "#c09d65", dark: "#845c3a" },
-    { id: "27", light: "#a9a9a9", dark: "#a6865f" },
-    { id: "28", light: "#e3e0c5", dark: "#b8a671" },
-    { id: "29", light: "#d0bbaf", dark: "#c6b19d" },
-  ];
-
-  // ۳۸ مجموعه مهره — کافیست پوشه pieces/<name>/ را بگذاری
-  const PIECE_SETS = {
-    "پیشفرض": ["neo"],
-    "سه بعدی": ["3d_chesskid", "3d_plastic", "3d_staunton", "3d_wood"],
-    "کلاسیک": ["alpha", "bases", "classic", "club", "condal", "tournament", "vintage"],
-    "مدرن": ["glass", "light", "marble", "metal", "modern", "neon"],
-    "کارتونی": ["8_bit", "bubblegum", "graffiti", "lolz", "tigers"],
-    "طبیعی": ["icy_sea", "nature", "neo_wood", "ocean", "sky", "wood"],
-    "ویژه": ["blindfold", "book", "cases", "dash", "game_room", "gothic", "maya", "newspaper", "space","g08ph","ca09k",],
-  };
 
   function initSettingsPage() {
     const themeGrid = document.getElementById("themeGrid");
     const pieceContainer = document.getElementById("pieceSetsContainer");
     if (!themeGrid && !pieceContainer) return;
 
-    let tempTheme = getCurrentTheme();
-    let tempPieceSet = getCurrentPieceSet();
+    const $ = (id) => document.getElementById(id);
+    const saved = loadSettings();
+    let tempTheme = saved.theme;
+    let tempPieceSet = saved.pieceSet;
+    let tempSound = saved.sound;
+    let tempVolume = saved.volume;
+    let pendingUrl = null;
+
+    const dirtyPill = $("unsavedPill");
+    const saveBtn = $("saveSettingsBtn");
+
+    const isDirty = () => {
+      const cur = loadSettings();
+      return (
+        tempTheme !== cur.theme ||
+        tempPieceSet !== cur.pieceSet ||
+        tempSound !== cur.sound ||
+        tempVolume !== cur.volume
+      );
+    };
+
+    const refreshDirtyUI = () => {
+      const dirty = isDirty();
+      if (dirtyPill) dirtyPill.classList.toggle("show", dirty);
+      if (saveBtn) saveBtn.classList.toggle("has-changes", dirty);
+    };
 
     const toast = (text) => {
-      const el = document.getElementById("settingsToast");
+      const el = $("settingsToast");
       if (!el) return;
       el.textContent = text;
       el.classList.add("show");
@@ -744,6 +838,69 @@ window.chPh = function (w, h, label) {
       el._timeout = setTimeout(() => el.classList.remove("show"), 2500);
     };
 
+    /* ---- دیالوگ داخلی (به‌جای confirm خام مرورگر) ---- */
+    const dialogEl = $("ghDialog");
+    let dialogOk = null;
+    let dialogAlt = null;
+
+    function openDialog(opts) {
+      if (!dialogEl) return;
+      $("ghDialogTitle").textContent = opts.title;
+      $("ghDialogDesc").textContent = opts.desc;
+      $("ghDialogIcon").innerHTML = '<i class="' + opts.icon + '"></i>';
+      dialogEl.dataset.tone = opts.tone || "warn";
+      $("ghDialogOkLabel").textContent = opts.ok;
+      $("ghDialogOkIcon").className = opts.okIcon || "fas fa-floppy-disk";
+      const altBtn = $("ghDialogAlt");
+      if (opts.alt) {
+        altBtn.style.display = "";
+        $("ghDialogAltLabel").textContent = opts.alt;
+        $("ghDialogAltIcon").className = opts.altIcon || "fas fa-xmark";
+        dialogAlt = opts.onAlt || null;
+      } else {
+        altBtn.style.display = "none";
+        dialogAlt = null;
+      }
+      dialogOk = opts.onOk || null;
+      dialogEl.classList.add("open");
+      document.body.style.overflow = "hidden";
+      setTimeout(() => {
+        const b = $("ghDialogCancel");
+        if (b) b.focus();
+      }, 80);
+    }
+
+    function closeDialog() {
+      if (!dialogEl) return;
+      dialogEl.classList.remove("open");
+      document.body.style.overflow = "";
+      dialogOk = null;
+      dialogAlt = null;
+    }
+
+    if (dialogEl) {
+      $("ghDialogCancel").addEventListener("click", closeDialog);
+      $("ghDialogOk").addEventListener("click", () => {
+        const fn = dialogOk;
+        closeDialog();
+        if (fn) fn();
+      });
+      $("ghDialogAlt").addEventListener("click", () => {
+        const fn = dialogAlt;
+        closeDialog();
+        if (fn) fn();
+      });
+      dialogEl.addEventListener("click", (e) => {
+        if (e.target === dialogEl) closeDialog();
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && dialogEl.classList.contains("open")) {
+          closeDialog();
+        }
+      });
+    }
+
+    /* ---- اعمال موقت تم (پیش‌نمایش — ذخیره با دکمه) ---- */
     const applyTempTheme = (id) => {
       document.body.className = document.body.className
         .split(" ")
@@ -752,136 +909,262 @@ window.chPh = function (w, h, label) {
       document.body.classList.add("theme-" + id);
     };
 
-    /* ---- ساخت دکمه‌های تم (پیش‌نمایش درست روشن/تیره) ---- */
+    /* ---- رنگ پس‌زمینهٔ پیش‌نمایش مهره‌ها = تم انتخابی ---- */
+    function updatePieceBoxColors() {
+      if (!pieceContainer) return;
+      const th =
+        THEME_CATALOG.find((t) => t.id === tempTheme) || THEME_CATALOG[2];
+      pieceContainer.querySelectorAll(".piece-box").forEach((el) => {
+        el.style.setProperty("--cl", th.light);
+        el.style.setProperty("--cd", th.dark);
+      });
+    }
+
+    /* ---- کارت‌های تم — پیش‌نمایش واقعی شطرنجی ---- */
     function buildThemeButtons() {
       if (!themeGrid) return;
       themeGrid.innerHTML = "";
       THEME_CATALOG.forEach((theme) => {
         const btn = document.createElement("button");
-        btn.className = "theme-btn" + (theme.id === tempTheme ? " active" : "");
-        btn.dataset.theme = theme.id;
-        btn.setAttribute("aria-label", "تم " + theme.id);
+        btn.type = "button";
+        btn.className = "theme-card" + (theme.id === tempTheme ? " active" : "");
+        btn.title = theme.name;
         btn.innerHTML =
-          '<span class="theme-preview">' +
-          '<span class="preview-light" style="background:' + theme.light + '"></span>' +
-          '<span class="preview-dark" style="background:' + theme.dark + '"></span>' +
-          "</span>";
+          '<span class="theme-board" style="--cl:' + theme.light + ";--cd:" + theme.dark + '"></span>' +
+          '<span class="theme-name">' + theme.name + "</span>" +
+          '<span class="pick-badge"><i class="fas fa-check"></i></span>';
         btn.onclick = () => {
-          themeGrid.querySelectorAll(".theme-btn").forEach((b) => b.classList.remove("active"));
+          themeGrid
+            .querySelectorAll(".theme-card")
+            .forEach((b) => b.classList.remove("active"));
           btn.classList.add("active");
           tempTheme = theme.id;
           applyTempTheme(theme.id);
+          updatePieceBoxColors();
           Sound.play("select");
-          toast("تم اعمال شد — برای ماندگاری، ذخیره کن");
+          refreshDirtyUI();
         };
         themeGrid.appendChild(btn);
       });
     }
 
-    /* ---- ساخت دکمه‌های مجموعه مهره ---- */
+    /* ---- کارت‌های مهره — بزرگ، پیش‌نمایش واقعی، نام انگلیسی ---- */
     function buildPieceButtons() {
       if (!pieceContainer) return;
       pieceContainer.innerHTML = "";
-      let totalCount = 0;
-
-      Object.keys(PIECE_SETS).forEach((catName) => {
-        const section = document.createElement("div");
-        section.className = "piece-section";
-
-        const label = document.createElement("span");
-        label.className = "section-label";
-        label.textContent = catName;
-        section.appendChild(label);
-
-        const grid = document.createElement("div");
-        grid.className = "section-grid";
-
-        PIECE_SETS[catName].forEach((setName) => {
-          totalCount++;
-          const btn = document.createElement("button");
-          btn.className = "piece-btn" + (setName === tempPieceSet ? " active" : "");
-          btn.dataset.set = setName;
-          btn.title = setName;
-
-          btn.innerHTML =
-            '<div class="piece-preview">' +
-            '<img src="pieces/' + setName + '/wk.png" alt="شاه سفید" ' +
-            'onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">' +
-            '<span class="piece-fallback" style="display:none">\u2654</span>' +
-            '<img src="pieces/' + setName + '/bk.png" alt="شاه سیاه" ' +
-            'onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">' +
-            '<span class="piece-fallback" style="display:none">\u265A</span>' +
-            "</div>";
-
-          btn.onclick = () => {
-            pieceContainer.querySelectorAll(".piece-btn").forEach((b) => b.classList.remove("active"));
-            btn.classList.add("active");
-            tempPieceSet = setName;
-            Sound.play("select");
-            toast("مجموعه مهره انتخاب شد — ذخیره کن");
-          };
-
-          grid.appendChild(btn);
-        });
-
-        section.appendChild(grid);
-        pieceContainer.appendChild(section);
+      PIECE_SETS.forEach((set) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "piece-card" + (set.id === tempPieceSet ? " active" : "");
+        btn.dataset.set = set.id;
+        btn.title = set.name;
+        btn.innerHTML =
+          '<span class="piece-box">' +
+          '<img src="pieces/' + set.id + '/wk.png" alt="King" loading="lazy" ' +
+          'onerror="this.style.display=\'none\'">' +
+          '<img src="pieces/' + set.id + '/bk.png" alt="King" loading="lazy" ' +
+          'onerror="this.style.display=\'none\'">' +
+          "</span>" +
+          '<span class="piece-name">' + set.name + "</span>" +
+          '<span class="pick-badge"><i class="fas fa-check"></i></span>';
+        btn.onclick = () => {
+          pieceContainer
+            .querySelectorAll(".piece-card")
+            .forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          tempPieceSet = set.id;
+          Sound.play("select");
+          refreshDirtyUI();
+        };
+        pieceContainer.appendChild(btn);
       });
+      updatePieceBoxColors();
+    }
 
-      const countDisplay = document.getElementById("pieceCountDisplay");
-      if (countDisplay) countDisplay.textContent = faNum(totalCount);
+    /* ---- کارت صدا: کلید + ولوم + نمونه ---- */
+    function syncSoundUI() {
+      const soundToggle = $("settingsSoundToggle");
+      const volSlider = $("volumeSlider");
+      const volValue = $("volumeValue");
+      const stateEl = $("soundStateLabel");
+      if (soundToggle) soundToggle.checked = tempSound;
+      if (stateEl) {
+        stateEl.textContent = tempSound ? "فعال" : "غیرفعال";
+        stateEl.classList.toggle("on", tempSound);
+      }
+      if (volSlider) volSlider.value = tempVolume;
+      if (volValue) volValue.textContent = faNum(tempVolume) + "٪";
+    }
+
+    function initSoundCard() {
+      const soundToggle = $("settingsSoundToggle");
+      const volSlider = $("volumeSlider");
+      const testBtn = $("soundTestBtn");
+      syncSoundUI();
+
+      if (soundToggle) {
+        soundToggle.addEventListener("change", () => {
+          tempSound = soundToggle.checked;
+          syncSoundUI();
+          refreshDirtyUI();
+          if (tempSound) Sound.play("select");
+        });
+      }
+      if (volSlider) {
+        volSlider.addEventListener("input", () => {
+          tempVolume = Number(volSlider.value);
+          syncSoundUI();
+          Sound._tempVol = tempVolume; // پیش‌نمایش زندهٔ ولوم
+          refreshDirtyUI();
+        });
+        volSlider.addEventListener("change", () => {
+          if (tempSound) Sound.play("move"); // شنیدن ضربه با ولوم جدید
+        });
+      }
+      if (testBtn) {
+        testBtn.addEventListener("click", () => {
+          if (!tempSound) {
+            toast("اول صدا را فعال کن");
+            return;
+          }
+          Sound._tempVol = tempVolume;
+          Sound.play("move");
+          setTimeout(() => Sound.play("capture"), 280);
+          setTimeout(() => Sound.play("check"), 680);
+        });
+      }
     }
 
     /* ---- ذخیره نهایی ---- */
-    function saveAll() {
+    function persistAll() {
       const settings = loadSettings();
       settings.theme = tempTheme;
       settings.pieceSet = tempPieceSet;
+      settings.sound = tempSound;
+      settings.volume = tempVolume;
       saveSettings(settings);
+      Sound._tempVol = null;
       applyTempTheme(settings.theme);
-
       document.dispatchEvent(
         new CustomEvent("pieceSetChanged", { detail: { pieceSet: settings.pieceSet } })
       );
       document.dispatchEvent(
         new CustomEvent("themeChanged", { detail: { theme: settings.theme } })
       );
+    }
 
+    function saveAll() {
+      persistAll();
       Sound.play("correct");
-      toast("تنظیمات با موفقیت ذخیره شد");
+      refreshDirtyUI();
+      if (pendingUrl) {
+        const url = pendingUrl;
+        pendingUrl = null;
+        toast("ذخیره شد — در حال خروج…");
+        setTimeout(() => {
+          window.location.href = url;
+        }, 420);
+      } else {
+        toast("تنظیمات با موفقیت ذخیره شد");
+      }
     }
 
     function resetAll() {
-      if (!confirm("مطمئنی؟ همه تنظیمات به حالت پیشفرض برمی‌گردد.")) return;
-
-      const settings = { ...defaultSettings };
-      saveSettings(settings);
-      tempTheme = "1";
-      tempPieceSet = "neo";
-      applyTempTheme("1");
-      buildThemeButtons();
-      buildPieceButtons();
-
-      document.dispatchEvent(
-        new CustomEvent("pieceSetChanged", { detail: { pieceSet: "neo" } })
-      );
-      document.dispatchEvent(
-        new CustomEvent("themeChanged", { detail: { theme: "1" } })
-      );
-
-      Sound.play("select");
-      toast("تنظیمات به حالت پیشفرض بازگشت");
+      openDialog({
+        tone: "danger",
+        icon: "fas fa-rotate-left",
+        title: "بازنشانی تنظیمات",
+        desc: "همهٔ تنظیمات به حالت پیشفرض برمی‌گردد. مطمئنی؟",
+        ok: "بازنشانی",
+        okIcon: "fas fa-rotate-left",
+        onOk: () => {
+          tempTheme = defaultSettings.theme;
+          tempPieceSet = defaultSettings.pieceSet;
+          tempSound = defaultSettings.sound;
+          tempVolume = defaultSettings.volume;
+          applyTempTheme(tempTheme);
+          Sound._tempVol = null;
+          buildThemeButtons();
+          buildPieceButtons();
+          syncSoundUI();
+          document.dispatchEvent(
+            new CustomEvent("pieceSetChanged", {
+              detail: { pieceSet: defaultSettings.pieceSet },
+            })
+          );
+          document.dispatchEvent(
+            new CustomEvent("themeChanged", {
+              detail: { theme: defaultSettings.theme },
+            })
+          );
+          Sound.play("select");
+          toast("به پیشفرض بازگشت — برای ماندگاری ذخیره کن");
+          refreshDirtyUI();
+        },
+      });
     }
 
+    /* ---- Guard: تغییرات ذخیره‌نشده ---- */
+    function openGuard() {
+      openDialog({
+        tone: "warn",
+        icon: "fas fa-triangle-exclamation",
+        title: "تغییرات ذخیره نشده‌اند",
+        desc: "آیا می‌خواهید ذخیره کنید؟",
+        ok: "ذخیره و خروج",
+        okIcon: "fas fa-floppy-disk",
+        onOk: saveAll,
+        alt: "خروج بدون ذخیره",
+        altIcon: "fas fa-arrow-right-from-bracket",
+        onAlt: () => {
+          if (pendingUrl) {
+            const u = pendingUrl;
+            pendingUrl = null;
+            window.location.href = u;
+          }
+        },
+      });
+    }
+
+    // کلیک روی هر لینک صفحه → اگر تغییر ذخیره‌نشده هست، اول دیالوگ
+    document.addEventListener(
+      "click",
+      (e) => {
+        if (!isDirty()) return;
+        if (dialogEl && dialogEl.classList.contains("open")) return;
+        const a = e.target && e.target.closest ? e.target.closest("a[href]") : null;
+        if (!a) return;
+        const href = a.getAttribute("href") || "";
+        if (!href || href === "#" || href.indexOf("javascript:") === 0) return;
+        if (a.target === "_blank") return;
+        e.preventDefault();
+        e.stopPropagation();
+        pendingUrl = href;
+        openGuard();
+      },
+      true
+    );
+
+    // بستن تب / رفرش صفحه → هشدار خود مرورگر
+    window.addEventListener("beforeunload", (e) => {
+      if (isDirty()) {
+        e.preventDefault();
+        e.returnValue = "";
+        return "";
+      }
+    });
+
+    /* ---- بوت صفحه ---- */
     buildThemeButtons();
     buildPieceButtons();
+    initSoundCard();
+    refreshDirtyUI();
 
-    const saveBtn = document.getElementById("saveSettingsBtn");
     if (saveBtn) saveBtn.addEventListener("click", saveAll);
-
-    const resetBtn = document.getElementById("resetSettingsBtn");
+    const resetBtn = $("resetSettingsBtn");
     if (resetBtn) resetBtn.addEventListener("click", resetAll);
   }
+
 
   /* ============================================
      ۸) بوت — اجرا پس از آماده شدن DOM

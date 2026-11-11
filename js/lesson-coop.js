@@ -109,8 +109,6 @@
   const cellColorPalette = document.getElementById("cellColorPalette");
   const publishBtn = document.getElementById("publishBtn");
   const exportJSONBtn = document.getElementById("exportJSONBtn");
-  const importBtn = document.getElementById("importBtn");
-  const importFile = document.getElementById("importFile");
   const resetFormBtn = document.getElementById("resetFormBtn");
   const editModeBanner = document.getElementById("editModeBanner");
   const editModeTitle = document.getElementById("editModeTitle");
@@ -134,7 +132,6 @@
   let tableColCount = 2;
   let editingLesson = null; // درس در حال ویرایش (اگر حالت ویرایش فعال باشد)
   let pendingPublish = false; // ادامه‌ی انتشار پس از انتخاب نام نویسنده
-  let importedAuthor = null; // نویسنده‌ی داخل فایل JSON آپلودشده
 
   // ===== نام نویسنده =====
   function currentAuthor() {
@@ -614,8 +611,7 @@
   }
 
   function doPublish() {
-    // نویسنده: از نشست/پروفایل — مگر فایل JSON آپلود شود (با تأیید صریح کاربر)
-    const author = importedAuthor || currentAuthor();
+    const author = currentAuthor();
     if (!author) {
       // اگر به هر دلیلی نام از بین رفته باشد، دوباره پرسیده می‌شود
       pendingPublish = true;
@@ -625,7 +621,6 @@
 
     const data = collectLessonData();
     if (!validateLessonData(data)) return;
-    showImportErrors([]); // ✅ اعتبارسنجی رد شد — کادر خطاهای قدیمی پاک شود
 
     const now = Date.now();
     const list = loadUserLessons();
@@ -639,11 +634,8 @@
         list.unshift(Object.assign({}, editingLesson));
         idx = 0;
       }
-      // 📥 اگر آپلودکننده اثر نویسنده‌ی دیگر را ویرایش می‌کند، نام نویسنده‌ی اصلی حفظ می‌شود
-      const keepAuthor = !!list[idx].author && list[idx].author !== author;
       list[idx] = Object.assign({}, list[idx], data, {
-        author: keepAuthor ? list[idx].author : author,
-        importedFile: !!importedAuthor || keepAuthor,
+        author: author,
         updatedAt: now,
       });
       if (!saveUserLessons(list)) {
@@ -658,9 +650,6 @@
       const lesson = Object.assign({}, data, {
         id: "u_" + now,
         author: author,
-        importedFile: !!importedAuthor,
-        // 📥 آپلودکننده ثبت می‌شود تا بعداً ویرایش/حذف برای او هم باز باشد
-        importedBy: importedAuthor ? (currentAuthor() || null) : null,
         createdAt: now,
         updatedAt: now,
       });
@@ -696,9 +685,7 @@
       "lessons",
       serverId ? "update" : "publish",
       serverId || localItem.id,
-      payload,
-      // 📥 اگر محتوا از فایل JSON آمده، نام نویسنده‌ی فایل حفظ می‌شود
-      localItem.importedFile ? { allowFileAuthor: true } : undefined
+      payload
     )
       .then(function (j) {
         if (j.item && j.item.id) {
@@ -781,246 +768,6 @@
     showToast(`✅ فایل JSON با موفقیت دانلود شد! (${data.title})`, "success");
   }
 
-  // ===== ورودی JSON (آپلود فایل استاندارد — دقیقاً یک فایل در هر بار) =====
-
-  // پاک‌سازی HTML درس مطابق استاندارد سرور (حذف اسکریپت/رویداد/لینک خطرناک)
-  function sanitizeLessonHtml(html, maxLen) {
-    let s = String(html == null ? "" : html);
-    if (s.length > maxLen) s = s.slice(0, maxLen);
-    return s
-      .replace(/<\s*(script|style|iframe|object|embed|form|input|link|meta|base)[^>]*>[\s\S]*?<\s*\/\s*\1\s*>/gi, "")
-      .replace(/<\s*(script|style|iframe|object|embed|form|input|link|meta|base)[^>]*\/?\s*>/gi, "")
-      .replace(/\son\w+\s*=\s*"[^"]*"/gi, "")
-      .replace(/\son\w+\s*=\s*'[^']*'/gi, "")
-      .replace(/\son\w+\s*=\s*[^\s>]+/gi, "")
-      .replace(/javascript\s*:/gi, "");
-  }
-
-  function importJSON() {
-    importFile.value = "";
-    importFile.click();
-  }
-
-  // ===== 🆕 v8.3 — کادر خطاهای فایل آپلودشده (بالای فرم) =====
-  const importErrorBox = document.getElementById("importErrorBox");
-  const importErrorList = document.getElementById("importErrorList");
-
-  function faNum(n) {
-    return String(n).replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[+d]);
-  }
-
-  function showImportErrors(problems) {
-    if (!importErrorBox || !importErrorList) return;
-    importErrorList.innerHTML = "";
-    const list = problems || [];
-    list.forEach(function (p) {
-      const li = document.createElement("li");
-      const span = document.createElement("span");
-      span.textContent = p.msg;
-      li.appendChild(span);
-      if (p.find) {
-        const b = document.createElement("button");
-        b.type = "button";
-        b.textContent = "نمایش در فرم";
-        b.addEventListener("click", function () {
-          const el = p.find();
-          if (!el) return;
-          el.scrollIntoView({ behavior: "smooth", block: "center" });
-          el.classList.remove("chmi-bad-input");
-          void el.offsetWidth;
-          el.classList.add("chmi-bad-input");
-          try { el.focus({ preventScroll: true }); } catch (e) {}
-          setTimeout(function () { el.classList.remove("chmi-bad-input"); }, 3000);
-        });
-        li.appendChild(b);
-      }
-      importErrorList.appendChild(li);
-    });
-    importErrorBox.style.display = list.length ? "block" : "none";
-  }
-
-  function flagBadInput(el, msg) {
-    if (!el) return;
-    el.classList.add("chmi-bad-input");
-    if (msg) el.title = msg;
-    // select هم رویداد change می‌فرستد نه input — هر دو گوش داده می‌شوند
-    el.addEventListener(
-      "input",
-      function onFix() {
-        el.classList.remove("chmi-bad-input");
-        el.removeEventListener("input", onFix);
-        el.removeEventListener("change", onChange);
-        // ✅ همه‌ی فیلدهای خطادار اصلاح شدند → کادر خطا هم پنهان شود
-        if (!document.querySelector(".chmi-bad-input")) showImportErrors([]);
-      }
-    );
-    var onChange = function () {
-      el.classList.remove("chmi-bad-input");
-      el.removeEventListener("input", onFix);
-      el.removeEventListener("change", onChange);
-      if (!document.querySelector(".chmi-bad-input")) showImportErrors([]);
-    };
-    el.addEventListener("change", onChange);
-  }
-
-  function handleImportFile(file) {
-    if (!file) return;
-    if (file.size > 512 * 1024) {
-      showToast("❌ حجم فایل بیش از ۵۱۲ کیلوبایت است", "error");
-      return;
-    }
-    const reader = new FileReader();
-    reader.onerror = function () {
-      showToast("❌ خواندن فایل ممکن نشد", "error");
-    };
-    reader.onload = function () {
-      let obj = null;
-      try { obj = JSON.parse(String(reader.result)); } catch (e) { obj = null; }
-      if (!obj || typeof obj !== "object" || Array.isArray(obj)) {
-        showToast("❌ فایل JSON معتبر نیست — این فایل خروجی «خروجی JSON» همین صفحه است؟", "error");
-        return;
-      }
-      // 🆕 v8.3 — فایل همیشه بارگذاری می‌شود؛ خطاها همه با هم در کادر
-      // بالای فرم فهرست می‌شوند تا کاربر همان‌ها را اصلاح کند
-      const plan = buildImportPlan(obj);
-      fillFormFromImport(plan.data, obj, plan.problems);
-    };
-    reader.readAsText(file, "utf8");
-  }
-
-  // خروجی: { data, problems } — همه‌ی خطاها جمع می‌شوند؛ فایل رد نمی‌شود
-  function buildImportPlan(o) {
-    const problems = [];
-    const titleFind = function () { return document.getElementById("lessonTitle"); };
-    const descFind = function () { return document.getElementById("lessonDescription"); };
-
-    const title = String(o.title || "").trim();
-    if (title.length < 3 || title.length > 120) {
-      problems.push({
-        msg: "عنوان درس باید بین ۳ تا ۱۲۰ حرف باشد" + (title ? " (الان " + faNum(title.length) + " حرف)" : " (خالی است)"),
-        find: titleFind,
-      });
-    }
-
-    const description = String(o.description || "").trim();
-    if (description.length < 5 || description.length > 400) {
-      problems.push({
-        msg: "توضیحات درس باید بین ۵ تا ۴۰۰ حرف باشد" + (description ? " (الان " + faNum(description.length) + " حرف)" : " (خالی است)"),
-        find: descFind,
-      });
-    }
-
-    const content = sanitizeLessonHtml(o.content, 80000);
-    if (content.trim().length < 20) {
-      problems.push({
-        msg: "محتوای درس خیلی کوتاه است (حداقل ۲۰ حرف) — در ویرایشگر محتوا کاملش کن",
-        find: function () { return document.getElementById("editorArea") || document.getElementById("lessonTitle"); },
-      });
-    }
-
-    // دسته‌بندی و سطح — فقط مقادیر مجاز فرم
-    const catSelect = document.getElementById("lessonCategory");
-    const lvlSelect = document.getElementById("lessonLevel");
-    const catOptions = Array.from(catSelect.options).map((x) => x.value);
-    const lvlOptions = Array.from(lvlSelect.options).map((x) => x.value);
-    const category = catOptions.indexOf(String(o.category || "").trim()) >= 0
-      ? String(o.category).trim()
-      : catOptions[0];
-    const level = lvlOptions.indexOf(String(o.level || "").trim()) >= 0
-      ? String(o.level).trim()
-      : lvlOptions[0];
-    if (o.category && catOptions.indexOf(String(o.category).trim()) < 0) {
-      problems.push({
-        msg: "دسته‌بندی «" + String(o.category).slice(0, 30) + "» در سایت وجود ندارد — «" + catOptions[0] + "» گذاشته شد؛ خودت عوضش کن",
-        find: function () { return catSelect; },
-      });
-    }
-
-    const duration = String(o.duration || "").trim().slice(0, 40) || "۱۰ دقیقه";
-    const thumbIcon = ICONS.indexOf(String(o.thumbIcon || "").trim()) >= 0
-      ? String(o.thumbIcon).trim()
-      : "fas fa-book-open";
-    const color = COLORS.indexOf(String(o.color || "").trim()) >= 0
-      ? String(o.color).trim()
-      : "#2c7da0";
-
-    return {
-      data: {
-        title: title,
-        category: category,
-        level: level,
-        duration: duration,
-        description: description,
-        content: content,
-        thumbIcon: thumbIcon,
-        color: color,
-      },
-      problems: problems,
-    };
-  }
-
-  function fillFormFromImport(data, original, problems) {
-    // 📥 انتخاب نویسنده — پیش‌فرض: نویسنده‌ی داخل فایل (با تأیید کاربر)
-    const fileAuthor = String(original.author || "").trim().slice(0, 40);
-    const me = currentAuthor();
-    if (fileAuthor && fileAuthor !== me) {
-      const keep = confirm(
-        "نویسنده‌ی داخل فایل: «" + fileAuthor + "»\n\n" +
-          "OK = انتشار با نام نویسنده‌ی فایل («" + fileAuthor + "»)\n" +
-          "Cancel = انتشار با نام خودت" + (me ? " («" + me + "»)" : "")
-      );
-      importedAuthor = keep ? fileAuthor : me;
-    } else {
-      importedAuthor = me || fileAuthor || null;
-    }
-
-    document.getElementById("lessonTitle").value = data.title;
-    document.getElementById("lessonCategory").value = data.category;
-    document.getElementById("lessonLevel").value = data.level;
-    document.getElementById("lessonDuration").value = data.duration;
-    document.getElementById("lessonDescription").value = data.description;
-
-    editorArea.innerHTML = data.content;
-    selectedIcon = data.thumbIcon;
-    selectedIconInput.value = selectedIcon;
-    buildIconGrid();
-    selectedColor = data.color;
-    selectedColorInput.value = selectedColor;
-    buildColorGrid();
-    updatePreview();
-
-    editingLesson = null;
-    editModeBanner.style.display = "none";
-    restorePublishButton();
-    try { history.replaceState(null, "", "lesson-coop.html"); } catch (e) {}
-
-    if (importedAuthor || me) {
-      authorChip.style.display = "flex";
-      authorChipName.textContent = importedAuthor || me;
-    } else {
-      updateAuthorChip();
-    }
-    window.scrollTo({ top: 0, behavior: "smooth" });
-
-    // 🆕 v8.3 — علامت‌گذاری فیلدهای خطادار + کادر خطا بالای فرم
-    const probs = problems || [];
-    probs.forEach(function (p) {
-      if (!p.find) return;
-      const el = p.find();
-      if (el) flagBadInput(el, p.msg);
-    });
-    showImportErrors(probs);
-
-    if (probs.length) {
-      showToast(
-        "⚠️ فایل بارگذاری شد اما " + faNum(probs.length) + " خطا دارد — کادر بالای فرم را ببین و اصلاح کن",
-        "warning"
-      );
-    } else {
-      showToast("✅ فایل JSON با موفقیت بارگذاری شد — حالا «انتشار در سایت» را بزن");
-    }
-  }
-
   // ===== ریست فرم =====
   function resetForm(needsConfirm) {
     if (needsConfirm) {
@@ -1052,8 +799,6 @@
     buildCellColorPalette();
     selectedTableCell = null;
     editingLesson = null;
-    importedAuthor = null;
-    showImportErrors([]); // 🆕 v8.3 — کادر خطا هم پاک شود
     editModeBanner.style.display = "none";
     restorePublishButton();
     try {
@@ -1073,8 +818,7 @@
     if (!editId) return;
 
     const lesson = loadUserLessons().find(
-      (l) => String(l.id) === String(editId) ||
-             String(l.serverId || "") === String(editId)
+      (l) => String(l.id) === String(editId)
     );
     if (!lesson) {
       // 🔁 درس در این دستگاه ذخیره نیست — شاید روی سرور عمومی باشد
@@ -1100,38 +844,12 @@
   }
 
   function applyEditMode(lesson) {
-    // نویسنده‌ی همان درس (یا آپلودکننده‌ی فایل — مطابق مجوز سرور) حق ویرایش دارد
+    // فقط نویسنده‌ی همان درس حق ویرایش دارد
     const author = currentAuthor();
-    const isAllowed = !author || !lesson.author ||
-      lesson.author === author || lesson.importedBy === author;
-
-    if (!isAllowed && window.CommunityHub &&
-        (lesson.serverId || String(lesson.id || "").indexOf("srv_") === 0)) {
-      // 🔄 شاید آپلودکننده‌ی فایل باشی — مجوز واقعی از نسخه‌ی سرور چک می‌شود
-      CommunityHub.fetchAll(true).then(function (c) {
-        const remote = (c.lessons || []).find(function (x) {
-          return String(x.id) === String(lesson.serverId || lesson.id);
-        });
-        if (remote && (remote.author === author || remote.importedBy === author)) {
-          lesson.importedBy = remote.importedBy || author;
-          doApplyEditMode(lesson);
-        } else {
-          showToast("⚠️ فقط نویسنده‌ی درس می‌تواند آن را ویرایش کند", "warning");
-        }
-      }).catch(function () {
-        showToast("⚠️ فقط نویسنده‌ی درس می‌تواند آن را ویرایش کند", "warning");
-      });
-      return;
-    }
-
-    if (!isAllowed) {
+    if (author && lesson.author && lesson.author !== author) {
       showToast("⚠️ فقط نویسنده‌ی درس می‌تواند آن را ویرایش کند", "warning");
       return;
     }
-    doApplyEditMode(lesson);
-  }
-
-  function doApplyEditMode(lesson) {
 
     editingLesson = lesson;
 
@@ -1281,11 +999,6 @@
   // ===== دکمه‌های اصلی =====
   publishBtn.addEventListener("click", publishFlow);
   exportJSONBtn.addEventListener("click", exportJSON);
-  importBtn.addEventListener("click", importJSON);
-  importFile.addEventListener("change", function () {
-    // دقیقاً یک فایل در هر بار — ورودی بدون multiple است
-    if (this.files && this.files[0]) handleImportFile(this.files[0]);
-  });
   resetFormBtn.addEventListener("click", function () {
     resetForm(true);
   });

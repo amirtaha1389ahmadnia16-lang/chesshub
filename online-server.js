@@ -36,37 +36,24 @@ const ROOT = __dirname;
 const DATA_DIR = path.join(ROOT, "data");
 const USERS_FILE = path.join(DATA_DIR, "users.json");
 const GAMES_FILE = path.join(DATA_DIR, "online_games.json");
-const ACTIVE_FILE = path.join(DATA_DIR, "active_games.json"); // 🎮 v8.3 — بازی‌های در جریان
 // 🔄 ماندگاری داده‌ها با گیت‌هاب (اختیاری — با GITHUB_TOKEN فعال می‌شود)
 let dataSync = null;
 try { dataSync = require("./data-sync"); } catch (e) { dataSync = null; }
-// 🔐 v8.3 — هویت بازیکن به «حساب سایت» گره می‌خورد (توکن امضاشده)
-let authMod = null;
-try { authMod = require("./server-auth"); } catch (e) { authMod = null; }
 const ELO_K = 32;
 const START_RATING = 1200;
 const NAME_COOLDOWN_MS = 15 * 24 * 3600 * 1000; // ۱۵ روز
 const ABORT_TIMEOUT_MS = 15000;
-// ⏱ v8.3 — ۱۵ثانیه برای «رفرش صفحه» خیلی کم بود: رفرش + بازگشایی
-// پنجره‌ی ورود = حریف ببرد. حالا ۴۵ ثانیه و شمارش روی صفحه دیده می‌شود.
-const DISCONNECT_TIMEOUT_MS = 45000;
-// 🎮 v8.3 — بعد از ری‌استارت سرور، بازی بازیابی‌شده این‌قدر مهلت دارد تا
-// حداقل یکی از دو بازیکن برگردد؛ وگرنه بی‌دردسر لغو (بدون کسر ریتینگ)
-const RESTORE_GRACE_MS = 120000;
+const DISCONNECT_TIMEOUT_MS = 15000;
 
 // ---------- داده‌ها ----------
 let users = {};       // userId → {name, avatar, rating, wins, losses, draws, nameChangedAt, createdAt, lastSeen}
 let games = [];       // آرشیو همه‌ی بازی‌های تمام‌شده (فایل مدیر)
-let activeGamesDisk = []; // 🎮 v8.3 — وضعیت بازی‌های در جریان (بقای بعد از ری‌استارت)
 let dirtyUsers = false;
 let dirtyGames = false;
-let dirtyActive = false;
 
 function loadFiles() {
   try { users = JSON.parse(fs.readFileSync(USERS_FILE, "utf8")) || {}; } catch (e) { users = {}; }
   try { games = JSON.parse(fs.readFileSync(GAMES_FILE, "utf8")) || []; } catch (e) { games = []; }
-  try { activeGamesDisk = JSON.parse(fs.readFileSync(ACTIVE_FILE, "utf8")) || []; } catch (e) { activeGamesDisk = []; }
-  if (!Array.isArray(activeGamesDisk)) activeGamesDisk = [];
 }
 function saveFiles(force) {
   if (dirtyUsers || force) {
@@ -87,96 +74,6 @@ function saveFiles(force) {
       if (dataSync) dataSync.pushLater("online_games.json"); // 🔄 همگام‌سازی گیت‌هاب
     } catch (e) { console.error("[Online] ذخیره games:", e.message); }
   }
-  // 🎮 v8.3 — بازی‌های در جریان هم ماندگار می‌شوند (هر ۲ ثانیه اگر تغییر)
-  if (dirtyActive || force) {
-    try {
-      const list = [];
-      gamesMap.forEach(function (g) {
-        if (!g.over) list.push(serializeGame(g));
-      });
-      fs.mkdirSync(DATA_DIR, { recursive: true });
-      fs.writeFileSync(ACTIVE_FILE + ".tmp", JSON.stringify(list));
-      fs.renameSync(ACTIVE_FILE + ".tmp", ACTIVE_FILE);
-      dirtyActive = false;
-      if (dataSync) dataSync.pushLater("active_games.json");
-    } catch (e) { console.error("[Online] ذخیره activeGames:", e.message); }
-  }
-}
-
-// 🎮 v8.3 — تبدیل بازی زنده به رکورد قابل ذخیره (بدون تایمر/اشیاء زنده)
-function serializeGame(g) {
-  return {
-    id: g.id,
-    white: g.white,
-    black: g.black,
-    tc: { base: g.tc.base, inc: g.tc.inc },
-    fen: g.fen,
-    moves: (g.moves || []).slice(0, 1000),
-    lastMove: g.lastMove || null,
-    clocks: { w: g.clocks.w, b: g.clocks.b },
-    lastTick: Date.now(),
-    updatedAt: Date.now(),
-    started: !!g.started,
-    startedAt: g.startedAt || null,
-    over: false,
-    chat: (g.chat || []).slice(-50),
-  };
-}
-
-// 🎮 v8.3 — بازسازی بازی زنده از رکورد ذخیره‌شده (بعد از ری‌استارت/دیپلوی)
-function deserializeGame(rec) {
-  if (!rec || !rec.id || !rec.white || !rec.black) return null;
-  const tc = validTC(rec.tc) || { base: 300, inc: 0 };
-  const g = createGame(rec.white, rec.black, tc);
-  // createGame با شناسه‌ی تازه در gamesMap گذاشت — کلید کهنه را پاک کن
-  const staleId = g.id;
-  g.id = rec.id; // همان شناسه — کلاینت‌ها بعد از رفرش دوباره وصل می‌شوند
-  gamesMap.delete(staleId);
-  g.moves = Array.isArray(rec.moves) ? rec.moves.slice(0, 1000) : [];
-  g.clocks = {
-    w: Math.max(0, Number(rec.clocks && rec.clocks.w) || tc.base),
-    b: Math.max(0, Number(rec.clocks && rec.clocks.b) || tc.base),
-  };
-  g.chat = Array.isArray(rec.chat) ? rec.chat.slice(-50) : [];
-  g.started = !!rec.started;
-  g.startedAt = rec.startedAt || null;
-  g.lastMove = rec.lastMove || null;
-  // بازسازی وضعیت صفحه از روی حرکات — منبع حقیقت همان moves است
-  if (g.chess) {
-    for (let i = 0; i < g.moves.length; i++) {
-      const u = String(g.moves[i] || "");
-      try { g.chess.move({ from: u.slice(0, 2), to: u.slice(2, 4), promotion: u[4] || "q" }); } catch (e) { break; }
-    }
-    g.fen = g.chess.fen();
-  } else {
-    g.fen = rec.fen || g.fen;
-  }
-  return g;
-}
-
-// 🎮 v8.3 — بازیابی بازی‌های در جریان هنگام بوت + مهلت بازگشت بازیکن‌ها
-function restoreActiveGames() {
-  if (!activeGamesDisk.length) return 0;
-  let restored = 0;
-  activeGamesDisk.forEach(function (rec) {
-    if (!rec || !rec.id || gamesMap.has(rec.id)) return;
-    if (rec.over) return;
-    const g = deserializeGame(rec);
-    if (!g) return;
-    g.lastTick = Date.now(); // ساعت از همین لحظه ادامه می‌یابد
-    gamesMap.set(g.id, g);
-    restored++;
-    // 🕐 هر دو بازیکن (فعلاً) غایب‌اند — اگر تا ۲ دقیقه کسی برنگشت لغو؛
-    // با بازگشت هرکسی، تایمر قطعی ۴۵ثانیه‌ای برای حریفِ غایب مسلح می‌شود.
-    clearTimeout(g.abortTimer);
-    g.abortTimer = null;
-    g.abortDeadline = 0;
-    g.restoreTimer = setTimeout(function () {
-      if (!g.over) finishGame(g, null, "abort", false);
-    }, RESTORE_GRACE_MS);
-  });
-  if (restored) dirtyActive = true;
-  return restored;
 }
 
 // ---------- WebSocket (RFC 6455) ----------
@@ -316,7 +213,6 @@ function createGame(whiteId, blackId, tc) {
     chat: [],
   };
   gamesMap.set(g.id, g);
-  dirtyActive = true; // 🎮 v8.3
   armAbortTimer(g);
   return g;
 }
@@ -385,21 +281,14 @@ function publicPosition(g) {
   };
   // ⏱ شمارش معکوس لغو خودکار — فقط وقتی مسلح است
   if (g.abortDeadline) p.abortIn = Math.max(0, (g.abortDeadline - Date.now()) / 1000);
-  // ⏱ v8.3 — شمارش معکوس بازگشت حریفِ قطع‌شده (روی صفحه‌ی همه دیده می‌شود)
-  if (g.disconnectTimer && g.disconnectSide) {
-    p.reconnectIn = Math.max(0, DISCONNECT_TIMEOUT_MS / 1000 - (Date.now() - (g.disconnectStartedAt || Date.now())) / 1000);
-  }
   return p;
 }
 
 // ساعت: کم‌کردن از نوبت‌دار — هر ۱۰۰ms
 function tickGames() {
   const now = Date.now();
-  let anyActive = false;
   gamesMap.forEach(function (g) {
-    if (g.over) return;
-    anyActive = true;
-    if (!g.started) return;
+    if (g.over || !g.started) return;
     const turn = g.chess ? g.chess.turn() : "w";
     const dt = (now - g.lastTick) / 1000;
     g.lastTick = now;
@@ -413,8 +302,6 @@ function tickGames() {
       return;
     }
   });
-  // 🎮 v8.3 — بازی زنده یعنی فایل فعال باید به‌روز شود (نوشتن هر ۲ ثانیه)
-  if (anyActive) dirtyActive = true;
 }
 
 let clockSecond = 0;
@@ -471,10 +358,6 @@ function finishGame(g, result, reason, rated, loserId) {
   g.abortDeadline = 0;
   clearTimeout(g.disconnectTimer);
   g.disconnectTimer = null;
-  g.disconnectSide = null;
-  g.disconnectStartedAt = 0;
-  if (g.restoreTimer) { clearTimeout(g.restoreTimer); g.restoreTimer = null; } // 🎮 v8.3
-  dirtyActive = true; // 🎮 v8.3 — از فایل بازی‌های فعال حذف می‌شود
 
   const w = users[g.white];
   const b = users[g.black];
@@ -615,50 +498,27 @@ function broadcastLive() {
 
 // ---------- مدیریت پیام ----------
 function handleAuth(client, msg) {
-  let userId = null;
-  let displayName = null;
-  let avatar = null;
-
-  // 🔐 v8.3 — اگر توکن حساب سایت آمد، هویت = خودِ حساب (پایدار در همه‌ی
-  // دستگاه‌ها و بعد از رفرش). بدون توکن = مسیر مهمانِ قدیمی.
-  const token = String(msg.token || "").trim();
-  if (token && authMod) {
-    const payload = authMod.verifyToken(token);
-    if (payload && payload.u) {
-      userId = "acc:" + payload.u;
-      displayName = payload.n;
-      const acc = authMod.readAccounts()[payload.u];
-      if (acc) avatar = acc.avatar || "";
-    }
-  }
-  if (!userId) {
-    userId = (msg.userId || "u" + crypto.randomBytes(6).toString("hex")).slice(0, 40);
-    displayName = msg.name || null;
-    avatar = msg.avatar || null;
-  }
-
+  const userId = (msg.userId || "u" + crypto.randomBytes(6).toString("hex")).slice(0, 40);
   client.userId = userId;
-  client.profile = ensureUser(userId, displayName, avatar);
+  client.profile = ensureUser(userId, msg.name, msg.avatar);
   client.profile.lastSeen = Date.now();
   dirtyUsers = true;
   userSockets.set(userId, client);
   const p = publicProfile(userId);
-  wsSend(client, { t: "authed", profile: p, accountId: token && userId.indexOf("acc:") === 0 ? userId.slice(4) : null });
+  wsSend(client, { t: "authed", profile: p });
   broadcastUsers();
   broadcastLive();
 
-  // بازی در جریان؟ → ادامه بعد از رفرش 🎮
+  // بازی در جریان؟ → ادامه بعد از رفرش
   gamesMap.forEach(function (g) {
     if (g.over) return;
     const color = colorOf(g, userId);
     if (!color) return;
-    // پاک‌سازی تایمرهای قطعی/بازیابی — بازیکن برگشت
-    if (g.restoreTimer) { clearTimeout(g.restoreTimer); g.restoreTimer = null; }
+    // پاک‌سازی تایمر قطعی
     if (g.disconnectTimer && g.disconnectSide === userId) {
       clearTimeout(g.disconnectTimer);
       g.disconnectTimer = null;
       g.disconnectSide = null;
-      g.disconnectStartedAt = 0;
       broadcastGame(g, { t: "opponentReconnected", gameId: g.id });
     }
     wsSend(client, {
@@ -674,39 +534,6 @@ function handleAuth(client, msg) {
     wsSend(client, publicPosition(g));
     g.chat.forEach(function (ch) { wsSend(client, { t: "chat", gameId: g.id, from: ch.from, text: ch.text }); });
   });
-}
-
-// 🎮 v8.3 — درخواست «ادامه‌ی بازی» از سمت کلاینت بعد از رفرش
-// (پشتیبانِ پیوستن خودکار: کلاینت شناسه‌ی بازی را در sessionStorage دارد)
-function handleResume(client, msg) {
-  const g = gamesMap.get(String(msg.gameId || ""));
-  if (!g || g.over) {
-    return wsSend(client, { t: "resumeGone", gameId: msg.gameId || null });
-  }
-  const color = colorOf(g, client.userId);
-  if (!color) {
-    return wsSend(client, { t: "resumeGone", gameId: msg.gameId || null });
-  }
-  if (g.restoreTimer) { clearTimeout(g.restoreTimer); g.restoreTimer = null; }
-  if (g.disconnectTimer && g.disconnectSide === client.userId) {
-    clearTimeout(g.disconnectTimer);
-    g.disconnectTimer = null;
-    g.disconnectSide = null;
-    g.disconnectStartedAt = 0;
-    broadcastGame(g, { t: "opponentReconnected", gameId: g.id });
-  }
-  wsSend(client, {
-    t: "gameStart",
-    gameId: g.id,
-    color: color,
-    fen: g.fen,
-    tc: g.tc,
-    opp: oppProfile(g, client.userId),
-    reconnect: g.moves.length > 0,
-    reconnectSecondsLeft: g.disconnectTimer ? DISCONNECT_TIMEOUT_MS / 1000 : 0,
-  });
-  wsSend(client, publicPosition(g));
-  g.chat.forEach(function (ch) { wsSend(client, { t: "chat", gameId: g.id, from: ch.from, text: ch.text }); });
 }
 
 function handleQuick(client, msg) {
@@ -1076,7 +903,6 @@ function handleDisconnect(client) {
       wsSendTo(opp, { t: "opponentDisconnected", gameId: g.id, seconds: DISCONNECT_TIMEOUT_MS / 1000 });
       clearTimeout(g.disconnectTimer);
       g.disconnectSide = client.userId;
-      g.disconnectStartedAt = Date.now(); // 🎮 v8.3 — برای شمارش معکوس روی صفحه
       g.disconnectTimer = setTimeout(function () {
         if (!g.over) {
           finishGame(g, color === "w" ? "0-1" : "1-0", "disconnect", true, client.userId);
@@ -1091,18 +917,13 @@ function handleDisconnect(client) {
 // ---------- اتصال ----------
 function attach(server) {
   loadFiles();
-  const nRestored = restoreActiveGames(); // 🎮 v8.3 — بازی‌های نیمه‌کاره زنده می‌شوند
-  if (nRestored) console.log("[Online] 🎮 " + nRestored + " بازی در جریان از دیسک بازیابی شد");
   setInterval(function () { saveFiles(false); }, 2000);
 
   // 🔄 ماندگاری گیت‌هاب — اگر فایل‌های محلی نبودند از ریپو برمی‌گردند
   if (dataSync) {
     dataSync.init().then(function (fetched) {
-      // 🔐 کلید امضای توکن ممکن است از گیت‌هاب برگردد — قبل از اعتبارسنجی‌های بعدی
-      try { if (authMod && authMod.reloadTokenSecret) authMod.reloadTokenSecret(); } catch (e) {}
       if (fetched && fetched.length) {
-        // 🔄 v8.3 — ادغام امن به‌جای جایگزینی: داده‌ی تازه‌ترِ حافظه حفظ می‌شود
-        reloadFiles();
+        loadFiles(); // داده‌های بازیابی‌شده را دوباره بخوان
         broadcastUsers();
         broadcastLive();
         console.log("[Sync] بازگردانی از گیت‌هاب: " + fetched.join(", "));
@@ -1154,7 +975,6 @@ function attach(server) {
 function route(client, msg) {
   switch (msg.t) {
     case "auth": return handleAuth(client, msg);
-    case "resume": return handleResume(client, msg); // 🎮 v8.3
     case "quick": return handleQuick(client, msg);
     case "cancelQuick": return handleCancelQuick(client);
     case "challenge": return handleChallenge(client, msg);
@@ -1177,87 +997,4 @@ function route(client, msg) {
   }
 }
 
-// 🔄 v8.2 — بارگذاری مجدد داده از دیسک بعد از ادغام گیت‌هاب.
-// به‌جای جایگزینی کورکورانه، نسخه‌ی تازه‌ترِ هر رکورد نگه داشته می‌شود
-// تا ریتینگ/آمار بازیکنانی که همین الان در حافظه‌اند از بین نرود.
-function reloadFiles() {
-  try {
-    const diskUsers = JSON.parse(fs.readFileSync(USERS_FILE, "utf8")) || {};
-    const diskGames = JSON.parse(fs.readFileSync(GAMES_FILE, "utf8")) || [];
-    let ds = null;
-    try { ds = require("./data-sync")._test; } catch (e) { ds = null; }
-    if (ds) {
-      const mergedU = ds.mergeUsers(diskUsers, users);
-      const mergedG = ds.mergeGames(diskGames, games);
-      users = mergedU;
-      games = mergedG;
-    } else {
-      // بدون data-sync: فقط کلیدهای جدید را اضافه کن
-      Object.keys(diskUsers).forEach(function (k) { if (!users[k]) users[k] = diskUsers[k]; });
-      const have = new Set(games.map(function (g) { return String(g.id || g.gameId); }));
-      diskGames.forEach(function (g) {
-        if (!have.has(String(g.id || g.gameId))) games.push(g);
-      });
-    }
-    // 🎮 v8.3 — بازی‌های در جریانی که از گیت‌هاب آمده‌اند (مثلاً بعد از دیپلوی)
-    let diskActive = [];
-    try { diskActive = JSON.parse(fs.readFileSync(ACTIVE_FILE, "utf8")) || []; } catch (e) { diskActive = []; }
-    let restoredNow = 0;
-    if (Array.isArray(diskActive)) {
-      diskActive.forEach(function (rec) {
-        if (!rec || !rec.id || gamesMap.has(rec.id) || rec.over) return;
-        const g = deserializeGame(rec);
-        if (!g) return;
-        g.lastTick = Date.now();
-        gamesMap.set(g.id, g);
-        restoredNow++;
-        clearTimeout(g.abortTimer);
-        g.abortTimer = null;
-        g.abortDeadline = 0;
-        g.restoreTimer = setTimeout(function () {
-          if (!g.over) finishGame(g, null, "abort", false);
-        }, RESTORE_GRACE_MS);
-      });
-    }
-    // 🛠️ v8.3.1 — قبلاً اینجا «بدون هیچ شرطی» dirtyUsers/dirtyGames=true و
-    // saveFiles(true) اجباری اجرا می‌شد؛ یعنی «هر بوتِ سرور» دو-سه فایل را
-    // دوباره می‌نوشت و به گیت‌هاب push می‌کرد — حتی وقتی هیچ چیزی عوض نشده بود.
-    // نتیجه: کامیت خالی بعد از هر بوت → اگر autoDeploy روشن باشد، هر کامیت یک
-    // دیپلوی تازه → ری‌استارت دوباره → حلقه‌ی بی‌نهایت دیپلوی/ری‌استارت!
-    // حالا فقط وقتی محتوای ادغام‌شده با دیسک «واقعاً» فرق دارد ذخیره/push می‌شود.
-    let usersChanged = false;
-    let gamesChanged = false;
-    try {
-      const diskUsersRaw = fs.readFileSync(USERS_FILE, "utf8");
-      usersChanged = JSON.stringify(users) !== JSON.stringify(JSON.parse(diskUsersRaw));
-    } catch (e) { usersChanged = true; }
-    try {
-      const diskGamesRaw = fs.readFileSync(GAMES_FILE, "utf8");
-      gamesChanged = JSON.stringify(games) !== JSON.stringify(JSON.parse(diskGamesRaw));
-    } catch (e) { gamesChanged = true; }
-    if (usersChanged) dirtyUsers = true;
-    if (gamesChanged) dirtyGames = true;
-    if (restoredNow) dirtyActive = true;
-    saveFiles(false); // فقط فایل‌های واقعاً تغییریافته نوشته و push می‌شوند
-    console.log("[Online] داده‌ها پس از ادغام گیت‌هاب دوباره بارگذاری شد — " +
-      Object.keys(users).length + " بازیکن، " + games.length + " بازی" +
-      (restoredNow ? "، " + restoredNow + " بازی در جریان بازیابی شد" : ""));
-  } catch (e) {
-    console.error("[Online] خطای reloadFiles: " + e.message);
-  }
-}
-
-module.exports = { attach: attach, reloadFiles: reloadFiles };
-
-// 🔧 هوک تست — چرخه‌ی ذخیره/بازیابی بدون شبکه قابل تست می‌کند
-module.exports._test = {
-  serializeGame: serializeGame,
-  deserializeGame: deserializeGame,
-  restoreActiveGames: restoreActiveGames,
-  loadFiles: loadFiles,
-  activeCount: function () {
-    let n = 0;
-    gamesMap.forEach(function (g) { if (!g.over) n++; });
-    return n;
-  },
-};
+module.exports = { attach: attach };

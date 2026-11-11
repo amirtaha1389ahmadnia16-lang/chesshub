@@ -45,6 +45,8 @@
   let clocks = { w: 300, b: 300 };
   let localTick = null;
   let lastServerClock = 0;
+  let lastMoveCount = 0;
+  let lastFen = null;
   let posStarted = false; // ⏱ ساعت سرور فقط پس از اولین حرکت می‌چرخد
   let searching = false;
   let pendingInvite = null;
@@ -486,7 +488,7 @@
         send({ t: "move", gameId: curGameId, from: from, to: to, promotion: promo || "q" });
         lastMove = { from: mv.from, to: mv.to };
         refreshBoard();
-        if (window.ChessHub) ChessHub.Sound.play("move");
+        // 🎵 صدا در onPosition پخش می‌شود (هم حریف هم خودم — بدون دوبل)
         return true;
       },
     });
@@ -498,6 +500,8 @@
     connect._gotGame = true; // 🎮 v8.3 — پیوستن خودکار انجام شد؛ resume لازم نیست
     closeModal("inviteModal");
     setSearching(false);
+    lastMoveCount = 0;
+    lastFen = null;
     curGameId = msg.gameId;
     myColor = msg.color;
     oppInfo = msg.opp;
@@ -606,8 +610,19 @@
     $("olDrawBtn").style.display = showDraw ? "" : "none";
   }
 
+  // 🎵 تشخیص گرفتن مهره از روی تعداد مهره‌های FEN
+  function fenPieceCount(fen) {
+    let n = 0;
+    for (const ch of fen.split(" ")[0]) {
+      if ((ch >= "a" && ch <= "z") || (ch >= "A" && ch <= "Z")) n++;
+    }
+    return n;
+  }
+
   function onPosition(msg) {
     if (msg.gameId !== curGameId) return;
+    const prevCount = lastMoveCount;
+    const prevFen = lastFen;
     try {
       if (msg.fen && game && game.fen() !== msg.fen) game.load(msg.fen);
     } catch (e) {}
@@ -616,6 +631,13 @@
     lastServerClock = Date.now();
     posStarted = (msg.moveCount || 0) > 0;
     refreshBoard();
+    // 🎵 یک حرکت جدید انجام شده → صدای درست (کیش / گرفتن / حرکت)
+    if ((msg.moveCount || 0) > prevCount && prevFen && window.ChessHub) {
+      const captured = fenPieceCount(game.fen()) < fenPieceCount(prevFen);
+      ChessHub.Sound.play(game.in_check() ? "check" : captured ? "capture" : "move");
+    }
+    lastMoveCount = msg.moveCount || 0;
+    lastFen = game.fen();
     updateClockUI();
     updateActionButtons(msg.moveCount || 0);
     // ⏱ v8.3 — شمارش معکوس بازگشت حریف از روی position (بعد از رفرش خودم)
@@ -712,7 +734,9 @@
       icon = "🏆"; title = "برد!"; sub = REASONS[msg.reason] || "آفرین!";
       if (window.ChessHub) ChessHub.Sound.play("win");
     } else {
-      icon = "😔"; title = "باخت!"; sub = REASONS[msg.reason] || "دفعه‌ی بعد بهتر می‌شود.";
+      icon = "😔"; title = "باخت!";
+      if (window.ChessHub) ChessHub.Sound.play("lose");
+      sub = REASONS[msg.reason] || "دفعه‌ی بعد بهتر می‌شود.";
     }
     $("olResultIcon").textContent = icon;
     $("olResultTitle").textContent = title;

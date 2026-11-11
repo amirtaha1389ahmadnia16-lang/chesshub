@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="تنظیمات ChessHub - انتخاب تم رنگی تخته و مجموعه مهره‌ها"
+      content="تنظیمات ChessHub - انتخاب تم رنگی تخته، مجموعه مهره‌ها و صدا"
     />
     <title>ChessHub | تنظیمات</title>
     <link
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%E2%99%9B%3C/text%3E%3C/svg%3E"
     />
-    <link rel="stylesheet" href="css/theme.css?v=9.3" />
+    <link rel="stylesheet" href="css/theme.css?v=9.4" />
     <link
       href="fonts/vazir/font-face.css"
       rel="stylesheet"
@@ -21,37 +21,80 @@
       rel="stylesheet"
       href="lib/fontawesome/all.min.css"
     />
-    <link rel="stylesheet" href="css/style.css?v=9.3" />
+    <link rel="stylesheet" href="css/style.css?v=9.4" />
   </head>
   <body>
     <div class="container">
       <div id="header-placeholder"></div>
 
-      <!-- بنر اصلی -->
-      <section class="app-hero">
-        <h1><i class="fas fa-gear"></i> تنظیمات</h1>
-        <p>مجموعه مهره‌ها و تم رنگی مورد علاقه خود را انتخاب کن — انتخابت در همه صفحات اعمال می‌شود</p>
-      </section>
+      <!-- سربرگ مینیمال -->
+      <div class="settings-head">
+        <div class="head-icon"><i class="fas fa-gear"></i></div>
+        <div>
+          <h1>تنظیمات</h1>
+          <p class="head-sub">شخصی‌سازی تخته، مهره‌ها و صدا — انتخابت در همهٔ صفحات اعمال می‌شود</p>
+        </div>
+      </div>
 
-      <!-- انتخاب تم -->
+      <!-- تم رنگی تخته -->
       <div class="settings-card">
-        <div class="card-title"><i class="fas fa-palette"></i> تم رنگی</div>
-        <div class="card-sub">۲۹ تم رنگی برای تخته شطرنج</div>
+        <div class="card-head">
+          <div class="card-icon"><i class="fas fa-palette"></i></div>
+          <div>
+            <h2 class="card-title">رنگ صفحهٔ بازی</h2>
+            <p class="card-sub">۱۰ رنگ حرفه‌ای برای تخته شطرنج</p>
+          </div>
+        </div>
         <div class="theme-grid" id="themeGrid"></div>
       </div>
 
-      <!-- انتخاب مهره‌ها -->
+      <!-- مجموعه مهره‌ها -->
       <div class="settings-card">
-        <div class="card-title">
-          <i class="fas fa-chess-queen"></i> مجموعه مهره‌ها
-        </div>
-        <div class="card-sub">
-          <span id="pieceCountDisplay">۳۸</span> مجموعه مختلف — کافیست پوشه
-          <b>pieces/&lt;نام‌مجموعه&gt;/</b> را با تصاویر خودت بگذاری
+        <div class="card-head">
+          <div class="card-icon"><i class="fas fa-chess-queen"></i></div>
+          <div>
+            <h2 class="card-title">مهره‌ها</h2>
+            <p class="card-sub">مجموعهٔ مورد علاقه‌ات را انتخاب کن</p>
+          </div>
         </div>
         <div id="pieceSetsContainer"></div>
+      </div>
 
+      <!-- صدا -->
+      <div class="settings-card">
+        <div class="card-head">
+          <div class="card-icon"><i class="fas fa-volume-high"></i></div>
+          <div>
+            <h2 class="card-title">صدا</h2>
+            <p class="card-sub">صدای طبیعی حرکت مهره‌ها روی تخته</p>
+          </div>
+        </div>
+        <div class="sound-row">
+          <div class="sound-toggle-wrap">
+            <label class="switch">
+              <input type="checkbox" id="settingsSoundToggle" />
+              <span class="slider"></span>
+            </label>
+            <span class="sound-state" id="soundStateLabel">فعال</span>
+          </div>
+          <div class="sound-volume">
+            <i class="fas fa-volume-off"></i>
+            <input type="range" id="volumeSlider" min="0" max="100" step="5" value="70" aria-label="بلندی صدا" />
+            <i class="fas fa-volume-high"></i>
+            <span class="vol-value" id="volumeValue">۷۰٪</span>
+          </div>
+          <button type="button" class="sound-test" id="soundTestBtn">
+            <i class="fas fa-play"></i> شنیدن نمونه
+          </button>
+        </div>
+      </div>
+
+      <!-- عملیات -->
+      <div class="settings-card">
         <div class="settings-actions">
+          <span class="unsaved-pill" id="unsavedPill">
+            <i class="fas fa-circle-exclamation"></i> تغییرات ذخیره نشده
+          </span>
           <button class="btn btn-primary" id="saveSettingsBtn">
             <i class="fas fa-floppy-disk"></i> ذخیره تنظیمات
           </button>
@@ -64,10 +107,32 @@
       <div id="footer-placeholder"></div>
     </div>
 
+    <!-- دیالوگ داخلی: تغییرات ذخیره‌نشده / بازنشانی -->
+    <div class="gh-dialog-overlay" id="ghDialog" aria-hidden="true">
+      <div class="gh-dialog" role="dialog" aria-modal="true" aria-labelledby="ghDialogTitle">
+        <div class="gh-dialog-icon" id="ghDialogIcon">
+          <i class="fas fa-triangle-exclamation"></i>
+        </div>
+        <h3 class="gh-dialog-title" id="ghDialogTitle">تغییرات ذخیره نشده‌اند</h3>
+        <p class="gh-dialog-desc" id="ghDialogDesc">آیا می‌خواهید ذخیره کنید؟</p>
+        <div class="gh-dialog-actions">
+          <button type="button" class="gh-btn gh-btn-save" id="ghDialogOk">
+            <i class="fas fa-floppy-disk" id="ghDialogOkIcon"></i>
+            <span id="ghDialogOkLabel">ذخیره و خروج</span>
+          </button>
+          <button type="button" class="gh-btn gh-btn-discard" id="ghDialogAlt">
+            <i class="fas fa-arrow-right-from-bracket" id="ghDialogAltIcon"></i>
+            <span id="ghDialogAltLabel">خروج بدون ذخیره</span>
+          </button>
+          <button type="button" class="gh-btn gh-btn-cancel" id="ghDialogCancel">انصراف</button>
+        </div>
+      </div>
+    </div>
+
     <div class="settings-toast" id="settingsToast"></div>
 
-    <script src="js/script.js?v=9.3"></script>
-    <script src="js/profile.js?v=9.3"></script>
-    <script src="js/auth.js?v=9.3"></script>
+    <script src="js/script.js?v=9.4"></script>
+    <script src="js/profile.js?v=9.4"></script>
+    <script src="js/auth.js?v=9.4"></script>
   </body>
 </html>

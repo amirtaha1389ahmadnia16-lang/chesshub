@@ -45,8 +45,6 @@
 
   // ===== DOM refs =====
   const variantsContainer = document.getElementById("variantsContainer");
-  const importBtn = document.getElementById("importBtn");
-  const importFile = document.getElementById("importFile");
   const publishBtn = document.getElementById("publishBtn");
   const downloadBtn = document.getElementById("downloadBtn");
   const resetBtn = document.getElementById("resetBtn");
@@ -69,7 +67,6 @@
   let variantCounter = 0;
   let editingOpening = null; // گشایش در حال ویرایش (اگر حالت ویرایش فعال باشد)
   let pendingPublish = false; // ادامه‌ی انتشار پس از انتخاب نام نویسنده
-  let importedAuthor = null; // نویسنده‌ی داخل فایل JSON آپلودشده (با تأیید صریح کاربر)
 
   // ===== نام نویسنده (مشترک با بخش دروس) =====
   function currentAuthor() {
@@ -166,7 +163,7 @@
   }
 
   // ===== Toast =====
-  function showToast(text, type = "success", duration = 4000) {
+  function showToast(text, type = "success") {
     const toast = document.getElementById("toast");
     if (!toast) return;
     toast.textContent = text;
@@ -174,7 +171,7 @@
     clearTimeout(toast._timeout);
     toast._timeout = setTimeout(
       () => toast.classList.remove("show"),
-      duration
+      4000
     );
   }
 
@@ -682,20 +679,7 @@
   }
 
   function doPublish() {
-    // 🆕 v8.3 — قبل از انتشار، همه‌ی فیلدهای حرکت اعتبارسنجی می‌شوند؛
-    // حرکت غیرقانونی اجازه‌ی انتشار نمی‌گیرد و کادر خطا بالا نشان داده می‌شود
-    const moveProblems = validateAllMoveFields();
-    if (moveProblems.length) {
-      showImportErrors(moveProblems);
-      showToast("❌ حرکات نامعتبر اصلاح نشده‌اند — کادر بالای فرم را ببین", "error", 5000);
-      const firstBad = document.querySelector(".chmi-bad-input");
-      if (firstBad) firstBad.scrollIntoView({ behavior: "smooth", block: "center" });
-      return;
-    }
-    showImportErrors([]); // ✅ همه‌ی حرکات معتبرند — کادر خطاهای قدیمی پاک شود
-
-    // نویسنده: از نشست/پروفایل — مگر فایل JSON آپلود شود (با تأیید صریح کاربر)
-    const author = importedAuthor || currentAuthor();
+    const author = currentAuthor();
     if (!author) {
       // اگر به هر دلیلی نام از بین رفته باشد، دوباره پرسیده می‌شود
       pendingPublish = true;
@@ -718,13 +702,10 @@
         list.unshift(Object.assign({}, editingOpening));
         idx = 0;
       }
-      // 📥 اگر آپلودکننده اثر نویسنده‌ی دیگر را ویرایش می‌کند، نام نویسنده‌ی اصلی حفظ می‌شود
-      const keepAuthor = !!list[idx].author && list[idx].author !== author;
       list[idx] = Object.assign({}, list[idx], data, {
         thumbIcon: list[idx].thumbIcon || "fas fa-chess-queen",
         color: list[idx].color || "#2c7da0",
-        author: keepAuthor ? list[idx].author : author,
-        importedFile: !!importedAuthor || keepAuthor,
+        author: author,
         updatedAt: now,
       });
       if (!saveUserOpenings(list)) {
@@ -744,9 +725,6 @@
         thumbIcon: "fas fa-chess-queen",
         color: "#2c7da0",
         author: author,
-        importedFile: !!importedAuthor,
-        // 📥 آپلودکننده ثبت می‌شود تا بعداً ویرایش/حذف برای او هم باز باشد
-        importedBy: importedAuthor ? (currentAuthor() || null) : null,
         createdAt: now,
         updatedAt: now,
       });
@@ -783,9 +761,7 @@
       "openings",
       serverId ? "update" : "publish",
       serverId || localItem.id,
-      payload,
-      // 📥 اگر محتوا از فایل JSON آمده، نام نویسنده‌ی فایل حفظ می‌شود
-      localItem.importedFile ? { allowFileAuthor: true } : undefined
+      payload
     )
       .then(function (j) {
         if (j.item && j.item.id) {
@@ -872,523 +848,6 @@
     );
   }
 
-  // ===== ورودی JSON (آپلود فایل استاندارد — دقیقاً یک فایل در هر بار) =====
-
-  // پاک‌سازی توکن‌های حرکت: حذف شماره‌ی حرکت (1.e4) و نتیجه (1-0)
-  function cleanMoveTokens(list) {
-    return list
-      .map((m) => String(m || "").trim())
-      .filter(Boolean)
-      .map((m) => m.replace(/^\d+\.(\.\.)?/, "").replace(/[!?]+$/, ""))
-      .filter((m) => m && !/^(1-0|0-1|1\/2-1\/2|\*)$/.test(m));
-  }
-
-  // اعتبارسنجی قانونی بودن حرکات با موتور واقعی شطرنج
-  function legalMovesCheck(movesArr) {
-    if (!window.Chess) return { ok: true }; // بدون کتابخانه — سرور و انتشار دوباره چک می‌کنند
-    let g;
-    try { g = new window.Chess(); } catch (e) { return { ok: true }; }
-    for (let i = 0; i < movesArr.length; i++) {
-      let mv = null;
-      try { mv = g.move(movesArr[i], { sloppy: true }); } catch (e) { mv = null; }
-      if (!mv) return { ok: false, bad: movesArr[i] };
-    }
-    return { ok: true };
-  }
-
-  // PGN (با/بدون شماره) را تا جای ممکن می‌خواند؛ تعداد حرکت معتبر برمی‌گرداند
-  function loadPgnSloppy(g, text) {
-    const before = g.history().length;
-    let ok = false;
-    try { ok = g.load_pgn(String(text), { sloppy: true }); } catch (e) { ok = false; }
-    if (ok) return g.history().length - before;
-    // ⚠️ chess.js ممکن است تا نیمه راه اعمال کرده باشد — وضعیت را پاک کن
-    if (g.history().length > before) g.reset();
-    const tokens = String(text)
-      .replace(/\[[^\]]*\]/g, " ")
-      .replace(/\{[^}]*\}/g, " ")
-      .replace(/\([^)]*\)/g, " ")
-      .replace(/\d+\.(\.\.)?/g, " ")
-      .replace(/(1-0|0-1|1\/2-1\/2|\*)/g, " ")
-      .split(/[\s,;]+/)
-      .filter(Boolean);
-    let n = 0;
-    for (let i = 0; i < tokens.length; i++) {
-      const t = tokens[i].replace(/^\d+\.(\.\.)?/, "").replace(/[!?]+$/, "");
-      if (!t || /^(1-0|0-1|1\/2-1\/2|\*)$/.test(t)) continue;
-      let mv = null;
-      try { mv = g.move(t, { sloppy: true }); } catch (e) { mv = null; }
-      if (!mv) break;
-      n++;
-    }
-    return n;
-  }
-
-  function faNum(n) {
-    return String(n).replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[+d]);
-  }
-
-  // ===== 🆕 v8.3 — دکمه‌ی «ورود با تخته / PGN» کنار همه‌ی فیلدهای حرکت =====
-  function fieldTitleFor(input) {
-    const cls = input.className || "";
-    if (input.id === "openingMoves") return "حرکات اصلی";
-    if (cls.indexOf("variant-moves") >= 0) return "حرکات واریانت";
-    if (cls.indexOf("trap-moves") >= 0) return "حرکات تله";
-    if (cls.indexOf("pop-move-moves") >= 0) return "حرکات پرتکرار";
-    if (cls.indexOf("game-pgn") >= 0) return "حرکات PGN (نمونه‌بازی)";
-    return "ورود حرکات";
-  }
-
-  function ensureBoardButton(input) {
-    if (!input || input._chmiBtn) return;
-    if (!window.ChessHubMoveInput) return;
-    const parent = input.parentElement;
-    if (!parent) return;
-    const mode = (input.className || "").indexOf("game-pgn") >= 0 ? "pgn" : "moves";
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "chmi-field-btn" + (input.tagName === "TEXTAREA" ? " textarea" : "");
-    btn.title = "ورود با تخته / چسباندن PGN";
-    btn.textContent = "♟";
-    btn.addEventListener("click", function (e) {
-      e.preventDefault();
-      window.ChessHubMoveInput.open({
-        target: input,
-        mode: mode,
-        title: fieldTitleFor(input),
-      });
-    });
-    input._chmiBtn = btn;
-    try {
-      const wrap = document.createElement("span");
-      wrap.className = "chmi-inputwrap";
-      wrap.style.cssText = "position:relative;display:block";
-      parent.insertBefore(wrap, input);
-      wrap.appendChild(input);
-      wrap.appendChild(btn);
-      input.style.paddingLeft = "2.7rem";
-    } catch (e) {}
-  }
-
-  function wireBoardButtons() {
-    ["#openingMoves", ".variant-moves", ".trap-moves", ".pop-move-moves", ".game-pgn"].forEach(
-      function (sel) {
-        document.querySelectorAll(sel).forEach(ensureBoardButton);
-      }
-    );
-  }
-
-  // با هر تغییر DOM (واریانت/تله/نمونه‌بازی تازه) دکمه‌ی تخته هم می‌آید
-  if (typeof MutationObserver !== "undefined") {
-    let wireTimer = null;
-    new MutationObserver(function () {
-      clearTimeout(wireTimer);
-      wireTimer = setTimeout(wireBoardButtons, 150);
-    }).observe(document.body, { childList: true, subtree: true });
-  }
-
-  // ===== 🆕 v8.3 — کادر خطاهای فایل آپلودشده (بالای فرم) =====
-  const importErrorBox = document.getElementById("importErrorBox");
-  const importErrorList = document.getElementById("importErrorList");
-
-  function showImportErrors(problems) {
-    if (!importErrorBox || !importErrorList) return;
-    importErrorList.innerHTML = "";
-    const list = problems || [];
-    list.forEach(function (p) {
-      const li = document.createElement("li");
-      const span = document.createElement("span");
-      span.textContent = p.msg;
-      li.appendChild(span);
-      if (p.find) {
-        const b = document.createElement("button");
-        b.type = "button";
-        b.textContent = "نمایش در فرم";
-        b.addEventListener("click", function () {
-          const el = p.find();
-          if (!el) return;
-          el.scrollIntoView({ behavior: "smooth", block: "center" });
-          el.classList.remove("chmi-bad-input");
-          void el.offsetWidth;
-          el.classList.add("chmi-bad-input");
-          try { el.focus({ preventScroll: true }); } catch (e) {}
-          setTimeout(function () { el.classList.remove("chmi-bad-input"); }, 3000);
-        });
-        li.appendChild(b);
-      }
-      importErrorList.appendChild(li);
-    });
-    importErrorBox.style.display = list.length ? "block" : "none";
-    if (list.length && importErrorBox) {
-      importErrorBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    }
-  }
-
-  function flagBadInput(el, msg) {
-    if (!el) return;
-    el.classList.add("chmi-bad-input");
-    if (msg) el.title = msg;
-    // select هم رویداد change می‌فرستد نه input — هر دو گوش داده می‌شوند
-    el.addEventListener(
-      "input",
-      function onFix() {
-        el.classList.remove("chmi-bad-input");
-        el.removeEventListener("input", onFix);
-        el.removeEventListener("change", onChange);
-        // ✅ همه‌ی فیلدهای خطادار اصلاح شدند → کادر خطا هم پنهان شود
-        if (!document.querySelector(".chmi-bad-input")) showImportErrors([]);
-      }
-    );
-    var onChange = function () {
-      el.classList.remove("chmi-bad-input");
-      el.removeEventListener("input", onFix);
-      el.removeEventListener("change", onChange);
-      if (!document.querySelector(".chmi-bad-input")) showImportErrors([]);
-    };
-    el.addEventListener("change", onChange);
-  }
-
-  // یابنده‌های محل خطا در فرم — بعد از پر شدن فرم اجرا می‌شوند
-  function variantFinder(vi, sel) {
-    return function () {
-      const entry = document.querySelectorAll(".variant-entry")[vi];
-      return entry ? entry.querySelector(sel) : null;
-    };
-  }
-  function subFinder(vi, containerSel, si, sel) {
-    return function () {
-      const entry = document.querySelectorAll(".variant-entry")[vi];
-      if (!entry) return null;
-      const box = entry.querySelector(containerSel);
-      if (!box) return null;
-      const sub = box.querySelectorAll(".sub-entry")[si];
-      return sub ? sub.querySelector(sel) : null;
-    };
-  }
-
-  // اعتبارسنجی هنگام انتشار — حرکت غیرقانونی اجازه‌ی انتشار نمی‌گیرد
-  function validateAllMoveFields() {
-    const problems = [];
-    const checks = [
-      { sel: "#openingMoves", label: "حرکات اصلی" },
-      { sel: ".variant-moves", label: "حرکات واریانت" },
-      { sel: ".trap-moves", label: "حرکات تله" },
-      { sel: ".pop-move-moves", label: "حرکات پرتکرار" },
-    ];
-    checks.forEach(function (c) {
-      document.querySelectorAll(c.sel).forEach(function (el, i) {
-        const v = el.value.trim();
-        if (!v) return;
-        const tokens = cleanMoveTokens(v.split(/\s+/));
-        const lm = legalMovesCheck(tokens);
-        if (!lm.ok) {
-          const idx = tokens.indexOf(lm.bad);
-          problems.push({
-            msg:
-              c.label + (i ? " #" + faNum(i + 1) : "") +
-              ": حرکت غیرقانونی «" + lm.bad + "»" +
-              (idx >= 0 ? " (حرکت شماره " + faNum(idx + 1) + ")" : ""),
-            find: function () { return el; },
-          });
-          flagBadInput(el, "حرکت غیرقانونی: " + lm.bad);
-        }
-      });
-    });
-    document.querySelectorAll(".game-pgn").forEach(function (el, i) {
-      const v = el.value.trim();
-      if (!v) return;
-      let g = null;
-      try { g = new window.Chess(); } catch (e) { g = null; }
-      if (!g) return;
-      const n = loadPgnSloppy(g, v);
-      if (!n) {
-        problems.push({
-          msg: "حرکات PGN نمونه‌بازی #" + faNum(i + 1) + ": هیچ حرکت معتبری خوانده نشد",
-          find: function () { return el; },
-        });
-        flagBadInput(el, "PGN خوانده نشد");
-      }
-    });
-    return problems;
-  }
-
-  function importJSON() {
-    importFile.value = ""; // انتخاب مجدد همان فایل هم کار کند
-    importFile.click();
-  }
-
-  function handleImportFile(file) {
-    if (!file) return;
-    if (file.size > 512 * 1024) {
-      showToast("❌ حجم فایل بیش از ۵۱۲ کیلوبایت است", "error");
-      return;
-    }
-    const reader = new FileReader();
-    reader.onerror = function () {
-      showToast("❌ خواندن فایل ممکن نشد", "error");
-    };
-    reader.onload = function () {
-      let obj = null;
-      try { obj = JSON.parse(String(reader.result)); } catch (e) { obj = null; }
-      if (!obj || typeof obj !== "object" || Array.isArray(obj)) {
-        showToast("❌ فایل JSON معتبر نیست — این فایل خروجی «آپلود فایل JSON» همین صفحه است؟", "error");
-        return;
-      }
-      // 🆕 v8.3 — فایل «همیشه» بارگذاری می‌شود؛ خطاها در کادر بالای فرم
-      // فهرست می‌شوند تا کاربر همان‌ها را اصلاح کند (نه رد شدن کل فایل)
-      const plan = buildImportPlan(obj);
-      fillFormFromImport(plan.data, obj, plan.problems);
-    };
-    reader.readAsText(file, "utf8");
-  }
-
-  // خروجی: { data: داده برای فرم، problems: فهرست کامل خطاها }
-  // برخلاف قبل، اولین خطا کل فایل را رد نمی‌کند — همه‌ی خطاها جمع می‌شوند
-  function buildImportPlan(o) {
-    const problems = [];
-    const name = String(o.name || "").trim();
-    if (name.length < 2 || name.length > 80) {
-      problems.push({
-        msg: "نام گشایش" + (name ? " «" + name.slice(0, 30) + "»" : "") + " باید بین ۲ تا ۸۰ حرف باشد",
-        find: function () { return document.getElementById("openingName"); },
-      });
-    }
-
-    // حرکات اصلی
-    const rawMoves = Array.isArray(o.moves) ? o.moves : String(o.moves || "").split(/\s+/);
-    const moves = cleanMoveTokens(rawMoves).slice(0, 40);
-    const mainFind = function () { return document.getElementById("openingMoves"); };
-    if (!moves.length) {
-      problems.push({ msg: "حرکات اصلی گشایش پیدا نشد (مثلاً: e4 c5 Nf3)", find: mainFind });
-    } else {
-      const lm = legalMovesCheck(moves);
-      if (!lm.ok) {
-        const idx = moves.indexOf(lm.bad);
-        problems.push({
-          msg: "حرکت غیرقانونی در حرکات اصلی: «" + lm.bad + "»" + (idx >= 0 ? " (حرکت شماره " + faNum(idx + 1) + ")" : ""),
-          find: mainFind,
-        });
-      }
-    }
-
-    if (!Array.isArray(o.variants) || o.variants.length === 0) {
-      problems.push({ msg: "هیچ واریانتی در فایل نیست — حداقل یک واریانت لازم است", find: null });
-    }
-
-    // واریانت‌ها — هر مشکل جداگانه ثبت می‌شود
-    const variants = [];
-    (Array.isArray(o.variants) ? o.variants : []).slice(0, 12).forEach(function (v, vi) {
-      v = v || {};
-      const vname = String(v.name || "").trim();
-      const vn = "واریانت " + faNum(vi + 1) + (vname ? " («" + vname + "»)" : "");
-      if (vname.length < 2) {
-        problems.push({ msg: vn + ": نام باید حداقل ۲ حرف باشد", find: variantFinder(vi, ".variant-name") });
-      }
-      const vmRaw = Array.isArray(v.moves) ? v.moves : String(v.moves || "").split(/\s+/);
-      const vmoves = cleanMoveTokens(vmRaw).slice(0, 30);
-      if (!vmoves.length) {
-        problems.push({ msg: vn + ": حرکات واریانت پیدا نشد", find: variantFinder(vi, ".variant-moves") });
-      } else {
-        const lm2 = legalMovesCheck(vmoves);
-        if (!lm2.ok) {
-          const idx = vmoves.indexOf(lm2.bad);
-          problems.push({
-            msg: vn + ": حرکت غیرقانونی «" + lm2.bad + "»" + (idx >= 0 ? " (حرکت شماره " + faNum(idx + 1) + ")" : ""),
-            find: variantFinder(vi, ".variant-moves"),
-          });
-        }
-      }
-      const clamp = (n) => Math.max(0, Math.min(100000, Number(n) || 0));
-      const lines = (x) =>
-        (Array.isArray(x) ? x : [])
-          .slice(0, 12)
-          .map((s) => String(s || "").trim().slice(0, 300))
-          .filter(Boolean);
-
-      // حرکات پرتکرار — اول ساخته می‌شوند، بعد خطای هر کدام جداگانه چک می‌شود
-      // (⚠️ ارجاع به آرایه در حین map = خطای TDZ — به همین دلیل دو مرحله‌ای است)
-      const pops = (Array.isArray(v.popularMoves) ? v.popularMoves : [])
-        .slice(0, 10)
-        .map((p) => {
-          p = p || {};
-          return {
-            san: String(p.san || "").trim().slice(0, 12),
-            description: String(p.description || "").trim().slice(0, 400),
-            moves: cleanMoveTokens(Array.isArray(p.moves) ? p.moves : String(p.moves || "").split(/\s+/)).slice(0, 30),
-          };
-        })
-        .filter((p) => p.san);
-      pops.forEach(function (p, pi) {
-        if (!p.moves.length) return;
-        const lm3 = legalMovesCheck(p.moves);
-        if (!lm3.ok) {
-          problems.push({
-            msg: vn + " — حرکت پرتکرار «" + p.san + "»: حرکت غیرقانونی «" + lm3.bad + "»",
-            find: subFinder(vi, ".popular-moves-container", pi, ".pop-move-moves"),
-          });
-        }
-      });
-
-      // تله‌ها — اول ساخته می‌شوند، بعد چک می‌شوند
-      const traps = (Array.isArray(v.traps) ? v.traps : [])
-        .slice(0, 10)
-        .map((t) => {
-          t = t || {};
-          return {
-            name: String(t.name || "").trim().slice(0, 100),
-            moves: cleanMoveTokens(Array.isArray(t.moves) ? t.moves : String(t.moves || "").split(/\s+/)).slice(0, 30),
-          };
-        })
-        .filter((t) => t.name && t.moves.length);
-      traps.forEach(function (t, ti) {
-        const lm4 = legalMovesCheck(t.moves);
-        if (!lm4.ok) {
-          const idx = t.moves.indexOf(lm4.bad);
-          problems.push({
-            msg: vn + " — تله «" + t.name + "»: حرکت غیرقانونی «" + lm4.bad + "»" + (idx >= 0 ? " (حرکت شماره " + faNum(idx + 1) + ")" : ""),
-            find: subFinder(vi, ".traps-container", ti, ".trap-moves"),
-          });
-        }
-      });
-
-      // نمونه‌بازی‌ها — PGN ناخوانا جدا گزارش می‌شود
-      const games = (Array.isArray(v.sampleGames) ? v.sampleGames : [])
-        .slice(0, 8)
-        .map((g) => {
-          g = g || {};
-          const out = {
-            white: String(g.white || "").trim().slice(0, 60),
-            black: String(g.black || "").trim().slice(0, 60),
-            year: Math.max(0, Math.min(2100, Number(g.year) || 0)),
-            result: String(g.result || "*").slice(0, 12) || "*",
-          };
-          if (g.pgn) out.pgn = String(g.pgn).slice(0, 20000);
-          return out;
-        })
-        .filter((g) => g.white && g.black);
-      games.forEach(function (g, gi) {
-        if (!g.pgn || !g.pgn.trim()) return;
-        let pg = null;
-        try { pg = new window.Chess(); } catch (e) { pg = null; }
-        if (pg && !loadPgnSloppy(pg, g.pgn)) {
-          problems.push({
-            msg: vn + " — نمونه‌بازی «" + (g.white || "?") + " در برابر " + (g.black || "?") + "»: PGN حرکت معتبری ندارد",
-            find: subFinder(vi, ".games-container", gi, ".game-pgn"),
-          });
-        }
-      });
-
-      variants.push({
-        name: vname.slice(0, 80),
-        moves: vmoves,
-        stats: {
-          whiteWins: clamp(v.stats && v.stats.whiteWins),
-          blackWins: clamp(v.stats && v.stats.blackWins),
-          draws: clamp(v.stats && v.stats.draws),
-        },
-        strengths: lines(v.strengths),
-        weaknesses: lines(v.weaknesses),
-        popularMoves: pops,
-        evaluation: {
-          score: String((v.evaluation && v.evaluation.score) || "0.0").slice(0, 16) || "0.0",
-          summary: String((v.evaluation && v.evaluation.summary) || "").slice(0, 600),
-        },
-        ideas: lines(v.ideas),
-        endgames: lines(v.endgames),
-        traps: traps,
-        sampleGames: games,
-      });
-    });
-    if (!variants.length) {
-      problems.push({ msg: "هیچ واریانت معتبری در فایل نیست", find: null });
-    }
-
-    let code = String(o.categoryCode || "").trim();
-    if (!AUTO_CATEGORY_NAMES[code]) code = "other";
-    const categoryName = String(o.categoryName || "").trim().slice(0, 40);
-
-    return {
-      data: {
-        name: name,
-        moves: moves,
-        categoryCode: code,
-        categoryName: categoryName,
-        variants: variants,
-      },
-      problems: problems,
-    };
-  }
-
-  function fillFormFromImport(data, original, problems) {
-    // 📥 انتخاب نویسنده — پیش‌فرض: نویسنده‌ی داخل فایل (با تأیید کاربر)
-    const fileAuthor = String(original.author || "").trim().slice(0, 40);
-    const me = currentAuthor();
-    if (fileAuthor && fileAuthor !== me) {
-      const keep =
-        confirm(
-          "نویسنده‌ی داخل فایل: «" + fileAuthor + "»\n\n" +
-            "OK = انتشار با نام نویسنده‌ی فایل («" + fileAuthor + "»)\n" +
-            "Cancel = انتشار با نام خودت" + (me ? " («" + me + "»)" : "")
-        );
-      importedAuthor = keep ? fileAuthor : me;
-    } else {
-      importedAuthor = me || fileAuthor || null;
-    }
-
-    document.getElementById("openingName").value = data.name;
-    document.getElementById("categoryCode").value = data.categoryCode;
-    document.getElementById("categoryName").value =
-      data.categoryName && data.categoryName !== AUTO_CATEGORY_NAMES[data.categoryCode]
-        ? data.categoryName
-        : "";
-    document.getElementById("openingMoves").value = data.moves.join(" ");
-
-    variantsContainer.innerHTML = "";
-    variantCounter = 0;
-    data.variants.forEach((v) => addVariant(v));
-
-    editingOpening = null;
-    editModeBanner.style.display = "none";
-    restorePublishButton();
-    try { history.replaceState(null, "", "opening-coop.html"); } catch (e) {}
-
-    updateAuthorChipWith(importedAuthor || me);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-
-    // 🆕 v8.3 — علامت‌گذاری فیلدهای خطادار + کادر خطا بالای فرم
-    const probs = problems || [];
-    probs.forEach(function (p) {
-      if (!p.find) return;
-      const el = p.find();
-      if (el) flagBadInput(el, p.msg);
-    });
-    showImportErrors(probs);
-    wireBoardButtons();
-
-    if (probs.length) {
-      showToast(
-        "⚠️ فایل بارگذاری شد اما " + faNum(probs.length) + " خطا دارد — کادر بالای فرم را ببین و اصلاح کن",
-        "warning",
-        5200
-      );
-    } else {
-      showToast(
-        "✅ فایل JSON با موفقیت بارگذاری شد (" + data.variants.length + " واریانت) — حالا «انتشار در سایت» را بزن",
-        "success",
-        4200
-      );
-    }
-  }
-
-  function updateAuthorChipWith(name) {
-    if (name) {
-      authorChip.style.display = "flex";
-      authorChipName.textContent = name;
-    } else {
-      updateAuthorChip();
-    }
-  }
-
   // ===== ریست فرم =====
   function resetForm(needsConfirm) {
     if (needsConfirm) {
@@ -1409,8 +868,6 @@
     editingOpening = null;
     editModeBanner.style.display = "none";
     restorePublishButton();
-    importedAuthor = null;
-    showImportErrors([]); // 🆕 v8.3 — کادر خطا هم پاک شود
     try {
       history.replaceState(null, "", "opening-coop.html");
     } catch (e) {}
@@ -1428,8 +885,7 @@
     if (!editId) return;
 
     const opening = loadUserOpenings().find(
-      (o) => String(o.id) === String(editId) ||
-             String(o.serverId || "") === String(editId)
+      (o) => String(o.id) === String(editId)
     );
     if (!opening) {
       // 🔁 در این دستگاه نیست — شاید گشایش عمومی سرور باشد
@@ -1457,38 +913,15 @@
   }
 
   function applyEditMode(opening) {
-    // نویسنده‌ی همان گشایش (یا آپلودکننده‌ی فایل — مطابق مجوز سرور) حق ویرایش دارد
+    // فقط نویسنده‌ی همان گشایش حق ویرایش دارد
     const author = currentAuthor();
-    const isAllowed = !author || !opening.author ||
-      opening.author === author || opening.importedBy === author;
-
-    if (!isAllowed && window.CommunityHub &&
-        (opening.serverId || String(opening.id || "").indexOf("srv_") === 0)) {
-      // 🔄 شاید آپلودکننده‌ی فایل باشی — مجوز واقعی از نسخه‌ی سرور چک می‌شود
-      CommunityHub.fetchAll(true).then(function (c) {
-        const remote = (c.openings || []).find(function (x) {
-          return String(x.id) === String(opening.serverId || opening.id);
-        });
-        if (remote && (remote.author === author || remote.importedBy === author)) {
-          opening.importedBy = remote.importedBy || author;
-          doApplyEditMode(opening);
-        } else {
-          showToast("⚠️ فقط نویسنده‌ی گشایش می‌تواند آن را ویرایش کند", "warning");
-        }
-      }).catch(function () {
-        showToast("⚠️ فقط نویسنده‌ی گشایش می‌تواند آن را ویرایش کند", "warning");
-      });
+    if (author && opening.author && opening.author !== author) {
+      showToast(
+        "⚠️ فقط نویسنده‌ی گشایش می‌تواند آن را ویرایش کند",
+        "warning"
+      );
       return;
     }
-
-    if (!isAllowed) {
-      showToast("⚠️ فقط نویسنده‌ی گشایش می‌تواند آن را ویرایش کند", "warning");
-      return;
-    }
-    doApplyEditMode(opening);
-  }
-
-  function doApplyEditMode(opening) {
 
     editingOpening = opening;
 
@@ -1523,11 +956,6 @@
   // ===== دکمه‌های اصلی =====
   publishBtn.addEventListener("click", publishFlow);
   downloadBtn.addEventListener("click", exportJSON);
-  importBtn.addEventListener("click", importJSON);
-  importFile.addEventListener("change", function () {
-    // دقیقاً یک فایل در هر بار — ورودی بدون multiple است
-    if (this.files && this.files[0]) handleImportFile(this.files[0]);
-  });
   resetBtn.addEventListener("click", function () {
     resetForm(true);
   });
@@ -1567,12 +995,6 @@
     variantsContainer.innerHTML = "";
     variantCounter = 0;
 
-    // ♟ پیش‌بارگذاری مهره‌های دلخواه کاربر — تخته‌ی «ورود با تخته»
-    // از همان اول با مجموعه‌ی انتخابی کاربر نمایش داده می‌شود
-    if (window.ChessUtils && window.ChessUtils.loadPieces) {
-      try { window.ChessUtils.loadPieces(); } catch (e) {}
-    }
-
     updateAuthorChip();
     loadEditingOpening();
 
@@ -1580,9 +1002,6 @@
     if (!variantsContainer.children.length) {
       addVariant();
     }
-
-    // 🆕 v8.3 — دکمه‌ی ورود با تخته کنار همه‌ی فیلدهای حرکت
-    setTimeout(wireBoardButtons, 200);
 
     console.log(
       "✅ ChessHub Cooperation - Openings loaded successfully"
