@@ -6,13 +6,18 @@
     <meta name="description" content="پایگاه بازی‌های استادان بزرگ شطرنج - بیش از ۳۰ استاد بزرگ و هزاران بازی معروف" />
     <title>ChessHub | پایگاه بازی‌ها</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%E2%99%9B%3C/text%3E%3C/svg%3E" />
-    <link rel="stylesheet" href="css/theme.css?v=9.4" />
+    <link rel="stylesheet" href="css/theme.css?v=10.0" />
     <link rel="stylesheet" href="lib/fontawesome/all.min.css" />
     <link href="fonts/vazir/font-face.css" rel="stylesheet" />
-    <link rel="stylesheet" href="css/style.css?v=9.4" />
-    <link rel="stylesheet" href="css/gamereview.css?v=9.4" />
+    <link rel="stylesheet" href="css/style.css?v=10.0" />
+    <link rel="stylesheet" href="css/gamereview.css?v=10.0" />
     <script src="lib/chess.min.js"></script>
     <style>
+      /* اسکرول‌بار اورلی‌ها سمت راست: ظرف اسکرول ltr، محتوا rtl */
+      body .page-overlay { direction: ltr; }
+      .page-overlay .page-close,
+      .page-overlay .overlay-scroll { direction: rtl; }
+
       /* استایل‌های اختصاصی پایگاه بازی‌ها (Pro Edition) */
       .players-section { margin-bottom: 2rem; }
       .section-header {
@@ -316,6 +321,22 @@
         margin-bottom: 0.5rem;
       }
 
+      /* نشانگرهای اسکرول بی‌نهایت */
+      .list-state {
+        text-align: center;
+        padding: 0.9rem;
+        color: var(--text-light);
+        font-size: 0.8rem;
+        font-weight: 700;
+      }
+      .list-state.loading i { color: var(--accent); margin-inline-end: 0.3rem; }
+      .list-state.all-done {
+        color: var(--success-dark);
+        background: #f8fafc;
+        border: 1px dashed #dbe1ea;
+        border-radius: var(--radius-sm);
+      }
+
       .game-viewer {
         background: #ffffff;
         border-radius: var(--radius-lg);
@@ -566,25 +587,9 @@
       </div>
     </div>
 
-    <!-- Overlay نمایش بازی -->
-    <div class="page-overlay" id="gameOverlay">
-      <div class="page-close">
-        <h2><i class="fas fa-chess-board"></i> نمایش بازی</h2>
-        <button class="close-btn" id="closeGameOverlay">
-          <i class="fas fa-arrow-right"></i> بازگشت
-        </button>
-      </div>
-      <div class="overlay-scroll">
-        <div id="gameViewerContainer"></div>
-      </div>
-    </div>
-
-    <script src="js/script.js?v=9.4"></script>
-    <script src="js/profile.js?v=9.4"></script>
-    <script src="js/auth.js?v=9.4"></script>
-    <script src="js/engine-core.js"></script>
-    <script src="js/board-ui.js"></script>
-    <script src="js/gamereview.js"></script>
+    <script src="js/script.js?v=10.0"></script>
+    <script src="js/profile.js?v=10.0"></script>
+    <script src="js/auth.js?v=10.0"></script>
     <script>
       (function () {
         "use strict";
@@ -749,21 +754,20 @@
         let currentPlayerFile = null; // فایل PGN استادِ جاری (برای قلب‌ها)
         let currentPlayer = null;     // آبجکت استادِ جاری
         let favOnly = false;
-        let currentGameMoves = [];
-        let currentMoveIndex = 0;
-        let currentGame = null;
-        let autoPlayInterval = null;
-        let isAutoPlaying = false;
-        let totalPlies = 0;
+        let pendingAutoOpen = null;   // بازی مورد علاقه‌ای که باید بعد از لود باز شود
+
+        // 📜 اسکرول بی‌نهایت — هر بار ۱۰۰ بازی (slice + IntersectionObserver)
+        const PAGE_SIZE = 100;
+        let renderedCount = 0;
+        let listSentinel = null;
+        let listObserver = null;
+        let isLoadingMore = false;
 
         const playersGrid = document.getElementById("playersGrid");
         const gamesOverlay = document.getElementById("gamesOverlay");
-        const gameOverlay = document.getElementById("gameOverlay");
         const gamesListContainer = document.getElementById("gamesListContainer");
-        const gameViewerContainer = document.getElementById("gameViewerContainer");
         const overlayPlayerName = document.getElementById("overlayPlayerName");
         const closeGamesOverlayBtn = document.getElementById("closeGamesOverlay");
-        const closeGameOverlayBtn = document.getElementById("closeGameOverlay");
         const searchInput = document.getElementById("searchInput");
         const searchField = document.getElementById("searchField");
         const resetSearchBtn = document.getElementById("resetSearchBtn");
@@ -831,28 +835,23 @@
               if (currentPlayerFile === f.playerFile) applyFilters();
             });
             div.addEventListener("click", function () {
-              // باز کردن مستقیم بازیِ مورد علاقه از صفحه‌ی اصلی
+              // باز کردن مستقیم بازیِ مورد علاقه از صفحه‌ی اصلی —
+              // بعد از لود بازی‌ها، همین بازی در صفحهٔ مرور باز می‌شود
               const player = players.find((p) => p.file === f.playerFile);
               if (!player) return;
-              openPlayerGames(player);
-              // پس از لود بازی‌ها، همین بازی پیدا و باز شود
-              setTimeout(function () {
-                const idx = currentPlayerGames.findIndex(
-                  (g) => g.white === f.white && g.black === f.black && g.date === f.date && g.result === f.result,
-                );
-                if (idx >= 0) openGameViewer(idx, filteredGames.length ? filteredGames : currentPlayerGames);
-              }, 450);
+              openPlayerGames(player, f);
             });
             grid.appendChild(div);
           });
         }
 
-        function openPlayerGames(player) {
+        function openPlayerGames(player, autoOpen) {
           if (!player) return;
           if (overlayPlayerName) overlayPlayerName.textContent = player.name;
           currentPlayer = player;
           currentPlayerFile = player.file;
           favOnly = false;
+          pendingAutoOpen = autoOpen || null;
           const favChip = document.getElementById("favOnlyChip");
           if (favChip) favChip.classList.remove("active");
           if (gamesOverlay) gamesOverlay.classList.add("open");
@@ -872,8 +871,6 @@
           if (fYearFrom) fYearFrom.value = "";
           if (fYearTo) fYearTo.value = "";
           if (fSort) fSort.value = "old";
-          if (gameOverlay) gameOverlay.classList.remove("open");
-          if (gameViewerContainer) gameViewerContainer.innerHTML = "";
 
           if (gamesListContainer) {
             gamesListContainer.innerHTML = `<div class="loading-state"><i class="fas fa-spinner fa-pulse"></i> بارگذاری بازی‌های ${player.name}...</div>`;
@@ -888,9 +885,20 @@
               currentPlayerGames = parsePGN(pgnText);
               filteredGames = [...currentPlayerGames];
               applyFilters();
+              // ❤️ اگر از بخش علاقه‌مندی‌ها آمده‌ایم، همین بازی در مرور باز شود
+              if (pendingAutoOpen) {
+                const f = pendingAutoOpen;
+                pendingAutoOpen = null;
+                const list = filteredGames.length ? filteredGames : currentPlayerGames;
+                const idx = list.findIndex(
+                  (g) => g.white === f.white && g.black === f.black && g.date === f.date && g.result === f.result,
+                );
+                if (idx >= 0) openReviewPage(idx, list);
+              }
             })
             .catch((err) => {
               console.error(err);
+              pendingAutoOpen = null;
               if (gamesListContainer) {
                 gamesListContainer.innerHTML =
                   `<div class="no-games">فایل PGN «pgn/${player.file}» پیدا نشد — فایل بازی‌های این استاد را در پوشه‌ی pgn/ قرار بده تا این‌جا نمایش داده شود.</div>`;
@@ -922,54 +930,119 @@
           return games;
         }
 
+        // ساخت یک ردیف بازی (برای اسکرول بی‌نهایت هم استفاده می‌شود)
+        function buildGameItem(game, idx) {
+          const div = document.createElement("div");
+          div.className = "game-item";
+          const resultText =
+            game.result === "1-0"
+              ? "برد سفید"
+              : game.result === "0-1"
+                ? "برد سیاه"
+                : "مساوی";
+          const resultClass =
+            game.result === "1-0"
+              ? "white-win"
+              : game.result === "0-1"
+                ? "black-win"
+                : "draw";
+          const key = gameKeyOf(currentPlayerFile || "", game);
+          const fav = isFav(key);
+          div.innerHTML = `
+            <button class="fav-heart${fav ? " on" : ""}" title="${fav ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها"}"><i class="${fav ? "fas" : "far"} fa-heart"></i></button>
+            <div class="game-info">
+              <span class="badge ${resultClass}">${resultText}</span>
+              <span>⚪ ${game.white}</span>
+              <span>⚫ ${game.black}</span>
+              <span>📅 ${game.date}</span>
+              ${game.opening ? `<span class="opening-tag">${game.opening}</span>` : ""}
+            </div>
+            <div class="game-arrow"><i class="fas fa-chevron-left"></i></div>
+          `;
+          div.querySelector(".fav-heart").addEventListener("click", function (e) {
+            e.stopPropagation();
+            const on = toggleFav(currentPlayer, game);
+            this.className = "fav-heart" + (on ? " on" : "");
+            this.innerHTML = `<i class="${on ? "fas" : "far"} fa-heart"></i>`;
+          });
+          div.addEventListener("click", function () {
+            openReviewPage(idx, filteredGames);
+          });
+          return div;
+        }
+
+        // افزودن ۱۰۰ بازی بعدی به لیست (بدون بازسازی کل لیست)
+        function appendMoreGames() {
+          if (!gamesListContainer) return;
+          const total = filteredGames.length;
+          const end = Math.min(renderedCount + PAGE_SIZE, total);
+          gamesListContainer.querySelectorAll(".list-state").forEach((n) => n.remove());
+          const frag = document.createDocumentFragment();
+          for (let idx = renderedCount; idx < end; idx++) {
+            frag.appendChild(buildGameItem(filteredGames[idx], idx));
+          }
+          const sent = gamesListContainer.querySelector("#listSentinel");
+          gamesListContainer.insertBefore(frag, sent);
+          renderedCount = end;
+          if (end >= total) {
+            const done = document.createElement("div");
+            done.className = "list-state all-done";
+            done.innerHTML = '<i class="fas fa-circle-check"></i> همهٔ بازی‌ها نمایش داده شد';
+            gamesListContainer.insertBefore(done, sent);
+            if (listSentinel) listSentinel.style.display = "none";
+          } else if (listSentinel) {
+            listSentinel.style.display = "";
+          }
+        }
+
+        // 👁 رصد اسکرول — رسیدن به انتهای لیست = لود خودکار ۱۰۰ تای بعدی
+        function setupInfiniteScroll() {
+          if (listObserver) { listObserver.disconnect(); listObserver = null; }
+          if (!gamesOverlay || !gamesListContainer) return;
+          let sent = gamesListContainer.querySelector("#listSentinel");
+          if (!sent) {
+            sent = document.createElement("div");
+            sent.id = "listSentinel";
+            sent.style.height = "12px";
+            gamesListContainer.appendChild(sent);
+          }
+          listSentinel = sent;
+          listObserver = new IntersectionObserver(
+            function (entries) {
+              if (!entries[0].isIntersecting) return;
+              if (isLoadingMore || renderedCount >= filteredGames.length) return;
+              isLoadingMore = true;
+              const loader = document.createElement("div");
+              loader.className = "list-state loading";
+              loader.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> در حال بارگذاری…';
+              gamesListContainer.insertBefore(loader, listSentinel);
+              // دو فریم صبر تا نشانگر لودینگ دیده شود؛ صفحه هرگز فریز نمی‌شود
+              requestAnimationFrame(function () {
+                requestAnimationFrame(function () {
+                  appendMoreGames();
+                  if (loader.parentNode) loader.remove();
+                  isLoadingMore = false;
+                });
+              });
+            },
+            { root: gamesOverlay, rootMargin: "500px 0px" }
+          );
+          listObserver.observe(listSentinel);
+        }
+
         function renderGamesList(games) {
           if (!gamesListContainer) return;
+          filteredGames = games;
           const rc = document.getElementById("resultsCount");
           if (rc) rc.textContent = faNum(games.length) + " بازی";
+          renderedCount = 0;
+          gamesListContainer.innerHTML = "";
           if (!games.length) {
             gamesListContainer.innerHTML = `<div class="no-games">هیچ بازی‌ای با این فیلترها یافت نشد</div>`;
             return;
           }
-          gamesListContainer.innerHTML = "";
-          games.forEach((game, idx) => {
-            const div = document.createElement("div");
-            div.className = "game-item";
-            const resultText =
-              game.result === "1-0"
-                ? "برد سفید"
-                : game.result === "0-1"
-                  ? "برد سیاه"
-                  : "مساوی";
-            const resultClass =
-              game.result === "1-0"
-                ? "white-win"
-                : game.result === "0-1"
-                  ? "black-win"
-                  : "draw";
-            const key = gameKeyOf(currentPlayerFile || "", game);
-            const fav = isFav(key);
-            div.innerHTML = `
-              <button class="fav-heart${fav ? " on" : ""}" title="${fav ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها"}"><i class="${fav ? "fas" : "far"} fa-heart"></i></button>
-              <div class="game-info">
-                <span class="badge ${resultClass}">${resultText}</span>
-                <span>⚪ ${game.white}</span>
-                <span>⚫ ${game.black}</span>
-                <span>📅 ${game.date}</span>
-                ${game.opening ? `<span class="opening-tag">${game.opening}</span>` : ""}
-              </div>
-              <div class="game-arrow"><i class="fas fa-chevron-left"></i></div>
-            `;
-            div.querySelector(".fav-heart").addEventListener("click", function (e) {
-              e.stopPropagation();
-              const on = toggleFav(currentPlayer, game);
-              this.className = "fav-heart" + (on ? " on" : "");
-              this.innerHTML = `<i class="${on ? "fas" : "far"} fa-heart"></i>`;
-            });
-            div.addEventListener("click", function () {
-              openGameViewer(idx, games);
-            });
-            gamesListContainer.appendChild(div);
-          });
+          appendMoreGames(); // فقط ۱۰۰ بازی اول — بقیه با اسکرول می‌آیند
+          setupInfiniteScroll();
         }
 
         // 🔎 فیلتر حرفه‌ای — جستجو + فیلترهای پیشرفته + علاقه‌مندی + ترتیب
@@ -1036,243 +1109,31 @@
         // سازگاری با لیسنرهای قدیمی
         function performSearch() { applyFilters(); }
 
-        function openGameViewer(gameIdx, games) {
-          if (!games || !games[gameIdx]) return;
-          const game = games[gameIdx];
-          currentGame = game;
-          stopAutoPlay();
-          if (!gameViewerContainer) return;
-
-          const viewer = document.createElement("div");
-          viewer.className = "game-viewer";
-          viewer.id = "gameViewer";
-          const resultIcon =
-            game.result === "1-0"
-              ? "🏆 برد سفید"
-              : game.result === "0-1"
-                ? "🏆 برد سیاه"
-                : "🤝 مساوی";
-
-          viewer.innerHTML = `
-            <div class="viewer-header">
-              <div class="game-title">♜ ${game.white} <span class="vs">vs</span> ${game.black} <span style="font-size:0.65rem;color:var(--text-light);font-weight:400;margin-right:0.4rem;">${resultIcon}</span></div>
-            </div>
-            <div class="viewer-body">
-              <div class="board-wrapper">
-                <div id="gameBoard" class="chessboard"></div>
-                <div class="playback-controls">
-                  <button id="firstMoveBtn"><i class="fas fa-fast-backward"></i></button>
-                  <button id="prevMoveBtn"><i class="fas fa-step-backward"></i></button>
-                  <button id="playPauseBtn" class="primary"><i class="fas fa-play"></i> شروع</button>
-                  <button id="nextMoveBtn"><i class="fas fa-step-forward"></i></button>
-                  <button id="lastMoveBtn"><i class="fas fa-fast-forward"></i></button>
-                  <span class="move-counter" id="moveCounter">0/0</span>
-                </div>
-                <div class="playback-controls">
-                  <button id="reviewBtn" class="review"><i class="fas fa-magnifying-glass-chart"></i> مرور بازی با انجین</button>
-                </div>
-              </div>
-              <div class="info-wrapper">
-                <div class="game-meta">
-                  <div class="meta-item"><span class="label">گشایش:</span><span class="value">${game.opening || "نامشخص"}</span></div>
-                  <div class="meta-item"><span class="label">ECO:</span><span class="value">${game.eco || "-"}</span></div>
-                  <div class="meta-item"><span class="label">تاریخ:</span><span class="value">${game.date}</span></div>
-                  <div class="meta-item"><span class="label">تعداد حرکت:</span><span class="value" id="totalMoves">0</span></div>
-                </div>
-                <div class="pgn-actions">
-                  <button id="copyPgnBtn"><i class="fas fa-copy"></i> کپی PGN</button>
-                  <button id="downloadPgnBtn"><i class="fas fa-download"></i> دانلود PGN</button>
-                </div>
-              </div>
-            </div>
-          `;
-
-          gameViewerContainer.innerHTML = "";
-          gameViewerContainer.appendChild(viewer);
-          loadGameMoves(game.pgn);
-
-          document.getElementById("firstMoveBtn").addEventListener("click", goToFirstMove);
-          document.getElementById("prevMoveBtn").addEventListener("click", goToPrevMove);
-          document.getElementById("playPauseBtn").addEventListener("click", toggleAutoPlay);
-          document.getElementById("nextMoveBtn").addEventListener("click", goToNextMove);
-          document.getElementById("lastMoveBtn").addEventListener("click", goToLastMove);
-          document.getElementById("copyPgnBtn").addEventListener("click", copyPGN);
-          document.getElementById("downloadPgnBtn").addEventListener("click", downloadPGN);
-          document.getElementById("reviewBtn").addEventListener("click", function () {
-            if (!currentGameMoves.length) return;
-            // تبدیل حرکات به UCI برای مرور بازی
-            const g = new Chess();
-            const uciMoves = [];
-            currentGameMoves.forEach(function (mv) {
-              try {
-                const m = g.move(mv, { sloppy: true });
-                if (m) uciMoves.push(m.from + m.to + (m.promotion || ""));
-              } catch (e) {}
-            });
-            window.GameReview.open({
-              moves: uciMoves,
-              white: game.white,
-              black: game.black,
-              title: "بازی استادان",
-              subtitle: game.white + " در برابر " + game.black + (game.opening ? " — " + game.opening : ""),
-              result: game.result,
-            });
-          });
-
-          if (gameOverlay) gameOverlay.classList.add("open");
-          document.body.style.overflow = "hidden";
-          if (gameOverlay) gameOverlay.scrollTop = 0;
-        }
-
-        function loadGameMoves(pgn) {
-          const temp = new Chess();
+        // 🚀 باز کردن بازی در صفحهٔ مستقل مرور (game-review.html)
+        function openReviewPage(gameIdx, games) {
+          const game = games && games[gameIdx];
+          if (!game) return;
           try {
-            temp.load_pgn(pgn);
-            currentGameMoves = temp.history({ verbose: true });
-          } catch (e) {
-            currentGameMoves = [];
-          }
-          totalPlies = currentGameMoves.length;
-          currentMoveIndex = 0;
-          const moveCount = Math.ceil(totalPlies / 2);
-          const totalMovesEl = document.getElementById("totalMoves");
-          if (totalMovesEl) totalMovesEl.textContent = moveCount;
-          updateBoard();
+            sessionStorage.setItem(
+              "chesshub_review_game",
+              JSON.stringify({
+                pgn: game.pgn,
+                white: game.white,
+                black: game.black,
+                date: game.date,
+                eco: game.eco,
+                opening: game.opening,
+                result: game.result,
+                playerName: currentPlayer ? currentPlayer.name : "",
+              })
+            );
+          } catch (e) {}
+          window.location.href = "game-review.html";
         }
 
-        function renderBoardDOM(boardId, moves, moveIndex) {
-          const container = document.getElementById(boardId);
-          if (!container) return;
-          const game = new Chess();
-          for (let i = 0; i < moveIndex; i++) {
-            try {
-              game.move(moves[i], { sloppy: true });
-            } catch (e) {
-              break;
-            }
-          }
-          const board = game.board();
-          const pieceSet = getCurrentPieceSet();
-          container.innerHTML = "";
-          container.style.display = "grid";
-          container.style.gridTemplateColumns = "repeat(8, 1fr)";
-          container.style.aspectRatio = "1 / 1";
-          for (let i = 0; i < 8; i++) {
-            for (let j = 0; j < 8; j++) {
-              const piece = board[i][j];
-              const isLight = (i + j) % 2 === 0;
-              const squareDiv = document.createElement("div");
-              squareDiv.className = `square ${isLight ? "light" : "dark"}`;
-              if (piece) {
-                const key =
-                  (piece.color === "w" ? "w" : "b") + piece.type.toLowerCase();
-                const img = document.createElement("img");
-                img.src = `pieces/${pieceSet}/${pieceCodes[key]}`;
-                img.classList.add("piece-img");
-                img.draggable = false;
-                img.style.pointerEvents = "none";
-                squareDiv.appendChild(img);
-              }
-              container.appendChild(squareDiv);
-            }
-          }
-        }
-
-        function updateBoard() {
-          renderBoardDOM("gameBoard", currentGameMoves, currentMoveIndex);
-          const moveNumber = Math.ceil(currentMoveIndex / 2);
-          const totalMoves = Math.ceil(totalPlies / 2);
-          const counter = document.getElementById("moveCounter");
-          if (counter) counter.textContent = `${moveNumber}/${totalMoves}`;
-        }
-
-        function goToFirstMove() {
-          stopAutoPlay();
-          currentMoveIndex = 0;
-          updateBoard();
-        }
-        function goToPrevMove() {
-          stopAutoPlay();
-          if (currentMoveIndex > 0) currentMoveIndex--;
-          updateBoard();
-        }
-        function goToNextMove() {
-          stopAutoPlay();
-          if (currentMoveIndex < totalPlies) currentMoveIndex++;
-          updateBoard();
-        }
-        function goToLastMove() {
-          stopAutoPlay();
-          currentMoveIndex = totalPlies;
-          updateBoard();
-        }
-
-        function toggleAutoPlay() {
-          if (isAutoPlaying) stopAutoPlay();
-          else startAutoPlay();
-        }
-        function startAutoPlay() {
-          if (isAutoPlaying) return;
-          if (currentMoveIndex >= totalPlies) {
-            currentMoveIndex = 0;
-            updateBoard();
-          }
-          isAutoPlaying = true;
-          const btn = document.getElementById("playPauseBtn");
-          if (btn) btn.innerHTML = '<i class="fas fa-pause"></i> توقف';
-          autoPlayInterval = setInterval(() => {
-            if (currentMoveIndex < totalPlies) {
-              currentMoveIndex++;
-              updateBoard();
-            } else {
-              stopAutoPlay();
-            }
-          }, 1200);
-        }
-        function stopAutoPlay() {
-          isAutoPlaying = false;
-          if (autoPlayInterval) {
-            clearInterval(autoPlayInterval);
-            autoPlayInterval = null;
-          }
-          const btn = document.getElementById("playPauseBtn");
-          if (btn) btn.innerHTML = '<i class="fas fa-play"></i> شروع';
-        }
-
-        function copyPGN() {
-          if (!currentGame) return;
-          navigator.clipboard
-            .writeText(currentGame.pgn)
-            .then(() => alert("✅ PGN کپی شد"))
-            .catch(() => alert("❌ خطا در کپی PGN"));
-        }
-        function downloadPGN() {
-          if (!currentGame) return;
-          const blob = new Blob([currentGame.pgn], { type: "text/plain" });
-          const a = document.createElement("a");
-          const url = URL.createObjectURL(blob);
-          a.href = url;
-          a.download = `${currentGame.white}_vs_${currentGame.black}.pgn`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-        }
-
-        function closeGameOverlay() {
-          if (gameOverlay) gameOverlay.classList.remove("open");
-          if (!gamesOverlay || !gamesOverlay.classList.contains("open")) {
-            document.body.style.overflow = "";
-          }
-          stopAutoPlay();
-          if (gameViewerContainer) gameViewerContainer.innerHTML = "";
-        }
         function closeGamesOverlay() {
           if (gamesOverlay) gamesOverlay.classList.remove("open");
-          if (gameOverlay) gameOverlay.classList.remove("open");
           document.body.style.overflow = "";
-          stopAutoPlay();
-          if (gameViewerContainer) gameViewerContainer.innerHTML = "";
         }
 
         function init() {
@@ -1281,8 +1142,6 @@
             renderFavSection();
             if (closeGamesOverlayBtn)
               closeGamesOverlayBtn.addEventListener("click", closeGamesOverlay);
-            if (closeGameOverlayBtn)
-              closeGameOverlayBtn.addEventListener("click", closeGameOverlay);
             if (searchInput) searchInput.addEventListener("input", applyFilters);
             if (searchField) searchField.addEventListener("change", applyFilters);
             if (resetSearchBtn)
@@ -1328,20 +1187,13 @@
 
             document.addEventListener("keydown", function (e) {
               if (e.key === "Escape") {
-                if (gameOverlay && gameOverlay.classList.contains("open"))
-                  closeGameOverlay();
-                else if (gamesOverlay && gamesOverlay.classList.contains("open"))
+                if (gamesOverlay && gamesOverlay.classList.contains("open"))
                   closeGamesOverlay();
               }
             });
 
             document.addEventListener("pieceSetChanged", function () {
-              loadPieces().then(() => {
-                if (currentGame) updateBoard();
-              });
-            });
-            document.addEventListener("themeChanged", function () {
-              if (currentGame) updateBoard();
+              loadPieces();
             });
           });
         }

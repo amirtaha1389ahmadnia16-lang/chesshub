@@ -78,7 +78,7 @@
 }
 .gr-close:hover { background: var(--danger, #e53e3e); }
 
-/* ---------- نوار پیشرفت تحلیل ---------- */
+/* ---------- نوار پیشرفت تحلیل — فقط درصد + اسپینر کوچک ---------- */
 .gr-progress {
   display: flex;
   align-items: center;
@@ -88,13 +88,23 @@
   border-bottom: 1px solid var(--border, #e2e8f0);
 }
 .gr-progress.done { background: rgba(56, 161, 105, 0.1); }
-.gr-prog-text {
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--accent-dark, #2c5282);
-  white-space: nowrap;
+.gr-spin {
+  display: none;
+  color: var(--accent, #3182ce);
+  font-size: 0.9rem;
+  line-height: 1;
 }
-.gr-progress.done .gr-prog-text { color: var(--success-dark, #2f855a); }
+.gr-spin.show { display: inline-flex; }
+.gr-progress.done .gr-spin { display: none; }
+.gr-prog-pct {
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: var(--accent-dark, #2c5282);
+  min-width: 3.2rem;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+.gr-progress.done .gr-prog-pct { color: var(--success-dark, #2f855a); }
 .gr-prog-track {
   flex: 1;
   height: 8px;
@@ -280,6 +290,7 @@
 }
 
 /* رنگ‌بندی کیفیت حرکت */
+.k-bril  { background: rgba(45, 190, 172, 0.16) !important; color: #0d9488 !important; }
 .k-best  { background: rgba(56, 161, 105, 0.14) !important; color: var(--success-dark, #2f855a) !important; }
 .k-exc   { background: rgba(56, 161, 105, 0.09) !important; color: #38a169 !important; }
 .k-good  { background: rgba(49, 130, 206, 0.09) !important; color: var(--accent, #3182ce) !important; }
@@ -360,9 +371,10 @@
   background: var(--secondary, #f1f5f9);
   color: var(--text-light, #64748b);
 }
-.gr-move.k-best .gr-kind, .gr-move.k-exc .gr-kind, .gr-move.k-good .gr-kind,
+.gr-move.k-bril .gr-kind, .gr-move.k-best .gr-kind, .gr-move.k-exc .gr-kind, .gr-move.k-good .gr-kind,
 .gr-move.k-ina .gr-kind, .gr-move.k-mis .gr-kind, .gr-move.k-blun .gr-kind,
 .gr-move.k-book .gr-kind { background: transparent; }
+.gr-move.k-bril { background: rgba(45, 190, 172, 0.08); }
 .gr-move.k-best { background: rgba(56, 161, 105, 0.08); }
 .gr-move.k-blun { background: rgba(229, 62, 62, 0.07); }
 .gr-move.k-mis { background: rgba(246, 173, 85, 0.1); }
@@ -391,4 +403,197 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .gr-overlay, .gr-inner { animation: none !important; }
+}
+
+/* ============================================================
+   صفحهٔ مستقل مرور بازی (game-review.html)
+   ------------------------------------------------------------
+   • تمام‌صفحه و حرفه‌ای؛ اسکرول‌بار سمت راست (html با ltr)
+   • دکمهٔ بستن/بازگشت فقط سمت چپ (آخرین عنصر ردیف RTL)
+   • کادر تحلیل با زبان طراحی کادر «ذخیرهٔ تنظیمات»
+   ============================================================ */
+
+html {
+  /* فقط در این صفحه: اسکرول‌بار نما سمت راست بماند */
+  direction: ltr;
+}
+
+body.grev-body {
+  direction: rtl;
+  background:
+    radial-gradient(1200px 400px at 85% -100px, rgba(59, 130, 246, 0.07), transparent 60%),
+    #f4f6fa;
+  min-height: 100vh;
+}
+
+/* ---------- نوار بالا ---------- */
+.grev-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 0.8rem 1.2rem;
+  background: linear-gradient(135deg, var(--primary-dark, #0e2a55), #1c3a6e);
+  color: #fff;
+  box-shadow: var(--shadow-md, 0 6px 16px rgba(14, 42, 85, 0.15));
+}
+.grev-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+.grev-title > i {
+  color: var(--accent-light, #93c5fd);
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+.grev-title b { display: block; font-size: 1rem; font-weight: 900; }
+.grev-title span {
+  display: block;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.72);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 52vw;
+}
+.grev-close {
+  background: rgba(255, 255, 255, 0.12);
+  border: none;
+  color: #fff;
+  padding: 0.45rem 1rem;
+  border-radius: var(--radius-md, 10px);
+  font-family: "Vazir";
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.82rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+  transition: var(--transition-smooth, all 0.2s);
+}
+.grev-close:hover { background: var(--danger, #e05252); }
+
+/* ---------- بدنهٔ صفحه ---------- */
+.grev-page {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 1rem 1.2rem 2.5rem;
+}
+
+/* کادر تحلیل — هم‌زبان طراحی کادر ذخیرهٔ تنظیمات */
+.grev-analyze {
+  background: #ffffff;
+  border: 1px solid var(--border, #dbe1ea);
+  border-radius: var(--radius-lg, 14px);
+  box-shadow: var(--shadow-md, 0 6px 16px rgba(14, 42, 85, 0.12));
+  padding: 0.9rem 1.2rem;
+  margin-bottom: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+  animation: grevIn 0.35s cubic-bezier(0.22, 0.8, 0.3, 1) both;
+}
+@keyframes grevIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: none; }
+}
+.grev-analyze .gr-prog-track { height: 10px; }
+.grev-analyze .gr-prog-pct { font-size: 1.5rem; min-width: 4.2rem; }
+.grev-analyze .gr-spin { font-size: 1.15rem; }
+
+.grev-analyze.done { border-color: #bfe8d4; }
+
+/* راهنمای فالبک انجین */
+.grev-engine-hint {
+  display: none;
+  width: 100%;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-light, #5b6577);
+  background: #f8fafc;
+  border: 1px dashed var(--border, #dbe1ea);
+  border-radius: var(--radius-sm, 8px);
+  padding: 0.45rem 0.7rem;
+}
+.grev-engine-hint.show { display: flex; }
+.grev-engine-hint i { color: var(--accent, #3b82f6); }
+.grev-engine-hint a { color: var(--accent, #3b82f6); font-weight: 800; }
+.grev-engine-hint a:hover { text-decoration: underline; }
+
+/* پیام خالی */
+.grev-empty {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 3rem 1rem;
+  color: var(--text-light, #5b6577);
+  font-weight: 700;
+  text-align: center;
+}
+.grev-empty i { font-size: 2.4rem; color: var(--accent-light, #93c5fd); }
+
+/* اورلی مودال کادر دعوت انجین روی این صفحه */
+.engine-prompt { z-index: 6000; }
+
+/* ---------- ریسپانسیو صفحهٔ مستقل ---------- */
+@media (max-width: 720px) {
+  .grev-topbar { padding: 0.65rem 0.85rem; }
+  .grev-title b { font-size: 0.9rem; }
+  .grev-title span { font-size: 0.64rem; max-width: 44vw; }
+  .grev-close { padding: 0.38rem 0.75rem; font-size: 0.75rem; }
+  .grev-page { padding: 0.8rem 0.8rem 2rem; }
+  .grev-analyze { padding: 0.7rem 0.9rem; gap: 0.6rem; }
+  .grev-analyze .gr-prog-pct { font-size: 1.2rem; min-width: 3.4rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grev-analyze { animation: none !important; }
+}
+
+/* ---------- نوار ارزیابی افقی زیر تخته (سهم سفید/سیاه) ---------- */
+.eval-bar {
+  direction: ltr;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  max-width: 480px;
+  margin: 0.75rem auto 0;
+}
+.eval-track {
+  position: relative;
+  flex: 1;
+  height: 14px;
+  border-radius: 99px;
+  overflow: hidden;
+  background: #20293a; /* سهم سیاه */
+  border: 1px solid rgba(15, 42, 85, 0.3);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+.eval-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  background: linear-gradient(180deg, #ffffff, #eef1f6); /* سهم سفید */
+  transition: width 0.35s ease;
+}
+.eval-mid {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: rgba(59, 130, 246, 0.55);
+  transform: translateX(-50%);
 }

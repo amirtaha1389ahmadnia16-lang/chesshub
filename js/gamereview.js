@@ -25,7 +25,7 @@
   function $(id) { return document.getElementById(id); }
   function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
 
-  const CACHE_KEY = "chesshub_review_cache_v1";
+  const CACHE_KEY = "chesshub_review_cache_v2";
   const CACHE_MAX = 40;
 
   function cacheAll() {
@@ -80,14 +80,46 @@
   }
 
   const KINDS = {
-    best:       { fa: "برترین",  icon: "fa-star",          cls: "k-best" },
-    excellent:  { fa: "عالی",    icon: "fa-circle-check",  cls: "k-exc" },
-    good:       { fa: "خوب",     icon: "fa-thumbs-up",     cls: "k-good" },
-    inaccuracy: { fa: "بی‌دقتی", icon: "fa-circle-question", cls: "k-ina" },
-    mistake:    { fa: "اشتباه",  icon: "fa-triangle-exclamation", cls: "k-mis" },
-    blunder:    { fa: "فاجعه",   icon: "fa-skull",         cls: "k-blun" },
-    book:       { fa: "تئوری",   icon: "fa-book",          cls: "k-book" },
+    brilliant:  { fa: "درخشان",      icon: "fa-gem",                  cls: "k-bril" },
+    best:       { fa: "بهترین",      icon: "fa-trophy",               cls: "k-best" },
+    excellent:  { fa: "عالی",        icon: "fa-star",                 cls: "k-exc" },
+    good:       { fa: "خوب",         icon: "fa-thumbs-up",            cls: "k-good" },
+    inaccuracy: { fa: "بی‌دقتی",     icon: "fa-triangle-exclamation", cls: "k-ina" },
+    mistake:    { fa: "اشتباه",      icon: "fa-circle-xmark",         cls: "k-mis" },
+    blunder:    { fa: "اشتباه فاحش", icon: "fa-skull",                cls: "k-blun" },
+    book:       { fa: "تئوری",       icon: "fa-book",                 cls: "k-book" },
   };
+
+  // ارزش مادی بر حسب پیاده — برای تشخیص قربانی (Brilliant)
+  const PIECE_VALS = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
+  function materialOf(fen, color) {
+    let v = 0;
+    const rows = fen.split(" ")[0];
+    for (let i = 0; i < rows.length; i++) {
+      const c = rows[i];
+      if (color === "w" && /[A-Z]/.test(c) && PIECE_VALS[c.toLowerCase()]) v += PIECE_VALS[c.toLowerCase()];
+      else if (color === "b" && /[a-z]/.test(c) && PIECE_VALS[c]) v += PIECE_VALS[c];
+    }
+    return v;
+  }
+  // آیا حرکتِ «بهترین/عالی» با قربانی دادن همراه بوده؟ → درخشان 💎
+  function isSacrifice(fens, i, reps) {
+    try {
+      if (i + 1 >= fens.length) return false;
+      const reply = reps[i + 1] && reps[i + 1].best;
+      if (!reply) return false;
+      const g = new Chess();
+      if (!g.load(fens[i + 1])) return false;
+      const mv = g.move({ from: reply.slice(0, 2), to: reply.slice(2, 4), promotion: reply[4] || "q" });
+      if (!mv) return false;
+      const mover = fens[i].split(" ")[1] === "w" ? "w" : "b";
+      const before = materialOf(fens[i], mover);
+      const after = materialOf(g.fen(), mover);
+      return before - after >= 2; // قربانی حداقل ۲ پیاده
+    } catch (e) {
+      return false;
+    }
+  }
 
   let R = null; // وضعیت جلسه‌ی مرور جاری
   let _opening = false; // قفل ضدِ دابل‌کلیک هنگام await پیش‌بارگذاری مهره‌ها
@@ -114,8 +146,9 @@
           '<button class="gr-close" id="grCloseBtn"><i class="fas fa-xmark"></i> بستن</button>' +
         "</div>" +
         '<div class="gr-progress" id="grProgWrap">' +
-          '<div class="gr-prog-text" id="grProgText">در صف تحلیل…</div>' +
-          '<div class="gr-prog-track"><div class="gr-prog-fill" id="grProgFill" style="width:0%"></div></div>' +
+          '<span class="gr-spin" id="grSpin"><i class="fas fa-spinner fa-pulse"></i></span>' +
+          '<div class="gr-prog-pct" id="grProgText">۵٪</div>' +
+          '<div class="gr-prog-track"><div class="gr-prog-fill" id="grProgFill" style="width:5%"></div></div>' +
         "</div>" +
         '<div class="gr-body">' +
           '<div class="gr-board-side">' +
@@ -172,6 +205,19 @@
     if (num) num.textContent = typeof cpWhite === "number" ? fmtEvalCp(cpWhite, true) : "۰٫۰";
   }
 
+  /* ---------- نوار پیشرفت تحلیل — فقط درصد (۵٪ تا ۱۰۰٪) + اسپینر کوچک ---------- */
+  function setProgress(pct, analyzing) {
+    const t = $("grProgText");
+    const spin = $("grSpin");
+    const fill = $("grProgFill");
+    const wrap = $("grProgWrap");
+    const v = Math.max(5, Math.min(100, Math.round(pct)));
+    if (t) t.textContent = fa(v) + "٪";
+    if (fill) fill.style.width = v + "%";
+    if (wrap) wrap.classList.toggle("done", v >= 100);
+    if (spin) spin.classList.toggle("show", !!analyzing && v < 100);
+  }
+
   /* ---------- تحلیل ---------- */
   async function analyzeMoves(cfg, onDone) {
     const moves = cfg.moves || [];
@@ -208,8 +254,7 @@
         pv: (r.pv || []).slice(0, 8),
       });
       const pct = Math.round(((i + 1) / fens.length) * 100);
-      $("grProgFill").style.width = pct + "%";
-      $("grProgText").textContent = "تحلیل موقعیت " + fa(i + 1) + " از " + fa(fens.length) + "…";
+      setProgress(pct, true);
     }
 
     // نمره‌دهی
@@ -220,7 +265,7 @@
       const after = afterResp && afterResp.cp != null ? -afterResp.cp : null;
       let kind = "good";
       if (i === sans.length - 1 && fens[i + 1]) {
-        // حرکت آخر اگر مات باشد همیشه «برترین» است (ارزیابیِ موقعیت پایان‌یافته معنا ندارد)
+        // حرکت آخر اگر مات باشد همیشه «بهترین» است (ارزیابیِ موقعیت پایان‌یافته معنا ندارد)
         try {
           const gg = new Chess();
           if (gg.load(fens[i + 1]) && gg.in_checkmate()) kind = "best";
@@ -243,6 +288,10 @@
           else kind = "blunder";
           if (isWinning && after < 120 && after > -250) kind = delta > 250 ? "blunder" : "mistake";
         }
+      }
+      // درخشان 💎 = بهترین/عالی + قربانی دادن ماده
+      if ((kind === "best" || kind === "excellent") && isSacrifice(fens, i, reps)) {
+        kind = "brilliant";
       }
       judged.push({ i: i, san: sans[i], uci: moves[i], kind: kind,
         before: before, after: after, best: reps[i].best,
@@ -322,7 +371,7 @@
       return judged.filter(function (m) { return m.color === side && m.kind === kind; }).length;
     };
     const sideRow = function (side, label) {
-      const kinds = ["best", "excellent", "good", "inaccuracy", "mistake", "blunder"];
+      const kinds = ["brilliant", "best", "excellent", "good", "inaccuracy", "mistake", "blunder"];
       return '<div class="gr-side"><div class="gr-side-head"><b>' + label +
         '</b><span class="gr-acc">' + fa(avg(acc[side])) + "٪ دقت</span></div><div class='gr-kinds'>" +
         kinds.map(function (k) {
@@ -467,48 +516,32 @@
     });
   }
 
-  async function open(cfg) {
+  // بازگشت صفحهٔ مرور به صفحهٔ قبل (حالت صفحهٔ مستقل)
+  function closeNav() {
+    if (window.history && window.history.length > 1) window.history.back();
+    else window.location.href = "games-database.html";
+  }
+
+  function checkDeps() {
     if (typeof Chess === "undefined") {
       console.warn("[GameReview] chess.js لود نشده");
-      return;
+      return false;
     }
     if (!window.ChessEngine) {
       console.warn("[GameReview] engine-core.js لود نشده — <script src=\"js/engine-core.js\"> را اضافه کن");
-      return;
+      return false;
     }
     if (!window.ChessBoardUI) {
       console.warn("[GameReview] board-ui.js لود نشده — <script src=\"js/board-ui.js\"> را اضافه کن");
-      if (typeof toast === "function") toast("ماژول تخته لود نشد — صفحه را رفرش کن");
-      return;
+      toast("ماژول تخته لود نشد — صفحه را رفرش کن");
+      return false;
     }
-    if (_opening) return; // اگر همان لحظه یک باز شدنِ دیگر در جریان است
-    _opening = true;
+    return true;
+  }
 
-    ChessEngine.init();
-    close();
-
-    // 🔑 پیش‌بارگذاری تصاویر مهره‌ها قبل از ساخت تخته — بدون این، صفحاتی که
-    // در شروع خود ChessUtils.loadPieces را صدا نمی‌زنند (مثل پایگاه بازی‌ها)
-    // در مرور بازی به جای عکس مهره‌ها، گلیف یونیکد نشان می‌دادند.
-    if (window.ChessUtils && ChessUtils.loadPieces) {
-      try { await ChessUtils.loadPieces(); } catch (e) {}
-    }
-    _opening = false;
-
-    R = {
-      cfg: cfg || {},
-      epoch: 0,
-      closed: false,
-      idx: 0,
-      reps: null,
-      judged: null,
-      fens: null,
-      auto: null,
-      viewGame: null,
-    };
-    const ov = buildOverlay(R.cfg);
-    R.ov = ov;
-
+  // اتصال جلسهٔ مرور به DOM آماده (اورلی مودال یا صفحهٔ مستقل) —
+  // هر دو از همان id ها استفاده می‌کنند؛ فقط رفتار دکمهٔ بستن متفاوت است.
+  function bindSession() {
     // تخته فقط نمایشی (بدون تعامل)
     R.board = ChessBoardUI.create({
       boardEl: $("grBoard"),
@@ -526,7 +559,7 @@
     $("grPb").innerHTML = '<i class="fas fa-chess-king" style="color:#1a202c"></i> ' + (R.cfg.black || "سیاه");
 
     // رویدادها
-    $("grCloseBtn").addEventListener("click", close);
+    $("grCloseBtn").addEventListener("click", R.pageMode ? closeNav : close);
     $("grFirst").addEventListener("click", function () { nav(0); });
     $("grPrev").addEventListener("click", function () { nav(R.idx - 1); });
     $("grNext").addEventListener("click", function () { nav(R.idx + 1); });
@@ -560,7 +593,7 @@
     document.addEventListener("pieceSetChanged", grOnPieceSetChange);
 
     showPosition();
-    $("grProgText").textContent = "در صف تحلیل…";
+    setProgress(5, true); // شروع نمایش: فقط ۵٪ + اسپینر کوچک
 
     // شروع تحلیل
     const fensCollector = [];
@@ -578,18 +611,64 @@
       R.reps = data.reps;
       R.judged = data.judged;
       R.fens = fensCollector;
-      $("grProgWrap").classList.add("done");
-      $("grProgText").textContent = "تحلیل کامل شد — " + fa((data.judged || []).length) + " حرکت نمره گرفت";
+      setProgress(100, false); // پایان: فقط ۱۰۰٪ — بدون متن اضافه
       renderSummary();
       showPosition();
     });
+  }
+
+  async function startSession(cfg, pageMode) {
+    if (!checkDeps()) return;
+    if (_opening) return; // اگر همان لحظه یک باز شدنِ دیگر در جریان است
+    _opening = true;
+
+    ChessEngine.init();
+    close();
+
+    // 🔑 پیش‌بارگذاری تصاویر مهره‌ها قبل از ساخت تخته — بدون این، صفحاتی که
+    // در شروع خود ChessUtils.loadPieces را صدا نمی‌زنند (مثل پایگاه بازی‌ها)
+    // در مرور بازی به جای عکس مهره‌ها، گلیف یونیکد نشان می‌دادند.
+    if (window.ChessUtils && ChessUtils.loadPieces) {
+      try { await ChessUtils.loadPieces(); } catch (e) {}
+    }
+    _opening = false;
+
+    R = {
+      cfg: cfg || {},
+      epoch: 0,
+      closed: false,
+      idx: 0,
+      reps: null,
+      judged: null,
+      fens: null,
+      auto: null,
+      viewGame: null,
+      pageMode: !!pageMode,
+    };
+    if (!R.pageMode) {
+      R.ov = buildOverlay(R.cfg);
+    }
+    bindSession();
+  }
+
+  // حالت مودال (analysis.html و صفحات دیگر)
+  function open(cfg) {
+    return startSession(cfg, false);
+  }
+
+  // حالت صفحهٔ مستقل (game-review.html) — داخل DOM موجود رندر می‌شود
+  function openPage(cfg) {
+    return startSession(cfg, true);
   }
 
   function grKey(e) {
     if (!R || R.closed) return;
     if (e.key === "ArrowLeft") nav(R.idx + 1);
     else if (e.key === "ArrowRight") nav(R.idx - 1);
-    else if (e.key === "Escape") close();
+    else if (e.key === "Escape") {
+      if (R.pageMode) closeNav();
+      else close();
+    }
   }
   function grResize() { if (R && !R.closed) drawGraph(); }
 
@@ -616,5 +695,10 @@
     R = null;
   }
 
-  window.GameReview = { open: open, close: close };
+  window.GameReview = {
+    open: open,
+    openPage: openPage,
+    close: close,
+    showToast: toast,
+  };
 })();

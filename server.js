@@ -1356,13 +1356,15 @@ function serveStatic(req, res, pathname) {
     //  • CSP: همه‌چیز فقط از خود سایت؛ inline مجاز (۴ صفحه اسکریپت داخلی دارند)
     //  • 'wasm-unsafe-eval' برای موتور Stockfish (WASM)
     //  • worker-src blob: برای کارگرهای موتور
+    //  • connect-src https://unpkg.com برای دانلود انجین Stockfish از CDN رسمی
+    //  • connect-src blob: برای خواندن انجین ذخیره‌شده در IndexedDB (Blob URL)
     headers["Content-Security-Policy"] = [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
-      "connect-src 'self' ws: wss:",
+      "connect-src 'self' https://unpkg.com blob: ws: wss:",
       "media-src 'self' blob:",
       "worker-src 'self' blob:",
       "object-src 'none'",

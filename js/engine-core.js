@@ -23,6 +23,9 @@
   let ready = false;
   let available = false;
   let announced = false;
+  let engineKind = "none";   // stored | local | none
+  let engineLabel = "";      // نام انجین برای نمایش
+  let initStarted = false;
   const readyCbs = [];
   const queue = [];
   let busy = false;
@@ -39,27 +42,85 @@
     }
   }
 
-  function init() {
-    if (worker || typeof Worker === "undefined") return;
-    try {
-      worker = new Worker("js/stockfish.js");
-      worker.onmessage = function (e) {
-        const line = typeof e.data === "string" ? e.data : (e.data && e.data.data) || "";
-        handle(line);
-      };
-      worker.onerror = function () {
-        ready = false;
-        available = false;
-        flush();
-      };
-      worker.postMessage("uci");
-    } catch (err) {
+  // اتصال Worker به هسته + تأیید «uciok» در مهلت مشخص
+  function adoptAndConfirm(w, kind, label, guardMs) {
+    worker = w;
+    ready = false;
+    engineKind = kind;
+    engineLabel = label || "";
+    w.onmessage = function (e) {
+      const line = typeof e.data === "string" ? e.data : (e.data && e.data.data) || "";
+      handle(line);
+    };
+    w.onerror = function () {
+      if (!available) {
+        try { w.terminate(); } catch (err) {}
+        worker = null;
+      }
+    };
+    try { w.postMessage("uci"); } catch (err) {
       worker = null;
+      return Promise.resolve(false);
     }
-    setTimeout(function () {
-      if (!available) flush();
-    }, 8000);
+    return new Promise(function (resolve) {
+      const t0 = Date.now();
+      (function check() {
+        if (available) { resolve(true); return; }
+        if (!worker) { resolve(false); return; }
+        if (Date.now() - t0 > guardMs) {
+          try { worker.terminate(); } catch (err) {}
+          worker = null;
+          resolve(false);
+          return;
+        }
+        setTimeout(check, 150);
+      })();
+    });
   }
+
+  // انجین محلی همیشه‌در دسترس (فالبک نهایی)
+  function fallbackLocal(guardMs) {
+    if (typeof Worker === "undefined") return Promise.resolve(false);
+    let w = null;
+    try { w = new Worker("js/stockfish.js"); } catch (err) { return Promise.resolve(false); }
+    return adoptAndConfirm(w, "local", "Stockfish داخلی (سبک)", guardMs || 8000);
+  }
+
+  // تلاش برای انجین ذخیره‌شده در IndexedDB
+  function tryStored(usePatch, guardMs) {
+    if (!window.EngineStore) return Promise.resolve(false);
+    return window.EngineStore.createActiveWorker(usePatch).then(function (w) {
+      if (!w) return false;
+      const meta = window.EngineStore.meta(w._chEngineId);
+      const label = meta ? meta.label + " (ذخیره‌شده)" : "انجین ذخیره‌شده";
+      return adoptAndConfirm(w, "stored", label, guardMs || 12000);
+    }).catch(function () { return false; });
+  }
+
+  function init() {
+    if (initStarted || worker || typeof Worker === "undefined") return;
+    initStarted = true;
+    // ۱) انجین ذخیره‌شده (IndexedDB) با مکانیزم hash
+    // ۲) همان با پچ نشانی wasm
+    // ۳) فالبک نهایی: انجین سبک محلی
+    tryStored(false, 12000)
+      .then(function (ok) { return ok ? true : tryStored(true, 12000); })
+      .then(function (ok) { if (!ok) return fallbackLocal(8000); return true; })
+      .then(function () {
+        if (!available) flush();
+        else pump();
+      });
+  }
+
+  // پس از دانلود/فعال‌سازی انجین جدید در حین کار → ارتقای زنده
+  document.addEventListener("engineStoreChanged", function () {
+    if (engineKind === "stored") return; // هم‌اکنون انجین ذخیره‌شده فعال است
+    if (busy || queue.length) return;    // وسط تحلیل جابجا نمی‌کنیم
+    initStarted = false;
+    ready = false;
+    available = false;
+    init();
+  });
 
   function handle(line) {
     if (!line) return;
@@ -67,7 +128,8 @@
       ready = true;
       available = true;
       worker.postMessage("setoption name UCI_Chess960 value false");
-      worker.postMessage("setoption name Threads value 2");
+      // انجین‌های ذخیره‌شده تک‌نخب هستند (Threads max 1)
+      worker.postMessage("setoption name Threads value " + (engineKind === "stored" ? 1 : 2));
       worker.postMessage("setoption name Hash value 128");
       worker.postMessage("isready");
       if (!announced) {
@@ -145,11 +207,12 @@
   }
 
   // fen ← موقعیت؛ opts: {movetime, depth, skill, multiPV}
+  // در حال بوت شدن انجین، درخواست‌ها صف می‌شوند تا «uciok» برسد
   function ask(fen, opts) {
     opts = opts || {};
     return new Promise(function (resolve) {
       init();
-      if (!worker || (!available && queue.length > 8)) {
+      if (typeof Worker === "undefined") {
         resolve({ move: null, score: null, pv: [], bestUci: null });
         return;
       }
@@ -187,6 +250,8 @@
     flush: flush,
     isReady: function () { return ready; },
     isAvailable: function () { return available; },
+    kind: function () { return engineKind; },
+    label: function () { return engineLabel; },
     onReady: function (cb) {
       if (announced) cb();
       else readyCbs.push(cb);

@@ -51,6 +51,7 @@
       lastMove: null,
       flipped: false,
       destroyed: false,
+      prevPieces: null,   // نقشهٔ مهره‌ها در رندر قبلی (برای انیمیشن)
     };
 
     function game() { return opts.getGame ? opts.getGame() : null; }
@@ -93,6 +94,7 @@
       S.flipped = orientation() === "b";
       boardEl.innerHTML = "";
       S.squares = {};
+      S.prevPieces = null; // ساخت تازه — بدون انیمیشن
       const files = ["a", "b", "c", "d", "e", "f", "g", "h"];
       const ranks = [8, 7, 6, 5, 4, 3, 2, 1];
       const fOrder = S.flipped ? [...files].reverse() : files;
@@ -111,6 +113,63 @@
       render({});
     }
 
+    /* ---------- انیمیشن نرم حرکت مهره‌ها (FLIP) ----------
+       مهره در خانهٔ مقصد ساخته می‌شود، از مختصات خانهٔ مبدأ با
+       transition ۲۴۰ms (cubic-bezier ease-out) به جایش می‌لغزد.
+       برای همهٔ حرکات: معمولی، کیش، قلعه (شاه+رخ)، آن‌پاسان، ارتقا. */
+    function animatePieces(prev, now, els) {
+      const br = boardEl.getBoundingClientRect();
+      const sources = Object.keys(prev).filter(function (sq) {
+        return now[sq] !== prev[sq];
+      });
+      if (sources.length > 4) return; // جابجایی عظیم = انیمیشن لازم نیست
+      Object.keys(now).forEach(function (sq) {
+        if (prev[sq] === now[sq]) return;
+        const key = now[sq];
+        let best = null, bestD = Infinity;
+        sources.forEach(function (from) {
+          if (prev[from] !== key) return;
+          const fe = S.squares[from];
+          const te = S.squares[sq];
+          if (!fe || !te) return;
+          const fr = fe.getBoundingClientRect();
+          const tr = te.getBoundingClientRect();
+          const d = Math.abs(fr.left - tr.left) + Math.abs(fr.top - tr.top);
+          if (d < bestD) { bestD = d; best = fe; }
+        });
+        // ارتقا: پیادهٔ هم‌رنگ از همان مبدأ بلغزد و وزیر/رخ/... بنشیند
+        if (!best) {
+          const color = key[0];
+          const promoFrom = sources.filter(function (from) {
+            return prev[from] === color + "p";
+          });
+          if (promoFrom.length === 1) best = S.squares[promoFrom[0]];
+        }
+        if (!best) return;
+        const el = els[sq];
+        if (!el || !el.style) return;
+        const sqEl = el.parentNode;
+        if (!sqEl || !sqEl.getBoundingClientRect) return;
+        const fromR = best.getBoundingClientRect();
+        const toR = sqEl.getBoundingClientRect();
+        const dx = fromR.left - toR.left;
+        const dy = fromR.top - toR.top;
+        if (!dx && !dy) return;
+        el.classList.add("piece-anim");
+        el.style.transition = "none";
+        el.style.transform = "translate(" + dx + "px," + dy + "px)";
+        void el.offsetWidth; // reflow — نقطهٔ شروع
+        el.style.transition = "";
+        requestAnimationFrame(function () {
+          el.style.transform = "";
+          setTimeout(function () {
+            el.classList.remove("piece-anim");
+            el.style.transform = "";
+          }, 320);
+        });
+      });
+    }
+
     function render(x) {
       x = x || {};
       if (x.lastMove !== undefined) S.lastMove = x.lastMove;
@@ -123,12 +182,17 @@
         return;
       }
       const board = g.board();
+      const prev = S.prevPieces;
+      const canAnimate =
+        x.animate !== false && !!prev && !S.press && !S.destroyed;
       const legal = {};
       if (S.selected && canMove()) {
         g.moves({ square: S.selected, verbose: true }).forEach(function (m) {
           if (!legal[m.to]) legal[m.to] = m.captured ? "capture" : "move";
         });
       }
+      const nowMap = {};
+      const newEls = {};
       for (let r = 0; r < 8; r++) {
         for (let f = 0; f < 8; f++) {
           const sq = "abcdefgh"[f] + (8 - r);
@@ -140,9 +204,18 @@
             "selected", "dot", "dot-capture", "last-move",
             "check", "drag-over", "dragging"
           );
-          if (p) el.appendChild(makePieceEl(p.color, p.type));
+          if (p) {
+            const key = p.color + p.type;
+            nowMap[sq] = key;
+            const pieceEl = makePieceEl(p.color, p.type);
+            el.appendChild(pieceEl);
+            newEls[sq] = pieceEl;
+          }
         }
       }
+      // انیمیشن نرم — فقط برای رندرهای عادی (نه درگ/ساخت اولیه)
+      if (canAnimate) animatePieces(prev, nowMap, newEls);
+      S.prevPieces = nowMap;
       if (S.lastMove) {
         if (S.squares[S.lastMove.from]) S.squares[S.lastMove.from].classList.add("last-move");
         if (S.squares[S.lastMove.to]) S.squares[S.lastMove.to].classList.add("last-move");

@@ -57,31 +57,20 @@ window.chPh = function (w, h, label) {
      کاتالوگ‌های رسمی تنظیمات — تنها گزینه‌های مجاز
      ============================================ */
 
-  // ۱۰ تم رنگی تخته — دقیقاً همین‌ها، به همین ترتیب
+  // ۴ تم رنگی تخته — دقیقاً همین‌ها، به همین ترتیب (آیکون ۲×۲ شطرنجی)
   const THEME_CATALOG = [
-    { id: "1",  name: "Amber Wood", light: "#ecc79b", dark: "#c7703c" },
-    { id: "2",  name: "Ocean Blue", light: "#eae9d2", dark: "#4b7399" },
-    { id: "3",  name: "Classic",    light: "#f0d9b5", dark: "#b58863" },
-    { id: "4",  name: "Charcoal",   light: "#717b8e", dark: "#2b323f" },
-    { id: "5",  name: "Meadow",     light: "#eeeed2", dark: "#769656" },
-    { id: "6",  name: "Frost",      light: "#cddbe2", dark: "#7b9eb3" },
-    { id: "7",  name: "Stone",      light: "#cac8bf", dark: "#52514e" },
-    { id: "8",  name: "Violet",     light: "#efefef", dark: "#8877b7" },
-    { id: "9",  name: "Coral",      light: "#f0d8bf", dark: "#ba5546" },
-    { id: "10", name: "Forest",     light: "#efefec", dark: "#33684b" },
+    { id: "1", name: "Meadow",   light: "#eeeed2", dark: "#769656" },
+    { id: "2", name: "Ocean",    light: "#eae9d2", dark: "#4b7399" },
+    { id: "3", name: "Classic",  light: "#f0d9b5", dark: "#b58863" },
+    { id: "4", name: "Charcoal", light: "#717b8e", dark: "#2b323f" },
   ];
 
-  // ۹ مجموعه مهره — دقیقاً همین‌ها، به همین ترتیب
+  // ۴ مجموعه مهره — دقیقاً همین‌ها، به همین ترتیب
   const PIECE_SETS = [
-    { id: "alpha",     name: "Alpha" },
-    { id: "classic",   name: "Classic" },
-    { id: "g08ph",     name: "G08PH" },
-    { id: "game_room", name: "Game Room" },
-    { id: "glass",     name: "Glass" },
-    { id: "light",     name: "Light" },
-    { id: "neo",       name: "Neo" },
-    { id: "neo_wood",  name: "Neo Wood" },
-    { id: "ocean",     name: "Ocean" },
+    { id: "alpha",   name: "Alpha" },
+    { id: "classic", name: "Classic" },
+    { id: "neo",     name: "Neo" },
+    { id: "glass",   name: "Glass" },
   ];
 
   const VALID_THEMES = THEME_CATALOG.map(function (t) { return t.id; });
@@ -610,6 +599,8 @@ window.chPh = function (w, h, label) {
 
   async function loadComponent(selector, url) {
     const element = document.querySelector(selector);
+    // صفحاتی مثل game-review.html عمداً header/footer ندارند — بی‌صدا رد شود
+    if (!element) return false;
     try {
       const response = await fetch(url);
       if (!response.ok) throw new Error("HTTP " + response.status);
@@ -1167,6 +1158,461 @@ window.chPh = function (w, h, label) {
 
 
   /* ============================================
+     ۷٫۵) انجین شطرنج — دانلود + ذخیره در IndexedDB + Worker
+     ------------------------------------------------------------
+     • کاتالوگ: نسخه‌های رسمی WASM «single» از unpkg (بدون نیاز
+       به SharedArrayBuffer؛ CORS باز — تست‌شده).
+     • ذخیره‌سازی: IndexedDB (محلی؛ حجم بزرگ پشتیبانی می‌شود).
+       localStorage فقط برای «انجین فعال» و نشان‌گر بستن
+       دعوت‌نامهٔ اولیه استفاده می‌شود.
+     • اجرا: Worker از Blob + مسیر فایل wasm از طریق «hash» آدرس
+       Worker — مکانیزم رسمی خودِ لودر Stockfish
+       (self.location.hash → e[0]). اگر hash پشتیبانی نشود متن
+       لودر با نشانی Blob پچ می‌شود؛ فالبک نهایی: انجین محلی.
+     ============================================ */
+
+  const ENGINE_DB_NAME = "chesshub_engine";
+  const ENGINE_FILES_STORE = "files";
+  const ENGINE_META_STORE = "meta";
+  const ENGINE_ACTIVE_KEY = "chesshub_engine_active";
+  const ENGINE_PROMPT_KEY = "chesshub_engine_prompt_dismissed";
+  const ENGINE_DEFAULT_ID = "sf18lite";
+
+  // کاتالوگ رسمی انجین‌ها — فقط نسخه‌های single (سازگار با همهٔ هاست‌ها)
+  const ENGINE_CATALOG = [
+    {
+      id: "sf19", label: "Stockfish 19", version: "19.0.1", sizeBytes: 94600000,
+      desc: "جدیدترین و قوی‌ترین نسخهٔ رسمی — NNUE کامل",
+      tag: "قوی‌ترین",
+      js: "https://unpkg.com/stockfish@19.0.1/bin/stockfish-19-single.js",
+      wasm: "https://unpkg.com/stockfish@19.0.1/bin/stockfish-19-single.wasm",
+    },
+    {
+      id: "sf18", label: "Stockfish 18", version: "18.0.8", sizeBytes: 107800000,
+      desc: "نسخهٔ پایدار و بسیار قوی — NNUE کامل",
+      tag: "پایدار",
+      js: "https://unpkg.com/stockfish@18.0.8/bin/stockfish-18-single.js",
+      wasm: "https://unpkg.com/stockfish@18.0.8/bin/stockfish-18-single.wasm",
+    },
+    {
+      id: "sf18lite", label: "Stockfish 18 Lite", version: "18.0.8", sizeBytes: 7300000,
+      desc: "سبک و سریع با NNUE — مناسب بارگذاری سریع",
+      tag: "پیشنهادی",
+      js: "https://unpkg.com/stockfish@18.0.8/bin/stockfish-18-lite-single.js",
+      wasm: "https://unpkg.com/stockfish@18.0.8/bin/stockfish-18-lite-single.wasm",
+    },
+  ];
+
+  /* ---- ابزار IndexedDB ---- */
+  function engineDbOpen() {
+    return new Promise(function (resolve, reject) {
+      if (typeof indexedDB === "undefined") {
+        reject(new Error("IndexedDB پشتیبانی نمی‌شود"));
+        return;
+      }
+      const req = indexedDB.open(ENGINE_DB_NAME, 1);
+      req.onupgradeneeded = function () {
+        const db = req.result;
+        if (!db.objectStoreNames.contains(ENGINE_FILES_STORE)) db.createObjectStore(ENGINE_FILES_STORE);
+        if (!db.objectStoreNames.contains(ENGINE_META_STORE)) db.createObjectStore(ENGINE_META_STORE);
+      };
+      req.onsuccess = function () { resolve(req.result); };
+      req.onerror = function () { reject(req.error || new Error("IndexedDB باز نشد")); };
+    });
+  }
+  function engineDbPut(store, key, val) {
+    return engineDbOpen().then(function (db) {
+      return new Promise(function (res, rej) {
+        const tx = db.transaction(store, "readwrite");
+        tx.objectStore(store).put(val, key);
+        tx.oncomplete = function () { res(); };
+        tx.onerror = function () { rej(tx.error || new Error("ذخیره ناموفق")); };
+      });
+    });
+  }
+  function engineDbGet(store, key) {
+    return engineDbOpen().then(function (db) {
+      return new Promise(function (res, rej) {
+        const rq = db.transaction(store, "readonly").objectStore(store).get(key);
+        rq.onsuccess = function () { res(rq.result || null); };
+        rq.onerror = function () { rej(rq.error); };
+      });
+    });
+  }
+  function engineDbDelete(store, key) {
+    return engineDbOpen().then(function (db) {
+      return new Promise(function (res, rej) {
+        const tx = db.transaction(store, "readwrite");
+        tx.objectStore(store).delete(key);
+        tx.oncomplete = function () { res(); };
+        tx.onerror = function () { rej(tx.error); };
+      });
+    });
+  }
+  function engineDbKeys(store) {
+    return engineDbOpen().then(function (db) {
+      return new Promise(function (res, rej) {
+        const rq = db.transaction(store, "readonly").objectStore(store).getAllKeys();
+        rq.onsuccess = function () { res(rq.result || []); };
+        rq.onerror = function () { rej(rq.error); };
+      });
+    });
+  }
+
+  const EngineStore = {
+    catalog: ENGINE_CATALOG,
+    downloads: {}, // engineId → AbortController
+    watchers: {},  // engineId → fn(percent) برای نمایش زندهٔ درصد
+
+    meta(id) {
+      for (let i = 0; i < ENGINE_CATALOG.length; i++) {
+        if (ENGINE_CATALOG[i].id === id) return ENGINE_CATALOG[i];
+      }
+      return null;
+    },
+
+    listDownloaded() {
+      return engineDbKeys(ENGINE_META_STORE).catch(function () { return []; });
+    },
+
+    activeId() {
+      try { return localStorage.getItem(ENGINE_ACTIVE_KEY) || null; } catch (e) { return null; }
+    },
+
+    setActive(id) {
+      try {
+        if (id) localStorage.setItem(ENGINE_ACTIVE_KEY, id);
+        else localStorage.removeItem(ENGINE_ACTIVE_KEY);
+      } catch (e) {}
+      document.dispatchEvent(new CustomEvent("engineStoreChanged"));
+    },
+
+    get(id) {
+      return Promise.all([
+        engineDbGet(ENGINE_FILES_STORE, id + "/engine.js"),
+        engineDbGet(ENGINE_FILES_STORE, id + "/engine.wasm"),
+      ]).then(function (pair) {
+        if (!pair[0] || !pair[1]) return null;
+        return { js: pair[0], wasm: pair[1] };
+      });
+    },
+
+    // دانلود با درصد ۰ تا ۱۰۰ — onProgress(percent)
+    download(id, onProgress) {
+      const self = this;
+      const meta = this.meta(id);
+      if (!meta) return Promise.reject(new Error("انجین پیدا نشد"));
+      if (self.downloads[id]) return Promise.reject(new Error("دانلود در جریان است"));
+      const ctrl = new AbortController();
+      self.downloads[id] = ctrl;
+      const rep = function (p) {
+        const v = Math.max(0, Math.min(100, Math.round(p)));
+        if (onProgress) onProgress(v);
+        if (self.watchers[id]) self.watchers[id](v);
+      };
+      rep(1);
+      const opts = { cache: "no-store", signal: ctrl.signal };
+      const jsFetch = fetch(meta.js, opts).then(function (r) {
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        const total = Number(r.headers.get("content-length")) || 40000;
+        return engineStreamToBlob(r, function (rec) { rep(1 + 2 * (rec / total)); });
+      });
+      const wasmFetch = jsFetch.then(function () {
+        return fetch(meta.wasm, opts).then(function (r) {
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          const total = Number(r.headers.get("content-length")) || Math.max(1, meta.sizeBytes - 40000);
+          return engineStreamToBlob(r, function (rec) { rep(3 + 96 * (rec / total)); });
+        });
+      });
+      return Promise.all([jsFetch, wasmFetch])
+        .then(function (pair) {
+          rep(99);
+          return Promise.all([
+            engineDbPut(ENGINE_FILES_STORE, id + "/engine.js", pair[0]),
+            engineDbPut(ENGINE_FILES_STORE, id + "/engine.wasm", pair[1]),
+            engineDbPut(ENGINE_META_STORE, id, {
+              id: id, label: meta.label, version: meta.version,
+              size: pair[0].size + pair[1].size, t: Date.now(),
+            }),
+          ]).then(function () { rep(100); });
+        })
+        .then(function () {
+          delete self.downloads[id];
+          if (!self.activeId()) self.setActive(id);
+          else document.dispatchEvent(new CustomEvent("engineStoreChanged"));
+          return true;
+        })
+        .catch(function (err) {
+          delete self.downloads[id];
+          throw err;
+        });
+    },
+
+    cancel(id) {
+      const c = this.downloads[id];
+      if (c && c.abort) c.abort();
+    },
+
+    isDownloading(id) { return !!this.downloads[id]; },
+
+    remove(id) {
+      const self = this;
+      return Promise.all([
+        engineDbDelete(ENGINE_FILES_STORE, id + "/engine.js").catch(function () {}),
+        engineDbDelete(ENGINE_FILES_STORE, id + "/engine.wasm").catch(function () {}),
+        engineDbDelete(ENGINE_META_STORE, id).catch(function () {}),
+      ]).then(function () {
+        if (self.activeId() === id) {
+          return self.listDownloaded().then(function (rest) {
+            self.setActive(rest.length ? rest[0] : null);
+          });
+        }
+        document.dispatchEvent(new CustomEvent("engineStoreChanged"));
+      });
+    },
+
+    // ساخت Worker از انجین ذخیره‌شده
+    // usePatch=false → مکانیزم hash خود لودر؛ usePatch=true → پچ مستقیم نشانی wasm
+    createWorker(id, usePatch) {
+      return this.get(id).then(function (files) {
+        if (!files) return null;
+        const wasmUrl = URL.createObjectURL(
+          new Blob([files.wasm], { type: "application/wasm" })
+        );
+        return files.js.text().then(function (jsText) {
+          let jsUrl;
+          try {
+            if (usePatch) {
+              const patched = jsText.replace(
+                'location.origin+location.pathname.replace(/\\.js$/i,".wasm")',
+                '"' + wasmUrl + '"'
+              );
+              jsUrl = URL.createObjectURL(new Blob([patched], { type: "text/javascript" }));
+            } else {
+              jsUrl =
+                URL.createObjectURL(new Blob([jsText], { type: "text/javascript" })) +
+                "#" +
+                encodeURIComponent(wasmUrl);
+            }
+            const w = new Worker(jsUrl);
+            w._chWasmUrl = wasmUrl;
+            return w;
+          } catch (e) {
+            console.warn("[EngineStore] ساخت Worker ناموفق:", e && e.message);
+            return null;
+          }
+        });
+      });
+    },
+
+    // Worker انجین فعال — اگر هیچ انجین ذخیره‌شده‌ای نیست null
+    createActiveWorker(usePatch) {
+      const self = this;
+      return self.listDownloaded().then(function (list) {
+        if (!list.length) return null;
+        let id = self.activeId();
+        if (list.indexOf(id) < 0) id = list[0];
+        return self.createWorker(id, usePatch).then(function (w) {
+          if (w) w._chEngineId = id;
+          return w;
+        });
+      });
+    },
+
+    promptDismissed() {
+      try { return localStorage.getItem(ENGINE_PROMPT_KEY) === "1"; } catch (e) { return false; }
+    },
+
+    dismissPrompt() {
+      try { localStorage.setItem(ENGINE_PROMPT_KEY, "1"); } catch (e) {}
+    },
+  };
+  window.EngineStore = EngineStore;
+
+  // خواندن استریمی پاسخ → Blob با گزارش پیشرفت
+  function engineStreamToBlob(resp, onRec) {
+    const total = Number(resp.headers.get("content-length")) || 0;
+    if (!resp.body || typeof resp.body.getReader !== "function") {
+      return resp.blob().then(function (b) { if (onRec) onRec(b.size, b.size); return b; });
+    }
+    const reader = resp.body.getReader();
+    const chunks = [];
+    let received = 0;
+    return new Promise(function (resolve, reject) {
+      function pump() {
+        reader.read().then(function (r) {
+          if (r.done) { resolve(new Blob(chunks)); return; }
+          chunks.push(r.value);
+          received += r.value.byteLength;
+          if (onRec) onRec(received, total);
+          pump();
+        }).catch(reject);
+      }
+      pump();
+    });
+  }
+
+  /* ---- کادر دعوت دانلود انجین (فقط اولین ورود) ---- */
+  function initEnginePrompt() {
+    const mount = document.getElementById("enginePromptMount");
+    if (!mount) return;
+    EngineStore.listDownloaded().then(function (list) {
+      if (list.length || EngineStore.promptDismissed()) return;
+      mount.innerHTML =
+        '<div class="gh-dialog-overlay engine-prompt" id="enginePrompt" data-tone="engine">' +
+          '<div class="gh-dialog" role="dialog" aria-modal="true">' +
+            '<div class="gh-dialog-icon"><i class="fas fa-microchip"></i></div>' +
+            '<h3 class="gh-dialog-title">دانلود انجین Stockfish</h3>' +
+            '<p class="gh-dialog-desc">برای مرور دقیق بازی‌ها، می‌توانید موتور انجین اصل (Stockfish) را یک بار دانلود کنید. پس از دانلود، در مرورگر شما ذخیره می‌شود و دفعات بعد نیازی به دانلود دوباره نیست. <b>(حدود ۷ مگابایت)</b></p>' +
+            '<div class="engine-prog" id="enginePromptProg"><div class="engine-prog-fill"></div></div>' +
+            '<div class="engine-prog-pct" id="enginePromptPct"></div>' +
+            '<div class="gh-dialog-actions">' +
+              '<button type="button" class="gh-btn gh-btn-save" id="enginePromptOk"><i class="fas fa-download"></i> دانلود انجین</button>' +
+              '<button type="button" class="gh-btn gh-btn-muted" id="enginePromptNo">فعلاً نه</button>' +
+              '<a class="gh-link" href="settings.html#engine-section">می‌توانید بعداً از بخش تنظیمات، انجین را دانلود کنید.</a>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      const ov = document.getElementById("enginePrompt");
+      requestAnimationFrame(function () { ov.classList.add("open"); });
+
+      function hide() { ov.classList.remove("open"); }
+
+      document.getElementById("enginePromptNo").addEventListener("click", function () {
+        EngineStore.dismissPrompt();
+        hide();
+      });
+      ov.addEventListener("click", function (e) { if (e.target === ov) hide(); });
+      document.getElementById("enginePromptOk").addEventListener("click", function () {
+        const btn = this;
+        const prog = document.getElementById("enginePromptProg");
+        const fill = prog.querySelector(".engine-prog-fill");
+        const pct = document.getElementById("enginePromptPct");
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> در حال دانلود…';
+        prog.classList.add("show");
+        EngineStore.download(ENGINE_DEFAULT_ID, function (p) {
+          fill.style.width = p + "%";
+          pct.textContent = faNum(p) + "٪";
+        })
+          .then(function () {
+            hide();
+            if (window.GameReview && GameReview.showToast) {
+              GameReview.showToast("انجین ذخیره شد — از این به بعد در مرور بازی استفاده می‌شود");
+            }
+          })
+          .catch(function (err) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-download"></i> تلاش مجدد';
+            prog.classList.remove("show");
+            pct.textContent = "";
+            console.warn("[EngineStore] دانلود ناموفق:", err && err.message);
+            if (window.GameReview && GameReview.showToast) {
+              GameReview.showToast("دانلود ناموفق بود — اینترنت را بررسی کن");
+            }
+          });
+      });
+    });
+  }
+
+  /* ---- بخش «دانلود انجین» در صفحهٔ تنظیمات ---- */
+  function initEngineSection() {
+    const box = document.getElementById("engineList");
+    if (!box) return;
+
+    function sizeFa(bytes) {
+      return faNum(Math.max(1, Math.round(bytes / 1048576))) + " مگابایت";
+    }
+
+    function render() {
+      EngineStore.listDownloaded().then(function (downloaded) {
+        const active = EngineStore.activeId();
+        box.innerHTML = "";
+        ENGINE_CATALOG.forEach(function (eng) {
+          const isDone = downloaded.indexOf(eng.id) >= 0;
+          const isActive = isDone && active === eng.id;
+          const isDl = EngineStore.isDownloading(eng.id);
+          const row = document.createElement("div");
+          row.className =
+            "engine-item" + (isDone ? " done" : "") + (isActive ? " active" : "");
+          row.innerHTML =
+            '<div class="engine-ico"><i class="fas fa-microchip"></i></div>' +
+            '<div class="engine-info">' +
+              '<div class="engine-name">' + eng.label +
+                ' <span class="engine-ver">v' + eng.version + "</span>" +
+                (eng.tag ? '<span class="engine-tag">' + eng.tag + "</span>" : "") +
+              "</div>" +
+              '<div class="engine-desc">' + eng.desc + "</div>" +
+              '<div class="engine-size">حجم تقریبی: ≈ ' + sizeFa(eng.sizeBytes) + "</div>" +
+              '<div class="engine-status' + (isDone ? " ok" : "") + '">' +
+                (isDone ? "دانلود شده ✅" : "ذخیره نشده") +
+                (isActive
+                  ? '<span class="engine-active-chip"><i class="fas fa-circle-check"></i> انجین فعال</span>'
+                  : "") +
+              "</div>" +
+              '<div class="engine-prog"><div class="engine-prog-fill"></div></div>' +
+            "</div>" +
+            '<div class="engine-actions"></div>';
+
+          const actions = row.querySelector(".engine-actions");
+          const prog = row.querySelector(".engine-prog");
+          const fill = row.querySelector(".engine-prog-fill");
+
+          function mkBtn(label, icon, cls, fn) {
+            const b = document.createElement("button");
+            b.type = "button";
+            b.className = "engine-btn " + cls;
+            b.innerHTML = '<i class="fas ' + icon + '"></i> ' + label;
+            b.addEventListener("click", fn);
+            actions.appendChild(b);
+            return b;
+          }
+
+          function startDownload() {
+            prog.classList.add("show");
+            // در حین دانلود فقط «لغو» نشان داده شود
+            actions.innerHTML = "";
+            mkBtn("لغو", "xmark", "ghost", function () { EngineStore.cancel(eng.id); });
+            EngineStore.download(eng.id, function (p) {
+              fill.style.width = p + "%";
+            })
+              .then(function () { render(); })
+              .catch(function (err) {
+                prog.classList.remove("show");
+                fill.style.width = "0%";
+                if (err && err.name === "AbortError") { render(); return; }
+                console.warn("[EngineStore] دانلود ناموفق:", err && err.message);
+                alert("دانلود انجین ناموفق بود: " + ((err && err.message) || "خطای شبکه"));
+                render();
+              });
+          }
+
+          if (isDl) {
+            prog.classList.add("show");
+            mkBtn("لغو", "xmark", "ghost", function () { EngineStore.cancel(eng.id); });
+          } else if (isDone) {
+            if (!isActive) {
+              mkBtn("فعال‌سازی", "circle-check", "primary", function () {
+                EngineStore.setActive(eng.id);
+              });
+            }
+            mkBtn("دانلود مجدد", "rotate", "ghost", startDownload);
+            mkBtn("حذف", "trash", "danger", function () { EngineStore.remove(eng.id); });
+          } else {
+            mkBtn("دانلود انجین", "download", "primary", startDownload);
+          }
+
+          box.appendChild(row);
+        });
+      });
+    }
+
+    render();
+    document.addEventListener("engineStoreChanged", render);
+  }
+
+
+  /* ============================================
      ۸) بوت — اجرا پس از آماده شدن DOM
      ============================================ */
 
@@ -1181,6 +1627,8 @@ window.chPh = function (w, h, label) {
     initMobileMenu();
     initSettings();
     initSettingsPage();
+    initEnginePrompt();
+    initEngineSection();
   }
 
   if (document.readyState === "loading") {
@@ -1206,6 +1654,8 @@ window.chPh = function (w, h, label) {
     loadComponent,
     initMobileMenu,
     initSettingsPage,
+    initEnginePrompt,
+    initEngineSection,
     faNum,
   };
 })();
