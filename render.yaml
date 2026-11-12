@@ -1,0 +1,13 @@
+# ChessHub — Render Blueprint
+# در Render: New → Blueprint → این ریپو را انتخاب کن (همه‌چیز خودکار ست می‌شود)
+services:
+  - type: web
+    name: chesshub
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
