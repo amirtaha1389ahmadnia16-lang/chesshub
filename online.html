@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="css/theme.css?v=10.7" />
     <link rel="stylesheet" href="lib/fontawesome/all.min.css" />
     <link href="fonts/vazir/font-face.css" rel="stylesheet" />
-    <link rel="stylesheet" href="css/style.css?v=10.9" />
+    <link rel="stylesheet" href="css/style.css?v=10.10" />
     <link rel="stylesheet" href="css/gamereview.css?v=10.7" />
     <script src="lib/chess.min.js"></script>
     <style>
@@ -327,16 +327,6 @@
         .ol-clock { font-size: 0.9rem; min-width: 64px; padding: 0.25rem 0.6rem; }
         .ol-btn { padding: 0.45rem 0.8rem; font-size: 0.75rem; }
       }
-
-      /* نمای تمام‌صفحه‌تر — وقتی در بازی هستیم:
-         بنر بالا مخفی می‌شود و تخته تا جایی که ارتفاع صفحه اجازه می‌دهد بزرگ می‌شود */
-      body.ol-ingame .app-hero { display: none; }
-      body.ol-ingame .ol-board-frame {
-        max-width: min(94vw, calc(100dvh - 230px), 720px);
-      }
-      body.ol-ingame .ol-chat { max-width: min(94vw, 720px); }
-      body.ol-ingame .ol-status { max-width: min(94vw, 720px); margin-inline: auto; }
-      body.ol-ingame .ol-player-bar { max-width: min(94vw, 720px); margin-inline: auto; }
     </style>
   </head>
   <body>
@@ -513,12 +503,12 @@
 
     <div class="ol-toast" id="olToast"></div>
 
-    <script src="js/script.js?v=10.9"></script>
+    <script src="js/script.js?v=10.10"></script>
     <script src="js/profile.js?v=10.7"></script>
     <script src="js/auth.js?v=10.7"></script>
     <script src="js/engine-core.js?v=10.7"></script>
     <script src="js/board-ui.js"></script>
     <script src="js/gamereview.js"></script>
-    <script src="js/online.js?v=10.9"></script>
+    <script src="js/online.js?v=10.7"></script>
   </body>
 </html>

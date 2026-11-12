@@ -21,7 +21,7 @@
       rel="stylesheet"
       href="lib/fontawesome/all.min.css"
     />
-    <link rel="stylesheet" href="css/style.css?v=10.9" />
+    <link rel="stylesheet" href="css/style.css?v=10.10" />
     <script src="lib/chess.min.js"></script>
   </head>
   <body>
@@ -71,27 +71,42 @@
 
       <!-- گرید اصلی -->
       <section class="main-card-grid">
-        <!-- کارت پازل روزانه — صفحهٔ مستقل خودش را دارد -->
+        <!-- کارت مسئله روز -->
         <div class="card daily-puzzle-card">
           <div class="puzzle-card-head">
-            <h2><i class="fas fa-puzzle-piece"></i> پازل روزانه</h2>
-            <span class="puzzle-date" id="homePuzzleDate"></span>
+            <h2><i class="fas fa-puzzle-piece"></i> مسئله روز</h2>
+            <span class="puzzle-date" id="puzzleDate"></span>
           </div>
 
-          <p style="margin: 0.4rem 0 1rem; font-size: 0.8rem; color: var(--text-light); font-weight: 600">
-            هر روز یک پازل تازه با تاریخچهٔ تقویم فارسی — پازل روزهای گذشته را هم می‌توانی حل کنی.
+          <div class="puzzle-meta" id="puzzleMeta"></div>
+
+          <p>
+            با مهره‌های <strong id="userColorLabel">—</strong> بازی کن
           </p>
 
-          <div class="button-group">
-            <a href="daily-puzzle.html" class="btn btn-primary" style="text-decoration: none">
-              <i class="fas fa-calendar-day"></i> پازل روزانه
-            </a>
-            <a href="puzzle-rush.html" class="btn" style="text-decoration: none">
-              <i class="fas fa-bolt"></i> پازل عجله‌ای
-            </a>
+          <div class="board-container">
+            <div id="chessboard"></div>
           </div>
 
-          <div id="homePuzzleSolved" class="puzzle-solved"></div>
+          <div class="puzzle-progress">
+            <div class="puzzle-progress-bar">
+              <div class="puzzle-progress-fill"></div>
+            </div>
+            <span class="puzzle-progress-text">حرکت ۰ از ۰</span>
+          </div>
+
+          <div class="button-group">
+            <button id="resetBtn" class="btn">
+              <i class="fas fa-rotate-right"></i> از نو
+            </button>
+            <button id="hintBtn" class="btn btn-hint">
+              <i class="fas fa-lightbulb"></i> راهنمایی
+            </button>
+          </div>
+
+          <div id="message" class="message info">در حال آماده‌سازی پازل روزانه…</div>
+
+          <div id="puzzleSolved" class="puzzle-solved"></div>
         </div>
 
         <!-- کارت امکانات -->
@@ -101,7 +116,7 @@
             <div class="feature">
               <i class="fas fa-puzzle-piece"></i>
               <span>پازل روزانه</span>
-              <a href="daily-puzzle.html">حل کن</a>
+              <a href="index.html">حل کن</a>
             </div>
             <div class="feature">
               <i class="fas fa-bolt"></i>
@@ -164,7 +179,7 @@
       <div id="footer-placeholder"></div>
     </div>
 
-    <script src="js/script.js?v=10.9"></script>
+    <script src="js/script.js?v=10.10"></script>
     <script src="js/profile.js?v=10.7"></script>
     <script src="js/auth.js?v=10.7"></script>
   </body>
