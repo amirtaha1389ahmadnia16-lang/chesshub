@@ -193,7 +193,7 @@
   background: #f8fafc;
 }
 .card-body.open {
-  max-height: 500px;
+  max-height: 800px;
   overflow-y: auto;
   padding: 1rem;
 }
@@ -207,12 +207,12 @@
 
 .variants-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 0.6rem;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 0.55rem;
 }
 .variant-item {
   background: #ffffff;
-  border-radius: var(--radius-sm);
+  border-radius: 12px;
   padding: 0.6rem 0.8rem;
   display: flex;
   justify-content: space-between;
@@ -225,7 +225,19 @@
   font-weight: 600;
   gap: 0.4rem;
   min-width: 0;
+  position: relative;
+  overflow: hidden;
 }
+.variant-item::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--accent), var(--accent-dark));
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.variant-item:hover::before { opacity: 1; }
 .variant-item:hover {
   background: #ebf8ff;
   border-color: #90cdf4;
@@ -254,7 +266,8 @@
   grid-column: 1 / -1;
 }
 
-/* ===== Overlay (پنجره جزئیات) ===== */
+/* ===== Overlay (پنجره جزئیات) =====
+   🔑 اسکرول‌بار سمت راست: ظرف ltr + محتوا rtl (اصلاح اسکرول معکوس در RTL) */
 .page-overlay {
   position: fixed;
   top: 0;
@@ -268,10 +281,14 @@
   padding: 0;
   transform: translateX(100%);
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  direction: rtl;
+  direction: ltr;
+  overscroll-behavior: contain;
 }
 .page-overlay.open {
   transform: translateX(0);
+}
+.page-overlay > * {
+  direction: rtl;
 }
 
 .overlay-header {

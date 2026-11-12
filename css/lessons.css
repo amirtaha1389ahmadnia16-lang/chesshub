@@ -434,7 +434,8 @@
   margin-bottom: 0.6rem;
 }
 
-/* ----- پنجره مطالعه (Overlay) ----- */
+/* ----- پنجره مطالعه (Overlay) -----
+   🔑 اسکرول‌بار سمت راست: ظرف ltr + محتوا rtl (اصلاح اسکرول معکوس در RTL) */
 .page-overlay {
   position: fixed;
   top: 0;
@@ -448,10 +449,14 @@
   padding: 0;
   transform: translateX(100%);
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  direction: rtl;
+  direction: ltr;
+  overscroll-behavior: contain;
 }
 .page-overlay.open {
   transform: translateX(0);
+}
+.page-overlay > * {
+  direction: rtl;
 }
 
 .overlay-header {

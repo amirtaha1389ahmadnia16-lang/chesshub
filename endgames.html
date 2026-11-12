@@ -8,253 +8,221 @@
     />
     <meta
       name="description"
-      content="آکادمی آخربازی شطرنج — مربی هوشمند Stockfish: هر موقعیت خودش به درس تبدیل می‌شود، تحلیل تک‌تک حرکات، نمایش ادامه‌ی بازی و چالش تایمردار"
+      content="آموزش آخربازی شطرنج — یادگیری مات دادن با وزیر روی یک پوزیسیون واقعی"
     />
-    <title>ChessHub | آکادمی آخربازی</title>
-    <link rel="stylesheet" href="css/theme.css?v=10.7" />
-    <link
-      rel="stylesheet"
-      href="lib/fontawesome/all.min.css"
-    />
-    <link
-      href="fonts/vazir/font-face.css"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="css/style.css?v=10.7" />
-    <link rel="stylesheet" href="css/endgames.css?v=5" />
+    <title>ChessHub | آخربازی‌ها</title>
+    <link rel="stylesheet" href="css/theme.css?v=10.9" />
+    <link rel="stylesheet" href="lib/fontawesome/all.min.css" />
+    <link href="fonts/vazir/font-face.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/style.css?v=10.9" />
     <script src="lib/chess.min.js"></script>
+    <style>
+      /* ============================================================
+         آخربازی‌ها — نسخهٔ آموزشی متمرکز (v10.2)
+         فقط یک درس: مات با وزیر — روی یک پوزیسیون مات واقعی
+         ============================================================ */
+      .eg-wrap { display: flex; flex-direction: column; gap: 1.2rem; max-width: 980px; margin: 0 auto; }
+      .eg-card {
+        background: #ffffff; border: 1px solid var(--border); border-radius: 22px;
+        padding: 1.4rem 1.5rem; box-shadow: 0 1px 2px rgba(15, 42, 85, 0.03), 0 14px 34px -16px rgba(15, 42, 85, 0.13);
+      }
+      .eg-card h2 {
+        font-size: 1.05rem; font-weight: 900; color: var(--primary-dark);
+        display: flex; align-items: center; gap: 0.5rem; margin: 0 0 1rem;
+      }
+      .eg-card h2 i { color: var(--accent); }
+      .eg-flex { display: flex; gap: 1.3rem; align-items: flex-start; flex-wrap: wrap; }
+      .eg-board-side { flex: 1.1; min-width: 260px; max-width: 430px; margin: 0 auto; }
+      .eg-board-wrap { position: relative; }
+      #egBoard {
+        display: grid; grid-template-columns: repeat(8, 1fr);
+        aspect-ratio: 1 / 1; border-radius: 14px; overflow: hidden;
+        box-shadow: var(--shadow-board); direction: ltr;
+      }
+      #egBoard .square { position: relative; display: flex; align-items: center; justify-content: center; }
+      #egBoard .square.light { background: var(--board-light, #f0d9b5); }
+      #egBoard .square.dark { background: var(--board-dark, #b58863); }
+      #egBoard .piece-img { width: 92%; height: 92%; object-fit: contain; pointer-events: none; }
+      #egBoard .piece-glyph { width: 90%; height: 90%; display: flex; align-items: center; justify-content: center; font-size: min(6vw, 34px); }
+      #egBoard .piece-glyph.w { color: #fff; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75); }
+      #egBoard .piece-glyph.b { color: #1a202c; text-shadow: 0 1px 2px rgba(255, 255, 255, 0.35); }
+      #egBoard .square.marked::after {
+        content: ""; position: absolute; inset: 0;
+        background: radial-gradient(circle, rgba(229, 57, 53, 0.6) 18%, rgba(229, 57, 53, 0.18) 58%, transparent 74%);
+      }
+
+      .eg-text { flex: 1; min-width: 240px; }
+      .eg-text p { font-size: 0.82rem; color: var(--text-dark); font-weight: 600; line-height: 2.1; margin: 0 0 0.9rem; }
+      .eg-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.55rem; }
+      .eg-steps li {
+        display: flex; gap: 0.6rem; align-items: flex-start;
+        background: #f8fafc; border: 1px solid var(--border); border-radius: 12px;
+        padding: 0.6rem 0.8rem; font-size: 0.76rem; font-weight: 700; color: var(--text-dark); line-height: 1.9;
+      }
+      .eg-steps li .n {
+        width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+        background: var(--accent); color: #fff; font-weight: 900; font-size: 0.72rem;
+        display: flex; align-items: center; justify-content: center; margin-top: 0.15rem;
+      }
+      .eg-tip {
+        margin-top: 0.9rem; background: #eef8f2; border: 1px solid #cdebdb; border-radius: 12px;
+        padding: 0.6rem 0.85rem; color: #23684a; font-size: 0.74rem; font-weight: 700; line-height: 2;
+        display: flex; gap: 0.5rem; align-items: flex-start;
+      }
+      .eg-tip i { margin-top: 0.2rem; }
+      .eg-fen-row {
+        margin-top: 0.9rem; display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;
+      }
+      .eg-fen-row code {
+        flex: 1; min-width: 200px; direction: ltr; text-align: left;
+        background: #f1f5f9; border: 1px solid var(--border); border-radius: 10px;
+        padding: 0.45rem 0.7rem; font-size: 0.7rem; font-weight: 700; color: var(--text-dark);
+        font-family: monospace; overflow-x: auto; white-space: nowrap;
+      }
+      .eg-fen-row button {
+        background: #f1f5f9; border: 1px solid var(--border); border-radius: 10px;
+        padding: 0.45rem 0.9rem; font-family: "Vazir"; font-size: 0.7rem; font-weight: 800;
+        color: var(--text-dark); cursor: pointer; transition: var(--transition-smooth);
+        display: inline-flex; align-items: center; gap: 0.35rem;
+      }
+      .eg-fen-row button:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+      .eg-next-note {
+        text-align: center; color: var(--text-light); font-size: 0.74rem; font-weight: 700;
+        padding: 0.6rem; background: #f8fafc; border: 1px dashed var(--border); border-radius: 14px;
+      }
+    </style>
   </head>
   <body>
     <div class="container">
       <div id="header-placeholder"></div>
 
-      <!-- بنر یکپارچه -->
       <section class="app-hero">
-        <h1><i class="fas fa-graduation-cap"></i> آکادمی آخربازی</h1>
-        <p>
-          مربی واقعی به تو: انجین Stockfish هر موقعیت را تحلیل می‌کند، تک‌تک
-          حرکاتت را نمره می‌دهد و ادامه‌ی بازی را نشانت می‌دهد
-        </p>
+        <h1><i class="fas fa-flag-checkered"></i> آخربازی‌ها</h1>
+        <p>آموزش گام‌به‌گام پایان بازی — از همین پوزیسیون مات شروع کن</p>
       </section>
 
-      <!-- تب‌های حالت -->
-      <nav class="mode-tabs" id="modeTabs">
-        <button class="mode-tab active" data-mode="academy">
-          <i class="fas fa-chalkboard-teacher"></i> آموزش
-        </button>
-        <button class="mode-tab" data-mode="concepts">
-          <i class="fas fa-book-open"></i> مفاهیم
-        </button>
-        <button class="mode-tab" data-mode="challenge">
-          <i class="fas fa-bolt"></i> چالش
-        </button>
-      </nav>
-
-      <!-- ═══════════ حالت آموزش ═══════════ -->
-      <section id="academySection" class="mode-section">
-        <div class="section-head">
-          <h2><i class="fas fa-chalkboard-teacher"></i> درس‌های خودکار انجین</h2>
-          <p>
-            برای هر موقعیت، انجین <b>همه‌ی حرکات ممکن</b> را تحلیل می‌کند و
-            می‌گوید کدام‌ها برنده‌اند، کدام‌ها مساوی می‌کنند و کدام‌ها می‌بازند.
-            حرکت اشتباه بزنی، ادامه‌ی بازی و تغییر برتری را زنده نشانت می‌دهند.
-          </p>
-        </div>
-        <div class="academy-progress" id="academyProgress"></div>
-        <div class="filter-group">
-          <span class="filter-label"><i class="fas fa-layer-group"></i> دسته‌بندی پایانی</span>
-          <div class="filter-chips" id="lessonCatFilters"></div>
-        </div>
-        <div class="filter-group">
-          <span class="filter-label"><i class="fas fa-filter"></i> فیلترها</span>
-          <div class="filter-chips" id="lessonFilters"></div>
-        </div>
-        <div class="lessons-grid" id="lessonsGrid"></div>
-        <div class="data-empty" id="lessonsEmpty" hidden>
-          <i class="fas fa-chess-pawn"></i>
-          <p>موقعیتی برای آموزش پیدا نشد — فایل data/endgames.json را بررسی کن</p>
-        </div>
-      </section>
-
-      <!-- ═══════════ مفاهیم ═══════════ -->
-      <section id="conceptsSection" class="mode-section" hidden>
-        <div class="section-head">
-          <h2><i class="fas fa-book-open"></i> کتابخانه‌ی مفاهیم</h2>
-          <p>
-            کلیدهای نظری آخربازی — از اوپوزیسیون و زوتسوانگ تا پل لوچنا و دفاع
-            فیلیدور؛ هر مفهوم با توضیح حرفه‌ای، نکته‌ی طلایی و نمونه‌ی زنده روی تخته.
-          </p>
-        </div>
-        <div class="filter-chips" id="conceptFilters"></div>
-        <div class="concepts-grid" id="conceptsGrid"></div>
-      </section>
-
-      <!-- ═══════════ چالش ═══════════ -->
-      <section id="challengeSection" class="mode-section" hidden>
-        <div class="section-head">
-          <h2><i class="fas fa-bolt"></i> چالش آخربازی</h2>
-          <p>
-            زمان خودت را انتخاب کن، موقعیت تصادفی می‌آید و باید در برابر انجین
-            به نتیجه‌ی معما برسی. بدون راهنما، بدون ارزیابی — آزمون واقعی!
-          </p>
-        </div>
-        <div class="challenge-panel" id="challengePanel">
-          <!-- صفحه‌ی آماده‌سازی -->
-          <div class="challenge-intro" id="challengeIntro">
-            <div class="ch-setup">
-              <div class="ch-setup-block">
-                <h3><i class="fas fa-hourglass-half"></i> زمان هر موقعیت</h3>
-                <div class="time-chips" id="chTimeChips">
-                  <button class="time-chip" data-sec="30">۳۰ ثانیه</button>
-                  <button class="time-chip active" data-sec="60">۱ دقیقه</button>
-                  <button class="time-chip" data-sec="120">۲ دقیقه</button>
-                  <button class="time-chip" data-sec="180">۳ دقیقه</button>
-                </div>
+      <div class="eg-wrap">
+        <!-- درس ۱: مات با وزیر -->
+        <div class="eg-card">
+          <h2><i class="fas fa-chess-queen"></i> درس ۱ — مات با وزیر (قانون طلایی پایان بازی)</h2>
+          <div class="eg-flex">
+            <div class="eg-board-side">
+              <div class="eg-board-wrap">
+                <div id="egBoard"></div>
               </div>
-              <div class="ch-setup-block">
-                <h3><i class="fas fa-brain"></i> انتخاب موقعیت</h3>
-                <div class="mode-select" id="chModeSelect">
-                  <button class="mode-opt active" data-mode="smart">
-                    <i class="fas fa-user-graduate"></i>
-                    <b>مربی هوشمند</b>
-                    <span>نقاط ضعفت را پیدا و همان‌ها را تمرین می‌دهد</span>
-                  </button>
-                  <button class="mode-opt" data-mode="random">
-                    <i class="fas fa-dice"></i>
-                    <b>تصادفی</b>
-                    <span>از بین همه‌ی موقعیت‌ها به‌طور رندوم</span>
-                  </button>
-                </div>
+            </div>
+            <div class="eg-text">
+              <p>
+                در این پوزیشن، سفید <strong>مات</strong> کرده است: وزیر در g7 کنار شاه سیاه در h8 است و
+                شاه سفید در g6 از وزیر خودی محافظت می‌کند. وزیر قابل‌گرفتن نیست و شاه سیاه هیچ خانه‌ای برای رفتن ندارد.
+              </p>
+              <ul class="eg-steps">
+                <li><span class="n">۱</span> شاه سیاه را با وزیر به <strong>لبهٔ تخته</strong> محدود کن — وزیر مانند یک دیوار جلوی پیشروی او را می‌گیرد.</li>
+                <li><span class="n">۲</span> <strong>شاه خودت را نزدیک کن</strong> (الگوی اسب) تا از وزیر حمایت کند — بدون کمک شاه، هیچ ماتی در پایان بازی ممکن نیست.</li>
+                <li><span class="n">۳</span> وقتی شاه حریف در خانهٔ آخر ایستاد، وزیر را کنار او و <strong>محافظت‌شده با شاه</strong> بگذار — مات!</li>
+              </ul>
+              <div class="eg-tip">
+                <i class="fas fa-lightbulb"></i>
+                <span>مراقب باش پات (مساوی) نسازی! اگر وزیر را خیلی نزدیک شاهِ تنها بگذاری و شاه خودت دور باشد، حریف حرکتی ندارد و بازی مساوی می‌شود — همیشه دو خانه فاصله بده تا شاه حریف را قدم‌به‌قدم عقب برانی.</span>
               </div>
-              <div class="ch-stats" id="chStats"></div>
-              <button class="btn-start-challenge" id="challengeStartBtn">
-                <i class="fas fa-play"></i> شروع چالش
-              </button>
+              <div class="eg-fen-row">
+                <code id="egFen">7k/6Q1/6K1/8/8/8/8/8 w - - 0 1</code>
+                <button id="egCopyFen"><i class="fas fa-copy"></i> کپی FEN</button>
+              </div>
             </div>
           </div>
-
-          <!-- صفحه‌ی اجرا -->
-          <div class="challenge-run" id="challengeRun" hidden>
-            <div class="challenge-statusbar">
-              <span class="ch-timer" id="chTimer">
-                <i class="fas fa-stopwatch"></i> <b id="chTimerNum">1:00</b>
-              </span>
-              <span class="ch-score" id="chScore">
-                <i class="fas fa-coins"></i> امتیاز <b id="chScoreNum">۰</b>
-              </span>
-              <span class="ch-streak" id="chStreak">
-                <i class="fas fa-fire"></i> <b id="chStreakNum">۰</b>
-              </span>
-              <span class="ch-pos" id="chPosNum">موقعیت ۱</span>
-            </div>
-            <div class="challenge-goal-mini" id="chGoal"></div>
-            <div class="board-wrapper">
-              <div id="chBoard" class="chessboard"></div>
-            </div>
-            <div class="feedback-bar" id="chFeedback" hidden></div>
-            <div class="ch-run-actions">
-              <button class="btn-sm" id="chEndBtn">
-                <i class="fas fa-flag-checkered"></i> پایان جلسه
-              </button>
-            </div>
-          </div>
-
-          <!-- جمع‌بندی -->
-          <div class="challenge-summary" id="challengeSummary" hidden></div>
         </div>
-      </section>
+
+        <div class="eg-card">
+          <div class="eg-next-note">
+            <i class="fas fa-hourglass-half"></i> درس‌های بعدی (مات با رخ، مات دو فیل و…) به‌زودی اضافه می‌شوند — فعلاً روی همین پوزیسیون تمرین کن.
+          </div>
+        </div>
+      </div>
 
       <div id="footer-placeholder"></div>
     </div>
 
-    <!-- ═══════════ اورلی درس (مربی) ═══════════ -->
-    <div class="page-overlay" id="lessonOverlay" aria-hidden="true">
-      <div class="overlay-inner">
-        <div class="overlay-header">
-          <button class="btn-back" id="lessonBackBtn">
-            <i class="fas fa-arrow-right"></i> بازگشت
-          </button>
-          <h2 class="overlay-title" id="lessonTitle"></h2>
-          <div class="lesson-best-stars" id="lessonBestStars"></div>
-        </div>
+    <script src="js/script.js?v=10.9"></script>
+    <script src="js/profile.js?v=10.9"></script>
+    <script src="js/auth.js?v=10.9"></script>
+    <script>
+      (function () {
+        "use strict";
+        // اعمال تم
+        try {
+          const s = JSON.parse(localStorage.getItem("chesshub_settings"));
+          if (s && s.theme) document.body.classList.add("theme-" + s.theme);
+        } catch (e) {}
 
-        <div class="lesson-body">
-          <div class="board-side">
-            <div class="lesson-goal-bar" id="lessonGoalBar"></div>
-            <div class="board-wrapper">
-              <div id="lessonBoard" class="chessboard"></div>
-              <svg class="board-arrows" id="boardArrows" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
-            </div>
-            <div class="eval-bar" id="lessonEvalBar">
-              <div class="eval-track">
-                <div class="eval-fill" id="lessonEvalFill"></div>
-                <div class="eval-mid"></div>
-              </div>
-            </div>
-            <div class="feedback-bar" id="lessonFeedback" hidden></div>
-            <div class="trainer-buttons">
-              <button class="btn-sm" id="lessonHintBtn" disabled>
-                <i class="fas fa-lightbulb"></i> راهنما
-              </button>
-              <button class="btn-sm" id="lessonUndoBtn">
-                <i class="fas fa-undo"></i> برگشت
-              </button>
-              <button class="btn-sm" id="lessonRestartBtn">
-                <i class="fas fa-redo"></i> از نو
-              </button>
-            </div>
-          </div>
+        const FEN = "7k/6Q1/6K1/8/8/8/8/8 w - - 0 1";
+        const game = new Chess();
+        if (!game.load(FEN)) return;
 
-          <aside class="lesson-info">
-            <div class="coach-panel">
-              <div class="coach-head">
-                <span class="coach-avatar"><i class="fas fa-robot"></i></span>
-                <div class="coach-name">
-                  <b>مربی Stockfish</b>
-                  <span id="coachStatus">آماده‌ام…</span>
-                </div>
-                <button class="coach-gear" id="coachGearBtn" title="آپشن‌های مربی" type="button">
-                  <i class="fas fa-sliders"></i>
-                </button>
-              </div>
-              <div class="coach-opts" id="coachOptsPanel" hidden>
-                <div class="copt-row">
-                  <span class="copt-label">قدرت تحلیل انجین</span>
-                  <div class="copt-chips" id="coptDepth">
-                    <button type="button" data-v="0.6">سریع</button>
-                    <button type="button" data-v="1" class="active">متوازن</button>
-                    <button type="button" data-v="1.6">عمیق</button>
-                  </div>
-                </div>
-                <label class="copt-row copt-toggle"><input type="checkbox" id="coptPV" checked /><span class="copt-label">نمایش خط اصلی انجین</span></label>
-                <label class="copt-row copt-toggle"><input type="checkbox" id="coptEval" checked /><span class="copt-label">نوار ارزیابی</span></label>
-                <label class="copt-row copt-toggle"><input type="checkbox" id="coptArrow" /><span class="copt-label">فلش خودکار حرکت درست بعد از خطا</span></label>
-                <label class="copt-row copt-toggle"><input type="checkbox" id="coptDelay" checked /><span class="copt-label">مکث طبیعی پاسخ حریف (فرصت فکر)</span></label>
-              </div>
-              <div class="coach-log" id="coachLog"></div>
-            </div>
+        // خانه‌های مات‌شونده را علامت بزن (g7 = وزیر، h8 = شاه سیاه)
+        function buildStaticBoard() {
+          const el = document.getElementById("egBoard");
+          if (!el) return;
+          const b = game.board();
+          el.innerHTML = "";
+          for (let i = 0; i < 8; i++) {
+            for (let j = 0; j < 8; j++) {
+              const p = b[i][j];
+              const light = (i + j) % 2 === 0;
+              const d = document.createElement("div");
+              d.className = "square " + (light ? "light" : "dark");
+              const file = "abcdefgh"[j];
+              const rank = 8 - i;
+              const sq = file + rank;
+              if (sq === "g7" || sq === "h8") d.classList.add("marked");
+              if (p) {
+                const key = p.color + p.type;
+                const img = document.createElement("img");
+                const cached = window.ChessUtils && ChessUtils.getPieceImage
+                  ? ChessUtils.getPieceImage(key) : null;
+                img.src = cached ? cached.src : "pieces/" + pieceSet() + "/" + key + ".png";
+                img.className = "piece-glyph piece-img";
+                img.alt = "";
+                img.draggable = false;
+                d.appendChild(img);
+              }
+              el.appendChild(d);
+            }
+          }
+        }
+        function pieceSet() {
+          try {
+            const s = JSON.parse(localStorage.getItem("chesshub_settings"));
+            return (s && s.pieceSet) || "neo";
+          } catch (e) { return "neo"; }
+        }
 
-            <div class="info-card done-card" id="lessonDoneCard" hidden>
-              <div class="done-stars" id="doneStars"></div>
-              <h3 id="doneTitle"></h3>
-              <p id="doneDetail"></p>
-              <div class="done-buttons">
-                <button class="btn-sm primary" id="doneNextBtn">
-                  <i class="fas fa-forward"></i> درس بعدی
-                </button>
-                <button class="btn-sm" id="doneRetryBtn">
-                  <i class="fas fa-redo"></i> تمرین دوباره
-                </button>
-              </div>
-            </div>
-          </aside>
-        </div>
-      </div>
-    </div>
+        function boot() {
+          if (window.ChessUtils && ChessUtils.loadPieces) {
+            ChessUtils.loadPieces().finally(buildStaticBoard);
+          } else buildStaticBoard();
+          const cp = document.getElementById("egCopyFen");
+          if (cp) cp.addEventListener("click", function () {
+            navigator.clipboard.writeText(FEN)
+              .then(function () {
+                const t = document.createElement("div");
+                t.className = "settings-toast show";
+                t.textContent = "FEN کپی شد";
+                document.body.appendChild(t);
+                setTimeout(function () { t.remove(); }, 2000);
+              })
+              .catch(function () {});
+          });
+        }
 
-    <script src="js/script.js?v=10.7"></script>
-    <script src="js/profile.js?v=10.7"></script>
-    <script src="js/auth.js?v=10.7"></script>
-    <script src="js/endgames.js?v=12"></script>
+        document.addEventListener("pieceSetChanged", function () {
+          if (window.ChessUtils) ChessUtils.loadPieces().then(buildStaticBoard);
+        });
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", boot);
+        } else boot();
+      })();
+    </script>
   </body>
 </html>

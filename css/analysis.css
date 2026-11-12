@@ -193,7 +193,7 @@
   flex: 1.3; min-width: 300px; max-width: 720px; margin: 0 auto;
   display: flex; justify-content: center;
 }
-.an-board-row { display: flex; gap: 10px; align-items: stretch; width: 100%; }
+.an-board-line { display: flex; gap: 10px; align-items: stretch; width: 100%; }
 .an-board-col { flex: 1; min-width: 0; }
 
 .an-board-wrap {
@@ -511,10 +511,56 @@
   .an-evalbar { width: 22px; }
 }
 @media (max-width: 480px) {
-  .an-board-row { gap: 6px; }
+  .an-board-line { gap: 6px; }
   .an-board-wrap { width: min(100%, calc(100vw - 72px)); }
   .an-evalbar { width: 18px; border-radius: 6px; }
   .an-eval-num { font-size: 0.54rem; padding: 0.05rem 0.2rem; }
   .an-tree { max-height: 240px; }
   .an-mini { width: 140px; }
 }
+
+/* ---------- ۱۵) ردیف‌های حرکات — هر ردیف = یک حرکت سفید + سیاه ---------- */
+.an-tree .mrow {
+  display: flex; align-items: center; gap: 0.15rem;
+  padding: 0.02rem 0.25rem; border-radius: 8px;
+}
+.an-tree .mrow:hover { background: rgba(59, 130, 246, 0.06); }
+.an-tree .mrow .mno { color: #8a94a6; font-weight: 700; font-size: 0.7rem; min-width: 2.2ch; text-align: left; }
+.an-tree .varblock { margin-top: 0.1rem; }
+.an-line .mv .mv-no { color: #8a94a6; font-weight: 700; font-size: 0.66rem; }
+
+/* ---------- ۱۶) دکمهٔ پخش خودکار (شروع/توقف — Space) ---------- */
+.an-nav .an-auto-btn {
+  background: var(--accent); color: #fff; border: 1px solid var(--accent-dark);
+  border-radius: var(--radius-sm); padding: 0.45rem 1.1rem; cursor: pointer;
+  font-family: "Vazir"; font-size: 0.82rem; font-weight: 800;
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  transition: var(--transition-smooth);
+  box-shadow: 0 6px 14px -6px rgba(59, 130, 246, 0.55);
+}
+.an-nav .an-auto-btn:hover { transform: translateY(-1px); filter: brightness(1.08); }
+.an-nav .an-auto-btn.on { background: var(--danger, #e53e3e); border-color: #c53030; }
+
+/* ---------- ۱۷) اکسپلورر «حرکات بازی شده» — حرکت‌ها + بازی‌های رسیده ---------- */
+.ex-moves { display: flex; flex-direction: column; gap: 0.3rem; }
+.an-ex-move { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
+.an-ex-move .ex-wdl { font-size: 0.62rem; font-weight: 800; color: var(--text-light); min-width: 88px; text-align: left; direction: ltr; white-space: nowrap; }
+.an-ex-move .ex-count { font-size: 0.62rem; font-weight: 800; color: var(--accent-dark); background: var(--accent-soft, #eef4fb); border-radius: 99px; padding: 0.12rem 0.5rem; white-space: nowrap; }
+.ex-games { margin-top: 0.7rem; border-top: 1px dashed var(--border); padding-top: 0.6rem; display: flex; flex-direction: column; gap: 0.3rem; }
+.ex-games-title { font-size: 0.72rem; font-weight: 900; color: var(--primary-dark); display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.15rem; }
+.ex-games-title i { color: var(--accent); }
+.ex-game {
+  display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;
+  background: #f8fafc; border: 1px solid var(--border); border-radius: 10px;
+  padding: 0.4rem 0.6rem; cursor: pointer; font-size: 0.68rem; font-weight: 700;
+  color: var(--text-dark); transition: var(--transition-smooth);
+}
+.ex-game:hover { border-color: var(--accent); background: var(--accent-soft, #eef4fb); transform: translateY(-1px); }
+.ex-game .g-res { font-size: 0.6rem; font-weight: 900; border-radius: 99px; padding: 0.14rem 0.5rem; white-space: nowrap; }
+.ex-game .g-res.w { background: #ffffff; border: 1px solid #cbd5e0; color: #1a202c; }
+.ex-game .g-res.b { background: #1a202c; color: #fff; }
+.ex-game .g-res.d { background: #e2e8f0; color: #475569; }
+.ex-game .g-players { flex: 1; min-width: 120px; }
+.ex-game .g-date { color: var(--text-light); direction: ltr; }
+.ex-game .g-open { color: var(--accent-dark); white-space: nowrap; display: inline-flex; align-items: center; gap: 0.25rem; }
+.ex-games-more { font-size: 0.64rem; font-weight: 700; color: var(--text-light); padding: 0.25rem 0.4rem; }

@@ -9,14 +9,14 @@
     <link rel="stylesheet" href="css/theme.css?v=10.7" />
     <link rel="stylesheet" href="lib/fontawesome/all.min.css" />
     <link href="fonts/vazir/font-face.css" rel="stylesheet" />
-    <link rel="stylesheet" href="css/style.css?v=10.7" />
+    <link rel="stylesheet" href="css/style.css?v=10.9" />
     <link rel="stylesheet" href="css/gamereview.css?v=10.7" />
     <script src="lib/chess.min.js"></script>
   </head>
   <!-- جهت اسکرول‌بار: html با جهت ltr → اسکرول‌بار سمت راست؛
        محتوا با body dir=rtl → چیدمان طبیعی فارسی -->
   <body dir="rtl" class="grev-body">
-    <!-- نوار بالا — عنوان مرور (بدون دکمهٔ بازگشت؛ خروج با دکمهٔ مرورگر) -->
+    <!-- نوار بالا — عنوان مرور + دکمهٔ بازگشت -->
     <header class="grev-topbar">
       <div class="grev-title">
         <i class="fas fa-magnifying-glass-chart"></i>
@@ -25,6 +25,9 @@
           <span id="grSub"></span>
         </div>
       </div>
+      <button class="gr-btn" id="grBackBtn" title="بازگشت به صفحهٔ قبل">
+        <i class="fas fa-arrow-right"></i> بازگشت
+      </button>
     </header>
 
     <main class="grev-page">
@@ -88,12 +91,12 @@
       </div>
     </main>
 
-    <script src="js/script.js?v=10.7"></script>
+    <script src="js/script.js?v=10.9"></script>
     <script src="js/profile.js?v=10.7"></script>
     <script src="js/auth.js?v=10.7"></script>
     <script src="js/engine-core.js?v=10.7"></script>
     <script src="js/board-ui.js?v=10.7"></script>
-    <script src="js/gamereview.js?v=10.7"></script>
+    <script src="js/gamereview.js?v=10.9"></script>
     <script>
       (function () {
         "use strict";

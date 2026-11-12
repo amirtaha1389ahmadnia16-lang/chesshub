@@ -520,6 +520,7 @@
     } catch (e) {}
     $("olMenu").style.display = "none";
     $("olGame").classList.add("show");
+    document.body.classList.add("ol-ingame");
     $("olSpectHud").classList.remove("show");
     $("olExitSpectate").style.display = "none";
     $("olGameActions").style.display = "";
@@ -564,6 +565,7 @@
 
     $("olMenu").style.display = "none";
     $("olGame").classList.add("show");
+    document.body.classList.add("ol-ingame");
     $("olSpectHud").classList.add("show");
     $("olSpectCount").textContent = fa(msg.spectators || 0);
     $("olGameActions").style.display = "none";   // تماشاگر هیچ کنترلی ندارد
@@ -758,6 +760,7 @@
   function backToMenu() {
     $("olResultOverlay").classList.remove("open");
     $("olGame").classList.remove("show");
+    document.body.classList.remove("ol-ingame");
     $("olSpectHud").classList.remove("show");
     $("olMenu").style.display = "";
     if (isSpectating) send({ t: "unSpectate" });

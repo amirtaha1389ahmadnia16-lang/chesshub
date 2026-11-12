@@ -143,7 +143,7 @@
         '<div class="gr-head">' +
           '<div class="gr-title"><i class="fas fa-magnifying-glass-chart"></i>' +
             '<div><b>مرور بازی</b><span id="grSub">' + (cfg.subtitle || "") + "</span></div></div>" +
-          '<button class="gr-close" id="grCloseBtn"><i class="fas fa-xmark"></i> بستن</button>' +
+          '<button class="gr-close" id="grCloseBtn"><i class="fas fa-arrow-right"></i> بازگشت</button>' +
         "</div>" +
         '<div class="gr-progress" id="grProgWrap">' +
           '<span class="gr-spin" id="grSpin"><i class="fas fa-spinner fa-pulse"></i></span>' +
@@ -558,7 +558,9 @@
     $("grPw").innerHTML = '<i class="fas fa-chess-king" style="color:#e2e8f0"></i> ' + (R.cfg.white || "سفید");
     $("grPb").innerHTML = '<i class="fas fa-chess-king" style="color:#1a202c"></i> ' + (R.cfg.black || "سیاه");
 
-    // رویدادها — دکمهٔ «بازگشت» از صفحهٔ مستقل حذف شده است؛ فقط اورلی مودال دکمهٔ بستن دارد
+    // رویدادها — دکمهٔ «بازگشت» بالای صفحهٔ مرور (صفحهٔ مستقل) + اورلی
+    const backBtn = $("grBackBtn");
+    if (backBtn) backBtn.addEventListener("click", closeNav);
     const closeBtn = $("grCloseBtn");
     if (closeBtn) closeBtn.addEventListener("click", R.pageMode ? closeNav : close);
     $("grFirst").addEventListener("click", function () { nav(0); });
@@ -589,7 +591,6 @@
       a.click();
       URL.revokeObjectURL(a.href);
     });
-    document.addEventListener("keydown", grKey);
     window.addEventListener("resize", grResize);
     document.addEventListener("pieceSetChanged", grOnPieceSetChange);
 
@@ -663,14 +664,19 @@
   }
 
   function grKey(e) {
-    if (!R || R.closed) return;
-    if (e.key === "ArrowLeft") nav(R.idx + 1);
-    else if (e.key === "ArrowRight") nav(R.idx - 1);
+    if (!R || R.closed) return false;
+    if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA" || e.target.tagName === "SELECT")) return false;
+    if (e.key === "ArrowLeft") { e.preventDefault(); nav(R.idx + 1); return true; }
+    else if (e.key === "ArrowRight") { e.preventDefault(); nav(R.idx - 1); return true; }
     else if (e.key === "Escape") {
       if (R.pageMode) closeNav();
       else close();
+      return true;
     }
+    return false;
   }
+  // ⌨️ ناوبری کیبورد سراسری — script.js آن را در همهٔ صفحات فرامی‌خواند
+  window.ChessNavKeys = grKey;
   function grResize() { if (R && !R.closed) drawGraph(); }
 
   function toast(msg) {
@@ -687,7 +693,6 @@
     R.epoch++;
     stopAuto();
     if (R.board) R.board.destroy();
-    document.removeEventListener("keydown", grKey);
     window.removeEventListener("resize", grResize);
     document.removeEventListener("pieceSetChanged", grOnPieceSetChange);
     const ov = $("grOverlay");

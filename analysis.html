@@ -3,15 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="description" content="تخته آنالیز ChessHub — تحلیل زنده با انجین Stockfish، سه خط برتر، درخت واریانت‌ها و کتاب گشایش‌های استادان" />
+    <meta name="description" content="تخته آنالیز ChessHub — تحلیل زنده با انجین Stockfish، سه خط برتر، درخت واریانت‌ها و اکسپلورر «حرکات بازی شده» از پایگاه بازی‌ها" />
     <title>ChessHub | آنالیز</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%E2%99%9B%3C/text%3E%3C/svg%3E" />
     <link rel="stylesheet" href="css/theme.css?v=10.8" />
     <link rel="stylesheet" href="lib/fontawesome/all.min.css" />
     <link href="fonts/vazir/font-face.css" rel="stylesheet" />
-    <link rel="stylesheet" href="css/style.css?v=10.8" />
-    <link rel="stylesheet" href="lib/chessground/chessground.base.css?v=10.8" />
-    <link rel="stylesheet" href="css/analysis.css?v=10.8" />
+    <link rel="stylesheet" href="css/style.css?v=10.9" />
+    <link rel="stylesheet" href="css/gamereview.css?v=10.9" />
+    <link rel="stylesheet" href="lib/chessground/chessground.base.css?v=10.9" />
+    <link rel="stylesheet" href="css/analysis.css?v=10.9" />
     <script src="lib/chess.min.js"></script>
   </head>
   <body>
@@ -20,7 +21,7 @@
 
       <section class="app-hero">
         <h1><i class="fas fa-chart-line"></i> آنالیز با انجین</h1>
-        <p>تحلیل زندهٔ بی‌نهایت با Stockfish — سه خط برتر، درخت واریانت‌ها و کتاب گشایش‌ها</p>
+        <p>تحلیل زندهٔ بی‌نهایت با Stockfish — سه خط برتر، درخت واریانت‌ها و اکسپلورر «حرکات بازی شده»</p>
       </section>
 
       <div class="an-wrap">
@@ -42,24 +43,25 @@
         </div>
 
         <div class="an-body">
-          <!-- تخته + نوار ارزیابی -->
+          <!-- تخته + نوار ارزیابی — نوار دقیقاً هم‌قدِ تخته (بدون ناوبری) -->
           <div class="an-board-side">
-            <div class="an-board-row">
-              <div class="an-evalbar" id="anEvalBar">
-                <div class="eval-white" id="anEvalFill" style="height:50%"></div>
-                <div class="eval-mid"></div>
-                <span class="an-eval-num" id="anEvalNum">۰٫۰</span>
-              </div>
-              <div class="an-board-col">
+            <div class="an-board-col">
+              <div class="an-board-line">
+                <div class="an-evalbar" id="anEvalBar">
+                  <div class="eval-white" id="anEvalFill" style="height:50%"></div>
+                  <div class="eval-mid"></div>
+                  <span class="an-eval-num" id="anEvalNum">۰٫۰</span>
+                </div>
                 <div class="an-board-wrap">
                   <div id="anBoard" class="an-board"></div>
                 </div>
-                <div class="an-nav">
-                  <button id="navFirst" title="شروع"><i class="fas fa-fast-backward"></i></button>
-                  <button id="navPrev" title="حرکت قبل"><i class="fas fa-step-backward"></i></button>
-                  <button id="navNext" title="حرکت بعد"><i class="fas fa-step-forward"></i></button>
-                  <button id="navLast" title="انتهای خط اصلی"><i class="fas fa-fast-forward"></i></button>
-                </div>
+              </div>
+              <div class="an-nav">
+                <button id="navFirst" title="شروع خط"><i class="fas fa-fast-backward"></i></button>
+                <button id="navPrev" title="حرکت قبل"><i class="fas fa-step-backward"></i></button>
+                <button id="navNext" title="حرکت بعد"><i class="fas fa-step-forward"></i></button>
+                <button id="navLast" title="انتهای خط اصلی"><i class="fas fa-fast-forward"></i></button>
+                <button id="anAutoBtn" class="an-auto-btn" title="پخش خودکار — با Space هم فعال می‌شود"><i class="fas fa-play"></i> شروع</button>
               </div>
             </div>
           </div>
@@ -93,16 +95,16 @@
               </div>
             </div>
 
-            <!-- اکسپلورر — کتاب گشایش‌های استادان -->
+            <!-- اکسپلورر «حرکات بازی شده» — از پایگاه بازی‌های خود سایت -->
             <div class="an-card" id="anExplorerCard">
               <h3>
-                <button class="an-book-btn" id="anExplorerBtn" title="بازکردن کتاب گشایش‌های استادان">
+                <button class="an-book-btn" id="anExplorerBtn" title="بازکردن «حرکات بازی شده»">
                   <i class="fas fa-book-open"></i>
                 </button>
-                گشایش‌یاب (کتاب استادان)
+                حرکات بازی شده
               </h3>
               <div class="an-explorer-body" id="anExplorerBody">
-                <div class="an-ex-empty">در حال بارگذاری کتاب…</div>
+                <div class="an-ex-empty">در حال بارگذاری پایگاه بازی‌ها…</div>
               </div>
             </div>
 
@@ -153,10 +155,12 @@
 
     <div class="settings-toast" id="settingsToast"></div>
 
-    <script src="js/script.js?v=10.8"></script>
-    <script src="js/profile.js?v=10.8"></script>
-    <script src="js/auth.js?v=10.8"></script>
-    <script src="js/engine-core.js?v=10.8"></script>
+    <script src="js/script.js?v=10.9"></script>
+    <script src="js/profile.js?v=10.9"></script>
+    <script src="js/auth.js?v=10.9"></script>
+    <script src="js/engine-core.js?v=10.9"></script>
+    <script src="js/board-ui.js?v=10.9"></script>
+    <script src="js/gamereview.js?v=10.9"></script>
     <script type="module" src="lib/chessground/loader.js?v=10.8"></script>
     <script>
       (function () {
@@ -190,17 +194,6 @@
         let engineShape = null;   // فلش بهترین حرکت انجین
         let lineData = [];        // دادهٔ خطوط انجین برای پیش‌نمایش
         let explorerEnabled = false;
-        let explorerCache = new Map();
-        const LICHESS_TOKEN_KEY = "chesshub_lichess_token";
-        function lichessToken() {
-          try { return localStorage.getItem(LICHESS_TOKEN_KEY) || ""; } catch (e) { return ""; }
-        }
-        function saveLichessToken(t) {
-          try {
-            if (t) localStorage.setItem(LICHESS_TOKEN_KEY, t);
-            else localStorage.removeItem(LICHESS_TOKEN_KEY);
-          } catch (e) {}
-        }
         let multiGames = null;    // بازی‌های یک PGN چندتایی
         let ctxPath = null;       // مسیر حرکتِ منوی راست‌کلیک
         let lastRenderedLines = null;
@@ -358,7 +351,8 @@
           } else {
             node.children.push(T(g.fen(), mv.san, uci));
             currentPath.push(node.children.length - 1);
-            if (node.children.length > 1) openBranchDialog(node);
+            // 🔑 هنگام بازی کردن، هیچ پرسشی نمی‌آید — شاخه‌ها بی‌صدا ساخته می‌شوند؛
+            // پرسش «کدام مسیر» فقط وقتی است که به این نقطه برگردی و «بعدی» بزنی
             window.ChessHub && ChessHub.Sound.play(mv.captured ? "capture" : "move");
           }
           afterPositionChange({ from: mv.from, to: mv.to });
@@ -413,11 +407,19 @@
         }
         function turnOf(fen) { return (fen.split(" ")[1] || "w") === "w" ? "w" : "b"; }
 
+        // شمارهٔ حرکتِ یک FEN برای نمایش («۱. » برای سفید، «۱… » برای سیاه)
+        function moveNoText(fen) {
+          const p = String(fen || "").split(" ");
+          const isWhite = p[1] === "b"; // بعد از حرکت سفید، نوبت سیاه است
+          const fm = parseInt(p[5], 10) || 1;
+          return isWhite ? fa(fm) + ". " : fa(Math.max(1, fm - 1)) + "… ";
+        }
+
         function escapeSan(s) {
           return String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
 
-        /* ---------- درخت واریانت‌ها ---------- */
+        /* ---------- درخت واریانت‌ها — هر ردیف = یک حرکت سفید + سیاه ---------- */
         function renderTree() {
           const box = $("anTree");
           if (!box) return;
@@ -427,52 +429,80 @@
           }
           const out = [];
           const mainIdx = root.mainIdx < root.children.length ? root.mainIdx : 0;
-          // فقط خط اصلی از ریشه — واریانت‌ها داخل emitMoveAndVariants رندر می‌شوند
-          if (root.children.length) emitMoveAndVariants(root, [], mainIdx, out);
+          emitRows(root, [], mainIdx, out);
           box.innerHTML = out.join("");
           const cur = box.querySelector(".mv.cur");
           if (cur) cur.scrollIntoView({ block: "nearest" });
         }
 
-        // یک حرکت با شمارهٔ درست (san + شماره) رندر می‌کند
-        function renderMoveToken(moveNode, movePath, out) {
-          const turnAfter = turnOf(moveNode.fen); // نوبتِ بعد از این حرکت
-          const fm = moveNumberOf(moveNode.fen);
-          const playedByWhite = turnAfter === "b";
-          const no = playedByWhite ? fm : Math.max(1, fm - 1);
+        // دکمهٔ یک حرکت
+        function mvBtn(moveNode, movePath) {
           const isCur = pathStr(movePath) === pathStr(currentPath);
-          out.push(
-            '<span class="mvpair"><span class="mno">' + (playedByWhite ? no + ". " : no + "… ") + "</span>" +
-            '<button type="button" class="mv' + (isCur ? " cur" : "") + '" data-path="' + pathStr(movePath) + '">' + escapeSan(moveNode.san) + "</button></span>"
-          );
+          return '<button type="button" class="mv' + (isCur ? " cur" : "") + '" data-path="' + pathStr(movePath) + '">' + escapeSan(moveNode.san) + "</button>";
         }
 
-        // حرکتِ فرزند childIdx از parentNode + واریانت‌های خواهرش + ادامهٔ خط اصلی
-        function emitMoveAndVariants(parentNode, parentPath, childIdx, out) {
+        // واریانت‌های خواهرِ یک حرکت (فقط وقتی خودش اصلی است)
+        function emitSiblings(parentNode, parentPath, childIdx, out) {
+          const kids = parentNode.children;
+          const mainIdx = parentNode.mainIdx < kids.length ? parentNode.mainIdx : 0;
+          if (childIdx !== mainIdx || kids.length <= 1) return;
+          kids.forEach(function (_, i) {
+            if (i === mainIdx) return;
+            out.push('<div class="varblock">');
+            emitRows(parentNode, parentPath, i, out);
+            out.push("</div>");
+          });
+        }
+
+        // یک ردیف کامل: شماره + حرکت سفید + حرکت سیاه (+ واریانت‌ها + ادامهٔ خط)
+        function emitRows(parentNode, parentPath, childIdx, out) {
           const kids = parentNode.children;
           if (!kids[childIdx]) return;
-          const mainIdx = parentNode.mainIdx < kids.length ? parentNode.mainIdx : 0;
           const child = kids[childIdx];
           const movePath = parentPath.concat([childIdx]);
+          const whiteMove = turnOf(child.fen) === "b"; // بعد از حرکت، نوبت سیاه ⇒ سفید بازی کرده
 
-          // ۱) خودِ حرکت
-          renderMoveToken(child, movePath, out);
-
-          // ۲) واریانت‌ها — خواهرهایِ غیرِاصلی (فقط وقتی این حرکت، اصلی است)
-          if (childIdx === mainIdx && kids.length > 1) {
-            kids.forEach(function (_, i) {
-              if (i === mainIdx) return;
-              out.push('<span class="varblock">');
-              emitMoveAndVariants(parentNode, parentPath, i, out);
-              out.push("</span>");
-            });
+          if (!whiteMove) {
+            // حرکت سیاه، آغازگر ردیف (ادامهٔ واریانت یا PGN از نوبت سیاه)
+            const no0 = Math.max(1, moveNumberOf(child.fen) - 1);
+            out.push('<div class="mrow"><span class="mno">' + no0 + "… </span>" + mvBtn(child, movePath) + "</div>");
+            emitSiblings(parentNode, parentPath, childIdx, out);
+            const ck0 = child.children;
+            if (ck0.length) {
+              const cmi0 = child.mainIdx < ck0.length ? child.mainIdx : 0;
+              emitRows(child, movePath, cmi0, out);
+            }
+            return;
           }
 
-          // ۳) ادامهٔ خط اصلی از این فرزند
+          // حرکت سفید — ردیف با شماره + جفتِ سیاه در همان ردیف
+          out.push('<div class="mrow"><span class="mno">' + moveNumberOf(child.fen) + ". </span>" + mvBtn(child, movePath));
+          let blackNode = null, blackPath = null, blackParent = null, blackIdx = -1;
           const ck = child.children;
           if (ck.length) {
             const cmi = child.mainIdx < ck.length ? child.mainIdx : 0;
-            emitMoveAndVariants(child, movePath, cmi, out);
+            blackNode = ck[cmi];
+            blackPath = movePath.concat([cmi]);
+            blackParent = child;
+            blackIdx = cmi;
+            out.push(mvBtn(blackNode, blackPath));
+          }
+          out.push("</div>");
+          // واریانت‌ها بعد از ردیف — خواهرهای سفید و خواهرهای سیاه
+          emitSiblings(parentNode, parentPath, childIdx, out);
+          if (blackParent && blackParent.children.length > 1) {
+            blackParent.children.forEach(function (_, i) {
+              if (i === blackIdx) return;
+              out.push('<div class="varblock">');
+              emitRows(blackParent, movePath, i, out);
+              out.push("</div>");
+            });
+          }
+          // ادامهٔ خط اصلی از حرکت سیاه
+          if (blackNode && blackNode.children.length) {
+            const bk = blackNode.children;
+            const bmi = blackNode.mainIdx < bk.length ? blackNode.mainIdx : 0;
+            emitRows(blackNode, blackPath, bmi, out);
           }
         }
 
@@ -492,6 +522,8 @@
         function navForward() {
           const node = curNode();
           if (!node.children.length) return;
+          // 🔑 در نقطهٔ انشعاب، هر بار «بعدی» = پرسش انتخاب مسیر (مگر شاخه‌ها حذف شده باشند)
+          if (node.children.length > 1) { openBranchDialog(node); return; }
           const mainIdx = node.mainIdx < node.children.length ? node.mainIdx : 0;
           navTo(currentPath.concat([mainIdx]));
         }
@@ -510,18 +542,49 @@
           navTo(path);
         }
 
+        /* ---------- پخش خودکار — دکمهٔ «شروع» زیر تخته + کلید Space ---------- */
+        let autoTimer = null;
+        function startAutoPlay() {
+          if (autoTimer) return;
+          const btn = $("anAutoBtn");
+          if (btn) {
+            btn.innerHTML = '<i class="fas fa-pause"></i> توقف';
+            btn.classList.add("on");
+          }
+          // اگر در انتهای خط هستیم، از اول شروع کن
+          if (!curNode().children.length) navTo([]);
+          autoTimer = setInterval(function () {
+            const node = curNode();
+            if (!node.children.length) { stopAutoPlay(); return; }
+            const mi = node.mainIdx < node.children.length ? node.mainIdx : 0;
+            navTo(currentPath.concat([mi]));
+          }, 1300);
+        }
+        function stopAutoPlay() {
+          if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+          const btn = $("anAutoBtn");
+          if (btn) {
+            btn.innerHTML = '<i class="fas fa-play"></i> شروع';
+            btn.classList.remove("on");
+          }
+        }
+        function toggleAutoPlay() {
+          if (autoTimer) stopAutoPlay();
+          else startAutoPlay();
+        }
+
         /* ---------- حذف با منوی راست‌کلیک ---------- */
+        // 🔑 «حذف از اینجا به بعد» = خودِ این حرکت می‌ماند؛ فقط ادامه‌های بعدش حذف می‌شود
         function deleteFrom(path) {
           if (!path || !path.length) return;
-          const parentPath = path.slice(0, -1);
-          const parent = nodeAt(parentPath);
-          const idx = path[path.length - 1];
-          if (!parent.children[idx]) return;
-          parent.children.splice(idx, 1);
-          if (parent.mainIdx >= parent.children.length) parent.mainIdx = 0;
-          if (currentPath.length >= path.length) currentPath = parentPath;
+          const node = nodeAt(path);
+          if (!node) return;
+          if (!node.children.length) { toast("بعد از این حرکت چیزی برای حذف نیست"); return; }
+          node.children = [];
+          node.mainIdx = 0;
+          if (currentPath.length > path.length) currentPath = path.slice();
           afterPositionChange();
-          toast("حرکات بعد از این نقطه حذف شد");
+          toast("حرکات بعد از این حرکت حذف شد — خودِ حرکت باقی ماند");
         }
 
         function deleteVariant(path) {
@@ -737,7 +800,8 @@
           if (!lineData.length) { box.innerHTML = '<div class="an-status">در انتظار تحلیل…</div>'; return; }
           box.innerHTML = lineData.map(function (ln, i) {
             const moves = ln.sans.map(function (san, k) {
-              return '<span class="mv" data-line="' + i + '" data-idx="' + k + '">' + escapeSan(san) + "</span>";
+              const fenK = ln.fens[k] || "";
+              return '<span class="mv" data-line="' + i + '" data-idx="' + k + '"><b class="mv-no">' + moveNoText(fenK) + "</b>" + escapeSan(san) + "</span>";
             }).join(" ");
             return (
               '<div class="an-line ' + (openLines.has(i) ? "open" : "closed") + '" data-line="' + i + '">' +
@@ -749,111 +813,199 @@
           }).join("");
         }
 
-        /* ---------- اکسپلورر — کتاب گشایش‌های استادان (API لایچز) ----------
-           لایچز از سال ۲۰۲۶ درخواست‌های ناشناس را نمی‌پذیرد — هر درخواست
-           باید توکن OAuth رایگان لایچز کاربر را داشته باشد (Bearer). */
-        function updateExplorer() {
-          if (!explorerEnabled) return;
-          const body = $("anExplorerBody");
-          if (!body) return;
-          const token = lichessToken();
-          if (!token) { renderExplorerTokenForm(""); return; }
-          const fen = curNode().fen;
-          const cached = explorerCache.get(fen);
-          if (cached) { renderExplorer(cached, fen); return; }
-          body.innerHTML = '<div class="an-ex-empty"><i class="fas fa-spinner fa-pulse"></i> در حال دریافت از کتاب استادان…</div>';
-          fetch("https://explorer.lichess.ovh/masters?fen=" + encodeURIComponent(fen) + "&topGames=0", {
-            headers: { Authorization: "Bearer " + token },
-          })
+        /* ---------- اکسپلورر «حرکات بازی شده» — از پایگاه بازی‌های خود سایت ----------
+           بدون هیچ سرویس بیرونی (بدون لایچس): همهٔ بازی‌های پایگاه به یک
+           اکسپلورر بزرگ تبدیل شده‌اند — هر پوزیشن: حرکت‌ها + تعداد بازیکنان
+           + درصد برد/مساوی/باخت + فهرست بازی‌های رسیده به همین پوزیشن. */
+        let explorerData = null;
+        let explorerState = "idle"; // idle | loading | ok | fail
+        let explorerPgnCache = new Map();
+
+        function loadExplorer() {
+          if (explorerState !== "idle") return;
+          explorerState = "loading";
+          renderExplorerLocal();
+          fetch("data/explorer/explorer.json")
             .then(function (r) {
-              if (r.status === 401 || r.status === 403) {
-                const err = new Error("auth");
-                err.authFail = true;
-                throw err;
-              }
-              if (!r.ok) throw new Error("HTTP " + r.status);
+              if (!r.ok) throw new Error("http " + r.status);
               return r.json();
             })
-            .then(function (j) {
-              explorerCache.set(fen, j);
-              if (curNode().fen === fen) renderExplorer(j, fen);
+            .then(function (data) {
+              explorerData = data;
+              explorerState = "ok";
+              renderExplorerLocal();
             })
-            .catch(function (err) {
-              if (curNode().fen !== fen) return;
-              if (err && err.authFail) renderExplorerTokenForm("invalid");
-              else {
-                body.innerHTML = '<div class="an-ex-empty">دسترسی به کتاب استادان برقرار نشد — اتصال اینترنت را بررسی کن.</div>';
-              }
+            .catch(function () {
+              explorerState = "fail";
+              renderExplorerLocal();
             });
         }
 
-        function renderExplorerTokenForm(state) {
-          const body = $("anExplorerBody");
-          if (!body) return;
-          body.innerHTML =
-            '<div class="an-ex-token">' +
-              '<div class="an-ex-token-msg">' +
-                (state === "invalid"
-                  ? "توکن ذخیره‌شده معتبر نیست یا منقضی شده — یک توکن تازه بساز."
-                  : "کتاب گشایش‌های استادان لایچز برای جلوگیری از حملهٔ DDoS به یک توکن رایگان نیاز دارد.") +
-              "</div>" +
-              '<div class="an-ex-token-row">' +
-                '<input type="password" id="exTokenInput" placeholder="lichess API token…" dir="ltr" autocomplete="off" />' +
-                '<button type="button" class="an-btn primary" id="exTokenSave"><i class="fas fa-check"></i> ذخیره</button>' +
-              "</div>" +
-              '<div class="an-ex-token-hint">توکن رایگان لایچز را از <a href="https://lichess.org/account/oauth/token/create" target="_blank" rel="noopener">lichess.org/account/oauth/token/create</a> بساز و این‌جا بچسبان — فقط در مرورگر خودت ذخیره می‌شود. <button type="button" class="ex-token-link" id="exTokenHelp">توکن چیست؟</button></div>' +
-            "</div>";
-          $("exTokenSave").addEventListener("click", function () {
-            const v = $("exTokenInput").value.trim();
-            if (!v) return;
-            saveLichessToken(v);
-            explorerCache.clear();
-            updateExplorer();
-          });
-          $("exTokenInput").addEventListener("keydown", function (e) {
-            if (e.key === "Enter") $("exTokenSave").click();
-          });
-          $("exTokenHelp").addEventListener("click", function () {
-            toast("توکن = کلید API شخصی لایچز؛ با حساب رایگان لایچز می‌سازی و بدون محدودیت به کتاب استادان وصل می‌شود.");
-          });
+        // گرهٔ اکسپلورر متناظر با پوزیشن فعلی (با دنبالهٔ SAN خط جاری)
+        function explorerNodeFor() {
+          if (!explorerData) return null;
+          let n = explorerData.root;
+          let node = root;
+          for (let i = 0; i < currentPath.length; i++) {
+            node = node.children[currentPath[i]];
+            if (!node || !node.san) return null;
+            const san = String(node.san).replace(/[+#!?]/g, "");
+            if (!n.m || !n.m[san]) return null;
+            n = n.m[san];
+          }
+          return n;
         }
 
-        function renderExplorer(j, fen) {
+        function updateExplorer() {
+          if (!explorerEnabled) return;
+          if (explorerState === "idle") { loadExplorer(); return; }
+          renderExplorerLocal();
+        }
+
+        function renderExplorerLocal() {
           const body = $("anExplorerBody");
           if (!body) return;
-          const total = (j.white || 0) + (j.draws || 0) + (j.black || 0);
-          if (!total) {
-            body.innerHTML = '<div class="an-ex-empty">این موقعیت در کتاب بازی‌های استادان نیست.</div>';
+          if (explorerState === "loading") {
+            body.innerHTML = '<div class="an-ex-empty"><i class="fas fa-spinner fa-pulse"></i> در حال بارگذاری پایگاه بازی‌ها…</div>';
             return;
           }
-          const meta =
-            '<div class="an-explorer-meta">' +
-              "<span>مجموع بازی‌ها: <b>" + faNum(total) + "</b></span>" +
-              (j.averageRating ? "<span>میانگین ریتینگ: <b>" + faNum(Math.round(j.averageRating)) + "</b></span>" : "") +
-              '<button type="button" class="ex-token-link" id="exTokenChange" title="تغییر توکن لایچز"><i class="fas fa-key"></i></button>' +
-            "</div>";
-          const moves = (j.moves || []).slice(0, 12).map(function (m) {
-            const n = (m.white || 0) + (m.draws || 0) + (m.black || 0);
-            const pw = (m.white / n) * 100, pd = (m.draws / n) * 100, pb = (m.black / n) * 100;
-            return (
-              '<div class="an-ex-move" data-uci="' + m.uci + '" title="' + escapeSan(m.san) + '">' +
-                '<span class="ex-san">' + escapeSan(m.san) + "</span>" +
+          if (explorerState === "fail") {
+            body.innerHTML = '<div class="an-ex-empty">دادهٔ اکسپلورر در دسترس نیست — فایل data/explorer/explorer.json را بررسی کن.</div>';
+            return;
+          }
+          const node = explorerNodeFor();
+          if (!node) {
+            body.innerHTML = '<div class="an-ex-empty">این پوزیشن در بازی‌های پایگاه دیده نشده — از موقعیت اولیه بازی کن تا «حرکات بازی شده» را ببینی.</div>';
+            return;
+          }
+
+          // حرکت‌ها — مرتب بر اساس تعداد بازیکنان
+          const entries = Object.keys(node.m || {})
+            .map(function (san) { return { san: san, c: node.m[san] }; })
+            .sort(function (a, b) { return b.c.n - a.c.n; })
+            .slice(0, 14);
+          let html = '<div class="an-explorer-meta"><span>از <b>' + faNum(explorerData.totalGames || 0) + "</b> بازی پایگاه — در این پوزیشن <b>" + faNum(node.n) + "</b> بار اینجا بوده‌اند</span></div>";
+          html += '<div class="ex-moves">';
+          if (!entries.length) {
+            html += '<div class="an-ex-empty">این آخرین پوزیشن ثبت‌شده است — حرکتی بعدش در پایگاه نیست.</div>';
+          }
+          entries.forEach(function (mv) {
+            const c = mv.c;
+            const total = Math.max(1, c.n);
+            const pw = (c.w / total) * 100, pd = (c.d / total) * 100, pb = (c.b / total) * 100;
+            html +=
+              '<div class="an-ex-move" data-san="' + escapeSan(mv.san) + '" title="برد سفید ' + Math.round(pw) + "٪ — مساوی " + Math.round(pd) + "٪ — برد سیاه " + Math.round(pb) + '٪">' +
+                '<span class="ex-san">' + escapeSan(mv.san) + "</span>" +
                 '<span class="ex-bar">' +
                   '<i class="w" style="width:' + pw.toFixed(1) + '%"></i>' +
                   '<i class="d" style="width:' + pd.toFixed(1) + '%"></i>' +
                   '<i class="b" style="width:' + pb.toFixed(1) + '%"></i>' +
                 "</span>" +
-                '<span class="ex-n">' + (pw.toFixed(0) + " / " + pd.toFixed(0) + " / " + pb.toFixed(0)) + "٪ — " + faNum(n) + "</span>" +
-              "</div>"
-            );
-          }).join("");
-          body.innerHTML = meta + moves;
-          const ch = $("exTokenChange");
-          if (ch) ch.addEventListener("click", function () {
-            saveLichessToken("");
-            explorerCache.clear();
-            renderExplorerTokenForm("");
+                '<span class="ex-wdl">' + Math.round(pw) + "٪ / " + Math.round(pd) + "٪ / " + Math.round(pb) + "٪</span>" +
+                '<span class="ex-count">' + faNum(c.n) + " بازیکن</span>" +
+              "</div>";
           });
+          html += "</div>";
+
+          // بازی‌های رسیده به همین پوزیشن — کلیک = مرور و تحلیل
+          const RESULT_FA = { "1-0": "برد سفید", "0-1": "برد سیاه", "1/2-1/2": "مساوی" };
+          const RESULT_CL = { "1-0": "w", "0-1": "b", "1/2-1/2": "d" };
+          const games = (node.g || []).filter(function (gr) {
+            return explorerData.meta && explorerData.meta[gr[0]];
+          });
+          html += '<div class="ex-games">';
+          html += '<div class="ex-games-title"><i class="fas fa-chess-queen"></i> بازی‌های رسیده به همین پوزیشن</div>';
+          games.forEach(function (gr) {
+            const m = explorerData.meta[gr[0]];
+            const res = m[2] || "*";
+            const resFa = RESULT_FA[res] || "نامشخص";
+            const resCl = RESULT_CL[res] || "d";
+            html +=
+              '<div class="ex-game" data-gi="' + gr[0] + '">' +
+                '<span class="g-res ' + resCl + '">' + resFa + "</span>" +
+                "<span class=\"g-players\">" + escapeSan(m[0]) + " — " + escapeSan(m[1]) + "</span>" +
+                (m[3] ? '<span class="g-date">' + escapeSan(String(m[3])) + "</span>" : "") +
+                '<span class="g-open">مرور و تحلیل <i class="fas fa-chevron-left"></i></span>' +
+              "</div>";
+          });
+          if (node.n > games.length) {
+            html += '<div class="ex-games-more">و ' + faNum(node.n - games.length) + " بازی دیگر…</div>";
+          }
+          html += "</div>";
+          body.innerHTML = html;
+
+          // کلیک روی حرکت → همان حرکت روی تخته
+          body.querySelectorAll(".an-ex-move").forEach(function (el) {
+            el.addEventListener("click", function () { playExplorerSan(el.dataset.san); });
+          });
+          // کلیک روی بازی → مرور و تحلیل (بازگشت = ادامهٔ آنالیز خودت)
+          body.querySelectorAll(".ex-game").forEach(function (el) {
+            el.addEventListener("click", function () { openExplorerGame(parseInt(el.dataset.gi, 10), el); });
+          });
+        }
+
+        function playExplorerSan(san) {
+          const node = curNode();
+          const g = new Chess(node.fen);
+          let mv = null;
+          try { mv = g.move(san); } catch (e) { mv = null; }
+          if (!mv) { toast("این حرکت در این پوزیشن مجاز نیست"); return; }
+          const uci = mv.from + mv.to + (mv.promotion || "");
+          const idx = node.children.findIndex(function (c) { return c.uci === uci; });
+          if (idx < 0) {
+            node.children.push(T(g.fen(), mv.san, uci));
+            idx = node.children.length - 1;
+          }
+          currentPath.push(idx);
+          afterPositionChange({ from: mv.from, to: mv.to });
+        }
+
+        function openExplorerGame(gi, el) {
+          if (!explorerData || !explorerData.srcs || !explorerData.srcs[gi]) { toast("این بازی در دسترس نیست"); return; }
+          const src = explorerData.srcs[gi];
+          const file = (explorerData.players || [])[src[0]];
+          if (!file) { toast("این بازی در دسترس نیست"); return; }
+          const openWith = function (metas) {
+            const g = metas[src[1]];
+            if (!g) { toast("بازی پیدا نشد"); return; }
+            const chess = new Chess();
+            let ucis = [];
+            try {
+              chess.load_pgn(g.pgn, { sloppy: true });
+              ucis = chess.history({ verbose: true }).map(function (m) {
+                return m.from + m.to + (m.promotion || "");
+              });
+            } catch (e) { ucis = []; }
+            if (!ucis.length) { toast("حرکتی برای مرور نیست"); return; }
+            if (window.GameReview) {
+              const dateClean = String(g.date || "").replace(/\.\?\?/g, "");
+              window.GameReview.open({
+                moves: ucis,
+                white: g.white,
+                black: g.black,
+                title: "حرکات بازی شده",
+                subtitle: g.white + " در برابر " + g.black + (g.opening ? " — " + g.opening : "") + (dateClean ? " (" + dateClean + ")" : ""),
+                result: g.result,
+              });
+            }
+          };
+          if (explorerPgnCache.has(file)) { openWith(explorerPgnCache.get(file)); return; }
+          if (el) el.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> در حال باز کردن بازی…';
+          fetch("pgn/" + file)
+            .then(function (r) {
+              if (!r.ok) throw new Error("http");
+              return r.text();
+            })
+            .then(function (txt) {
+              const metas = parsePgnFile(txt);
+              explorerPgnCache.set(file, metas);
+              openWith(metas);
+              renderExplorerLocal(); // بازگرداندن ردیف به حالت عادی
+            })
+            .catch(function () {
+              toast("فایل PGN «" + file + "» باز نشد");
+              renderExplorerLocal();
+            });
         }
 
         /* ---------- PGN: خواندن چند‌بازی + درخت واریانت ---------- */
@@ -862,6 +1014,21 @@
           const parts = norm.split(/(?=\[Event\s)/);
           return parts.map(function (p) { return p.trim(); }).filter(function (p) {
             return p && /\[Event\s"/.test(p) && /[a-h][1-8]/.test(p);
+          });
+        }
+
+        // متادیتای همهٔ بازی‌های یک فایل PGN (برای اکسپلورر و فهرست بازی‌ها)
+        function parsePgnFile(text) {
+          return splitGames(text).map(function (raw) {
+            return {
+              white: (raw.match(/\[White "([^"]+)"\]/) || [])[1] || "؟",
+              black: (raw.match(/\[Black "([^"]+)"\]/) || [])[1] || "؟",
+              result: (raw.match(/\[Result "([^"]+)"\]/) || [])[1] || "*",
+              date: (raw.match(/\[Date "([^"]+)"\]/) || [])[1] || "",
+              eco: (raw.match(/\[ECO "([^"]+)"\]/) || [])[1] || "",
+              opening: (raw.match(/\[Opening "([^"]+)"\]/) || [])[1] || "",
+              pgn: raw,
+            };
           });
         }
 
@@ -1187,6 +1354,9 @@
             if (explorerEnabled) updateExplorer();
           });
 
+          // دکمهٔ پخش خودکار (شروع/توقف — با Space هم)
+          $("anAutoBtn").addEventListener("click", toggleAutoPlay);
+
           // رویدادهای درخت حرکات: کلیک، راست‌کلیک، لمس طولانی، هاور
           const tree = $("anTree");
           tree.addEventListener("click", function (e) {
@@ -1220,14 +1390,14 @@
               const k = parseInt(mv.dataset.idx, 10);
               const ln = lineData[li];
               if (ln && ln.fens[k]) {
-                showMini(ln.fens[k], ln.evalText + " · " + ln.sans.slice(0, k + 1).join(" "), e.clientX, e.clientY);
+                showMini(ln.fens[k], "حرکت " + moveNoText(ln.fens[k]) + escapeSan(ln.sans[k]) + " — " + ln.evalText, e.clientX, e.clientY);
               }
               return;
             }
             const tmv = e.target.closest(".an-tree .mv");
             if (tmv) {
               const node = nodeAt(parsePath(tmv.dataset.path));
-              if (node && node.san) showMini(node.fen, escapeSan(node.san), e.clientX, e.clientY);
+              if (node && node.san) showMini(node.fen, "حرکت " + moveNoText(node.fen) + escapeSan(node.san), e.clientX, e.clientY);
             }
           });
           document.addEventListener("mouseout", function (e) {
@@ -1248,13 +1418,7 @@
             }
           });
 
-          // کلیک روی حرکت اکسپلورر → بازی روی تخته
-          $("anExplorerBody").addEventListener("click", function (e) {
-            const row = e.target.closest(".an-ex-move");
-            if (!row) return;
-            const uci = row.dataset.uci;
-            if (uci) playMove(uci.slice(0, 2), uci.slice(2, 4), uci[4] || null);
-          });
+          // کلیک روی حرکت اکسپلورر → بازی روی تخته (در renderExplorerLocal متصل می‌شود)
 
           // منوی راست‌کلیک
           $("anCtx").addEventListener("click", function (e) {
@@ -1275,15 +1439,18 @@
             if (e.target === this) closeBranchDialog();
           });
 
-          // ⌨️ کیبورد — راست = جلو، چپ = عقب
-          document.addEventListener("keydown", function (e) {
+          // ⌨️ ناوبری کیبورد — راست = جلو، چپ = عقب + Space = پخش خودکار
+          // (script.js این تابع را در کل صفحه فرامی‌خواند — در هر جای صفحه کار می‌کند)
+          window.ChessNavKeys = function (e) {
             const t = e.target;
-            if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT")) return;
-            if (e.key === "ArrowRight") { e.preventDefault(); navForward(); }
-            else if (e.key === "ArrowLeft") { e.preventDefault(); navBack(); }
-            else if (e.key === "Home") { e.preventDefault(); navTo([]); }
-            else if (e.key === "End") { e.preventDefault(); navToEnd(); }
-          });
+            if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT")) return false;
+            if (e.key === "ArrowRight") { e.preventDefault(); navForward(); return true; }
+            else if (e.key === "ArrowLeft") { e.preventDefault(); navBack(); return true; }
+            else if (e.key === "Home") { e.preventDefault(); navTo([]); return true; }
+            else if (e.key === "End") { e.preventDefault(); navToEnd(); return true; }
+            else if (e.key === " ") { e.preventDefault(); toggleAutoPlay(); return true; }
+            return false;
+          };
 
           // تغییر ست مهره‌ها از تنظیمات
           document.addEventListener("pieceSetChanged", function () {

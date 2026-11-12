@@ -1555,7 +1555,7 @@ window.chPh = function (w, h, label) {
         activeBox.innerHTML =
           '<div class="ea-ico"><i class="fas fa-bolt"></i></div>' +
           '<div class="ea-label">انجین فعال<small>هنوز هیچ انجینی دانلود نشده — آنالیز با انجین سبک داخلی اجرا می‌شود</small></div>' +
-          '<span class="engine-select" style="display:flex;align-items:center;color:var(--text-light)"><i class="fas fa-circle-info" style="margin-inline-end:0.4rem"></i> اول یک انجین دانلود کن</span>';
+          '<span class="engine-select engine-empty"><i class="fas fa-circle-info"></i> اول یک انجین دانلود کن</span>';
         return;
       }
       const active = EngineStore.activeId();
@@ -1621,7 +1621,8 @@ window.chPh = function (w, h, label) {
             const b = document.createElement("button");
             b.type = "button";
             b.className = "engine-btn " + cls;
-            b.innerHTML = '<i class="fas ' + icon + '"></i> ' + label;
+            /* 🔑 آیکن داخل چیپ گرد — fa- پیشوند لازم است وگرنه آیکن رندر نمی‌شود */
+            b.innerHTML = '<i class="fas fa-' + icon + '"></i> ' + label;
             b.addEventListener("click", fn);
             actions.appendChild(b);
             return b;

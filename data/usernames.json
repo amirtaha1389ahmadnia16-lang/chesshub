@@ -55,6 +55,11 @@
       "avatar": "images/avatars/7.png",
       "registeredAt": 1794327880533,
       "avatarUpdatedAt": 1794327893343
+    },
+    "amirtaha": {
+      "name": "Amirtaha",
+      "avatar": "images/avatars/1.png",
+      "registeredAt": 1794433413894
     }
   }
 }
