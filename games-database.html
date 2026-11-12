@@ -9,22 +9,60 @@
     <link rel="stylesheet" href="css/theme.css?v=10.7" />
     <link rel="stylesheet" href="lib/fontawesome/all.min.css" />
     <link href="fonts/vazir/font-face.css" rel="stylesheet" />
-    <link rel="stylesheet" href="css/style.css?v=10.10" />
-    <link rel="stylesheet" href="css/gamereview.css?v=10.7" />
+    <link rel="stylesheet" href="css/style.css?v=10.11" />
+    <link rel="stylesheet" href="lib/chessground/chessground.base.css?v=11.0" />
     <script src="lib/chess.min.js"></script>
     <style>
+      /* ============================================================
+         پایگاه بازی‌ها — نسخهٔ ترکیبی v11.3
+         طراحی حرفه‌ای + موتور ضدلگ برای موبایل:
+         ۱) پارس PGN تکه‌تکه (بدون فریز شدن صفحه)
+         ۲) اسکرول بی‌نهایت نرم (۳۰ بازی در هر مرحله)
+         ۳) content-visibility برای رندر تنبل ردیف‌ها
+         ============================================================ */
+
       /* اسکرول‌بار اورلی‌ها سمت راست: ظرف اسکرول ltr، محتوا rtl */
       body .page-overlay { direction: ltr; }
       .page-overlay .page-close,
       .page-overlay .overlay-scroll { direction: rtl; }
 
-      /* استایل‌های اختصاصی پایگاه بازی‌ها (Pro Edition) */
-      .players-section { margin-bottom: 2rem; }
+      /* ---------- هیرو ---------- */
+      .db-hero { width: 100%; }
+      .db-hero h1 {
+        font-size: clamp(1.3rem, 2.6vw, 1.8rem);
+        font-weight: 900;
+        letter-spacing: -0.3px;
+      }
+      .db-hero p { opacity: 0.85; }
+      .db-hero-stats {
+        display: flex;
+        gap: 0.6rem;
+        margin-top: 1.1rem;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .db-hero-stats .hs-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        background: rgba(255, 255, 255, 0.75);
+        border: 1px solid var(--gray-border, #e2e8f0);
+        color: var(--blue-dark, #0f2a55);
+        border-radius: 99px;
+        padding: 0.4rem 1rem;
+        font-size: 0.74rem;
+        font-weight: 800;
+        box-shadow: var(--shadow-sm);
+      }
+      .db-hero-stats .hs-chip i { color: var(--accent); }
+
+      /* ---------- بخش استادان ---------- */
+      .players-section { margin-bottom: 2.2rem; }
       .section-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 1.5rem;
+        margin-bottom: 1.3rem;
         flex-wrap: wrap;
         gap: 0.8rem;
       }
@@ -51,36 +89,49 @@
 
       .players-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: 1.2rem;
+        grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
+        gap: 1.1rem;
       }
       .player-card {
         background: #ffffff;
-        border-radius: var(--radius-md);
-        padding: 1.2rem 0.5rem;
+        border-radius: var(--radius-lg);
+        padding: 1.3rem 0.6rem 1.1rem;
         text-align: center;
         cursor: pointer;
         transition: var(--transition-smooth);
         box-shadow: var(--shadow-sm);
         border: 1px solid #e2e8f0;
         position: relative;
+        overflow: hidden;
       }
+      .player-card::after {
+        content: "";
+        position: absolute;
+        inset: auto 0 0 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary-dark), var(--accent));
+        transform: scaleX(0);
+        transform-origin: right;
+        transition: transform 0.28s ease;
+      }
+      .player-card:hover::after { transform: scaleX(1); }
       .player-card:hover {
-        transform: translateY(-4px);
+        transform: translateY(-5px);
         box-shadow: var(--shadow-md);
-        border-color: var(--accent);
+        border-color: var(--accent-light, var(--accent));
       }
       .player-card .avatar {
-        width: 72px;
-        height: 72px;
+        width: 78px;
+        height: 78px;
         border-radius: 50%;
         margin: 0 auto 0.8rem;
         overflow: hidden;
         background: #f1f5f9;
         border: 3px solid #e2e8f0;
         transition: var(--transition-smooth);
+        box-shadow: 0 4px 10px -3px rgba(14, 42, 85, 0.18);
       }
-      .player-card:hover .avatar { border-color: var(--accent); }
+      .player-card:hover .avatar { border-color: var(--accent); transform: scale(1.04); }
       .player-card .avatar img { width: 100%; height: 100%; object-fit: cover; }
       .player-card .name {
         font-size: 0.9rem;
@@ -97,27 +148,29 @@
         margin-top: 0.2rem;
       }
 
+      /* ---------- اورلی تمام‌صفحه ---------- */
       .page-overlay {
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100dvh;
-        background: #ffffff;
+        background: #f5f7fa;
         z-index: 1000;
         overflow-y: auto;
         overflow-x: hidden;
         padding: 0;
         transform: translateX(100%);
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        direction: rtl;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
       }
       .page-overlay.open { transform: translateX(0); }
       .page-close {
         position: sticky;
         top: 0;
-        background: var(--primary-dark);
-        padding: 0.8rem 1.2rem;
+        background: linear-gradient(135deg, var(--primary-dark), #24344d);
+        padding: 0.85rem 1.3rem;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -133,13 +186,16 @@
         text-overflow: ellipsis;
         max-width: 70%;
         font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
       }
-      .page-close h2 i { color: var(--accent-light); }
+      .page-close h2 i { color: var(--accent-light, var(--accent)); }
       .page-close .close-btn {
-        background: rgba(255, 255, 255, 0.1);
-        border: none;
-        padding: 0.4rem 1rem;
-        border-radius: var(--radius-sm);
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        padding: 0.45rem 1.1rem;
+        border-radius: var(--radius-md);
         font-family: "Vazir";
         font-weight: 700;
         cursor: pointer;
@@ -151,10 +207,58 @@
         font-size: 0.85rem;
         flex-shrink: 0;
       }
-      .page-close .close-btn:hover { background: var(--danger); }
+      .page-close .close-btn:hover { background: var(--danger); border-color: var(--danger); }
 
       .overlay-scroll { padding: 1.5rem; }
 
+      /* ---------- کارت هیروی بازیکن داخل اورلی ---------- */
+      .player-hero {
+        background: linear-gradient(135deg, var(--primary-dark), #24344d);
+        border-radius: var(--radius-xl, 18px);
+        padding: 1.4rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+        color: #fff;
+        margin-bottom: 1.4rem;
+        box-shadow: var(--shadow-md);
+        flex-wrap: wrap;
+      }
+      .player-hero .hero-avatar {
+        width: 84px;
+        height: 84px;
+        border-radius: 50%;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        object-fit: cover;
+        background: #f1f5f9;
+        box-shadow: 0 8px 18px -6px rgba(0, 0, 0, 0.4);
+        flex-shrink: 0;
+      }
+      .player-hero .hero-id { min-width: 150px; }
+      .player-hero .hero-name { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.15rem; }
+      .player-hero .hero-title { font-size: 0.72rem; color: var(--accent-light, #93c5fd); font-weight: 700; }
+      .player-hero .hero-stats {
+        display: flex;
+        gap: 0.55rem;
+        margin-right: auto;
+        flex-wrap: wrap;
+      }
+      .player-hero .stat-box {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: var(--radius-md);
+        padding: 0.55rem 0.85rem;
+        text-align: center;
+        min-width: 74px;
+      }
+      .player-hero .stat-box b { display: block; font-size: 1.1rem; font-weight: 800; }
+      .player-hero .stat-box span {
+        font-size: 0.6rem;
+        color: rgba(255, 255, 255, 0.78);
+        font-weight: 600;
+      }
+
+      /* ---------- فیلتر و جستجو ---------- */
       .search-bar {
         display: flex;
         flex-wrap: wrap;
@@ -206,78 +310,6 @@
       }
       .search-actions .btn-sm:hover { background: var(--accent); color: white; border-color: var(--accent); }
 
-      .games-list { display: flex; flex-direction: column; gap: 0.6rem; }
-      .game-item {
-        background: #ffffff;
-        border-radius: var(--radius-sm);
-        padding: 0.8rem 1rem;
-        cursor: pointer;
-        transition: var(--transition-smooth);
-        border: 1px solid #e2e8f0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 0.4rem;
-      }
-      .game-item:hover {
-        border-color: var(--accent);
-        box-shadow: var(--shadow-sm);
-        transform: translateX(-4px);
-      }
-      .game-info {
-        display: flex;
-        gap: 0.6rem;
-        flex-wrap: wrap;
-        align-items: center;
-        font-size: 0.85rem;
-        font-weight: 600;
-        color: var(--text-dark);
-      }
-      .game-info .badge {
-        padding: 0.2rem 0.6rem;
-        border-radius: var(--radius-sm);
-        font-size: 0.65rem;
-        font-weight: 700;
-      }
-      .game-info .badge.white-win { background: #c6f6d5; color: #22543d; }
-      .game-info .badge.black-win { background: #fed7d7; color: #742a2a; }
-      .game-info .badge.draw { background: #feebc8; color: #744210; }
-      .game-info .opening-tag {
-        font-size: 0.65rem;
-        color: var(--text-light);
-        background: #f1f5f9;
-        padding: 0.1rem 0.6rem;
-        border-radius: var(--radius-sm);
-      }
-      .game-arrow { color: var(--text-light); font-size: 0.8rem; }
-
-      /* ⭐ علاقه‌مندی‌ها — قلب */
-      .fav-heart {
-        background: none; border: none; cursor: pointer;
-        font-size: 1rem; color: #cbd5e0; padding: 0.3rem;
-        transition: transform 0.18s ease, color 0.18s ease;
-        line-height: 1;
-        flex-shrink: 0;
-      }
-      .fav-heart:hover { transform: scale(1.25); color: #f56565; }
-      .fav-heart.on { color: #e53e3e; }
-      .fav-heart.on i { font-weight: 900; }
-      .fav-section { margin-bottom: 2rem; }
-      .fav-grid { display: flex; flex-direction: column; gap: 0.5rem; }
-      .fav-item {
-        background: #ffffff; border: 1px solid #e2e8f0; border-radius: var(--radius-sm);
-        padding: 0.6rem 0.9rem; cursor: pointer; transition: var(--transition-smooth);
-        display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
-      }
-      .fav-item:hover { border-color: var(--accent); box-shadow: var(--shadow-sm); transform: translateX(-4px); }
-      .fav-item .fav-player {
-        font-size: 0.66rem; font-weight: 800; color: var(--accent);
-        background: var(--accent-soft); padding: 0.15rem 0.6rem; border-radius: 99px;
-      }
-      .fav-empty { text-align: center; color: var(--text-light); font-size: 0.82rem; padding: 1rem; }
-
-      /* فیلتر حرفه‌ای */
       .filter-bar { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; align-items: center; }
       .filter-bar .f-chip {
         background: #f1f5f9; border: 1.5px solid #e2e8f0; color: var(--text-light);
@@ -307,14 +339,7 @@
         background: #f1f5f9; border-radius: 99px; padding: 0.3rem 0.9rem;
       }
 
-      .no-games {
-        text-align: center;
-        padding: 2rem;
-        color: var(--text-light);
-        font-size: 0.9rem;
-      }
-
-      /* ⚪⚫ نوار درصد برد/باخت — سفید و سیاه */
+      /* ---------- نوار درصد برد/مساوی/باخت ---------- */
       .wld-stats {
         background: #ffffff;
         border: 1px solid #e2e8f0;
@@ -383,13 +408,109 @@
       .wld-nums .n-b { color: #1a202c; }
       .wld-nums .pct { font-size: 0.8rem; font-weight: 900; }
       .wld-nums small { font-weight: 700; color: var(--text-light); margin-inline-start: 0.25rem; }
-      .loading-state { text-align: center; padding: 2rem; color: var(--text-light); }
-      .loading-state i {
-        font-size: 2rem;
-        color: var(--accent);
-        display: block;
-        margin-bottom: 0.5rem;
+
+      /* ---------- لیست بازی‌ها — سطرهای حرفه‌ای ---------- */
+      .games-list { display: flex; flex-direction: column; gap: 0.55rem; }
+      .game-item {
+        background: #ffffff;
+        border-radius: var(--radius-md);
+        padding: 0.75rem 1rem;
+        cursor: pointer;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+        border: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        box-shadow: 0 1px 2px rgba(14, 42, 85, 0.04);
+        /* 🔑 ضدلگ: ردیف‌های خارج از دید اصلاً رندر نمی‌شوند */
+        content-visibility: auto;
+        contain-intrinsic-size: auto 92px;
       }
+      .game-item:hover {
+        border-color: var(--accent-light, var(--accent));
+        box-shadow: var(--shadow-md);
+        transform: translateX(-4px);
+        background: #fbfdff;
+      }
+      .game-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.35rem; }
+      .game-players {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+        font-size: 0.86rem;
+        font-weight: 700;
+        color: var(--primary-dark);
+      }
+      .g-player { display: inline-flex; align-items: center; gap: 0.4rem; min-width: 0; }
+      .g-player .pawn-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        flex-shrink: 0;
+        border: 1px solid rgba(0, 0, 0, 0.15);
+      }
+      .g-player.white .pawn-dot { background: #ffffff; }
+      .g-player.black .pawn-dot { background: #1a202c; }
+      .g-player .g-elo {
+        font-size: 0.62rem;
+        color: var(--text-light);
+        font-weight: 700;
+        background: #f1f5f9;
+        border-radius: 99px;
+        padding: 0.08rem 0.5rem;
+      }
+      .g-result-badge {
+        font-size: 0.62rem;
+        font-weight: 800;
+        padding: 0.22rem 0.7rem;
+        border-radius: 99px;
+        white-space: nowrap;
+      }
+      .g-result-badge.white-win { background: #c6f6d5; color: #22543d; }
+      .g-result-badge.black-win { background: #fed7d7; color: #742a2a; }
+      .g-result-badge.draw { background: #feebc8; color: #744210; }
+      .game-tags { display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap; }
+      .g-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        font-size: 0.65rem;
+        color: var(--text-light);
+        font-weight: 600;
+        max-width: 220px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .g-tag i { font-size: 0.6rem; opacity: 0.8; }
+      .opening-tag {
+        font-size: 0.65rem;
+        color: var(--accent-dark, var(--accent));
+        background: var(--accent-soft, #eff6ff);
+        padding: 0.12rem 0.6rem;
+        border-radius: 99px;
+        font-weight: 700;
+        max-width: 240px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .game-arrow {
+        color: var(--text-light);
+        font-size: 0.85rem;
+        flex-shrink: 0;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition-smooth);
+      }
+      .game-item:hover .game-arrow { background: var(--accent); color: #fff; transform: translateX(-3px); }
 
       /* نشانگرهای اسکرول بی‌نهایت */
       .list-state {
@@ -401,20 +522,105 @@
       }
       .list-state.loading i { color: var(--accent); margin-inline-end: 0.3rem; }
       .list-state.all-done {
-        color: var(--success-dark);
+        color: var(--success-dark, #276749);
         background: #f8fafc;
         border: 1px dashed #dbe1ea;
         border-radius: var(--radius-sm);
       }
 
+      /* 🆕 نوار پیشرفت پارس بازی‌ها — صفحه هرگز فریز نمی‌شود */
+      .parse-state {
+        text-align: center;
+        padding: 1.6rem 1rem;
+        color: var(--text-light);
+        background: #ffffff;
+        border: 1px dashed #dbe1ea;
+        border-radius: var(--radius-md);
+      }
+      .parse-state i {
+        font-size: 1.7rem;
+        color: var(--accent);
+        display: block;
+        margin-bottom: 0.6rem;
+      }
+      .parse-state .parse-text { font-size: 0.8rem; font-weight: 800; margin-bottom: 0.6rem; }
+      .parse-state .parse-bar {
+        height: 10px;
+        background: #eef2f7;
+        border-radius: 99px;
+        overflow: hidden;
+        max-width: 320px;
+        margin: 0 auto;
+      }
+      .parse-state .parse-fill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, var(--accent), #60a5fa);
+        border-radius: 99px;
+        transition: width 0.12s linear;
+      }
+
+      /* ---------- علاقه‌مندی‌ها ---------- */
+      .fav-heart {
+        background: none; border: none; cursor: pointer;
+        font-size: 1rem; color: #cbd5e0; padding: 0.3rem;
+        transition: transform 0.18s ease, color 0.18s ease;
+        line-height: 1;
+        flex-shrink: 0;
+      }
+      .fav-heart:hover { transform: scale(1.25); color: #f56565; }
+      .fav-heart.on { color: #e53e3e; }
+      .fav-heart.on i { font-weight: 900; }
+      .fav-section { margin-bottom: 2.2rem; }
+      .fav-grid { display: flex; flex-direction: column; gap: 0.5rem; }
+      .fav-item {
+        background: #ffffff; border: 1px solid #e2e8f0; border-radius: var(--radius-md);
+        padding: 0.6rem 0.9rem; cursor: pointer; transition: var(--transition-smooth);
+        display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+        box-shadow: 0 1px 2px rgba(14, 42, 85, 0.04);
+      }
+      .fav-item:hover { border-color: var(--accent-light, var(--accent)); box-shadow: var(--shadow-md); transform: translateX(-4px); }
+      .fav-item .fav-player {
+        font-size: 0.66rem; font-weight: 800; color: var(--accent);
+        background: var(--accent-soft, #eff6ff); padding: 0.15rem 0.6rem; border-radius: 99px;
+      }
+      .fav-empty { text-align: center; color: var(--text-light); font-size: 0.82rem; padding: 1rem; }
+
+      /* نشان نتیجه — هم در لیست و هم در علاقه‌مندی‌ها */
+      .badge { padding: 0.2rem 0.6rem; border-radius: var(--radius-sm); font-size: 0.65rem; font-weight: 700; }
+      .badge.white-win { background: #c6f6d5; color: #22543d; }
+      .badge.black-win { background: #fed7d7; color: #742a2a; }
+      .badge.draw { background: #feebc8; color: #744210; }
+
+      /* ---------- حالت‌های خاص ---------- */
+      .no-games {
+        text-align: center;
+        padding: 2.2rem;
+        color: var(--text-light);
+        font-size: 0.9rem;
+        background: #ffffff;
+        border: 1px dashed #e2e8f0;
+        border-radius: var(--radius-lg, 16px);
+      }
+      .loading-state { text-align: center; padding: 2.2rem; color: var(--text-light); }
+      .loading-state i {
+        font-size: 2rem;
+        color: var(--accent);
+        display: block;
+        margin-bottom: 0.5rem;
+      }
+
+      /* ---------- نمایش بازی (اورلی دوم) ---------- */
       .game-viewer {
         background: #ffffff;
-        border-radius: var(--radius-lg);
-        padding: 1.5rem;
+        border-radius: var(--radius-xl, 18px);
+        padding: 1.6rem;
         box-shadow: var(--shadow-md);
         border: 1px solid #e2e8f0;
         margin-top: 0.5rem;
         animation: fadeSlideIn 0.3s ease;
+        max-width: 1080px;
+        margin-inline: auto;
       }
       @keyframes fadeSlideIn {
         from { opacity: 0; transform: translateY(16px); }
@@ -422,38 +628,57 @@
       }
       .viewer-header {
         display: flex;
-        justify-content: space-between;
+        justify-content: center;
         align-items: center;
         flex-wrap: wrap;
         gap: 0.6rem;
         margin-bottom: 1.5rem;
+        padding-bottom: 1.1rem;
+        border-bottom: 1px dashed #e2e8f0;
       }
       .viewer-header .game-title {
         font-size: 1.1rem;
         font-weight: 800;
         color: var(--primary-dark);
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        flex-wrap: wrap;
+        justify-content: center;
+        text-align: center;
       }
       .viewer-header .game-title .vs {
         color: var(--text-light);
         font-weight: 400;
-        margin: 0 0.3rem;
+        font-size: 0.78rem;
       }
+      .viewer-header .v-result {
+        font-size: 0.68rem;
+        font-weight: 800;
+        padding: 0.25rem 0.85rem;
+        border-radius: 99px;
+        white-space: nowrap;
+      }
+      .viewer-header .v-result.white-win { background: #c6f6d5; color: #22543d; }
+      .viewer-header .v-result.black-win { background: #fed7d7; color: #742a2a; }
+      .viewer-header .v-result.draw { background: #feebc8; color: #744210; }
 
       .viewer-body {
         display: flex;
         flex-wrap: wrap;
-        gap: 1.5rem;
+        gap: 1.6rem;
         justify-content: center;
         align-items: flex-start;
       }
       .board-wrapper {
-        flex: 1.2;
+        flex: 1.3;
         min-width: 260px;
-        max-width: 500px;
+        max-width: 520px;
+        width: 100%;
       }
       .info-wrapper {
         flex: 1;
-        min-width: 190px;
+        min-width: 210px;
         display: flex;
         flex-direction: column;
         gap: 0.8rem;
@@ -469,81 +694,200 @@
       .playback-controls button {
         background: #f1f5f9;
         border: 1px solid #e2e8f0;
-        padding: 0.4rem 0.8rem;
-        border-radius: var(--radius-sm);
+        padding: 0.48rem 0.85rem;
+        border-radius: var(--radius-md);
         font-family: "Vazir";
         font-size: 0.75rem;
         font-weight: 700;
         cursor: pointer;
         transition: var(--transition-smooth);
         color: var(--text-dark);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
       }
       .playback-controls button:hover { background: #e2e8f0; transform: scale(0.96); }
       .playback-controls button.primary {
         background: var(--accent);
         color: #fff;
-        border-color: var(--accent-dark);
+        border-color: var(--accent-dark, var(--accent));
       }
       .playback-controls button.primary:hover { background: #4299e1; }
       .playback-controls button.review {
-        background: var(--success);
+        background: var(--success, #38a169);
         color: #fff;
-        border-color: var(--success-dark);
+        border-color: var(--success-dark, #276749);
       }
       .playback-controls button.review:hover { background: #38a169; }
       .playback-controls .move-counter {
         font-size: 0.75rem;
         background: #f1f5f9;
         padding: 0.4rem 0.8rem;
-        border-radius: var(--radius-sm);
+        border-radius: var(--radius-md);
         font-weight: 800;
-        min-width: 55px;
+        min-width: 58px;
         text-align: center;
         border: 1px solid #e2e8f0;
         color: var(--primary-dark);
+        direction: ltr;
       }
 
       .game-meta {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 0.4rem;
+        gap: 0.5rem;
         font-size: 0.8rem;
         background: #f8fafc;
-        border-radius: var(--radius-sm);
-        padding: 0.8rem 1rem;
+        border-radius: var(--radius-lg, 14px);
+        padding: 0.9rem 1rem;
         border: 1px solid #e2e8f0;
       }
-      .game-meta .meta-item { display: flex; gap: 0.3rem; align-items: center; }
-      .game-meta .meta-item .label { color: var(--text-light); font-weight: 700; }
-      .game-meta .meta-item .value { color: var(--text-dark); font-weight: 600; }
-
-      .pgn-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
-      .pgn-actions button {
-        background: #f1f5f9;
-        border: 1px solid #e2e8f0;
-        padding: 0.4rem 0.8rem;
+      .game-meta .meta-item {
+        display: flex; gap: 0.35rem; align-items: center;
+        background: #ffffff;
+        border: 1px solid #eef2f7;
         border-radius: var(--radius-sm);
+        padding: 0.42rem 0.7rem;
+        min-width: 0;
+      }
+      .game-meta .meta-item .label { color: var(--text-light); font-weight: 700; font-size: 0.72rem; flex-shrink: 0; }
+      .game-meta .meta-item .value { color: var(--text-dark); font-weight: 700; font-size: 0.76rem; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+      .pgn-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; }
+      /* 📥 دکمه‌های PGN — جذاب‌تر، همیشه کارا */
+      .pgn-actions .pgn-btn {
+        flex: 1;
+        min-width: 132px;
+        justify-content: center;
+        padding: 0.62rem 1rem;
+        border-radius: 12px;
+        border: none;
         font-family: "Vazir";
-        font-size: 0.7rem;
-        font-weight: 600;
+        font-size: 0.78rem;
+        font-weight: 800;
+        color: #fff;
         cursor: pointer;
-        transition: var(--transition-smooth);
-        color: var(--text-dark);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+        box-shadow: 0 6px 14px -6px rgba(14, 42, 85, 0.45);
       }
-      .pgn-actions button:hover { background: var(--accent); color: white; border-color: var(--accent); }
+      .pgn-actions .pgn-btn.copy { background: linear-gradient(135deg, #2b6cb0, #4299e1); }
+      .pgn-actions .pgn-btn.dl { background: linear-gradient(135deg, #276749, #38a169); }
+      .pgn-actions .pgn-btn:hover { transform: translateY(-2px); filter: brightness(1.07); box-shadow: 0 10px 20px -8px rgba(14, 42, 85, 0.5); }
+      .pgn-actions .pgn-btn:active { transform: scale(0.96); }
 
+      /* 🆕 تختهٔ لایچز نمایشگر بازی (Chessground) */
+      .gd-board {
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 12px 26px -12px rgba(14, 42, 85, 0.45);
+        direction: ltr;
+        touch-action: none;
+        -webkit-user-select: none; user-select: none;
+        -webkit-touch-callout: none;
+        -webkit-tap-highlight-color: transparent;
+        background: var(--board-dark, #b58863);
+      }
+      .gd-board.cg-wrap cg-board {
+        background-image: conic-gradient(
+          var(--board-dark, #b58863) 0 25%,
+          var(--board-light, #f0d9b5) 0 50%,
+          var(--board-dark, #b58863) 0 75%,
+          var(--board-light, #f0d9b5) 0
+        );
+        background-size: 25% 25%;
+      }
+      .gd-board.cg-wrap coords coord { font-size: 10px; font-weight: 700; }
+      .gd-board.cg-wrap coords { opacity: 0.75; }
+      .gd-board.cg-wrap square.last-move { background: rgba(155, 199, 0, 0.41); }
+      .gd-board.cg-wrap square.check {
+        background: radial-gradient(
+          ellipse at center,
+          rgba(231, 76, 60, 1) 0%,
+          rgba(231, 76, 60, 0.85) 28%,
+          rgba(231, 76, 60, 0) 70%
+        );
+      }
+      .gd-board.cg-wrap piece { border-radius: 2px; }
+
+      /* ⌨️ راهنمای کیبورد نمایشگر */
+      .viewer-kbd-hint {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        margin-top: 0.45rem;
+        font-size: 0.68rem;
+        font-weight: 700;
+        color: var(--text-light);
+      }
+      .viewer-kbd-hint i { color: var(--accent); }
+
+      /* 🍞 توست کوچک */
+      .gd-toast {
+        position: fixed;
+        bottom: 1.4rem;
+        left: 50%;
+        transform: translate(-50%, 20px);
+        background: #1a202c;
+        color: #fff;
+        padding: 0.55rem 1.15rem;
+        border-radius: 99px;
+        font-family: "Vazir";
+        font-size: 0.8rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        opacity: 0;
+        pointer-events: none;
+        z-index: 9000;
+        transition: all 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+        box-shadow: 0 10px 24px -8px rgba(0, 0, 0, 0.5);
+      }
+      .gd-toast.show { opacity: 1; transform: translate(-50%, 0); }
+      .gd-toast i { color: #48bb78; }
+
+      /* 👤 بازیکن‌های تیتر نمایشگر — عکس استاد یا آدمک */
+      .game-title .v-player { display: inline-flex; align-items: center; gap: 0.4rem; }
+      .game-title .v-player img {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #fff;
+        box-shadow: 0 2px 6px rgba(14, 42, 85, 0.3);
+        background: #cbd5e1;
+      }
+
+      /* ---------- ریسپانسیو ---------- */
       @media (max-width: 768px) {
+        .overlay-scroll { padding: 1rem; }
+        .player-hero { padding: 1.1rem; gap: 0.9rem; }
+        .player-hero .hero-avatar { width: 64px; height: 64px; }
+        .player-hero .hero-stats { margin-right: 0; width: 100%; }
+        .player-hero .stat-box { flex: 1; min-width: 64px; padding: 0.45rem 0.4rem; }
         .search-bar { flex-direction: column; align-items: stretch; }
-        .game-item { padding: 0.6rem 0.8rem; }
+        .game-item { padding: 0.65rem 0.8rem; gap: 0.5rem; }
+        .game-players { font-size: 0.78rem; }
         .game-viewer { padding: 1rem; }
         .viewer-body { flex-direction: column; align-items: center; }
         .game-meta { grid-template-columns: 1fr; }
         .players-grid { grid-template-columns: repeat(3, 1fr); gap: 0.8rem; }
-        .player-card .avatar { width: 56px; height: 56px; }
+        .player-card .avatar { width: 58px; height: 58px; }
+        .page-close { padding: 0.75rem 0.9rem; }
+        .page-close h2 { font-size: 0.95rem; }
+        .page-close .close-btn { padding: 0.38rem 0.8rem; font-size: 0.76rem; }
       }
       @media (max-width: 480px) {
+        .db-hero-stats .hs-chip { font-size: 0.66rem; padding: 0.35rem 0.8rem; }
         .players-grid { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
-        .player-card .avatar { width: 50px; height: 50px; }
+        .player-card { padding: 1rem 0.4rem 0.9rem; }
+        .player-card .avatar { width: 52px; height: 52px; }
         .player-card .name { font-size: 0.75rem; }
       }
     </style>
@@ -552,9 +896,15 @@
     <div class="container">
       <div id="header-placeholder"></div>
 
-      <section class="app-hero">
+      <section class="app-hero db-hero">
         <h1><i class="fas fa-database"></i> پایگاه بازی‌های استادان</h1>
         <p>۳۰ استاد بزرگ برتر | هزاران بازی معروف | مرور تحلیلی با انجین</p>
+        <div class="db-hero-stats">
+          <span class="hs-chip"><i class="fas fa-chess-queen"></i> ۳۰ استاد برتر جهان</span>
+          <span class="hs-chip"><i class="fas fa-chess-board"></i> هزاران بازی تاریخی</span>
+          <span class="hs-chip"><i class="fas fa-magnifying-glass-chart"></i> مرور انجینی هر بازی</span>
+          <span class="hs-chip"><i class="fas fa-heart"></i> ذخیرهٔ بازی‌های محبوب</span>
+        </div>
       </section>
 
       <div class="players-section" id="playersSection">
@@ -589,6 +939,20 @@
         </button>
       </div>
       <div class="overlay-scroll">
+        <!-- 🆕 کارت هیروی بازیکن + آمار واقعی بازی‌ها -->
+        <div class="player-hero" id="playerHero">
+          <img class="hero-avatar" id="heroAvatar" src="" alt="" />
+          <div class="hero-id">
+            <div class="hero-name" id="heroName"></div>
+            <div class="hero-title" id="heroTitle"></div>
+          </div>
+          <div class="hero-stats">
+            <div class="stat-box"><b id="statTotal">۰</b><span>کل بازی‌ها</span></div>
+            <div class="stat-box"><b id="statWhite">۰</b><span>برد سفید</span></div>
+            <div class="stat-box"><b id="statBlack">۰</b><span>برد سیاه</span></div>
+            <div class="stat-box"><b id="statDraw">۰</b><span>مساوی</span></div>
+          </div>
+        </div>
         <!-- ⚪⚫ نوار درصد برد سفید / مساوی / برد سیاه -->
         <div class="wld-stats" id="wldStats" style="display:none">
           <div class="wld-head">
@@ -678,7 +1042,21 @@
       </div>
     </div>
 
-    <script src="js/script.js?v=10.10"></script>
+    <!-- Overlay نمایش بازی -->
+    <div class="page-overlay" id="gameOverlay">
+      <div class="page-close">
+        <h2><i class="fas fa-chess-board"></i> نمایش بازی</h2>
+        <button class="close-btn" id="closeGameOverlay">
+          <i class="fas fa-arrow-right"></i> بازگشت
+        </button>
+      </div>
+      <div class="overlay-scroll">
+        <div id="gameViewerContainer"></div>
+      </div>
+    </div>
+
+    <script src="js/script.js?v=10.12"></script>
+    <script type="module" src="lib/chessground/loader.js?v=11.0"></script>
     <script src="js/profile.js?v=10.7"></script>
     <script src="js/auth.js?v=10.7"></script>
     <script>
@@ -763,32 +1141,15 @@
           });
         }
 
-        document.addEventListener("pieceSetChanged", function () {
-          loadPieces();
-        });
-
         // 🔑 مهره‌های «مرور بازی» (اورلی مشترک GameReview) از ChessUtils مشترک
-        // تغذیه می‌شوند — این صفحه قبلاً در شروع، ChessUtils.loadPieces را صدا
-        // نمی‌زد و به همین دلیل در مرور بازی، تصویر مهره‌ها لود نمی‌شد.
+        // تغذیه می‌شوند — این صفحه در شروع، ChessUtils.loadPieces را صدا می‌زند
+        // تا تصویر مهره‌ها در مرور انجینی هم لود شود.
         if (window.ChessUtils && typeof ChessUtils.loadPieces === "function") {
           ChessUtils.loadPieces();
         }
 
-        function getBoardColors() {
-          // تم‌ها روی body تعریف می‌شوند (body.theme-X)
-          const host = document.body || document.documentElement;
-          const light =
-            getComputedStyle(host).getPropertyValue("--board-light").trim() ||
-            "#f0d9b5";
-          const dark =
-            getComputedStyle(host).getPropertyValue("--board-dark").trim() ||
-            "#b58863";
-          return { light, dark };
-        }
-
         // 🖼 جایگزین‌های عکس کاربر — فقط از طریق کد (بدون UI روی صفحه):
         //   ChessDB.setPlayerImage("Magnus Carlsen", "images/players/carlsen.jpg")
-        //   ChessDB.setPlayerImage("Magnus Carlsen", "https://example.com/carlsen.png")
         //   ChessDB.clearPlayerImage("Magnus Carlsen")
         const AVATAR_KEY = "chesshub_avatar_overrides";
         function avatarOverrides() {
@@ -847,22 +1208,55 @@
         let favOnly = false;
         let pendingAutoOpen = null;   // بازی مورد علاقه‌ای که باید بعد از لود باز شود
 
-        // 📜 اسکرول بی‌نهایت — هر بار ۱۰۰ بازی (slice + IntersectionObserver)
-        const PAGE_SIZE = 100;
+        // نمایش بازی (اورلی دوم)
+        let currentGame = null;
+        let currentGameMoves = [];
+        let currentMoveIndex = 0;
+        let totalPlies = 0;
+        let autoPlayInterval = null;
+        let isAutoPlaying = false;
+        let replayGame = null;   // Chess همگام با موقعیت فعلی — ضدلگ در بازی‌های طولانی
+        let replayIndex = 0;
+        // 🆕 تختهٔ لایچز (Chessground) — انیمیشن نرم مهره‌ها + فلش‌کشی با کلیک‌راست
+        let gdCg = null;
+        let gdLastIdx = 0;
+        let gdUserShapes = [];
+
+        // 📜 اسکرول بی‌نهایت — ضدلگ: هر بار فقط ۳۰ بازی به لیست اضافه می‌شود
+        const PAGE_SIZE = 30;
         let renderedCount = 0;
         let listSentinel = null;
         let listObserver = null;
         let isLoadingMore = false;
 
+        // 🔎 دیبانس جستجو — فیلتر با هر حرف فشرده‌سازی نشود
+        let searchDebounce = null;
+        const SEARCH_DEBOUNCE_MS = 220;
+
+        // 🧩 پارس تکه‌تکه — توکن برای لغو پارس قبلی هنگام تعویض بازیکن
+        let parseToken = 0;
+
         const playersGrid = document.getElementById("playersGrid");
         const gamesOverlay = document.getElementById("gamesOverlay");
+        const gameOverlay = document.getElementById("gameOverlay");
         const gamesListContainer = document.getElementById("gamesListContainer");
+        const gameViewerContainer = document.getElementById("gameViewerContainer");
         const overlayPlayerName = document.getElementById("overlayPlayerName");
         const closeGamesOverlayBtn = document.getElementById("closeGamesOverlay");
+        const closeGameOverlayBtn = document.getElementById("closeGameOverlay");
         const searchInput = document.getElementById("searchInput");
         const searchField = document.getElementById("searchField");
         const resetSearchBtn = document.getElementById("resetSearchBtn");
         const playerCount = document.getElementById("playerCount");
+
+        function esc(s) {
+          return String(s == null ? "" : s)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+        }
 
         function playerAvatar(p) {
           const overrides = avatarOverrides();
@@ -871,6 +1265,10 @@
 
         function faNum(n) {
           try { return Number(n).toLocaleString("fa-IR"); } catch (e) { return String(n); }
+        }
+        // رقم فارسی بدون جداکنندهٔ هزارگان (مخصوص ریتینگ/سال)
+        function faPlain(v) {
+          return String(v).replace(/\d/g, function (d) { return "۰۱۲۳۴۵۶۷۸۹"[+d]; });
         }
 
         function renderPlayers() {
@@ -881,10 +1279,10 @@
             card.className = "player-card";
             card.innerHTML = `
               <div class="avatar">
-                <img src="${playerAvatar(p)}" alt="${p.name}" onerror=\"this.onerror=null;this.src=window.chFb(this.alt)\" loading="lazy">
+                <img src="${playerAvatar(p)}" alt="${esc(p.name)}" onerror="this.onerror=null;this.src=window.chFb(this.alt)" loading="lazy">
               </div>
-              <div class="name">${p.name}</div>
-              <div class="title">${p.title}</div>
+              <div class="name">${esc(p.name)}</div>
+              <div class="title">${esc(p.title)}</div>
             `;
             card.addEventListener("click", function () {
               openPlayerGames(p);
@@ -913,9 +1311,9 @@
             const resultText = f.result === "1-0" ? "برد سفید" : f.result === "0-1" ? "برد سیاه" : "مساوی";
             div.innerHTML = `
               <button class="fav-heart on" title="حذف از علاقه‌مندی‌ها"><i class="fas fa-heart"></i></button>
-              <span class="fav-player"><i class="fas fa-chess-queen"></i> ${f.playerName}</span>
-              <span style="font-size:0.8rem;font-weight:700">⚪ ${f.white} — ⚫ ${f.black}</span>
-              <span style="font-size:0.7rem;color:var(--text-light)">${f.date}${f.opening ? " · " + f.opening : ""}</span>
+              <span class="fav-player"><i class="fas fa-chess-queen"></i> ${esc(f.playerName)}</span>
+              <span style="font-size:0.8rem;font-weight:700">⚪ ${esc(f.white)} — ⚫ ${esc(f.black)}</span>
+              <span style="font-size:0.7rem;color:var(--text-light)">${esc(f.date)}${f.opening ? " · " + esc(f.opening) : ""}</span>
               <span class="badge ${f.result === "1-0" ? "white-win" : f.result === "0-1" ? "black-win" : "draw"}" style="font-size:0.62rem">${resultText}</span>
             `;
             div.querySelector(".fav-heart").addEventListener("click", function (e) {
@@ -927,7 +1325,7 @@
             });
             div.addEventListener("click", function () {
               // باز کردن مستقیم بازیِ مورد علاقه از صفحه‌ی اصلی —
-              // بعد از لود بازی‌ها، همین بازی در صفحهٔ مرور باز می‌شود
+              // بعد از لود و پارس بازی‌ها، همین بازی در نمایشگر باز می‌شود
               const player = players.find((p) => p.file === f.playerFile);
               if (!player) return;
               openPlayerGames(player, f);
@@ -943,10 +1341,12 @@
           currentPlayerFile = player.file;
           favOnly = false;
           pendingAutoOpen = autoOpen || null;
+          parseToken++; // پارس قبلی (اگر در جریان است) باطل شود
           const favChip = document.getElementById("favOnlyChip");
           if (favChip) favChip.classList.remove("active");
           if (gamesOverlay) gamesOverlay.classList.add("open");
           document.body.style.overflow = "hidden";
+          renderPlayerHero(player);
 
           if (searchInput) searchInput.value = "";
           // ریست فیلترهای پیشرفته
@@ -962,9 +1362,12 @@
           if (fYearFrom) fYearFrom.value = "";
           if (fYearTo) fYearTo.value = "";
           if (fSort) fSort.value = "old";
+          if (gameOverlay) gameOverlay.classList.remove("open");
+          if (gameViewerContainer) gameViewerContainer.innerHTML = "";
+          stopAutoPlay();
 
           if (gamesListContainer) {
-            gamesListContainer.innerHTML = `<div class="loading-state"><i class="fas fa-spinner fa-pulse"></i> بارگذاری بازی‌های ${player.name}...</div>`;
+            gamesListContainer.innerHTML = `<div class="loading-state"><i class="fas fa-spinner fa-pulse"></i> در حال دریافت بازی‌های ${esc(player.name)}…</div>`;
           }
 
           fetch(`pgn/${player.file}`)
@@ -973,10 +1376,121 @@
               return res.text();
             })
             .then((pgnText) => {
-              currentPlayerGames = parsePGN(pgnText);
-              filteredGames = [...currentPlayerGames];
+              processPGN(pgnText); // 🆕 پارس تکه‌تکه با نوار پیشرفت
+            })
+            .catch((err) => {
+              console.error(err);
+              pendingAutoOpen = null;
+              if (gamesListContainer) {
+                gamesListContainer.innerHTML =
+                  '<div class="no-games"><i class="fas fa-triangle-exclamation" style="font-size:1.6rem;display:block;margin-bottom:0.5rem;color:#cbd5e0"></i>فایل بازی‌های این استاد پیدا نشد — فایل PGN را در پوشهٔ pgn/ قرار بده یا اتصال را بررسی کن.</div>';
+              }
+            });
+        }
+
+        // 🆕 کارت هیروی بازیکن (آواتار + نام + لقب)
+        function renderPlayerHero(player) {
+          const hero = document.getElementById("playerHero");
+          if (!hero) return;
+          hero.style.display = "";
+          const av = document.getElementById("heroAvatar");
+          if (av) {
+            av.onerror = function () {
+              this.onerror = null;
+              this.src = window.chFb(this.alt || player.name);
+            };
+            av.alt = player.name;
+            av.src = playerAvatar(player);
+          }
+          const nm = document.getElementById("heroName");
+          if (nm) nm.textContent = player.name;
+          const ti = document.getElementById("heroTitle");
+          if (ti) ti.textContent = player.title;
+        }
+
+        // 🆕 آمار واقعی بازی‌های استاد (کل / برد سفید / برد سیاه / مساوی)
+        function renderPlayerStats(games) {
+          let w = 0, b = 0, d = 0;
+          (games || []).forEach(function (g) {
+            if (g.result === "1-0") w++;
+            else if (g.result === "0-1") b++;
+            else d++;
+          });
+          const set = function (id, v) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = faNum(v);
+          };
+          set("statTotal", (games || []).length);
+          set("statWhite", w);
+          set("statBlack", b);
+          set("statDraw", d);
+        }
+
+        // 🧩 ضدلگ — پارس تکه‌تکه:
+        // کل متن PGN (تا ۷ مگابایت / ~۱۰۰۰۰ بازی) یک‌جا پردازش نمی‌شود؛
+        // هر فریم فقط ۶۰۰ بازی تا هدرهایش استخراج شود و نوار پیشرفت آپدیت
+        // می‌شود. صفحه هرگز فریز نمی‌شود و UI روان می‌ماند.
+        function extractHeaders(raw) {
+          const whiteMatch = raw.match(/\[White "([^"]+)"\]/);
+          const blackMatch = raw.match(/\[Black "([^"]+)"\]/);
+          const resultMatch = raw.match(/\[Result "([^"]+)"\]/);
+          const dateMatch = raw.match(/\[Date "([^"]+)"\]/);
+          const ecoMatch = raw.match(/\[ECO "([^"]+)"\]/);
+          const openingMatch = raw.match(/\[Opening "([^"]+)"\]/);
+          const eventMatch = raw.match(/\[Event "([^"]+)"\]/);
+          const whiteEloMatch = raw.match(/\[WhiteElo "(\d+)"\]/);
+          const blackEloMatch = raw.match(/\[BlackElo "(\d+)"\]/);
+          return {
+            event: eventMatch ? eventMatch[1] : "",
+            whiteElo: whiteEloMatch ? whiteEloMatch[1] : "",
+            blackElo: blackEloMatch ? blackEloMatch[1] : "",
+            white: whiteMatch ? whiteMatch[1] : "?",
+            black: blackMatch ? blackMatch[1] : "?",
+            result: resultMatch ? resultMatch[1] : "*",
+            date: dateMatch ? dateMatch[1] : "????.??.??",
+            eco: ecoMatch ? ecoMatch[1] : "",
+            opening: openingMatch ? openingMatch[1] : "",
+            pgn: raw,
+          };
+        }
+
+        function processPGN(pgnText) {
+          const token = ++parseToken;
+          const who = currentPlayer ? currentPlayer.name : "";
+          if (gamesListContainer) {
+            gamesListContainer.innerHTML =
+              '<div class="parse-state"><i class="fas fa-spinner fa-pulse"></i>' +
+              '<div class="parse-text">در حال پردازش بازی‌های ' + esc(who) + '…</div>' +
+              '<div class="parse-bar"><div class="parse-fill" id="parseFill"></div></div>' +
+              '<div style="font-size:0.72rem;font-weight:700;margin-top:0.55rem" id="parseCount">۰ بازی</div>' +
+              "</div>";
+          }
+
+          const raws = pgnText.split(/(?=\[Event ")/);
+          const games = [];
+          const CHUNK = 600;
+          const total = raws.length;
+          let i = 0;
+
+          function step() {
+            if (token !== parseToken) return; // بازیکن عوض شد — پارس را رها کن
+            const end = Math.min(i + CHUNK, total);
+            for (; i < end; i++) {
+              const raw = raws[i];
+              if (raw && raw.trim()) games.push(extractHeaders(raw));
+            }
+            const fill = document.getElementById("parseFill");
+            const cnt = document.getElementById("parseCount");
+            const pct = total ? Math.round((i / total) * 100) : 100;
+            if (fill) fill.style.width = pct + "%";
+            if (cnt) cnt.textContent = faNum(games.length) + " بازی";
+            if (i < total) {
+              requestAnimationFrame(step);
+            } else {
+              currentPlayerGames = games;
+              renderPlayerStats(games);
               applyFilters();
-              // ❤️ اگر از بخش علاقه‌مندی‌ها آمده‌ایم، همین بازی در مرور باز شود
+              // ❤️ اگر از بخش علاقه‌مندی‌ها آمده‌ایم، همین بازی در نمایشگر باز شود
               if (pendingAutoOpen) {
                 const f = pendingAutoOpen;
                 pendingAutoOpen = null;
@@ -984,41 +1498,11 @@
                 const idx = list.findIndex(
                   (g) => g.white === f.white && g.black === f.black && g.date === f.date && g.result === f.result,
                 );
-                if (idx >= 0) openReviewPage(idx, list);
+                if (idx >= 0) openGameViewer(idx, list);
               }
-            })
-            .catch((err) => {
-              console.error(err);
-              pendingAutoOpen = null;
-              if (gamesListContainer) {
-                gamesListContainer.innerHTML =
-                  '<div class="no-games"><i class="fas fa-triangle-exclamation" style="font-size:1.6rem;display:block;margin-bottom:0.5rem;color:#cbd5e0"></i>بازی‌های این استاد در دسترس نیست — اتصال را بررسی کن و دوباره تلاش کن.</div>';
-              }
-            });
-        }
-
-        function parsePGN(pgnText) {
-          const rawGames = pgnText.split(/(?=\[Event ")/);
-          const games = [];
-          for (let raw of rawGames) {
-            if (!raw.trim()) continue;
-            const whiteMatch = raw.match(/\[White "([^"]+)"\]/);
-            const blackMatch = raw.match(/\[Black "([^"]+)"\]/);
-            const resultMatch = raw.match(/\[Result "([^"]+)"\]/);
-            const dateMatch = raw.match(/\[Date "([^"]+)"\]/);
-            const ecoMatch = raw.match(/\[ECO "([^"]+)"\]/);
-            const openingMatch = raw.match(/\[Opening "([^"]+)"\]/);
-            games.push({
-              white: whiteMatch ? whiteMatch[1] : "?",
-              black: blackMatch ? blackMatch[1] : "?",
-              result: resultMatch ? resultMatch[1] : "*",
-              date: dateMatch ? dateMatch[1] : "????.??.??",
-              eco: ecoMatch ? ecoMatch[1] : "",
-              opening: openingMatch ? openingMatch[1] : "",
-              pgn: raw,
-            });
+            }
           }
-          return games;
+          requestAnimationFrame(step);
         }
 
         // ساخت یک ردیف بازی (برای اسکرول بی‌نهایت هم استفاده می‌شود)
@@ -1041,12 +1525,17 @@
           const fav = isFav(key);
           div.innerHTML = `
             <button class="fav-heart${fav ? " on" : ""}" title="${fav ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها"}"><i class="${fav ? "fas" : "far"} fa-heart"></i></button>
-            <div class="game-info">
-              <span class="badge ${resultClass}">${resultText}</span>
-              <span>⚪ ${game.white}</span>
-              <span>⚫ ${game.black}</span>
-              <span>📅 ${game.date}</span>
-              ${game.opening ? `<span class="opening-tag">${game.opening}</span>` : ""}
+            <div class="game-main">
+              <div class="game-players">
+                <span class="g-player white"><span class="pawn-dot"></span>${esc(game.white)}${game.whiteElo ? ` <span class="g-elo">${faPlain(game.whiteElo)}</span>` : ""}</span>
+                <span class="g-result-badge ${resultClass}">${resultText}</span>
+                <span class="g-player black"><span class="pawn-dot"></span>${esc(game.black)}${game.blackElo ? ` <span class="g-elo">${faPlain(game.blackElo)}</span>` : ""}</span>
+              </div>
+              <div class="game-tags">
+                <span class="g-tag"><i class="fas fa-calendar-day"></i> ${esc(game.date)}</span>
+                ${game.event ? `<span class="g-tag"><i class="fas fa-trophy"></i> ${esc(game.event)}</span>` : ""}
+                ${game.opening ? `<span class="opening-tag">${esc(game.opening)}</span>` : ""}
+              </div>
             </div>
             <div class="game-arrow"><i class="fas fa-chevron-left"></i></div>
           `;
@@ -1057,12 +1546,12 @@
             this.innerHTML = `<i class="${on ? "fas" : "far"} fa-heart"></i>`;
           });
           div.addEventListener("click", function () {
-            openReviewPage(idx, filteredGames);
+            openGameViewer(idx, filteredGames);
           });
           return div;
         }
 
-        // افزودن ۱۰۰ بازی بعدی به لیست (بدون بازسازی کل لیست)
+        // افزودن ۳۰ بازی بعدی به لیست (بدون بازسازی کل لیست)
         function appendMoreGames() {
           if (!gamesListContainer) return;
           const total = filteredGames.length;
@@ -1086,7 +1575,7 @@
           }
         }
 
-        // 👁 رصد اسکرول — رسیدن به انتهای لیست = لود خودکار ۱۰۰ تای بعدی
+        // 👁 رصد اسکرول — رسیدن به انتهای لیست = لود خودکار ۳۰ تای بعدی
         function setupInfiniteScroll() {
           if (listObserver) { listObserver.disconnect(); listObserver = null; }
           if (!gamesOverlay || !gamesListContainer) return;
@@ -1116,7 +1605,7 @@
                 });
               });
             },
-            { root: gamesOverlay, rootMargin: "500px 0px" }
+            { root: gamesOverlay, rootMargin: "600px 0px" }
           );
           listObserver.observe(listSentinel);
         }
@@ -1166,13 +1655,16 @@
             gamesListContainer.innerHTML = `<div class="no-games">هیچ بازی‌ای با این فیلترها یافت نشد</div>`;
             return;
           }
-          appendMoreGames(); // فقط ۱۰۰ بازی اول — بقیه با اسکرول می‌آیند
+          appendMoreGames(); // فقط ۳۰ بازی اول — بقیه با اسکرول می‌آیند
           setupInfiniteScroll();
         }
 
         // 🔎 فیلتر حرفه‌ای — جستجو + فیلترهای پیشرفته + علاقه‌مندی + ترتیب
         function applyFilters() {
-          if (!currentPlayerFile) return;
+          if (!currentPlayerFile || !currentPlayerGames.length) {
+            filteredGames = [];
+            return;
+          }
           const query = searchInput ? searchInput.value.trim().toLowerCase() : "";
           const field = searchField ? searchField.value : "all";
           const fResult = (document.getElementById("fResult") || {}).value || "all";
@@ -1234,31 +1726,409 @@
         // سازگاری با لیسنرهای قدیمی
         function performSearch() { applyFilters(); }
 
-        // 🚀 باز کردن بازی در صفحهٔ مستقل مرور (game-review.html)
-        function openReviewPage(gameIdx, games) {
-          const game = games && games[gameIdx];
-          if (!game) return;
-          try {
-            sessionStorage.setItem(
-              "chesshub_review_game",
-              JSON.stringify({
-                pgn: game.pgn,
+        // ================== نمایش بازی (اورلی دوم) ==================
+
+        function openGameViewer(gameIdx, games) {
+          if (!games || !games[gameIdx]) return;
+          const game = games[gameIdx];
+          currentGame = game;
+          stopAutoPlay();
+          if (!gameViewerContainer) return;
+
+          const viewer = document.createElement("div");
+          viewer.className = "game-viewer";
+          viewer.id = "gameViewer";
+          const resultText =
+            game.result === "1-0"
+              ? "🏆 برد سفید"
+              : game.result === "0-1"
+                ? "🏆 برد سیاه"
+                : "🤝 مساوی";
+          const resultClass =
+            game.result === "1-0" ? "white-win" : game.result === "0-1" ? "black-win" : "draw";
+          const eloLine =
+            game.whiteElo || game.blackElo
+              ? faPlain(game.whiteElo || "؟") + " — " + faPlain(game.blackElo || "؟")
+              : "-";
+
+          viewer.innerHTML = `
+            <div class="viewer-header">
+              <div class="game-title">
+                <span class="v-player"><img src="${gdPhoto(game.white, "w")}" alt="" draggable="false">${esc(game.white)}</span>
+                <span class="vs">در برابر</span>
+                <span class="v-player"><img src="${gdPhoto(game.black, "b")}" alt="" draggable="false">${esc(game.black)}</span>
+                <span class="v-result ${resultClass}">${resultText}</span>
+              </div>
+            </div>
+            <div class="viewer-body">
+              <div class="board-wrapper">
+                <div id="gameBoard" class="gd-board"></div>
+                <div class="playback-controls">
+                  <button id="firstMoveBtn" title="اولین حرکت"><i class="fas fa-fast-backward"></i></button>
+                  <button id="prevMoveBtn" title="حرکت قبل"><i class="fas fa-step-backward"></i></button>
+                  <button id="playPauseBtn" class="primary"><i class="fas fa-play"></i> شروع</button>
+                  <button id="nextMoveBtn" title="حرکت بعد"><i class="fas fa-step-forward"></i></button>
+                  <button id="lastMoveBtn" title="آخرین حرکت"><i class="fas fa-fast-forward"></i></button>
+                  <span class="move-counter" id="moveCounter">0/0</span>
+                </div>
+                <div class="viewer-kbd-hint"><i class="fas fa-keyboard"></i> فلش چپ/راست = حرکت قبل/بعد &nbsp;•&nbsp; دکمهٔ فاصله = پخش کامل بازی &nbsp;•&nbsp; کلیک‌راست و کشیدن = فلش‌کشی</div>
+                <div class="playback-controls">
+                  <button id="reviewBtn" class="review"><i class="fas fa-magnifying-glass-chart"></i> مرور بازی با انجین</button>
+                </div>
+              </div>
+              <div class="info-wrapper">
+                <div class="game-meta">
+                  <div class="meta-item"><span class="label">گشایش:</span><span class="value">${esc(game.opening) || "نامشخص"}</span></div>
+                  <div class="meta-item"><span class="label">ECO:</span><span class="value">${esc(game.eco) || "-"}</span></div>
+                  <div class="meta-item"><span class="label">تاریخ:</span><span class="value">${esc(game.date)}</span></div>
+                  <div class="meta-item"><span class="label">تعداد حرکت:</span><span class="value" id="totalMoves">۰</span></div>
+                  <div class="meta-item"><span class="label">مسابقه:</span><span class="value">${esc(game.event) || "نامشخص"}</span></div>
+                  <div class="meta-item"><span class="label">ریتینگ:</span><span class="value">${esc(eloLine)}</span></div>
+                </div>
+                <div class="pgn-actions">
+                  <button id="copyPgnBtn" class="pgn-btn copy"><i class="fas fa-copy"></i> کپی PGN</button>
+                  <button id="downloadPgnBtn" class="pgn-btn dl"><i class="fas fa-download"></i> دانلود PGN</button>
+                </div>
+              </div>
+            </div>
+          `;
+
+          gameViewerContainer.innerHTML = "";
+          gameViewerContainer.appendChild(viewer);
+          loadGameMoves(game.pgn);
+
+          // اگر لودر لایچز هنوز نرسیده، به محض آماده‌شدن تختهٔ جدید را بساز
+          if (!window.Chessground) {
+            document.addEventListener("chessgroundReady", function () {
+              if (document.getElementById("gameBoard") && currentGame) {
+                replayGame = null;
+                replayIndex = 0;
+                updateBoard();
+              }
+            }, { once: true });
+          }
+
+          document.getElementById("firstMoveBtn").addEventListener("click", goToFirstMove);
+          document.getElementById("prevMoveBtn").addEventListener("click", goToPrevMove);
+          document.getElementById("playPauseBtn").addEventListener("click", toggleAutoPlay);
+          document.getElementById("nextMoveBtn").addEventListener("click", goToNextMove);
+          document.getElementById("lastMoveBtn").addEventListener("click", goToLastMove);
+          document.getElementById("copyPgnBtn").addEventListener("click", copyPGN);
+          document.getElementById("downloadPgnBtn").addEventListener("click", downloadPGN);
+          document.getElementById("reviewBtn").addEventListener("click", function () {
+            if (!currentGame || !currentGameMoves.length) return;
+            // 🆕 مرور بازی در صفحهٔ اختصاصی مرور باز می‌شود (با دکمهٔ بازگشت)
+            try {
+              sessionStorage.setItem("chesshub_review_game", JSON.stringify({
+                pgn: currentGame.pgn,
                 white: game.white,
                 black: game.black,
-                date: game.date,
-                eco: game.eco,
-                opening: game.opening,
                 result: game.result,
+                opening: game.opening || "",
+                eco: game.eco || "",
+                date: game.date || "",
                 playerName: currentPlayer ? currentPlayer.name : "",
-              })
-            );
-          } catch (e) {}
-          window.location.href = "game-review.html";
+              }));
+            } catch (e) {
+              alert("امکان شروع مرور بازی نیست — حافظهٔ مرورگر در دسترس نیست");
+              return;
+            }
+            window.location.href = "game-review.html";
+          });
+
+          if (gameOverlay) gameOverlay.classList.add("open");
+          document.body.style.overflow = "hidden";
+          if (gameOverlay) gameOverlay.scrollTop = 0;
         }
 
+        // 🆕 عکس بازیکن تیتر — استاد شناخته‌شده یا آدمکِ تولیدی با رنگ همان طرف
+        function gdPhoto(name, side) {
+          if (window.ChessUtils) {
+            const p = ChessUtils.masterPhoto ? ChessUtils.masterPhoto(name) : null;
+            if (p) return p;
+            if (ChessUtils.bustAvatar) return ChessUtils.bustAvatar(side);
+          }
+          return window.chFb ? chFb(name) : "";
+        }
+
+        function loadGameMoves(pgn) {
+          const temp = new Chess();
+          try {
+            temp.load_pgn(pgn, { sloppy: true });
+            currentGameMoves = temp.history({ verbose: true });
+          } catch (e) {
+            currentGameMoves = [];
+          }
+          totalPlies = currentGameMoves.length;
+          currentMoveIndex = 0;
+          replayGame = null;
+          replayIndex = 0;
+          const moveCount = Math.ceil(totalPlies / 2);
+          const totalMovesEl = document.getElementById("totalMoves");
+          if (totalMovesEl) totalMovesEl.textContent = faNum(moveCount);
+          updateBoard();
+        }
+
+        // 🔑 ضدلگ — به‌جای بازپخش همهٔ حرکات از صفر در هر آپدیت، Chess
+        // همگام نگه داشته می‌شود؛ فقط حرکت‌های جدید اعمال می‌شوند.
+        function boardAt(moves, target) {
+          if (!replayGame || target < replayIndex) {
+            replayGame = new Chess();
+            replayIndex = 0;
+          }
+          while (replayIndex < target) {
+            try { replayGame.move(moves[replayIndex], { sloppy: true }); } catch (e) {}
+            replayIndex++;
+          }
+          return replayGame.board();
+        }
+
+        function renderBoardDOM(boardId, moves, moveIndex) {
+          // فالبک قدیمی (بدون لایچز) — فقط وقتی Chessground در دسترس نیست
+          const container = document.getElementById(boardId);
+          if (!container) return;
+          const board = boardAt(moves, moveIndex);
+          const pieceSet = getCurrentPieceSet();
+          container.innerHTML = "";
+          container.style.display = "grid";
+          container.style.gridTemplateColumns = "repeat(8, 1fr)";
+          container.style.aspectRatio = "1 / 1";
+          const frag = document.createDocumentFragment();
+          for (let i = 0; i < 8; i++) {
+            for (let j = 0; j < 8; j++) {
+              const piece = board[i][j];
+              const isLight = (i + j) % 2 === 0;
+              const squareDiv = document.createElement("div");
+              squareDiv.className = `square ${isLight ? "light" : "dark"}`;
+              if (piece) {
+                const key =
+                  (piece.color === "w" ? "w" : "b") + piece.type.toLowerCase();
+                const img = document.createElement("img");
+                img.src = pieceImages[key]
+                  ? pieceImages[key].src
+                  : `pieces/${pieceSet}/${pieceCodes[key] || ""}`;
+                img.classList.add("piece-img");
+                img.draggable = false;
+                img.style.pointerEvents = "none";
+                squareDiv.appendChild(img);
+              }
+              frag.appendChild(squareDiv);
+            }
+          }
+          container.appendChild(frag);
+        }
+
+        // 🆕 تختهٔ لایچز نمایشگر — یک بار برای هر باز شدنِ نمایشگر ساخته می‌شود
+        function gdPieceSetId() {
+          try {
+            const s = JSON.parse(localStorage.getItem("chesshub_settings"));
+            return (s && s.pieceSet) || "neo";
+          } catch (e) { return "neo"; }
+        }
+        function gdKingSquare(fen, color) {
+          try {
+            const g = new Chess(fen);
+            for (let r = 0; r < 8; r++) {
+              for (let c = 0; c < 8; c++) {
+                const p = g.board()[r][c];
+                if (p && p.type === "k" && p.color === color) {
+                  return "abcdefgh"[c] + (8 - r);
+                }
+              }
+            }
+          } catch (e) {}
+          return null;
+        }
+        function ensureGdCg() {
+          const el = document.getElementById("gameBoard");
+          if (!el || gdCg || !window.Chessground) return gdCg;
+          const setId = gdPieceSetId();
+          if (window.ChessUtils && ChessUtils.ensureCgPieceSetCss) {
+            ChessUtils.ensureCgPieceSetCss("gd-board", setId);
+          }
+          el.className = "gd-board set-" + setId;
+          gdUserShapes = [];
+          gdCg = window.Chessground(el, {
+            fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+            orientation: "white",
+            coordinates: true,
+            highlight: { lastMove: true, check: true },
+            animation: { duration: 240 },
+            movable: { free: false, color: null, showDests: false, dests: new Map() },
+            drawable: {
+              enabled: true,
+              visible: true,
+              brushes: { hub: { key: "hub", color: "#3b82f6", opacity: 0.9, lineWidth: 10 } },
+              onChange: function (shapes) {
+                gdUserShapes = (shapes || []).filter(function (s) { return s.brush !== "hub"; });
+              },
+            },
+          });
+          return gdCg;
+        }
+        function destroyGdCg() {
+          if (gdCg) { try { gdCg.destroy(); } catch (e) {} gdCg = null; }
+          gdLastIdx = 0;
+        }
+
+        function updateBoard() {
+          // همگام‌سازی Chess با موقعیت هدف — فقط حرکت‌های جدید اعمال می‌شوند
+          if (!replayGame || currentMoveIndex < replayIndex) {
+            replayGame = new Chess();
+            replayIndex = 0;
+          }
+          while (replayIndex < currentMoveIndex) {
+            try { replayGame.move(currentGameMoves[replayIndex], { sloppy: true }); } catch (e) {}
+            replayIndex++;
+          }
+          const cg = ensureGdCg();
+          if (cg) {
+            // 🎬 تختهٔ لایچز — تفاوت دو موقعیت با انیمیشن نرم اجرا می‌شود
+            const lm = currentMoveIndex > 0 ? currentGameMoves[currentMoveIndex - 1] : null;
+            const fen = replayGame.fen();
+            const check = replayGame.in_check() ? gdKingSquare(fen, replayGame.turn()) : null;
+            const setCfg = {
+              fen: fen,
+              // ⬇ [] و null برای پاک‌شدن هایلایت قبلی (undefined یعنی «دست نزن»)
+              lastMove: lm ? [lm.from, lm.to] : [],
+              check: check || null,
+              turnColor: replayGame.turn() === "w" ? "white" : "black",
+            };
+            if (Math.abs(currentMoveIndex - gdLastIdx) > 1) setCfg.animate = false; // پرش بزرگ — بدون انیمیشن
+            gdLastIdx = currentMoveIndex;
+            try { cg.set(setCfg); cg.setShapes(gdUserShapes); } catch (e) {}
+          } else {
+            renderBoardDOM("gameBoard", currentGameMoves, currentMoveIndex); // فالبک
+          }
+          const moveNumber = Math.ceil(currentMoveIndex / 2);
+          const totalMoves = Math.ceil(totalPlies / 2);
+          const counter = document.getElementById("moveCounter");
+          if (counter) counter.textContent = `${moveNumber}/${totalMoves}`;
+        }
+
+        function goToFirstMove() {
+          stopAutoPlay();
+          currentMoveIndex = 0;
+          updateBoard();
+        }
+        function goToPrevMove() {
+          stopAutoPlay();
+          if (currentMoveIndex > 0) currentMoveIndex--;
+          updateBoard();
+        }
+        function goToNextMove() {
+          stopAutoPlay();
+          if (currentMoveIndex < totalPlies) currentMoveIndex++;
+          updateBoard();
+        }
+        function goToLastMove() {
+          stopAutoPlay();
+          currentMoveIndex = totalPlies;
+          updateBoard();
+        }
+
+        function toggleAutoPlay() {
+          if (isAutoPlaying) stopAutoPlay();
+          else startAutoPlay();
+        }
+        function startAutoPlay() {
+          if (isAutoPlaying) return;
+          if (currentMoveIndex >= totalPlies) {
+            currentMoveIndex = 0;
+            replayGame = null;
+            replayIndex = 0;
+            updateBoard();
+          }
+          isAutoPlaying = true;
+          const btn = document.getElementById("playPauseBtn");
+          if (btn) btn.innerHTML = '<i class="fas fa-pause"></i> توقف';
+          autoPlayInterval = setInterval(() => {
+            if (currentMoveIndex < totalPlies) {
+              currentMoveIndex++;
+              updateBoard();
+            } else {
+              stopAutoPlay();
+            }
+          }, 1200);
+        }
+        function stopAutoPlay() {
+          isAutoPlaying = false;
+          if (autoPlayInterval) {
+            clearInterval(autoPlayInterval);
+            autoPlayInterval = null;
+          }
+          const btn = document.getElementById("playPauseBtn");
+          if (btn) btn.innerHTML = '<i class="fas fa-play"></i> شروع';
+        }
+
+        function copyPGN() {
+          if (!currentGame) return;
+          const done = () => gdToast("PGN کپی شد");
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(currentGame.pgn).then(done).catch(function () {
+              legacyCopyPGN(currentGame.pgn, done);
+            });
+          } else {
+            legacyCopyPGN(currentGame.pgn, done);
+          }
+        }
+        // 🔒 برای همیشه درست: حتی وقتی Clipboard API در دسترس نیست (http/قدیمی)
+        function legacyCopyPGN(text, done) {
+          const ta = document.createElement("textarea");
+          ta.value = text;
+          ta.style.cssText = "position:fixed;top:0;left:0;opacity:0;";
+          document.body.appendChild(ta);
+          ta.focus();
+          ta.select();
+          try { document.execCommand("copy"); done(); } catch (e) { gdToast("کپی نشد — دستی کپی کن"); }
+          ta.remove();
+        }
+        // 🍞 توست کوچک — به‌جای alert خشک
+        function gdToast(msg) {
+          const t = document.createElement("div");
+          t.className = "gd-toast show";
+          t.innerHTML = '<i class="fas fa-circle-check"></i> ' + esc(msg);
+          document.body.appendChild(t);
+          setTimeout(function () { t.classList.remove("show"); }, 2100);
+          setTimeout(function () { t.remove(); }, 2500);
+        }
+        function downloadPGN() {
+          if (!currentGame) return;
+          const blob = new Blob([currentGame.pgn], { type: "application/x-chess-pgn" });
+          const a = document.createElement("a");
+          const url = URL.createObjectURL(blob);
+          a.href = url;
+          const clean = (s) =>
+            String(s || "").replace(/[\\/:*?"<>|\s]+/g, "_").slice(0, 40) || "player";
+          a.download = `${clean(currentGame.white)}_vs_${clean(currentGame.black)}.pgn`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          gdToast("دانلود PGN شروع شد");
+        }
+
+        function closeGameOverlay() {
+          if (gameOverlay) gameOverlay.classList.remove("open");
+          if (!gamesOverlay || !gamesOverlay.classList.contains("open")) {
+            document.body.style.overflow = "";
+          }
+          stopAutoPlay();
+          destroyGdCg();
+          if (gameViewerContainer) gameViewerContainer.innerHTML = "";
+        }
         function closeGamesOverlay() {
           if (gamesOverlay) gamesOverlay.classList.remove("open");
+          if (gameOverlay) gameOverlay.classList.remove("open");
           document.body.style.overflow = "";
+          stopAutoPlay();
+          destroyGdCg();
+          if (gameViewerContainer) gameViewerContainer.innerHTML = "";
+        }
+
+        function debounceApplyFilters() {
+          if (searchDebounce) clearTimeout(searchDebounce);
+          searchDebounce = setTimeout(applyFilters, SEARCH_DEBOUNCE_MS);
         }
 
         function init() {
@@ -1267,7 +2137,10 @@
             renderFavSection();
             if (closeGamesOverlayBtn)
               closeGamesOverlayBtn.addEventListener("click", closeGamesOverlay);
-            if (searchInput) searchInput.addEventListener("input", applyFilters);
+            if (closeGameOverlayBtn)
+              closeGameOverlayBtn.addEventListener("click", closeGameOverlay);
+            // 🔎 جستجوی متنی با دیبانس — موبایل هنگام تایپ لگ نمی‌زند
+            if (searchInput) searchInput.addEventListener("input", debounceApplyFilters);
             if (searchField) searchField.addEventListener("change", applyFilters);
             if (resetSearchBtn)
               resetSearchBtn.addEventListener("click", function () {
@@ -1307,18 +2180,44 @@
             });
             ["fOpening", "fYearFrom", "fYearTo"].forEach((id) => {
               const el = document.getElementById(id);
-              if (el) el.addEventListener("input", applyFilters);
+              if (el) el.addEventListener("input", debounceApplyFilters);
             });
 
             document.addEventListener("keydown", function (e) {
+              const viewerOpen = gameOverlay && gameOverlay.classList.contains("open");
+              const tag = e.target && e.target.tagName;
+              if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
               if (e.key === "Escape") {
-                if (gamesOverlay && gamesOverlay.classList.contains("open"))
+                if (gameOverlay && gameOverlay.classList.contains("open"))
+                  closeGameOverlay();
+                else if (gamesOverlay && gamesOverlay.classList.contains("open"))
                   closeGamesOverlay();
+              } else if (viewerOpen) {
+                // ⌨️ کنترل با کیبورد — مثل آنالیز و مرور بازی:
+                // فلش راست = حرکت بعد | فلش چپ = حرکت قبل | فاصله = پخش کامل
+                if (e.key === "ArrowRight") { e.preventDefault(); goToNextMove(); }
+                else if (e.key === "ArrowLeft") { e.preventDefault(); goToPrevMove(); }
+                else if (e.key === " " || e.key === "Spacebar") { e.preventDefault(); toggleAutoPlay(); }
+                else if (e.key === "Home") { e.preventDefault(); goToFirstMove(); }
+                else if (e.key === "End") { e.preventDefault(); goToLastMove(); }
               }
             });
 
             document.addEventListener("pieceSetChanged", function () {
-              loadPieces();
+              loadPieces().then(() => {
+                const el = document.getElementById("gameBoard");
+                if (el && gdCg) {
+                  const setId = gdPieceSetId();
+                  if (window.ChessUtils && ChessUtils.ensureCgPieceSetCss) {
+                    ChessUtils.ensureCgPieceSetCss("gd-board", setId);
+                  }
+                  el.className = "gd-board set-" + setId;
+                }
+                if (currentGame) updateBoard();
+              });
+            });
+            document.addEventListener("themeChanged", function () {
+              if (currentGame) updateBoard();
             });
           });
         }

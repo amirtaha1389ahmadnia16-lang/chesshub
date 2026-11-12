@@ -21,7 +21,7 @@
   to { opacity: 1; }
 }
 .gr-inner {
-  max-width: 1080px;
+  max-width: 1150px;
   margin: 0.5rem auto 2rem;
   background: #f8fafc;
   border-radius: var(--radius-xl, 18px);
@@ -122,9 +122,9 @@
 /* ---------- بدنه ---------- */
 .gr-body {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 360px;
-  gap: 1.1rem;
-  padding: 1.1rem;
+  grid-template-columns: minmax(0, 1fr) 425px;
+  gap: 1.15rem;
+  padding: 1.15rem;
   align-items: start;
 }
 
@@ -190,6 +190,210 @@
 }
 .board-arrows .arrow-line { stroke-linecap: round; stroke-linejoin: round; }
 
+/* ---------- 🆕 تختهٔ Chessground (کتابخانهٔ لایچز — مثل بخش آنالیز) ----------
+   در حالت عادی (فالبک) تخته grid است؛ وقتی Chessground لود شد
+   کلاس cg-wrap می‌گیرد و بلوکی می‌شود. رنگ خانه‌ها از تم رسمی سایت. */
+.gr-board.cg-wrap {
+  display: block;
+  grid-template-columns: none;
+  aspect-ratio: 1 / 1;
+}
+.gr-cg-mode .board-arrows { display: none; }
+.gr-board.cg-wrap cg-board {
+  background-image: conic-gradient(
+    var(--board-dark, #b58863) 0 25%,
+    var(--board-light, #f0d9b5) 0 50%,
+    var(--board-dark, #b58863) 0 75%,
+    var(--board-light, #f0d9b5) 0
+  );
+  background-size: 25% 25%;
+}
+.gr-board.cg-wrap coords coord { font-size: 10px; font-weight: 700; }
+.gr-board.cg-wrap coords { opacity: 0.75; }
+.gr-board.cg-wrap square.last-move { background: rgba(155, 199, 0, 0.41); }
+.gr-board.cg-wrap square.check {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(231, 76, 60, 1) 0%,
+    rgba(231, 76, 60, 0.85) 28%,
+    rgba(231, 76, 60, 0) 70%
+  );
+}
+.gr-board.cg-wrap piece { border-radius: 2px; }
+
+/* ---------- 🆕 هایلایت رنگی مبدا/مقصد — رنگِ برچسب همان حرکت ----------
+   بی‌دقتی = زرد، اشتباه = نارنجی، فاحش = سرخ، درخشان = فیروزه‌ای…
+   بعد از قانون last-move می‌آید تا رنگ دسته بر زردِ پیش‌فرض غلبه کند. */
+.gr-board.cg-wrap square.mk-brilliant { background: rgba(38, 194, 163, 0.55); }
+.gr-board.cg-wrap square.mk-best { background: rgba(129, 182, 76, 0.62); }
+.gr-board.cg-wrap square.mk-excellent { background: rgba(129, 182, 76, 0.5); }
+.gr-board.cg-wrap square.mk-good { background: rgba(129, 182, 76, 0.4); }
+.gr-board.cg-wrap square.mk-inaccuracy { background: rgba(247, 198, 49, 0.6); }
+.gr-board.cg-wrap square.mk-mistake { background: rgba(255, 164, 89, 0.62); }
+.gr-board.cg-wrap square.mk-blunder { background: rgba(250, 65, 45, 0.58); }
+.gr-board.cg-wrap square.mk-book { background: rgba(213, 164, 125, 0.6); }
+
+/* ---------- 🆕 برچسب حرکت — گوشهٔ بالا-چپِ خانه (آیکن چس‌دات‌کام) ---------- */
+.gr-badges {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 12;
+  direction: ltr;
+}
+.gr-badge {
+  position: absolute;
+  width: 4.8%;
+  aspect-ratio: 1 / 1;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.45));
+}
+.gr-badge svg { width: 100%; height: 100%; display: block; }
+.gr-badge.pop {
+  animation: grBadgePop 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.35) both;
+}
+@keyframes grBadgePop {
+  from { transform: scale(0.35); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+/* آیکن‌های SVG دسته‌ها — در چیپ‌ها و لیست حرکات */
+.gr-svgicon {
+  display: inline-block;
+  vertical-align: middle;
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+}
+.gr-chip .gr-svgicon, .gr-kind .gr-svgicon { width: 1.05em; height: 1.05em; }
+
+/* ---------- 🆕 آواتار بازیکن‌ها ---------- */
+.gr-players span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+.gr-players .gr-avatar-img,
+.gr-avatar-img.sm {
+  width: 31px;
+  height: 31px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid #fff;
+  box-shadow: 0 1px 4px rgba(14, 42, 85, 0.3);
+  background: #cbd5e1;
+  flex-shrink: 0;
+}
+
+/* ---------- 🆕 راهنمای کیبورد ---------- */
+.gr-kbd-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: var(--text-light, #718096);
+}
+.gr-kbd-hint i { color: var(--accent, #3182ce); }
+
+/* ---------- 🆕 گزارش عملکرد — کارت بازیکن‌ها (فضای کافی و خوانا) ---------- */
+.gr-pcards {
+  display: flex;
+  gap: 0.7rem;
+  align-items: stretch;
+}
+.gr-pcard {
+  flex: 1;
+  min-width: 0;
+  background: var(--secondary, #f1f5f9);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: var(--radius-lg, 12px);
+  padding: 1rem 0.75rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  text-align: center;
+  position: relative;
+  transition: box-shadow 0.2s ease;
+}
+.gr-pcard.winner {
+  border-color: #e9b84c;
+  background: linear-gradient(180deg, rgba(246, 173, 85, 0.14), var(--secondary, #f1f5f9));
+  box-shadow: 0 0 0 1px rgba(214, 158, 46, 0.3), 0 8px 16px -10px rgba(214, 158, 46, 0.55);
+}
+.gr-pava {
+  position: relative;
+  width: 78px;
+  height: 78px;
+  flex-shrink: 0;
+}
+.gr-pava .gr-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2.5px solid #fff;
+  box-shadow: 0 3px 9px -3px rgba(14, 42, 85, 0.4);
+  background: #cbd5e1;
+  display: block;
+}
+.gr-pcard.pb .gr-pava .gr-avatar-img { border-color: #1a202c; }
+.gr-crown {
+  position: absolute;
+  top: -11px;
+  left: -7px;
+  color: #d69e2e;
+  font-size: 1.1rem;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+}
+.gr-pname {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--primary-dark, #1a202c);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.gr-pacc {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  color: var(--accent-dark, #2c5282);
+  direction: ltr;
+}
+.gr-pacc b { font-size: 1.62rem; font-weight: 900; }
+.gr-pacc small { font-size: 0.68rem; font-weight: 700; color: var(--text-light, #64748b); }
+.gr-pvs {
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  color: var(--text-light, #64748b);
+  font-size: 0.66rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.gr-pvs i { font-size: 1.25rem; color: var(--accent, #3182ce); }
+.gr-nokind {
+  font-size: 0.7rem;
+  color: var(--text-light, #718096);
+  font-weight: 600;
+  padding: 0.25rem 0;
+}
+@media (max-width: 480px) {
+  .gr-pava { width: 62px; height: 62px; }
+  .gr-pava .gr-avatar-img { border-width: 2px; }
+  .gr-pcards { gap: 0.45rem; }
+  .gr-pcard { padding: 0.75rem 0.45rem 0.65rem; gap: 0.3rem; }
+  .gr-pname { font-size: 0.8rem; }
+  .gr-pacc b { font-size: 1.32rem; }
+  .gr-crown { font-size: 0.9rem; top: -9px; left: -5px; }
+}
+
 /* ---------- نوار ارزیابی ---------- */
 .gr-eval-num {
   font-weight: 800;
@@ -247,7 +451,7 @@
   background: #fff;
   border: 1px solid var(--border, #e2e8f0);
   border-radius: var(--radius-lg, 12px);
-  padding: 0.9rem;
+  padding: 1.05rem 1rem 0.95rem;
 }
 .gr-loading {
   text-align: center;
@@ -257,13 +461,13 @@
   padding: 0.5rem;
 }
 .gr-sum-title {
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 800;
   color: var(--primary-dark, #1a202c);
-  margin-bottom: 0.7rem;
+  margin-bottom: 0.85rem;
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.45rem;
 }
 .gr-sum-title i { color: var(--accent, #3182ce); }
 .gr-side { padding: 0.5rem 0; border-top: 1px dashed var(--border, #e2e8f0); }
@@ -288,6 +492,39 @@
   padding: 0.16rem 0.55rem;
   background: var(--secondary, #f1f5f9);
 }
+/* 🆕 چیپ‌های کلیک‌پذیر آمار — کلیک = پرش روی حرکت‌های آن دسته */
+.gr-kinds { gap: 0.35rem; }
+.gr-kinds button.gr-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  border-radius: 99px;
+  padding: 0.24rem 0.68rem;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  background: var(--secondary, #f1f5f9);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+.gr-kinds button.gr-chip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px -2px rgba(14, 42, 85, 0.28);
+  filter: brightness(1.07);
+}
+.gr-kinds button.gr-chip:active { transform: scale(0.93); }
+.gr-kinds button.gr-chip:focus-visible { outline: 2px solid var(--accent, #3182ce); outline-offset: 1px; }
+.gr-chip-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.32rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-light, #718096);
+  margin: -0.1rem 0 0.55rem;
+}
+.gr-chip-hint i { color: var(--accent, #3182ce); }
 
 /* رنگ‌بندی کیفیت حرکت */
 .k-bril  { background: rgba(45, 190, 172, 0.16) !important; color: #0d9488 !important; }
@@ -299,14 +536,49 @@
 .k-blun  { background: rgba(229, 62, 62, 0.12) !important; color: var(--danger, #e53e3e) !important; }
 .k-book  { background: rgba(59, 130, 246, 0.1) !important; color: var(--purple, #3b82f6) !important; }
 
-/* ---------- نمودار ---------- */
+/* ---------- 🆕 نمودار برتری — بزرگ و خوانا + شناسنامهٔ هاور ---------- */
 .gr-graph-wrap {
   background: #fff;
   border: 1px solid var(--border, #e2e8f0);
   border-radius: var(--radius-lg, 12px);
-  padding: 0.7rem;
+  padding: 0.8rem;
+  position: relative;
 }
-.gr-graph-wrap canvas { width: 100%; display: block; border-radius: 6px; }
+.gr-graph-wrap canvas {
+  width: 100%;
+  height: 210px;
+  display: block;
+  border-radius: 8px;
+  touch-action: pan-y;
+}
+.gr-graph-tip {
+  position: absolute;
+  top: 6px;
+  display: none;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(15, 23, 42, 0.93);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.32rem 0.65rem;
+  border-radius: 99px;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.35);
+  z-index: 5;
+  max-width: calc(100% - 8px);
+  overflow: hidden;
+}
+.gr-graph-tip .gt-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.85);
+}
+.gr-graph-tip .gt-side { color: rgba(255, 255, 255, 0.66); font-size: 0.62rem; }
+.gr-graph-tip .gt-ev { direction: ltr; font-family: monospace; font-weight: 800; }
 
 /* ---------- فهرست حرکات ---------- */
 .gr-moves {
@@ -384,13 +656,16 @@
 /* ---------- ریسپانسیو ---------- */
 @media (max-width: 960px) {
   .gr-body { grid-template-columns: 1fr; }
-  .gr-panel { max-width: 480px; margin: 0 auto; width: 100%; }
+  .gr-panel { max-width: 540px; margin: 0 auto; width: 100%; }
   .gr-moves { max-height: 220px; }
+  .gr-graph-wrap canvas { height: 180px; }
 }
 @media (max-width: 480px) {
   .gr-overlay { padding: 0; }
   .gr-inner { margin: 0; border-radius: 0; min-height: 100dvh; }
   .gr-head { padding: 0.7rem 0.85rem; }
+  .gr-badge { width: 5.4%; }
+  .gr-kbd-hint { font-size: 0.62rem; }
   .gr-title b { font-size: 0.9rem; }
   .gr-title span { font-size: 0.65rem; }
   .gr-close { padding: 0.35rem 0.7rem; font-size: 0.75rem; }
@@ -400,6 +675,12 @@
   .gr-board-wrap { max-width: min(88vw, 340px); }
   .gr-btn { padding: 0.38rem 0.6rem; font-size: 0.72rem; }
   .gr-actions .gr-btn { flex: 1; justify-content: center; }
+  .gr-summary { padding: 0.85rem 0.75rem 0.8rem; }
+  .gr-sum-title { font-size: 0.92rem; margin-bottom: 0.7rem; }
+  .gr-chip-hint { font-size: 0.64rem; }
+  .gr-graph-wrap { padding: 0.6rem; }
+  .gr-graph-wrap canvas { height: 140px; }
+  .gr-graph-tip { font-size: 0.62rem; padding: 0.26rem 0.5rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   .gr-overlay, .gr-inner { animation: none !important; }
@@ -481,7 +762,7 @@ body.grev-body {
 
 /* ---------- بدنهٔ صفحه ---------- */
 .grev-page {
-  max-width: 1160px;
+  max-width: 1220px;
   margin: 0 auto;
   padding: 1rem 1.2rem 2.5rem;
 }

@@ -1,0 +1,111 @@
+/* ============================================================
+   ♛ ChessHub — responsive.css | لایهٔ ریسپانسیو سراسری (v11.8)
+   ------------------------------------------------------------
+   این فایل به «همهٔ» صفحه‌ها وصل می‌شود و پایهٔ مشترک موبایل/
+   تبلت/لپ‌تاپ را درست می‌کند تا هیچ بخشی از سایت بیرون نزند.
+   قواعد اختصاصی هر صفحه در CSS خودِ همان صفحه است؛ اینجا فقط
+   پایدارسازی عمومی: سرریز افقی، جدول‌ها، فرم‌ها، مودال‌ها، nav.
+   ============================================================ */
+
+/* ---------- پایدارسازی پایه ---------- */
+html { -webkit-text-size-adjust: 100%; }
+body { overflow-x: hidden; }
+img, svg, video, canvas { max-width: 100%; }
+button, .btn, a.chip, input[type="submit"] { touch-action: manipulation; }
+* { -webkit-tap-highlight-color: transparent; }
+
+/* ---------- کانتینر و هیرو ---------- */
+@media (max-width: 1024px) {
+  .container { padding-inline: 0.9rem; }
+}
+@media (max-width: 768px) {
+  .container { padding-inline: 0.75rem; }
+  .app-hero h1 { font-size: 1.25rem !important; }
+  .app-hero p { font-size: 0.8rem !important; }
+  section.app-hero { padding: 1.1rem 0.9rem !important; }
+}
+
+/* ---------- هدر و ناوبری — در موبایل جمع‌وجور و قابل لمس ---------- */
+@media (max-width: 900px) {
+  .main-header, header.main-header, .site-header {
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .main-nav, nav.main-nav, .nav-links {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.25rem;
+    width: 100%;
+    order: 3;
+  }
+  .main-nav a, .nav-links a {
+    padding: 0.42rem 0.6rem !important;
+    font-size: 0.74rem !important;
+  }
+}
+
+/* ---------- فرم‌ها — سایز فونت ≥16px تا آیفون زوم نکند ---------- */
+@media (max-width: 768px) {
+  input[type="text"], input[type="search"], input[type="email"],
+  input[type="password"], input[type="number"], input[type="date"],
+  select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* ---------- جدول‌ها — اسکرول افقی به‌جای شکستن صفحه ---------- */
+.table-wrap, .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table { max-width: 100%; }
+@media (max-width: 640px) {
+  table.data-table, .card table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+}
+
+/* ---------- کارت‌ها و گریدهای عمومی ---------- */
+@media (max-width: 900px) {
+  .cards-grid, .features-grid, .stats-grid, .quick-grid, .tools-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+  }
+}
+
+/* ---------- مودال‌ها و دیالوگ‌ها — همیشه داخل صفحه ---------- */
+@media (max-width: 640px) {
+  .gh-dialog, .modal-content, .modal-card, .promotion-card {
+    max-width: 92vw !important;
+    width: 92vw !important;
+    max-height: 84dvh;
+    overflow-y: auto;
+  }
+  .gh-dialog-overlay, .modal-overlay {
+    padding: 0.6rem !important;
+  }
+}
+
+/* ---------- دکمه‌ها — هدف لمس مناسب ---------- */
+@media (pointer: coarse) {
+  button, .btn, .an-btn, .gr-btn, [role="button"] {
+    min-height: 38px;
+  }
+  a { min-height: 34px; }
+}
+
+/* ---------- Toast ---------- */
+@media (max-width: 480px) {
+  .settings-toast {
+    left: 0.6rem !important;
+    right: 0.6rem !important;
+    transform: none !important;
+    text-align: center;
+    font-size: 0.72rem !important;
+  }
+}
+
+/* ---------- اسکرول‌بار نازک در همه‌جا ---------- */
+* { scrollbar-width: thin; }
+*::-webkit-scrollbar { width: 7px; height: 7px; }
+*::-webkit-scrollbar-thumb { background: #b9c4d4; border-radius: 99px; }
+*::-webkit-scrollbar-track { background: transparent; }
+
+/* ---------- چاپ ---------- */
+@media print {
+  .gr-overlay, .settings-toast, .an-mini, .an-ctx { display: none !important; }
+}

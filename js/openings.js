@@ -380,12 +380,6 @@
       const isOpen = body.classList.toggle("open");
       chevron.classList.toggle("open");
       header.classList.toggle("expanded", isOpen);
-      // 🔑 ارتفاع دقیق = محتوای واقعی — شاخه‌ها همیشه کامل و مرتب باز می‌شوند
-      if (isOpen) {
-        body.style.maxHeight = body.scrollHeight + 40 + "px";
-      } else {
-        body.style.maxHeight = "";
-      }
     });
 
     card.querySelectorAll(".variant-item").forEach((item) => {

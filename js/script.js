@@ -54,25 +54,29 @@ window.chPh = function (w, h, label) {
   };
 
   /* ============================================
-     کاتالوگ‌های رسمی تنظیمات — تنها گزینه‌های مجاز
+     کاتالوگ‌های رسمی تنظیمات
+     🔑 بی‌نهایت‌پذیر: علاوه بر لیست پایینی، هر تعداد تم رنگی و
+        مجموعهٔ مهرهٔ دلخواه از دو فایل زیر اضافه می‌شود (بدون محدودیت):
+          js/custom-themes.js  →  window.CHESSHUB_EXTRA_THEMES
+          js/custom-pieces.js  →  window.CHESSHUB_EXTRA_PIECE_SETS
      ============================================ */
 
-  // 🎨 ۱۰ تم رنگی تخته — دقیقاً همین‌ها، به همین ترتیب (آیکون ۲×۲ شطرنجی)
-  const THEME_CATALOG = [
+  // 🎨 تم‌های پایهٔ رنگی تخته — آیکون ۲×۲ شطرنجی
+  let THEME_CATALOG = [
     { id: "1",  name: "Wood",     light: "#ecc79b", dark: "#c7703c" },
     { id: "2",  name: "Ocean",    light: "#eae9d2", dark: "#4b7399" },
     { id: "3",  name: "Classic",  light: "#f0d9b5", dark: "#b58863" },
     { id: "4",  name: "Charcoal", light: "#717b8e", dark: "#2b323f" },
     { id: "5",  name: "Meadow",   light: "#eeeed2", dark: "#769656" },
-    { id: "6",  name: "Ice",      light: "#cddbe2", dark: "#7b9eb3" },
+    { id: "6",  name: "Ice",      light: "#eef4f9", dark: "#6493b8" },
     { id: "7",  name: "Stone",    light: "#cac8bf", dark: "#52514e" },
     { id: "8",  name: "Violet",   light: "#efefef", dark: "#8877b7" },
     { id: "9",  name: "Coral",    light: "#f0d8bf", dark: "#ba5546" },
     { id: "10", name: "Forest",   light: "#efefec", dark: "#33684b" },
   ];
 
-  // ♟️ ۹ مجموعه مهره — دقیقاً همین‌ها، به همین ترتیب
-  const PIECE_SETS = [
+  // ♟️ مجموعه‌های پایهٔ مهره — پیش‌نمایش: pieces/<id>/wk.png و bk.png
+  let PIECE_SETS = [
     { id: "alpha",     name: "Alpha" },
     { id: "classic",   name: "Classic" },
     { id: "g08ph",     name: "G08ph" },
@@ -84,8 +88,68 @@ window.chPh = function (w, h, label) {
     { id: "ocean",     name: "Ocean" },
   ];
 
-  const VALID_THEMES = THEME_CATALOG.map(function (t) { return t.id; });
-  const VALID_PIECE_SETS = PIECE_SETS.map(function (p) { return p.id; });
+  let VALID_THEMES = THEME_CATALOG.map(function (t) { return t.id; });
+  let VALID_PIECE_SETS = PIECE_SETS.map(function (p) { return p.id; });
+
+  /* ---- 🔑 ادغام تم‌ها/مهره‌های سفارشی (تا بی‌نهایت) ---- */
+  function loadLocalScript(src) {
+    return new Promise(function (resolve) {
+      const s = document.createElement("script");
+      s.src = src;
+      s.onload = function () { resolve(true); };
+      s.onerror = function () { resolve(false); };
+      document.head.appendChild(s);
+    });
+  }
+
+  /* CSS تم‌های سفارشی — چون تم با کلاس body اعمال می‌شود، قاعدهٔ آن
+     همین‌جا از روی رنگ‌های تعریف‌شده ساخته می‌شود؛ یعنی برای تم جدید
+     هیچ ویرایش CSS لازم نیست، فقط یک خط در custom-themes.js */
+  function injectCustomThemeStyles(extraThemes) {
+    if (!extraThemes.length) return;
+    const css = extraThemes
+      .map(function (t) {
+        return ".theme-" + t.id + " { --board-light: " + t.light + "; --board-dark: " + t.dark + "; }";
+      })
+      .join("\n");
+    const st = document.createElement("style");
+    st.id = "chesshub-custom-theme-styles";
+    st.textContent = css;
+    document.head.appendChild(st);
+  }
+
+  function mergeCustomCatalogs() {
+    /* تم‌های سفارشی — id تکراری با پایه یا داخل خود لیست نادیده گرفته می‌شود */
+    const extrasT = Array.isArray(window.CHESSHUB_EXTRA_THEMES) ? window.CHESSHUB_EXTRA_THEMES : [];
+    const seenT = {};
+    THEME_CATALOG.forEach(function (t) { seenT[t.id] = true; });
+    const newThemes = [];
+    extrasT.forEach(function (t) {
+      if (!t || !t.id || !t.name || !t.light || !t.dark) return;
+      if (seenT[String(t.id)]) return;
+      seenT[String(t.id)] = true;
+      newThemes.push({ id: String(t.id), name: String(t.name), light: String(t.light), dark: String(t.dark) });
+    });
+    THEME_CATALOG = THEME_CATALOG.concat(newThemes);
+    injectCustomThemeStyles(newThemes);
+
+    /* مجموعه‌های مهرهٔ سفارشی */
+    const extrasP = Array.isArray(window.CHESSHUB_EXTRA_PIECE_SETS) ? window.CHESSHUB_EXTRA_PIECE_SETS : [];
+    const seenP = {};
+    PIECE_SETS.forEach(function (p) { seenP[p.id] = true; });
+    const newPieces = [];
+    extrasP.forEach(function (p) {
+      if (!p || !p.id || !p.name) return;
+      if (seenP[String(p.id)]) return;
+      seenP[String(p.id)] = true;
+      newPieces.push({ id: String(p.id), name: String(p.name) });
+    });
+    PIECE_SETS = PIECE_SETS.concat(newPieces);
+
+    /* بازسازی لیست‌های اعتبارسنجی */
+    VALID_THEMES = THEME_CATALOG.map(function (t) { return t.id; });
+    VALID_PIECE_SETS = PIECE_SETS.map(function (p) { return p.id; });
+  }
 
   function loadSettings() {
     const s = { ...defaultSettings };
@@ -372,6 +436,82 @@ window.chPh = function (w, h, label) {
       const dark =
         getComputedStyle(host).getPropertyValue("--board-dark").trim() || "#b58863";
       return { light, dark };
+    },
+
+    /* ---------- 🆕 نگاشت پویا مهره‌های Chessground ----------
+       Chessground مهره‌ها را با CSS نشان می‌دهد (piece.<color>.<type>)
+       و مجموعه‌های مهره بی‌نهایت‌اند (کتالوگ رسمی + مجموعه‌های دلخواه
+       custom-pieces.js). پس نگاشت تصاویر را همین‌جا به‌صورت پویا
+       می‌سازیم — برای هر id ای کار می‌کند و هرگز کهنه نمی‌شود. */
+    _cgStyleIds: {},
+    ensureCgPieceSetCss(cls, setId) {
+      if (!cls || !setId) return;
+      const styleId = "cgmap-" + cls + "-" + setId;
+      if (this._cgStyleIds[styleId] || document.getElementById(styleId)) return;
+      const colors = { w: "white", b: "black" };
+      const types = { k: "king", q: "queen", r: "rook", b: "bishop", n: "knight", p: "pawn" };
+      let css = "";
+      ["w", "b"].forEach(function (c) {
+        Object.keys(types).forEach(function (t) {
+          css += "." + cls + ".set-" + setId + " piece." + colors[c] + "." + types[t] +
+            "{background-image:url('pieces/" + setId + "/" + c + t + ".png')}\n";
+        });
+      });
+      const st = document.createElement("style");
+      st.id = styleId;
+      st.textContent = css;
+      document.head.appendChild(st);
+      this._cgStyleIds[styleId] = true;
+    },
+
+    /* ---------- 🆕 عکس بازیکنان شناخته‌شده ----------
+       ۳۰ استادِ پایگاه بازی عکس دارند (images/players/<id>.jpg).
+       نام کامل PGN مثل «Robert James Fischer» → فیشر پیدا می‌شود. */
+    _masterPhotos: [
+      "alekhine", "anand", "aronian", "botvinnik", "bronstein", "capablanca",
+      "carlsen", "caruana", "ding", "euwe", "firouzja", "fischer", "gukesh",
+      "karpov", "kasparov", "korchnoi", "kramnik", "lasker", "marshall",
+      "morphy", "nakamura", "nepomniachtchi", "nimzowitsch", "petrosian",
+      "reti", "smyslov", "so", "spassky", "steinitz", "tal",
+    ],
+    masterPhoto(name) {
+      let n = String(name || "").toLowerCase();
+      try {
+        n = n.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      } catch (e) {}
+      const toks = n.split(/[^a-z]+/).filter(Boolean);
+      for (let i = 0; i < toks.length; i++) {
+        if (this._masterPhotos.indexOf(toks[i]) >= 0) {
+          return "images/players/" + toks[i] + ".jpg";
+        }
+      }
+      return null;
+    },
+
+    /* ---------- 🆕 آواتار آدمکِ تولیدی — برای بازیکنان بی‌عکس ----------
+       سفید → آدمکِ سفید روی پس‌زمینهٔ تیره | سیاه → آدمکِ سیاه روی پس‌زمینهٔ روشن */
+    bustAvatar(side) {
+      const bg = side === "b" ? "#e8edf5" : "#22303f";
+      const fg = side === "b" ? "#26313d" : "#f4f7fb";
+      const svg =
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">' +
+        '<rect width="64" height="64" rx="14" fill="' + bg + '"/>' +
+        '<circle cx="32" cy="23.5" r="12.5" fill="' + fg + '"/>' +
+        '<path d="M9 62c0-14.5 10.5-22 23-22s23 7.5 23 22z" fill="' + fg + '"/>' +
+        "</svg>";
+      return "data:image/svg+xml;charset=utf8," + encodeURIComponent(svg);
+    },
+
+    /* ---------- 🆕 تگ تصویر آواتار — عکس استاد یا آدمک ---------- */
+    avatarTag(name, side, cls) {
+      const photo = this.masterPhoto(name);
+      const bust = this.bustAvatar(side);
+      const src = photo || bust;
+      const c = cls ? " " + cls : "";
+      return (
+        '<img class="gr-avatar-img' + c + '" src="' + src + '" alt="" draggable="false" ' +
+        'onerror="this.onerror=null;this.src=\'' + bust + '\';">'
+      );
     },
 
     /* ---------- مودال ترفیع پیاده ---------- */
@@ -800,6 +940,18 @@ window.chPh = function (w, h, label) {
     const themeGrid = document.getElementById("themeGrid");
     const pieceContainer = document.getElementById("pieceSetsContainer");
     if (!themeGrid && !pieceContainer) return;
+
+    /* زیرنویس با تعداد واقعی — بعد از افزودن تم/مهرهٔ دلخواه خودش به‌روز می‌ماند */
+    if (themeGrid) {
+      const card = themeGrid.closest(".settings-card");
+      const sub = card ? card.querySelector(".card-sub") : null;
+      if (sub) sub.textContent = faNum(THEME_CATALOG.length) + " تم رنگی — افزودن تم دلخواه تا بی‌نهایت";
+    }
+    if (pieceContainer) {
+      const card = pieceContainer.closest(".settings-card");
+      const sub = card ? card.querySelector(".card-sub") : null;
+      if (sub) sub.textContent = faNum(PIECE_SETS.length) + " مجموعهٔ مهره — افزودن مجموعهٔ دلخواه تا بی‌نهایت";
+    }
 
     const $ = (id) => document.getElementById(id);
     const saved = loadSettings();
@@ -1677,6 +1829,14 @@ window.chPh = function (w, h, label) {
      ============================================ */
 
   async function boot() {
+    /* 🔑 اول فایل‌های سفارشی (بی‌نهایت تم/مهره) — با بستر زمانی تا ویرایشِ
+       مالکِ سایت همیشه بدون مشکل کش بلافاصله دیده شود */
+    await Promise.all([
+      loadLocalScript("js/custom-themes.js?t=" + Date.now()),
+      loadLocalScript("js/custom-pieces.js?t=" + Date.now()),
+    ]);
+    mergeCustomCatalogs();
+
     applySavedThemeEarly();
 
     await Promise.all([

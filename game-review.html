@@ -10,13 +10,14 @@
     <link rel="stylesheet" href="lib/fontawesome/all.min.css" />
     <link href="fonts/vazir/font-face.css" rel="stylesheet" />
     <link rel="stylesheet" href="css/style.css?v=10.10" />
-    <link rel="stylesheet" href="css/gamereview.css?v=10.7" />
+    <link rel="stylesheet" href="lib/chessground/chessground.base.css?v=11.0" />
+    <link rel="stylesheet" href="css/gamereview.css?v=11.1" />
     <script src="lib/chess.min.js"></script>
   </head>
   <!-- جهت اسکرول‌بار: html با جهت ltr → اسکرول‌بار سمت راست؛
        محتوا با body dir=rtl → چیدمان طبیعی فارسی -->
   <body dir="rtl" class="grev-body">
-    <!-- نوار بالا — عنوان مرور (بدون دکمهٔ بازگشت؛ خروج با دکمهٔ مرورگر) -->
+    <!-- نوار بالا — عنوان مرور + دکمهٔ بازگشت -->
     <header class="grev-topbar">
       <div class="grev-title">
         <i class="fas fa-magnifying-glass-chart"></i>
@@ -25,6 +26,9 @@
           <span id="grSub"></span>
         </div>
       </div>
+      <button class="gr-close" id="grBackBtn" title="بازگشت به صفحهٔ قبل">
+        <i class="fas fa-arrow-right"></i> بازگشت
+      </button>
     </header>
 
     <main class="grev-page">
@@ -59,6 +63,7 @@
           <div class="gr-board-wrap">
             <div id="grBoard" class="chessboard gr-board"></div>
             <svg class="board-arrows" id="grArrows" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+            <div class="gr-badges" id="grBadges"></div>
           </div>
           <div class="eval-bar">
             <div class="eval-track"><div class="eval-fill" id="grEvalFill"></div><div class="eval-mid"></div></div>
@@ -72,6 +77,7 @@
             <button class="gr-btn" id="grLast" title="آخر"><i class="fas fa-fast-forward"></i></button>
             <span class="gr-counter" id="grCounter">۰/۰</span>
           </div>
+          <div class="gr-kbd-hint"><i class="fas fa-keyboard"></i> فلش چپ/راست = حرکت قبل/بعد &nbsp;•&nbsp; دکمهٔ فاصله = پخش بازی &nbsp;•&nbsp; کلیک‌راست و کشیدن = فلش‌کشی</div>
         </div>
 
         <div class="gr-panel">
@@ -88,12 +94,13 @@
       </div>
     </main>
 
-    <script src="js/script.js?v=10.10"></script>
+    <script src="js/script.js?v=10.12"></script>
     <script src="js/profile.js?v=10.7"></script>
     <script src="js/auth.js?v=10.7"></script>
     <script src="js/engine-core.js?v=10.7"></script>
+    <script type="module" src="lib/chessground/loader.js?v=11.0"></script>
     <script src="js/board-ui.js?v=10.7"></script>
-    <script src="js/gamereview.js?v=10.7"></script>
+    <script src="js/gamereview.js?v=11.1"></script>
     <script>
       (function () {
         "use strict";
@@ -110,6 +117,18 @@
 
         // 🎬 راه‌اندازی مرور — بازی از sessionStorage (پایگاه بازی) می‌آید
         function boot() {
+          // 🔙 دکمهٔ بازگشت — همیشه فعال، حتی وقتی بازی‌ای انتخاب نشده
+          const backBtn = document.getElementById("grBackBtn");
+          if (backBtn) {
+            backBtn.addEventListener("click", function () {
+              if (window.history && window.history.length > 1) {
+                window.history.back();
+              } else {
+                window.location.href = "games-database.html";
+              }
+            });
+          }
+
           const empty = document.getElementById("grevEmpty");
           const main = document.getElementById("grevMain");
           let payload = null;
