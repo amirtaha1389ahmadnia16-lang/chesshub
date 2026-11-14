@@ -469,7 +469,7 @@
   grid-template-rows: repeat(8, 1fr);
   aspect-ratio: 1 / 1;
   direction: ltr;
-  border-radius: var(--radius-md);
+  border-radius: 5px;
   overflow: hidden;
   box-shadow: var(--shadow-board);
   touch-action: none;

@@ -135,7 +135,7 @@
   aspect-ratio: 1/1;
   max-width: 480px;
   margin: 0 auto 1rem;
-  border-radius: var(--radius-sm);
+  border-radius: 5px;
   overflow: hidden;
   box-shadow: var(--shadow-board);
   border: 1px solid #cbd5e0;

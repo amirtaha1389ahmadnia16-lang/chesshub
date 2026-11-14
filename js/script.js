@@ -49,16 +49,18 @@ window.chPh = function (w, h, label) {
   const defaultSettings = {
     pieceSet: "neo",
     theme: "3",
+    // 🖼️ تنظیمات صفحهٔ بازی فقط تصویری است — تختهٔ پیش‌فرض = اولین تختهٔ کاتالوگ
+    board: "green",
     sound: true,
     volume: 70,
   };
 
   /* ============================================
      کاتالوگ‌های رسمی تنظیمات
-     🔑 بی‌نهایت‌پذیر: علاوه بر لیست پایینی، هر تعداد تم رنگی و
-        مجموعهٔ مهرهٔ دلخواه از دو فایل زیر اضافه می‌شود (بدون محدودیت):
-          js/custom-themes.js  →  window.CHESSHUB_EXTRA_THEMES
-          js/custom-pieces.js  →  window.CHESSHUB_EXTRA_PIECE_SETS
+     🔑 فقط دو فایل کانفیگ مخصوصِ خودِ مالک — دستکاری کد، برای
+        بازدیدکننده نامرئی (بقیهٔ فایل‌ها دست نزن):
+          js/boards-config.js   →  window.CHESSHUB_BOARD_IMAGES   (آدرس عکس تخته‌ها)
+          js/pieces-config.js   →  window.CHESSHUB_PIECE_FOLDERS  (نام پوشه‌های مهره)
      ============================================ */
 
   // 🎨 تم‌های پایهٔ رنگی تخته — آیکون ۲×۲ شطرنجی
@@ -75,21 +77,32 @@ window.chPh = function (w, h, label) {
     { id: "10", name: "Forest",   light: "#efefec", dark: "#33684b" },
   ];
 
-  // ♟️ مجموعه‌های پایهٔ مهره — پیش‌نمایش: pieces/<id>/wk.png و bk.png
-  let PIECE_SETS = [
-    { id: "alpha",     name: "Alpha" },
-    { id: "classic",   name: "Classic" },
-    { id: "g08ph",     name: "G08ph" },
-    { id: "game_room", name: "Game Room" },
-    { id: "glass",     name: "Glass" },
-    { id: "light",     name: "Light" },
-    { id: "neo",       name: "Neo" },
-    { id: "neo_wood",  name: "Neo Wood" },
-    { id: "ocean",     name: "Ocean" },
+  // 🖼️ تخته‌های تصویری — تخته یک عکس کامل ۸×۸ است و مهره‌ها روی آن می‌نشینند.
+  //    🔑 فهرست تخته‌ها فقط از فایل اختصاصیِ مالک js/boards-config.js می‌آید:
+  //    آرایه‌ای از «آدرس عکس». اسم تخته = اسم فایل بدون پسوند؛ پیش‌نمایش ۲×۲
+  //    کارت هم خودکار از برش همان عکس ساخته می‌شود (getBoardThumb).
+  //    این لیست عمداً خالی است؛ buildBoardsFromConfig() آن را پر می‌کند.
+  let BOARD_IMAGES = [];
+
+  // ♟️ مجموعه‌های مهره — فقط از js/pieces-config.js (نام پوشه‌های داخل
+  //    images/pieces). اسمی که روی هاور کارت دیده می‌شود = خود نام پوشه.
+  //    اگر لیست پوشه‌ها خالی باشد، این ۹ مجموعهٔ پیش‌فرض به کار می‌آیند:
+  const PIECE_SETS_FALLBACK = [
+    "alpha", "classic", "g08ph", "game_room", "glass",
+    "light", "neo", "neo_wood", "ocean",
   ];
+  let PIECE_SETS = [];
 
   let VALID_THEMES = THEME_CATALOG.map(function (t) { return t.id; });
   let VALID_PIECE_SETS = PIECE_SETS.map(function (p) { return p.id; });
+  let VALID_BOARDS = BOARD_IMAGES.map(function (b) { return b.id; });
+  /* 🔑 v11.25 — تا وقتی کاتالوگ‌ها از فایل‌های کانفیگ ساخته نشده‌اند،
+     loadSettings «اعتبارسنجی» را انجام نمی‌دهد. قبلاً فراخوانی‌های
+     پیش از بوت (مثل preload مهره‌ها در خط ۸۸۲ یا await خود صفحه‌ها)
+     با کاتالوگِ خالی مواجه می‌شدند → مقدار ذخیره‌شدهٔ کاربر به
+     پیش‌فرض برمی‌گشت → کش مهره‌ها با neo قفل می‌شد و در بعضی صفحه‌ها
+     تعویض مجموعه/تخته اعمال نمی‌شد. */
+  let _catalogsReady = false;
 
   /* ---- 🔑 ادغام تم‌ها/مهره‌های سفارشی (تا بی‌نهایت) ---- */
   function loadLocalScript(src) {
@@ -102,54 +115,7 @@ window.chPh = function (w, h, label) {
     });
   }
 
-  /* CSS تم‌های سفارشی — چون تم با کلاس body اعمال می‌شود، قاعدهٔ آن
-     همین‌جا از روی رنگ‌های تعریف‌شده ساخته می‌شود؛ یعنی برای تم جدید
-     هیچ ویرایش CSS لازم نیست، فقط یک خط در custom-themes.js */
-  function injectCustomThemeStyles(extraThemes) {
-    if (!extraThemes.length) return;
-    const css = extraThemes
-      .map(function (t) {
-        return ".theme-" + t.id + " { --board-light: " + t.light + "; --board-dark: " + t.dark + "; }";
-      })
-      .join("\n");
-    const st = document.createElement("style");
-    st.id = "chesshub-custom-theme-styles";
-    st.textContent = css;
-    document.head.appendChild(st);
-  }
-
-  function mergeCustomCatalogs() {
-    /* تم‌های سفارشی — id تکراری با پایه یا داخل خود لیست نادیده گرفته می‌شود */
-    const extrasT = Array.isArray(window.CHESSHUB_EXTRA_THEMES) ? window.CHESSHUB_EXTRA_THEMES : [];
-    const seenT = {};
-    THEME_CATALOG.forEach(function (t) { seenT[t.id] = true; });
-    const newThemes = [];
-    extrasT.forEach(function (t) {
-      if (!t || !t.id || !t.name || !t.light || !t.dark) return;
-      if (seenT[String(t.id)]) return;
-      seenT[String(t.id)] = true;
-      newThemes.push({ id: String(t.id), name: String(t.name), light: String(t.light), dark: String(t.dark) });
-    });
-    THEME_CATALOG = THEME_CATALOG.concat(newThemes);
-    injectCustomThemeStyles(newThemes);
-
-    /* مجموعه‌های مهرهٔ سفارشی */
-    const extrasP = Array.isArray(window.CHESSHUB_EXTRA_PIECE_SETS) ? window.CHESSHUB_EXTRA_PIECE_SETS : [];
-    const seenP = {};
-    PIECE_SETS.forEach(function (p) { seenP[p.id] = true; });
-    const newPieces = [];
-    extrasP.forEach(function (p) {
-      if (!p || !p.id || !p.name) return;
-      if (seenP[String(p.id)]) return;
-      seenP[String(p.id)] = true;
-      newPieces.push({ id: String(p.id), name: String(p.name) });
-    });
-    PIECE_SETS = PIECE_SETS.concat(newPieces);
-
-    /* بازسازی لیست‌های اعتبارسنجی */
-    VALID_THEMES = THEME_CATALOG.map(function (t) { return t.id; });
-    VALID_PIECE_SETS = PIECE_SETS.map(function (p) { return p.id; });
-  }
+  /* تم‌های رنگی — فقط ۱۰ تم پایهٔ کاتالوگ بالا؛ فایل کانفیگ اضافه ندارند */
 
   function loadSettings() {
     const s = { ...defaultSettings };
@@ -158,8 +124,13 @@ window.chPh = function (w, h, label) {
       if (saved) Object.assign(s, JSON.parse(saved));
     } catch (e) {}
     // اعتبارسنجی — مقدار ذخیره‌شدهٔ قدیمی که دیگر در کاتالوگ نیست → پیشفرض
-    if (VALID_THEMES.indexOf(s.theme) < 0) s.theme = defaultSettings.theme;
-    if (VALID_PIECE_SETS.indexOf(s.pieceSet) < 0) s.pieceSet = defaultSettings.pieceSet;
+    // (فقط بعد از ساخته‌شدن کاتالوگ‌ها در بوت — قبلش خام می‌خوانیم تا رِیس نباشد)
+    if (_catalogsReady) {
+      if (VALID_THEMES.indexOf(s.theme) < 0) s.theme = defaultSettings.theme;
+      if (VALID_PIECE_SETS.indexOf(s.pieceSet) < 0) s.pieceSet = defaultSettings.pieceSet;
+      // صفحهٔ بازی فقط تصویری است — مقدار نامعتبر/خالی = تختهٔ پیش‌فرض کاتالوگ
+      if (!s.board || VALID_BOARDS.indexOf(s.board) < 0) s.board = defaultSettings.board;
+    }
     const vol = Number(s.volume);
     s.volume = isNaN(vol) ? defaultSettings.volume : Math.max(0, Math.min(100, vol));
     s.sound = s.sound !== false;
@@ -182,8 +153,12 @@ window.chPh = function (w, h, label) {
       document.body.classList.add(`theme-${theme}`);
     }
 
+    // انتخاب تم رنگی یعنی تختهٔ تصویری خاموش (دو حالت جای یکدیگر را نمی‌گیرند)
+    applyBoardImage(null);
+
     const settings = loadSettings();
     settings.theme = theme;
+    settings.board = null;
     saveSettings(settings);
 
     document.querySelectorAll(".theme-btn").forEach((btn) => {
@@ -195,6 +170,246 @@ window.chPh = function (w, h, label) {
   function applySavedThemeEarly() {
     const settings = loadSettings();
     document.body.classList.add(`theme-${settings.theme}`);
+    if (settings.board) applyBoardImage(settings.board);
+  }
+
+  /* ============================================
+     🖼️ تختهٔ تصویری — عکس کامل ۸×۸ به‌جای رنگ خانه‌ها
+     --------------------------------------------
+     body.board-img + board-<id> روی body گذاشته می‌شود و آدرس عکس در
+     --board-image تزریق می‌گردد؛ همهٔ تخته‌های سایت (chessground و
+     خانه‌ای) با قواعد CSS روی این عکس می‌افتند. null = تختهٔ رنگی تم.
+     ============================================ */
+  function applyBoardImage(id) {
+    document.body.className = document.body.className
+      .split(" ")
+      .filter((cls) => !cls.startsWith("board-"))
+      .join(" ");
+    const old = document.getElementById("chesshub-board-image-style");
+    if (old) old.remove();
+
+    const found = BOARD_IMAGES.find(function (b) { return b.id === id; });
+    if (found) {
+      document.body.classList.add("board-img", "board-" + found.id);
+      const st = document.createElement("style");
+      st.id = "chesshub-board-image-style";
+      /* 🔑 آدرس مطلق — url داخل متغیر CSS توسط مرورگر نسبت به فایلِ
+         «مصرف‌کنندهٔ» متغیر (css/style.css) باز می‌شود نه ریشهٔ سایت.
+         ⚡ سرعت: اگر پس‌زمینهٔ فشرده‌شدهٔ همین تخته در localStorage باشد
+         (chesshub_board_bg)، دیگر هیچ عکسی دانلود نمی‌شود — بلافاصله اعمال. */
+      const cached = cachedBoardBg(found.id);
+      const url = cached || new URL(found.image, location.href).href;
+      if (!cached) cacheBoardBg(found);
+      st.textContent = 'body.board-img { --board-image: url("' + url + '"); }';
+      document.head.appendChild(st);
+      // دکمه‌های سریع تم رنگی در صفحات دیگر — هیچ‌کدام فعال نیستند
+      document.querySelectorAll(".theme-btn").forEach((btn) => {
+        btn.classList.remove("active");
+      });
+    } else {
+      // بازگشت به تختهٔ رنگی — دکمهٔ تم ذخیره‌شده دوباره فعال شود
+      const cur = loadSettings().theme;
+      document.querySelectorAll(".theme-btn").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.theme === cur);
+      });
+    }
+  }
+
+  /* 🖼️ بندانگشتی کارت تنظیمات — بدون هیچ فایل در پروژه! برش ۲×۲ گوشهٔ بالا-چپِ
+     عکس بزرگ با canvas ساخته می‌شود و dataURL آن در localStorage مرورگر کش می‌شود
+     (کلید chesshub_board_thumbs). با تغییر هنر تخته‌ها THUMB_VER را زیاد کن تا
+     کش باطل شود. cb(url): url=dataURL آماده؛ null = نشد (مثلاً file:// یا CORS)
+     → کارت موقتاً از CSS-zoom خودِ عکس بزرگ همان برش را نشان می‌دهد. */
+  const THUMB_CACHE_KEY = "chesshub_board_thumbs";
+  const THUMB_VER = "2"; // +۱ بعد از تعویض هنر تخته‌ها (باطل‌کردن کش بندانگشتی و پس‌زمینه)
+
+  /* ⚡ پس‌زمینهٔ فشردهٔ تخته در localStorage — بزرگ‌ترین برد سرعت سایت:
+     عکس کامل تخته فقط «اولین بار» دانلود می‌شود؛ نسخهٔ فشرده (≤۱۰۲۴px،
+     WebP/JPEG) در مرورگر ذخیره می‌شود و در همهٔ بازدیدهای بعدی صفحه
+     بدون هیچ درخواست شبکه‌ای همان‌جا اعمال می‌شود. */
+  const BOARD_BG_KEY = "chesshub_board_bg";
+  function cachedBoardBg(id) {
+    try {
+      const c = JSON.parse(localStorage.getItem(BOARD_BG_KEY) || "null");
+      return c && c.id === id && c.ver === THUMB_VER && c.url ? c.url : null;
+    } catch (e) {
+      return null;
+    }
+  }
+  function cacheBoardBg(b) {
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const w = Math.min(img.width || 1024, 1024);
+        const h = Math.round(((img.height || w) * w) / (img.width || w));
+        const cv = document.createElement("canvas");
+        cv.width = w;
+        cv.height = h;
+        cv.getContext("2d").drawImage(img, 0, 0, w, h);
+        let url = cv.toDataURL("image/webp", 0.82);
+        if (url.indexOf("data:image/webp") !== 0) url = cv.toDataURL("image/jpeg", 0.82); // سافاری
+        try {
+          localStorage.setItem(
+            BOARD_BG_KEY,
+            JSON.stringify({ id: b.id, ver: THUMB_VER, url: url })
+          );
+        } catch (e) {}
+      } catch (e) {}
+    };
+    img.onerror = () => {};
+    img.src = new URL(b.image, location.href).href;
+  }
+  function getBoardThumb(b, cb) {
+    try {
+      const c = JSON.parse(localStorage.getItem(THUMB_CACHE_KEY) || "null");
+      if (c && c.ver === THUMB_VER && c.thumbs && c.thumbs[b.id]) {
+        cb(c.thumbs[b.id]);
+        return;
+      }
+    } catch (e) {}
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const cv = document.createElement("canvas");
+        cv.width = cv.height = 320;
+        cv.getContext("2d").drawImage(img, 0, 0, img.width / 4, img.height / 4, 0, 0, 320, 320);
+        const url = cv.toDataURL("image/jpeg", 0.85);
+
+        /* 🔎 تختهٔ کشف‌شده رنگ ثابت ندارد — از خود عکس نمونه‌برداری می‌شود:
+           تصویر را ۸×۸ می‌کنیم؛ هر پیکسل ≈ میانگین یک خانه */
+        if (b.light == null || b.dark == null) {
+          try {
+            const sc = document.createElement("canvas");
+            sc.width = sc.height = 8;
+            const scx = sc.getContext("2d");
+            scx.drawImage(img, 0, 0, 8, 8);
+            const d = scx.getImageData(0, 0, 8, 8).data;
+            const L = [], D = [];
+            for (let r = 0; r < 8; r++)
+              for (let col = 0; col < 8; col++) {
+                const i = (r * 8 + col) * 4;
+                ((r + col) % 2 === 0 ? L : D).push([d[i], d[i + 1], d[i + 2]]);
+              }
+            const avgHex = (ps) => {
+              const s = ps.reduce((a, p) => [a[0] + p[0], a[1] + p[1], a[2] + p[2]], [0, 0, 0]);
+              return "#" + s.map((v) => ("0" + Math.round(v / ps.length).toString(16)).slice(-2)).join("");
+            };
+            b.light = avgHex(L);
+            b.dark = avgHex(D);
+          } catch (e) {
+            b.light = b.light || "#eeeed2";
+            b.dark = b.dark || "#769656";
+          }
+        }
+
+        let c = null;
+        try { c = JSON.parse(localStorage.getItem(THUMB_CACHE_KEY) || "null"); } catch (e) {}
+        if (!c || c.ver !== THUMB_VER || !c.thumbs) c = { ver: THUMB_VER, thumbs: {} };
+        c.thumbs[b.id] = url;
+        try { localStorage.setItem(THUMB_CACHE_KEY, JSON.stringify(c)); } catch (e) {}
+        cb(url);
+      } catch (e) {
+        cb(null);
+      }
+    };
+    img.onerror = () => cb(null);
+    img.src = new URL(b.image, location.href).href;
+  }
+
+  /* 🖼️ اعمال و ذخیرهٔ فوری تخته — بخش «صفحهٔ بازی» مستقل از دکمهٔ «ذخیرهٔ تغییرات»
+     کار می‌کند: با یک لمس همان لحظه اعمال و ذخیره می‌شود (بدون نوار isDirty). */
+  function saveBoardNow(id) {
+    const s = loadSettings();
+    s.board = id;
+    saveSettings(s);
+    applyBoardImage(id);
+    document.dispatchEvent(
+      new CustomEvent("boardChanged", { detail: { board: id } })
+    );
+  }
+
+  /* 🖼️ کاتالوگ تخته‌ها — فقط از js/boards-config.js (آدرس عکس‌ها؛ دستکاری کد،
+     برای بازدیدکننده نامرئی). اسم هر تخته = اسم خود فایل بدون پسوند
+     (green.png → «green»). پیش‌نمایش ۲×۲ کارت هم خودکار از برش همان عکس
+     ساخته می‌شود (getBoardThumb). اگر فقط اسم فایل بنویسی، خودکار از پوشهٔ
+     images/boards خوانده می‌شود و پسوندِ نیامده = .png فرض می‌شود.
+     عکسی که در پوشه باشد ولی در لیست نباشد، در سایت نشان داده نمی‌شود. */
+  function boardNameFromFile(path) {
+    const file = String(path).split(/[\/\\]/).pop() || "";
+    return file.replace(/\.[a-z0-9]+$/i, "") || "Board";
+  }
+  function boardIdFromFile(path) {
+    return boardNameFromFile(path).toLowerCase().replace(/[^a-z0-9_-]/g, "") || "board";
+  }
+  function addBoardFromAddress(addr) {
+    let image = null, name = null, light = null, dark = null;
+    if (typeof addr === "string") {
+      image = addr.trim();
+    } else if (addr && typeof addr === "object" && addr.image) {
+      /* شکل کامل اختیاری: { image, name, light, dark } */
+      image = String(addr.image).trim();
+      name = addr.name ? String(addr.name) : null;
+      light = addr.light || null;
+      dark = addr.dark || null;
+    }
+    if (!image) return;
+    if (!/[\/\\]/.test(image)) image = "images/boards/" + image;
+    if (!/\.[a-z0-9]+$/i.test(image)) image += ".png";
+    const id = boardIdFromFile(image);
+    if (!id || BOARD_IMAGES.some((b) => b.id === id)) return;
+    BOARD_IMAGES.push({
+      id: id,
+      /* اسم تخته = اسم فایل بدون پسوند؛ با فیلد اختیاری name قابل عوض‌کردن است */
+      name: name || boardNameFromFile(image),
+      image: image,
+      light: light,
+      dark: dark,
+    });
+    VALID_BOARDS.push(id);
+  }
+  function buildBoardsFromConfig() {
+    const list = Array.isArray(window.CHESSHUB_BOARD_IMAGES)
+      ? window.CHESSHUB_BOARD_IMAGES
+      : [];
+    list.forEach(addBoardFromAddress);
+    /* مهاجرت یک‌باره از نسخه‌های قبل: کادر قدیمی تنظیمات / board-add.js */
+    try {
+      const old = JSON.parse(localStorage.getItem("chesshub_custom_boards") || "[]");
+      if (Array.isArray(old)) {
+        old.forEach((b) => { if (b && b.image) addBoardFromAddress(String(b.image)); });
+      }
+      localStorage.removeItem("chesshub_custom_boards");
+    } catch (e) {}
+    if (Array.isArray(window.CHESSHUB_EXTRA_BOARDS)) {
+      window.CHESSHUB_EXTRA_BOARDS.forEach((b) => {
+        if (b && b.image) addBoardFromAddress(b.image);
+      });
+    }
+  }
+
+  /* ♟️ کاتالوگ مهره‌ها — فقط از js/pieces-config.js (نام پوشه‌های داخل
+     images/pieces؛ دستکاری کد، برای بازدیدکننده نامرئی). اسمی که روی هاور
+     کارت دیده می‌شود = خود نام پوشه. لیست خالی → ۹ مجموعهٔ پیش‌فرض. */
+  function buildPiecesFromConfig() {
+    let folders = Array.isArray(window.CHESSHUB_PIECE_FOLDERS)
+      ? window.CHESSHUB_PIECE_FOLDERS.map((f) => String(f || "").trim()).filter(Boolean)
+      : [];
+    /* مهاجرت یک‌باره از custom-pieces.js نسخه‌های قبل */
+    if (Array.isArray(window.CHESSHUB_EXTRA_PIECE_SETS)) {
+      window.CHESSHUB_EXTRA_PIECE_SETS.forEach((p) => {
+        if (p && p.id && folders.indexOf(String(p.id)) < 0) folders.push(String(p.id));
+      });
+    }
+    if (!folders.length) folders = PIECE_SETS_FALLBACK.slice();
+    const seen = {};
+    PIECE_SETS = [];
+    folders.forEach((f) => {
+      const id = f.replace(/[^a-z0-9_-]/gi, "");
+      if (!id || seen[id]) return;
+      seen[id] = true;
+      PIECE_SETS.push({ id: id, name: f });
+    });
+    VALID_PIECE_SETS = PIECE_SETS.map((p) => p.id);
   }
 
   function toggleSound(enabled) {
@@ -245,8 +460,21 @@ window.chPh = function (w, h, label) {
           const AC = window.AudioContext || window.webkitAudioContext;
           if (!AC) return null;
           this._ctx = new AC();
+          /* کمپرسور ملایم روی خروجی — وقتی چند صدا روی‌هم می‌افتند
+             (ضربه + کیش + انتخاب) هیچ‌وقت تیز/بریده نمی‌شود */
           this._master = this._ctx.createGain();
-          this._master.connect(this._ctx.destination);
+          try {
+            const comp = this._ctx.createDynamicsCompressor();
+            comp.threshold.value = -18;
+            comp.knee.value = 24;
+            comp.ratio.value = 4;
+            comp.attack.value = 0.004;
+            comp.release.value = 0.18;
+            this._master.connect(comp);
+            comp.connect(this._ctx.destination);
+          } catch (e) {
+            this._master.connect(this._ctx.destination);
+          }
         }
         if (this._ctx.state === "suspended") this._ctx.resume();
         // ولوم کاربر — سقف کلی پایین نگه داشته می‌شود تا هیچ‌وقت تند نباشد
@@ -270,10 +498,11 @@ window.chPh = function (w, h, label) {
     },
 
     // ضربهٔ خشکِ چوبی = بدنهٔ نویز باندپس‌شده + تامپِ سینوسی با پیچ افت‌کننده
+    //    + یک لایهٔ «بدنه» نرم‌تر برای گرم‌تر شدن صدا (v11.22)
     _knock(at, freq, vol, dur) {
       const ctx = this._ctx;
       try {
-        // ۱) کلیک — نویز فیلترشده با افت خیلی سریع
+        // ۱) کلیک — نویز فیلترشده؛ شروع نرم (۴ms) تا هیچ کلیک دیجیتالی نشود
         const src = ctx.createBufferSource();
         src.buffer = this._noise(ctx);
         const bp = ctx.createBiquadFilter();
@@ -281,7 +510,8 @@ window.chPh = function (w, h, label) {
         bp.frequency.value = freq * 4.4;
         bp.Q.value = 1.3;
         const g = ctx.createGain();
-        g.gain.setValueAtTime(vol, at);
+        g.gain.setValueAtTime(0.0001, at);
+        g.gain.linearRampToValueAtTime(vol, at + 0.004);
         g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
         src.connect(bp);
         bp.connect(g);
@@ -301,10 +531,25 @@ window.chPh = function (w, h, label) {
         og.connect(this._master);
         osc.start(at);
         osc.stop(at + dur * 1.25 + 0.02);
+
+        // ۳) بدنهٔ گرم — سینوس بم‌تر و کوتاه با ولوم کم؛ عمق «چوبی» می‌دهد
+        const body = ctx.createOscillator();
+        const bg = ctx.createGain();
+        body.type = "sine";
+        body.frequency.setValueAtTime(freq * 0.9, at);
+        body.frequency.exponentialRampToValueAtTime(freq * 0.5, at + dur * 1.6);
+        bg.gain.setValueAtTime(0.0001, at);
+        bg.gain.linearRampToValueAtTime(vol * 0.32, at + 0.006);
+        bg.gain.exponentialRampToValueAtTime(0.0001, at + dur * 1.8);
+        body.connect(bg);
+        bg.connect(this._master);
+        body.start(at);
+        body.stop(at + dur * 2 + 0.02);
       } catch (e) {}
     },
 
-    _tone(freq, at, dur, type, vol) {
+    // تون با اورتون ملایم — یک هارمونیک اضافه صدا را «گرم‌تر» و طبیعی‌تر می‌کند
+    _tone(freq, at, dur, type, vol, harmonic) {
       const ctx = this._ctx;
       try {
         const osc = ctx.createOscillator();
@@ -318,6 +563,19 @@ window.chPh = function (w, h, label) {
         gain.connect(this._master);
         osc.start(at);
         osc.stop(at + dur + 0.03);
+        if (harmonic !== false) {
+          const h = ctx.createOscillator();
+          const hg = ctx.createGain();
+          h.type = "sine";
+          h.frequency.value = freq * 2;
+          hg.gain.setValueAtTime(0.0001, at);
+          hg.gain.exponentialRampToValueAtTime(vol * 0.35, at + 0.012);
+          hg.gain.exponentialRampToValueAtTime(0.0001, at + dur * 0.8);
+          h.connect(hg);
+          hg.connect(this._master);
+          h.start(at);
+          h.stop(at + dur + 0.03);
+        }
       } catch (e) {}
     },
 
@@ -327,33 +585,37 @@ window.chPh = function (w, h, label) {
       const t = ctx.currentTime + 0.001;
 
       if (name === "move") {
-        // نشستن مهره — یک ضربهٔ کوتاه و خشک
+        // نشستن مهره — یک ضربهٔ کوتاه و خشک با بدنهٔ گرم
         this._knock(t, 180, 0.5, 0.055);
       } else if (name === "capture") {
-        // گرفتن مهره — دو ضربهٔ محکم پشت‌سرهم
+        // گرفتن مهره — دو ضربهٔ محکم + لرزش کوتاه تخته
         this._knock(t, 160, 0.62, 0.05);
         this._knock(t + 0.055, 128, 0.52, 0.07);
+        this._knock(t + 0.115, 96, 0.2, 0.09);
       } else if (name === "check") {
-        // کیش — همان ضربه + تیک هشدار ظریف
+        // کیش — ضربه + دو نت هشدار ظریف با اورتون
         this._knock(t, 200, 0.5, 0.05);
-        this._tone(1180, t + 0.05, 0.07, "sine", 0.10);
-        this._tone(880, t + 0.12, 0.09, "sine", 0.09);
+        this._tone(1180, t + 0.05, 0.08, "sine", 0.10);
+        this._tone(880, t + 0.13, 0.11, "sine", 0.09);
       } else if (name === "select") {
-        this._tone(520, t, 0.04, "sine", 0.07);
+        this._tone(560, t, 0.045, "sine", 0.06);
       } else if (name === "correct") {
-        this._tone(660, t, 0.08, "sine", 0.12);
-        this._tone(990, t + 0.085, 0.12, "sine", 0.12);
+        this._tone(660, t, 0.09, "sine", 0.12);
+        this._tone(990, t + 0.085, 0.14, "sine", 0.12);
       } else if (name === "wrong") {
         this._tone(210, t, 0.13, "sine", 0.11);
-        this._tone(155, t + 0.1, 0.16, "sine", 0.10);
+        this._tone(155, t + 0.1, 0.17, "sine", 0.10);
       } else if (name === "win") {
+        // آرپژ دو-می-سُل-دو با پنجمِ زیرین — پرتر و شادتر
         [523, 659, 784, 1046].forEach((f, i) => {
-          this._tone(f, t + i * 0.09, 0.16, "sine", 0.11);
+          this._tone(f, t + i * 0.09, 0.18, "sine", 0.11);
+          if (i === 3) this._tone(f / 2 * 3, t + i * 0.09 + 0.02, 0.22, "sine", 0.05, false);
         });
       } else if (name === "lose") {
         [392, 311, 262].forEach((f, i) => {
-          this._tone(f, t + i * 0.12, 0.18, "sine", 0.10);
+          this._tone(f, t + i * 0.12, 0.2, "sine", 0.10);
         });
+        this._tone(196, t + 0.36, 0.3, "sine", 0.07, false);
       }
     },
   };
@@ -363,7 +625,7 @@ window.chPh = function (w, h, label) {
      ============================================ */
 
   const ChessUtils = {
-    // ۱۲ مهره — مسیر: pieces/<set>/<code>.png
+    // ۱۲ مهره — مسیر: images/pieces/<set>/<code>.png
     pieceCodes: {
       wk: "wk.png", wq: "wq.png", wr: "wr.png", wb: "wb.png",
       wn: "wn.png", wp: "wp.png", bk: "bk.png", bq: "bq.png",
@@ -416,7 +678,7 @@ window.chPh = function (w, h, label) {
             this._errors[key] = true;
             done();
           };
-          img.src = `pieces/${pieceSet}/${filename}`;
+          img.src = `images/pieces/${pieceSet}/${filename}`;
           this._pieceImages[key] = img;
         });
       });
@@ -440,9 +702,9 @@ window.chPh = function (w, h, label) {
 
     /* ---------- 🆕 نگاشت پویا مهره‌های Chessground ----------
        Chessground مهره‌ها را با CSS نشان می‌دهد (piece.<color>.<type>)
-       و مجموعه‌های مهره بی‌نهایت‌اند (کتالوگ رسمی + مجموعه‌های دلخواه
-       custom-pieces.js). پس نگاشت تصاویر را همین‌جا به‌صورت پویا
-       می‌سازیم — برای هر id ای کار می‌کند و هرگز کهنه نمی‌شود. */
+       و مجموعه‌های مهره از js/pieces-config.js می‌آیند (بی‌نهایت). پس
+       نگاشت تصاویر را همین‌جا به‌صورت پویا می‌سازیم — برای هر id ای
+       کار می‌کند و هرگز کهنه نمی‌شود. */
     _cgStyleIds: {},
     ensureCgPieceSetCss(cls, setId) {
       if (!cls || !setId) return;
@@ -454,7 +716,7 @@ window.chPh = function (w, h, label) {
       ["w", "b"].forEach(function (c) {
         Object.keys(types).forEach(function (t) {
           css += "." + cls + ".set-" + setId + " piece." + colors[c] + "." + types[t] +
-            "{background-image:url('pieces/" + setId + "/" + c + t + ".png')}\n";
+            "{background-image:url('images/pieces/" + setId + "/" + c + t + ".png')}\n";
         });
       });
       const st = document.createElement("style");
@@ -565,7 +827,7 @@ window.chPh = function (w, h, label) {
 
         const code = prefix + piece.type;
         const img = new Image();
-        img.src = `pieces/${pieceSet}/${code}.png`;
+        img.src = `images/pieces/${pieceSet}/${code}.png`;
         img.alt = piece.name;
         img.onerror = () => {
           const glyph = document.createElement("span");
@@ -933,25 +1195,13 @@ window.chPh = function (w, h, label) {
 
   /* ============================================
      ۷) منطق صفحه تنظیمات — کاتالوگ رسمی
-     ۱۰ تم رنگی + ۹ مجموعه مهره + کارت صدا + Guard
+     تخته‌های تصویری (اعمال بی‌درنگ) + مجموعه‌های مهره + کارت صدا + Guard
      ============================================ */
 
   function initSettingsPage() {
     const themeGrid = document.getElementById("themeGrid");
     const pieceContainer = document.getElementById("pieceSetsContainer");
     if (!themeGrid && !pieceContainer) return;
-
-    /* زیرنویس با تعداد واقعی — بعد از افزودن تم/مهرهٔ دلخواه خودش به‌روز می‌ماند */
-    if (themeGrid) {
-      const card = themeGrid.closest(".settings-card");
-      const sub = card ? card.querySelector(".card-sub") : null;
-      if (sub) sub.textContent = faNum(THEME_CATALOG.length) + " تم رنگی — افزودن تم دلخواه تا بی‌نهایت";
-    }
-    if (pieceContainer) {
-      const card = pieceContainer.closest(".settings-card");
-      const sub = card ? card.querySelector(".card-sub") : null;
-      if (sub) sub.textContent = faNum(PIECE_SETS.length) + " مجموعهٔ مهره — افزودن مجموعهٔ دلخواه تا بی‌نهایت";
-    }
 
     const $ = (id) => document.getElementById(id);
     const saved = loadSettings();
@@ -1060,42 +1310,60 @@ window.chPh = function (w, h, label) {
       document.body.classList.add("theme-" + id);
     };
 
-    /* ---- رنگ پس‌زمینهٔ پیش‌نمایش مهره‌ها = تم انتخابی ---- */
+    /* ---- رنگ پس‌زمینهٔ پیش‌نمایش مهره‌ها = رنگ خودِ تختهٔ تصویری فعال (یا تم ذخیره‌شده) ---- */
     function updatePieceBoxColors() {
       if (!pieceContainer) return;
+      const cur = loadSettings();
+      const bi = BOARD_IMAGES.find((b) => b.id === cur.board);
       const th =
-        THEME_CATALOG.find((t) => t.id === tempTheme) || THEME_CATALOG[2];
+        (bi && { light: bi.light, dark: bi.dark }) ||
+        THEME_CATALOG.find((t) => t.id === cur.theme) ||
+        THEME_CATALOG[2];
       pieceContainer.querySelectorAll(".piece-box").forEach((el) => {
         el.style.setProperty("--cl", th.light);
         el.style.setProperty("--cd", th.dark);
       });
     }
 
-    /* ---- کارت‌های تم — پیش‌نمایش واقعی شطرنجی ---- */
-    function buildThemeButtons() {
+    /* ---- کارت‌های «صفحهٔ بازی» — فقط تخته‌های تصویری، اعمال و ذخیرهٔ بی‌درنگ ----
+       پیش‌نمایش = برش ۲×۲ بالا-چپ از خود عکس بزرگ: اول از کش localStorage،
+       اگر نبود همان لحظه با canvas ساخته می‌شود (تا آن موقع CSS-zoom نشان می‌دهد). */
+    function buildBoardCards() {
       if (!themeGrid) return;
       themeGrid.innerHTML = "";
-      THEME_CATALOG.forEach((theme) => {
+      const cur = loadSettings();
+
+      BOARD_IMAGES.forEach((b) => {
         const btn = document.createElement("button");
         btn.type = "button";
-        btn.className = "theme-card" + (theme.id === tempTheme ? " active" : "");
-        btn.title = theme.name;
+        btn.className = "theme-card board-card" + (b.id === cur.board ? " active" : "");
+        btn.title = b.name;
         btn.innerHTML =
-          '<span class="theme-board" style="--cl:' + theme.light + ";--cd:" + theme.dark + '"></span>' +
-          '<span class="theme-name">' + theme.name + "</span>" +
+          '<span class="board-thumb"><img src="' + b.image + '" alt="' + b.name + '" data-zoom="1" loading="lazy"></span>' +
           '<span class="pick-badge"><i class="fas fa-check"></i></span>';
+
+        const imgEl = btn.querySelector("img");
+
         btn.onclick = () => {
           themeGrid
             .querySelectorAll(".theme-card")
-            .forEach((b) => b.classList.remove("active"));
+            .forEach((c) => c.classList.remove("active"));
           btn.classList.add("active");
-          tempTheme = theme.id;
-          applyTempTheme(theme.id);
+          saveBoardNow(b.id);
           updatePieceBoxColors();
           Sound.play("select");
-          refreshDirtyUI();
         };
         themeGrid.appendChild(btn);
+
+        /* 🔑 بعد از append — در مسیر کش، cb هم‌زمان اجرا می‌شود و
+           imgEl باید همین حالا به DOM وصل باشد (isConnected=true) */
+        getBoardThumb(b, (url) => {
+          if (!url || !imgEl.isConnected) return;
+          imgEl.removeAttribute("data-zoom");
+          imgEl.src = url;
+          /* رنگ خانه‌های تختهٔ کشف‌شده همین حالا نمونه‌برداری شده — پیش‌نمایش مهره‌ها هم رنگ بگیرد */
+          updatePieceBoxColors();
+        });
       });
     }
 
@@ -1111,9 +1379,9 @@ window.chPh = function (w, h, label) {
         btn.title = set.name;
         btn.innerHTML =
           '<span class="piece-box">' +
-          '<img src="pieces/' + set.id + '/wk.png" alt="King" loading="lazy" ' +
+          '<img src="images/pieces/' + set.id + '/wk.png" alt="King" loading="lazy" ' +
           'onerror="this.style.display=\'none\'">' +
-          '<img src="pieces/' + set.id + '/bk.png" alt="King" loading="lazy" ' +
+          '<img src="images/pieces/' + set.id + '/bk.png" alt="King" loading="lazy" ' +
           'onerror="this.style.display=\'none\'">' +
           "</span>" +
           '<span class="piece-name">' + set.name + "</span>" +
@@ -1186,7 +1454,7 @@ window.chPh = function (w, h, label) {
       }
     }
 
-    /* ---- ذخیره نهایی ---- */
+    /* ---- ذخیره نهایی (بخش‌های دیگر — تخته مستقل و بی‌درنگ ذخیره می‌شود) ---- */
     function persistAll() {
       const settings = loadSettings();
       settings.theme = tempTheme;
@@ -1234,8 +1502,9 @@ window.chPh = function (w, h, label) {
           tempSound = defaultSettings.sound;
           tempVolume = defaultSettings.volume;
           applyTempTheme(tempTheme);
+          saveBoardNow(defaultSettings.board);
           Sound._tempVol = null;
-          buildThemeButtons();
+          buildBoardCards();
           buildPieceButtons();
           syncSoundUI();
           document.dispatchEvent(
@@ -1306,7 +1575,7 @@ window.chPh = function (w, h, label) {
     });
 
     /* ---- بوت صفحه ---- */
-    buildThemeButtons();
+    buildBoardCards();
     buildPieceButtons();
     initSoundCard();
     refreshDirtyUI();
@@ -1747,21 +2016,22 @@ window.chPh = function (w, h, label) {
           row.className =
             "engine-item" + (isDone ? " done" : "") + (isActive ? " active" : "");
           row.innerHTML =
-            '<div class="engine-ico"><i class="fas fa-microchip"></i></div>' +
+            '<div class="engine-ico"><i class="fas fa-' + (isDone ? "circle-check" : "microchip") + '"></i></div>' +
             '<div class="engine-info">' +
               '<div class="engine-name">' + eng.label +
                 ' <span class="engine-ver">v' + eng.version + "</span>" +
                 (eng.tag ? '<span class="engine-tag">' + eng.tag + "</span>" : "") +
-              "</div>" +
-              '<div class="engine-desc">' + eng.desc + "</div>" +
-              '<div class="engine-size">حجم تقریبی: ≈ ' + sizeFa(eng.sizeBytes) + "</div>" +
-              '<div class="engine-status' + (isDone ? " ok" : "") + '">' +
-                (isDone ? "دانلود شده ✅" : "ذخیره نشده") +
                 (isActive
-                  ? '<span class="engine-active-chip"><i class="fas fa-circle-check"></i> انجین فعال</span>'
+                  ? '<span class="engine-active-chip"><i class="fas fa-bolt"></i> فعال</span>'
                   : "") +
               "</div>" +
+              '<div class="engine-desc">' + eng.desc + " · حجم ≈ " + sizeFa(eng.sizeBytes) + "</div>" +
+              '<div class="engine-status' + (isDone ? " ok" : "") + '">' +
+                '<i class="fas fa-' + (isDone ? "circle-check" : "circle-minus") + '"></i>' +
+                (isDone ? "آمادهٔ استفاده" : "روی این مرورگر نصب نشده") +
+              "</div>" +
               '<div class="engine-prog"><div class="engine-prog-fill"></div></div>' +
+              '<span class="engine-prog-pct"></span>' +
             "</div>" +
             '<div class="engine-actions"></div>';
 
@@ -1782,16 +2052,20 @@ window.chPh = function (w, h, label) {
 
           function startDownload() {
             prog.classList.add("show");
+            const pctEl = row.querySelector(".engine-prog-pct");
+            if (pctEl) pctEl.classList.add("show");
             // در حین دانلود فقط «لغو» نشان داده شود
             actions.innerHTML = "";
             mkBtn("لغو", "xmark", "ghost", function () { EngineStore.cancel(eng.id); });
             EngineStore.download(eng.id, function (p) {
               fill.style.width = p + "%";
+              if (pctEl) pctEl.textContent = faNum(Math.round(p)) + "٪";
             })
               .then(function () { render(); })
               .catch(function (err) {
                 prog.classList.remove("show");
                 fill.style.width = "0%";
+                if (pctEl) { pctEl.classList.remove("show"); pctEl.textContent = ""; }
                 if (err && err.name === "AbortError") { render(); return; }
                 console.warn("[EngineStore] دانلود ناموفق:", err && err.message);
                 alert("دانلود انجین ناموفق بود: " + ((err && err.message) || "خطای شبکه"));
@@ -1824,18 +2098,42 @@ window.chPh = function (w, h, label) {
   }
 
 
+  /* ♟️ مختصات a-h و 1-8 — از v11.21 به بعد در js/board-ui.js ساخته می‌شوند:
+     «لایهٔ ثابت» بیرون از خانه‌ها؛ رندر مهره‌ها دیگر برچسب‌ها را پاک
+     نمی‌کند (بدون چشمک) و فونت کوچک است (≈۱۱px روی تختهٔ ۵۰۰px).
+     تزریق قبلی داخل خانه‌ها بود و با هر حرکت پاک و ۳۰۰ms بعد برمی‌گشت. */
+
   /* ============================================
      ۸) بوت — اجرا پس از آماده شدن DOM
      ============================================ */
 
   async function boot() {
-    /* 🔑 اول فایل‌های سفارشی (بی‌نهایت تم/مهره) — با بستر زمانی تا ویرایشِ
-       مالکِ سایت همیشه بدون مشکل کش بلافاصله دیده شود */
+    /* 🔑 اول دو فایل کانفیگِ مالک — با بستر زمانی تا ویرایشِ فایل کانفیگ
+       همیشه بدون مشکل کش بلافاصله دیده شود */
     await Promise.all([
-      loadLocalScript("js/custom-themes.js?t=" + Date.now()),
-      loadLocalScript("js/custom-pieces.js?t=" + Date.now()),
+      loadLocalScript("js/boards-config.js?t=" + Date.now()),
+      loadLocalScript("js/pieces-config.js?t=" + Date.now()),
     ]);
-    mergeCustomCatalogs();
+    /* کاتالوگ تخته‌ها و مهره‌ها — از boards-config.js و pieces-config.js؛
+       قبل از اعمال تم/تختهٔ ذخیره‌شده */
+    buildBoardsFromConfig();
+    buildPiecesFromConfig();
+    /* 🔑 از این‌جا به بعد اعتبارسنجی تنظیمات فعال است */
+    _catalogsReady = true;
+
+    /* نجاتِ مقدارِ کهنه — اگر مجموعهٔ مهره/تختهٔ ذخیره‌شدهٔ کاربر دیگر
+       در کاتالوگ نیست: ذخیرهٔ مقدار معتبر + رویداد تا همهٔ صفحه‌ها
+       با کشِ تازه دوباره رندر کنند */
+    (function rescueStaleCatalogValues() {
+      let saved = {};
+      try { saved = JSON.parse(localStorage.getItem("chesshub_settings") || "{}") || {}; } catch (e) {}
+      const norm = loadSettings();
+      if ((saved.pieceSet && saved.pieceSet !== norm.pieceSet) ||
+          (saved.board && saved.board !== norm.board)) {
+        saveSettings(norm);
+        document.dispatchEvent(new Event("pieceSetChanged"));
+      }
+    })();
 
     applySavedThemeEarly();
 
@@ -1867,6 +2165,7 @@ window.chPh = function (w, h, label) {
     loadSettings,
     saveSettings,
     applyTheme,
+    applyBoardImage,
     toggleSound,
     togglePanel,
     getCurrentPieceSet,

@@ -37,128 +37,128 @@
 .an-board.cg-wrap piece { border-radius: 2px; }
 .an-board.cg-wrap piece.dragging { cursor: grabbing; }
 
-/* ---------- ۲) نگاشت ۹ ست مهرهٔ سایت → PNG های pieces/ ---------- */
+/* ---------- ۲) نگاشت ۹ ست مهرهٔ سایت → PNG های images/pieces/ ---------- */
 
-.an-board.set-alpha piece.white.king { background-image: url("../pieces/alpha/wk.png"); }
-.an-board.set-alpha piece.black.king { background-image: url("../pieces/alpha/bk.png"); }
-.an-board.set-alpha piece.white.queen { background-image: url("../pieces/alpha/wq.png"); }
-.an-board.set-alpha piece.black.queen { background-image: url("../pieces/alpha/bq.png"); }
-.an-board.set-alpha piece.white.rook { background-image: url("../pieces/alpha/wr.png"); }
-.an-board.set-alpha piece.black.rook { background-image: url("../pieces/alpha/br.png"); }
-.an-board.set-alpha piece.white.bishop { background-image: url("../pieces/alpha/wb.png"); }
-.an-board.set-alpha piece.black.bishop { background-image: url("../pieces/alpha/bb.png"); }
-.an-board.set-alpha piece.white.knight { background-image: url("../pieces/alpha/wn.png"); }
-.an-board.set-alpha piece.black.knight { background-image: url("../pieces/alpha/bn.png"); }
-.an-board.set-alpha piece.white.pawn { background-image: url("../pieces/alpha/wp.png"); }
-.an-board.set-alpha piece.black.pawn { background-image: url("../pieces/alpha/bp.png"); }
+.an-board.set-alpha piece.white.king { background-image: url("../images/pieces/alpha/wk.png"); }
+.an-board.set-alpha piece.black.king { background-image: url("../images/pieces/alpha/bk.png"); }
+.an-board.set-alpha piece.white.queen { background-image: url("../images/pieces/alpha/wq.png"); }
+.an-board.set-alpha piece.black.queen { background-image: url("../images/pieces/alpha/bq.png"); }
+.an-board.set-alpha piece.white.rook { background-image: url("../images/pieces/alpha/wr.png"); }
+.an-board.set-alpha piece.black.rook { background-image: url("../images/pieces/alpha/br.png"); }
+.an-board.set-alpha piece.white.bishop { background-image: url("../images/pieces/alpha/wb.png"); }
+.an-board.set-alpha piece.black.bishop { background-image: url("../images/pieces/alpha/bb.png"); }
+.an-board.set-alpha piece.white.knight { background-image: url("../images/pieces/alpha/wn.png"); }
+.an-board.set-alpha piece.black.knight { background-image: url("../images/pieces/alpha/bn.png"); }
+.an-board.set-alpha piece.white.pawn { background-image: url("../images/pieces/alpha/wp.png"); }
+.an-board.set-alpha piece.black.pawn { background-image: url("../images/pieces/alpha/bp.png"); }
 
-.an-board.set-classic piece.white.king { background-image: url("../pieces/classic/wk.png"); }
-.an-board.set-classic piece.black.king { background-image: url("../pieces/classic/bk.png"); }
-.an-board.set-classic piece.white.queen { background-image: url("../pieces/classic/wq.png"); }
-.an-board.set-classic piece.black.queen { background-image: url("../pieces/classic/bq.png"); }
-.an-board.set-classic piece.white.rook { background-image: url("../pieces/classic/wr.png"); }
-.an-board.set-classic piece.black.rook { background-image: url("../pieces/classic/br.png"); }
-.an-board.set-classic piece.white.bishop { background-image: url("../pieces/classic/wb.png"); }
-.an-board.set-classic piece.black.bishop { background-image: url("../pieces/classic/bb.png"); }
-.an-board.set-classic piece.white.knight { background-image: url("../pieces/classic/wn.png"); }
-.an-board.set-classic piece.black.knight { background-image: url("../pieces/classic/bn.png"); }
-.an-board.set-classic piece.white.pawn { background-image: url("../pieces/classic/wp.png"); }
-.an-board.set-classic piece.black.pawn { background-image: url("../pieces/classic/bp.png"); }
+.an-board.set-classic piece.white.king { background-image: url("../images/pieces/classic/wk.png"); }
+.an-board.set-classic piece.black.king { background-image: url("../images/pieces/classic/bk.png"); }
+.an-board.set-classic piece.white.queen { background-image: url("../images/pieces/classic/wq.png"); }
+.an-board.set-classic piece.black.queen { background-image: url("../images/pieces/classic/bq.png"); }
+.an-board.set-classic piece.white.rook { background-image: url("../images/pieces/classic/wr.png"); }
+.an-board.set-classic piece.black.rook { background-image: url("../images/pieces/classic/br.png"); }
+.an-board.set-classic piece.white.bishop { background-image: url("../images/pieces/classic/wb.png"); }
+.an-board.set-classic piece.black.bishop { background-image: url("../images/pieces/classic/bb.png"); }
+.an-board.set-classic piece.white.knight { background-image: url("../images/pieces/classic/wn.png"); }
+.an-board.set-classic piece.black.knight { background-image: url("../images/pieces/classic/bn.png"); }
+.an-board.set-classic piece.white.pawn { background-image: url("../images/pieces/classic/wp.png"); }
+.an-board.set-classic piece.black.pawn { background-image: url("../images/pieces/classic/bp.png"); }
 
-.an-board.set-g08ph piece.white.king { background-image: url("../pieces/g08ph/wk.png"); }
-.an-board.set-g08ph piece.black.king { background-image: url("../pieces/g08ph/bk.png"); }
-.an-board.set-g08ph piece.white.queen { background-image: url("../pieces/g08ph/wq.png"); }
-.an-board.set-g08ph piece.black.queen { background-image: url("../pieces/g08ph/bq.png"); }
-.an-board.set-g08ph piece.white.rook { background-image: url("../pieces/g08ph/wr.png"); }
-.an-board.set-g08ph piece.black.rook { background-image: url("../pieces/g08ph/br.png"); }
-.an-board.set-g08ph piece.white.bishop { background-image: url("../pieces/g08ph/wb.png"); }
-.an-board.set-g08ph piece.black.bishop { background-image: url("../pieces/g08ph/bb.png"); }
-.an-board.set-g08ph piece.white.knight { background-image: url("../pieces/g08ph/wn.png"); }
-.an-board.set-g08ph piece.black.knight { background-image: url("../pieces/g08ph/bn.png"); }
-.an-board.set-g08ph piece.white.pawn { background-image: url("../pieces/g08ph/wp.png"); }
-.an-board.set-g08ph piece.black.pawn { background-image: url("../pieces/g08ph/bp.png"); }
+.an-board.set-g08ph piece.white.king { background-image: url("../images/pieces/g08ph/wk.png"); }
+.an-board.set-g08ph piece.black.king { background-image: url("../images/pieces/g08ph/bk.png"); }
+.an-board.set-g08ph piece.white.queen { background-image: url("../images/pieces/g08ph/wq.png"); }
+.an-board.set-g08ph piece.black.queen { background-image: url("../images/pieces/g08ph/bq.png"); }
+.an-board.set-g08ph piece.white.rook { background-image: url("../images/pieces/g08ph/wr.png"); }
+.an-board.set-g08ph piece.black.rook { background-image: url("../images/pieces/g08ph/br.png"); }
+.an-board.set-g08ph piece.white.bishop { background-image: url("../images/pieces/g08ph/wb.png"); }
+.an-board.set-g08ph piece.black.bishop { background-image: url("../images/pieces/g08ph/bb.png"); }
+.an-board.set-g08ph piece.white.knight { background-image: url("../images/pieces/g08ph/wn.png"); }
+.an-board.set-g08ph piece.black.knight { background-image: url("../images/pieces/g08ph/bn.png"); }
+.an-board.set-g08ph piece.white.pawn { background-image: url("../images/pieces/g08ph/wp.png"); }
+.an-board.set-g08ph piece.black.pawn { background-image: url("../images/pieces/g08ph/bp.png"); }
 
-.an-board.set-game_room piece.white.king { background-image: url("../pieces/game_room/wk.png"); }
-.an-board.set-game_room piece.black.king { background-image: url("../pieces/game_room/bk.png"); }
-.an-board.set-game_room piece.white.queen { background-image: url("../pieces/game_room/wq.png"); }
-.an-board.set-game_room piece.black.queen { background-image: url("../pieces/game_room/bq.png"); }
-.an-board.set-game_room piece.white.rook { background-image: url("../pieces/game_room/wr.png"); }
-.an-board.set-game_room piece.black.rook { background-image: url("../pieces/game_room/br.png"); }
-.an-board.set-game_room piece.white.bishop { background-image: url("../pieces/game_room/wb.png"); }
-.an-board.set-game_room piece.black.bishop { background-image: url("../pieces/game_room/bb.png"); }
-.an-board.set-game_room piece.white.knight { background-image: url("../pieces/game_room/wn.png"); }
-.an-board.set-game_room piece.black.knight { background-image: url("../pieces/game_room/bn.png"); }
-.an-board.set-game_room piece.white.pawn { background-image: url("../pieces/game_room/wp.png"); }
-.an-board.set-game_room piece.black.pawn { background-image: url("../pieces/game_room/bp.png"); }
+.an-board.set-game_room piece.white.king { background-image: url("../images/pieces/game_room/wk.png"); }
+.an-board.set-game_room piece.black.king { background-image: url("../images/pieces/game_room/bk.png"); }
+.an-board.set-game_room piece.white.queen { background-image: url("../images/pieces/game_room/wq.png"); }
+.an-board.set-game_room piece.black.queen { background-image: url("../images/pieces/game_room/bq.png"); }
+.an-board.set-game_room piece.white.rook { background-image: url("../images/pieces/game_room/wr.png"); }
+.an-board.set-game_room piece.black.rook { background-image: url("../images/pieces/game_room/br.png"); }
+.an-board.set-game_room piece.white.bishop { background-image: url("../images/pieces/game_room/wb.png"); }
+.an-board.set-game_room piece.black.bishop { background-image: url("../images/pieces/game_room/bb.png"); }
+.an-board.set-game_room piece.white.knight { background-image: url("../images/pieces/game_room/wn.png"); }
+.an-board.set-game_room piece.black.knight { background-image: url("../images/pieces/game_room/bn.png"); }
+.an-board.set-game_room piece.white.pawn { background-image: url("../images/pieces/game_room/wp.png"); }
+.an-board.set-game_room piece.black.pawn { background-image: url("../images/pieces/game_room/bp.png"); }
 
-.an-board.set-glass piece.white.king { background-image: url("../pieces/glass/wk.png"); }
-.an-board.set-glass piece.black.king { background-image: url("../pieces/glass/bk.png"); }
-.an-board.set-glass piece.white.queen { background-image: url("../pieces/glass/wq.png"); }
-.an-board.set-glass piece.black.queen { background-image: url("../pieces/glass/bq.png"); }
-.an-board.set-glass piece.white.rook { background-image: url("../pieces/glass/wr.png"); }
-.an-board.set-glass piece.black.rook { background-image: url("../pieces/glass/br.png"); }
-.an-board.set-glass piece.white.bishop { background-image: url("../pieces/glass/wb.png"); }
-.an-board.set-glass piece.black.bishop { background-image: url("../pieces/glass/bb.png"); }
-.an-board.set-glass piece.white.knight { background-image: url("../pieces/glass/wn.png"); }
-.an-board.set-glass piece.black.knight { background-image: url("../pieces/glass/bn.png"); }
-.an-board.set-glass piece.white.pawn { background-image: url("../pieces/glass/wp.png"); }
-.an-board.set-glass piece.black.pawn { background-image: url("../pieces/glass/bp.png"); }
+.an-board.set-glass piece.white.king { background-image: url("../images/pieces/glass/wk.png"); }
+.an-board.set-glass piece.black.king { background-image: url("../images/pieces/glass/bk.png"); }
+.an-board.set-glass piece.white.queen { background-image: url("../images/pieces/glass/wq.png"); }
+.an-board.set-glass piece.black.queen { background-image: url("../images/pieces/glass/bq.png"); }
+.an-board.set-glass piece.white.rook { background-image: url("../images/pieces/glass/wr.png"); }
+.an-board.set-glass piece.black.rook { background-image: url("../images/pieces/glass/br.png"); }
+.an-board.set-glass piece.white.bishop { background-image: url("../images/pieces/glass/wb.png"); }
+.an-board.set-glass piece.black.bishop { background-image: url("../images/pieces/glass/bb.png"); }
+.an-board.set-glass piece.white.knight { background-image: url("../images/pieces/glass/wn.png"); }
+.an-board.set-glass piece.black.knight { background-image: url("../images/pieces/glass/bn.png"); }
+.an-board.set-glass piece.white.pawn { background-image: url("../images/pieces/glass/wp.png"); }
+.an-board.set-glass piece.black.pawn { background-image: url("../images/pieces/glass/bp.png"); }
 
-.an-board.set-light piece.white.king { background-image: url("../pieces/light/wk.png"); }
-.an-board.set-light piece.black.king { background-image: url("../pieces/light/bk.png"); }
-.an-board.set-light piece.white.queen { background-image: url("../pieces/light/wq.png"); }
-.an-board.set-light piece.black.queen { background-image: url("../pieces/light/bq.png"); }
-.an-board.set-light piece.white.rook { background-image: url("../pieces/light/wr.png"); }
-.an-board.set-light piece.black.rook { background-image: url("../pieces/light/br.png"); }
-.an-board.set-light piece.white.bishop { background-image: url("../pieces/light/wb.png"); }
-.an-board.set-light piece.black.bishop { background-image: url("../pieces/light/bb.png"); }
-.an-board.set-light piece.white.knight { background-image: url("../pieces/light/wn.png"); }
-.an-board.set-light piece.black.knight { background-image: url("../pieces/light/bn.png"); }
-.an-board.set-light piece.white.pawn { background-image: url("../pieces/light/wp.png"); }
-.an-board.set-light piece.black.pawn { background-image: url("../pieces/light/bp.png"); }
+.an-board.set-light piece.white.king { background-image: url("../images/pieces/light/wk.png"); }
+.an-board.set-light piece.black.king { background-image: url("../images/pieces/light/bk.png"); }
+.an-board.set-light piece.white.queen { background-image: url("../images/pieces/light/wq.png"); }
+.an-board.set-light piece.black.queen { background-image: url("../images/pieces/light/bq.png"); }
+.an-board.set-light piece.white.rook { background-image: url("../images/pieces/light/wr.png"); }
+.an-board.set-light piece.black.rook { background-image: url("../images/pieces/light/br.png"); }
+.an-board.set-light piece.white.bishop { background-image: url("../images/pieces/light/wb.png"); }
+.an-board.set-light piece.black.bishop { background-image: url("../images/pieces/light/bb.png"); }
+.an-board.set-light piece.white.knight { background-image: url("../images/pieces/light/wn.png"); }
+.an-board.set-light piece.black.knight { background-image: url("../images/pieces/light/bn.png"); }
+.an-board.set-light piece.white.pawn { background-image: url("../images/pieces/light/wp.png"); }
+.an-board.set-light piece.black.pawn { background-image: url("../images/pieces/light/bp.png"); }
 
-.an-board.set-neo piece.white.king { background-image: url("../pieces/neo/wk.png"); }
-.an-board.set-neo piece.black.king { background-image: url("../pieces/neo/bk.png"); }
-.an-board.set-neo piece.white.queen { background-image: url("../pieces/neo/wq.png"); }
-.an-board.set-neo piece.black.queen { background-image: url("../pieces/neo/bq.png"); }
-.an-board.set-neo piece.white.rook { background-image: url("../pieces/neo/wr.png"); }
-.an-board.set-neo piece.black.rook { background-image: url("../pieces/neo/br.png"); }
-.an-board.set-neo piece.white.bishop { background-image: url("../pieces/neo/wb.png"); }
-.an-board.set-neo piece.black.bishop { background-image: url("../pieces/neo/bb.png"); }
-.an-board.set-neo piece.white.knight { background-image: url("../pieces/neo/wn.png"); }
-.an-board.set-neo piece.black.knight { background-image: url("../pieces/neo/bn.png"); }
-.an-board.set-neo piece.white.pawn { background-image: url("../pieces/neo/wp.png"); }
-.an-board.set-neo piece.black.pawn { background-image: url("../pieces/neo/bp.png"); }
+.an-board.set-neo piece.white.king { background-image: url("../images/pieces/neo/wk.png"); }
+.an-board.set-neo piece.black.king { background-image: url("../images/pieces/neo/bk.png"); }
+.an-board.set-neo piece.white.queen { background-image: url("../images/pieces/neo/wq.png"); }
+.an-board.set-neo piece.black.queen { background-image: url("../images/pieces/neo/bq.png"); }
+.an-board.set-neo piece.white.rook { background-image: url("../images/pieces/neo/wr.png"); }
+.an-board.set-neo piece.black.rook { background-image: url("../images/pieces/neo/br.png"); }
+.an-board.set-neo piece.white.bishop { background-image: url("../images/pieces/neo/wb.png"); }
+.an-board.set-neo piece.black.bishop { background-image: url("../images/pieces/neo/bb.png"); }
+.an-board.set-neo piece.white.knight { background-image: url("../images/pieces/neo/wn.png"); }
+.an-board.set-neo piece.black.knight { background-image: url("../images/pieces/neo/bn.png"); }
+.an-board.set-neo piece.white.pawn { background-image: url("../images/pieces/neo/wp.png"); }
+.an-board.set-neo piece.black.pawn { background-image: url("../images/pieces/neo/bp.png"); }
 
-.an-board.set-neo_wood piece.white.king { background-image: url("../pieces/neo_wood/wk.png"); }
-.an-board.set-neo_wood piece.black.king { background-image: url("../pieces/neo_wood/bk.png"); }
-.an-board.set-neo_wood piece.white.queen { background-image: url("../pieces/neo_wood/wq.png"); }
-.an-board.set-neo_wood piece.black.queen { background-image: url("../pieces/neo_wood/bq.png"); }
-.an-board.set-neo_wood piece.white.rook { background-image: url("../pieces/neo_wood/wr.png"); }
-.an-board.set-neo_wood piece.black.rook { background-image: url("../pieces/neo_wood/br.png"); }
-.an-board.set-neo_wood piece.white.bishop { background-image: url("../pieces/neo_wood/wb.png"); }
-.an-board.set-neo_wood piece.black.bishop { background-image: url("../pieces/neo_wood/bb.png"); }
-.an-board.set-neo_wood piece.white.knight { background-image: url("../pieces/neo_wood/wn.png"); }
-.an-board.set-neo_wood piece.black.knight { background-image: url("../pieces/neo_wood/bn.png"); }
-.an-board.set-neo_wood piece.white.pawn { background-image: url("../pieces/neo_wood/wp.png"); }
-.an-board.set-neo_wood piece.black.pawn { background-image: url("../pieces/neo_wood/bp.png"); }
+.an-board.set-neo_wood piece.white.king { background-image: url("../images/pieces/neo_wood/wk.png"); }
+.an-board.set-neo_wood piece.black.king { background-image: url("../images/pieces/neo_wood/bk.png"); }
+.an-board.set-neo_wood piece.white.queen { background-image: url("../images/pieces/neo_wood/wq.png"); }
+.an-board.set-neo_wood piece.black.queen { background-image: url("../images/pieces/neo_wood/bq.png"); }
+.an-board.set-neo_wood piece.white.rook { background-image: url("../images/pieces/neo_wood/wr.png"); }
+.an-board.set-neo_wood piece.black.rook { background-image: url("../images/pieces/neo_wood/br.png"); }
+.an-board.set-neo_wood piece.white.bishop { background-image: url("../images/pieces/neo_wood/wb.png"); }
+.an-board.set-neo_wood piece.black.bishop { background-image: url("../images/pieces/neo_wood/bb.png"); }
+.an-board.set-neo_wood piece.white.knight { background-image: url("../images/pieces/neo_wood/wn.png"); }
+.an-board.set-neo_wood piece.black.knight { background-image: url("../images/pieces/neo_wood/bn.png"); }
+.an-board.set-neo_wood piece.white.pawn { background-image: url("../images/pieces/neo_wood/wp.png"); }
+.an-board.set-neo_wood piece.black.pawn { background-image: url("../images/pieces/neo_wood/bp.png"); }
 
-.an-board.set-ocean piece.white.king { background-image: url("../pieces/ocean/wk.png"); }
-.an-board.set-ocean piece.black.king { background-image: url("../pieces/ocean/bk.png"); }
-.an-board.set-ocean piece.white.queen { background-image: url("../pieces/ocean/wq.png"); }
-.an-board.set-ocean piece.black.queen { background-image: url("../pieces/ocean/bq.png"); }
-.an-board.set-ocean piece.white.rook { background-image: url("../pieces/ocean/wr.png"); }
-.an-board.set-ocean piece.black.rook { background-image: url("../pieces/ocean/br.png"); }
-.an-board.set-ocean piece.white.bishop { background-image: url("../pieces/ocean/wb.png"); }
-.an-board.set-ocean piece.black.bishop { background-image: url("../pieces/ocean/bb.png"); }
-.an-board.set-ocean piece.white.knight { background-image: url("../pieces/ocean/wn.png"); }
-.an-board.set-ocean piece.black.knight { background-image: url("../pieces/ocean/bn.png"); }
-.an-board.set-ocean piece.white.pawn { background-image: url("../pieces/ocean/wp.png"); }
-.an-board.set-ocean piece.black.pawn { background-image: url("../pieces/ocean/bp.png"); }
+.an-board.set-ocean piece.white.king { background-image: url("../images/pieces/ocean/wk.png"); }
+.an-board.set-ocean piece.black.king { background-image: url("../images/pieces/ocean/bk.png"); }
+.an-board.set-ocean piece.white.queen { background-image: url("../images/pieces/ocean/wq.png"); }
+.an-board.set-ocean piece.black.queen { background-image: url("../images/pieces/ocean/bq.png"); }
+.an-board.set-ocean piece.white.rook { background-image: url("../images/pieces/ocean/wr.png"); }
+.an-board.set-ocean piece.black.rook { background-image: url("../images/pieces/ocean/br.png"); }
+.an-board.set-ocean piece.white.bishop { background-image: url("../images/pieces/ocean/wb.png"); }
+.an-board.set-ocean piece.black.bishop { background-image: url("../images/pieces/ocean/bb.png"); }
+.an-board.set-ocean piece.white.knight { background-image: url("../images/pieces/ocean/wn.png"); }
+.an-board.set-ocean piece.black.knight { background-image: url("../images/pieces/ocean/bn.png"); }
+.an-board.set-ocean piece.white.pawn { background-image: url("../images/pieces/ocean/wp.png"); }
+.an-board.set-ocean piece.black.pawn { background-image: url("../images/pieces/ocean/bp.png"); }
 
 /* فالبک: ست ناشناخته → neo */
-.an-board.cg-wrap:not([class*="set-"]) piece.white.king { background-image: url("../pieces/neo/wk.png"); }
-.an-board.cg-wrap:not([class*="set-"]) piece.black.king { background-image: url("../pieces/neo/bk.png"); }
+.an-board.cg-wrap:not([class*="set-"]) piece.white.king { background-image: url("../images/pieces/neo/wk.png"); }
+.an-board.cg-wrap:not([class*="set-"]) piece.black.king { background-image: url("../images/pieces/neo/bk.png"); }
 
 /* ---------- ۳) چیدمان کلی صفحهٔ آنالیز ---------- */
 .an-wrap { display: flex; flex-direction: column; gap: 1rem; }
@@ -208,7 +208,7 @@
 #anBoard {
   width: 100%;
   aspect-ratio: 1 / 1;
-  border-radius: var(--radius-sm);
+  border-radius: 5px;
   box-shadow: var(--shadow-board);
   direction: ltr;
   touch-action: none;

@@ -92,11 +92,54 @@
       return span;
     }
 
+    /* ---------- مختصات کوچک a-h / 1-8 — لایهٔ ثابت بیرون از خانه‌ها ----------
+       رندر مهره‌ها (render) فقط داخل خانه‌ها را پاک می‌کند، پس برچسب‌ها
+       هرگز پاک/بازمیس نمی‌شوند (بدون چشمک). فونت هم‌مقیاس با تخته اما
+       کوچک: ≈ ۱۱px روی تختهٔ ۵۰۰px (قبلاً ۰٫۳×عرض‌خانه = ۱۹px بود).
+       تخته‌های کوچک‌تر از ۲۴۰px (پیش‌نمایش‌ها) برچسب نمی‌گیرند. */
+    function sizeCoords() {
+      if (!S.coordLayer) return;
+      const w = boardEl.getBoundingClientRect().width;
+      if (!w || w < 240) {
+        S.coordLayer.style.display = "none";
+        return;
+      }
+      S.coordLayer.style.display = "";
+      S.coordLayer.style.fontSize = Math.max(7, Math.round((w / 8) * 0.17)) + "px";
+    }
+    function renderCoords() {
+      if (!S.coordLayer) return;
+      /* خانه‌ها به ترتیب دیداری (ردیف از بالا، ستون از چپ) — با چرخش تخته
+         (سیاه‌بالا) خود همین ترتیب عوض می‌شود، پس برچسب‌ها همیشه درست‌اند */
+      const sqs = boardEl.querySelectorAll(".square");
+      if (sqs.length !== 64) return;
+      let html = "";
+      for (let i = 0; i < 64; i++) {
+        const row = Math.floor(i / 8);
+        const col = i % 8;
+        if (col !== 0 && row !== 7) continue;
+        const sq = sqs[i];
+        const cls = sq.classList.contains("dark") ? "coord-light-text" : "coord-dark-text";
+        const name = (sq.dataset && sq.dataset.square) || "";
+        if (col === 0) {
+          html += '<span class="coord-cell" style="top:' + (row * 12.5) + '%;left:0">' +
+            '<span class="board-coord coord-rank ' + cls + '">' + (name.slice(1) || String(8 - row)) + "</span></span>";
+        }
+        if (row === 7) {
+          html += '<span class="coord-cell" style="top:auto;bottom:0;left:' + (col * 12.5) + '%">' +
+            '<span class="board-coord coord-file ' + cls + '">' + (name[0] || "abcdefgh"[col]) + "</span></span>";
+        }
+      }
+      S.coordLayer.innerHTML = html;
+      sizeCoords();
+    }
+
     /* ---------- ساخت / رندر ---------- */
     function build() {
       S.flipped = orientation() === "b";
       boardEl.innerHTML = "";
       S.squares = {};
+      S.coordLayer = null;
       S.prevPieces = null; // ساخت تازه — بدون انیمیشن
       const files = ["a", "b", "c", "d", "e", "f", "g", "h"];
       const ranks = [8, 7, 6, 5, 4, 3, 2, 1];
@@ -113,6 +156,22 @@
           S.squares[sq] = d;
         });
       });
+      // لایهٔ مختصات — ثابت روی تخته، خارج از خانه‌ها
+      try {
+        if (getComputedStyle(boardEl).position === "static") {
+          boardEl.style.position = "relative";
+        }
+        const layer = document.createElement("div");
+        layer.className = "coord-layer";
+        boardEl.appendChild(layer);
+        S.coordLayer = layer;
+        renderCoords();
+        if (!S.coordRO) {
+          S.coordRO = new ResizeObserver(function () { sizeCoords(); });
+          S.coordRO.observe(boardEl);
+          window.addEventListener("resize", sizeCoords);
+        }
+      } catch (e) {}
       render({});
     }
 

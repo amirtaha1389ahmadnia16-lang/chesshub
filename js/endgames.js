@@ -52,7 +52,10 @@
     w: { k: "♔", q: "♕", r: "♖", b: "♗", n: "♘", p: "♙" },
     b: { k: "♚", q: "♛", r: "♜", b: "♝", n: "♞", p: "♟" },
   };
-  let pieceSet = "neo";
+  /* 🔑 v11.25 — مقدار اولیه از تنظیمات ذخیره‌شده می‌خوانَد نه neo ثابت؛
+     قبلاً رندر اولیهٔ برد قبل از probePieceSet با neo قفل می‌شد و
+     تعویض مجموعهٔ مهره در این صفحه اعمال نمی‌شد. */
+  let pieceSet = getCurrentPieceSet();
   let glyphMode = false; // true = تصاویر نیست → گلیف یونیکد
 
   function getCurrentPieceSet() {
@@ -86,7 +89,7 @@
       img.onload = () => finish(img.naturalWidth > 1);
       img.onerror = () => finish(false);
       setTimeout(() => finish(false), 2500);
-      img.src = "pieces/" + pieceSet + "/wp.png";
+      img.src = "images/pieces/" + pieceSet + "/wp.png";
     });
   }
   function makePieceEl(color, type) {
@@ -114,7 +117,7 @@
     const img = document.createElement("img");
     img.className = "piece-img";
     img.draggable = false;
-    img.src = "pieces/" + pieceSet + "/" + color + type + ".png";
+    img.src = "images/pieces/" + pieceSet + "/" + color + type + ".png";
     img.onerror = function () {
       // اگر تصویر مهره‌ی خاصی نبود، همان‌جا گلیف بگذار
       glyphMode = true;

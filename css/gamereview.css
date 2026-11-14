@@ -144,7 +144,7 @@
 .gr-players .gr-vs { font-size: 0.68rem; color: var(--text-light, #64748b); font-weight: 600; }
 .gr-board-wrap {
   position: relative;
-  max-width: 480px;
+  max-width: 500px;
   margin: 0 auto;
 }
 .gr-board {
@@ -197,6 +197,8 @@
   display: block;
   grid-template-columns: none;
   aspect-ratio: 1 / 1;
+  border-radius: 5px;
+  overflow: hidden;
 }
 .gr-cg-mode .board-arrows { display: none; }
 .gr-board.cg-wrap cg-board {
@@ -847,7 +849,7 @@ body.grev-body {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  max-width: 480px;
+  max-width: 500px;
   margin: 0.75rem auto 0;
 }
 .eval-track {

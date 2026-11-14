@@ -72,7 +72,7 @@
     const c = window.ChessUtils && ChessUtils.getPieceImage
       ? ChessUtils.getPieceImage(color + type) : null;
     if (c && c.src) return c.src;
-    return "pieces/" + currentPieceSet() + "/" + PIECE_CODE[color + type];
+    return "images/pieces/" + currentPieceSet() + "/" + PIECE_CODE[color + type];
   }
 
   /* ============================================================

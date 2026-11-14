@@ -28,7 +28,7 @@ window.ChessHubAuth = (function () {
   const PROFILE_KEY = "chesshub_profile";
   const AUTHOR_KEY = "chesshub_author_name";
   const AUTH_PAGE = "login.html";
-  const DEFAULT_AVATAR = "images/avatars/1.png";
+  const DEFAULT_AVATAR = "images/avatars/1.jpg";
 
   /* ---------------- ذخیره‌سازی ---------------- */
   function readSession() {

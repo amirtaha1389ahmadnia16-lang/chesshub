@@ -120,7 +120,7 @@
             resolve();
           }
         };
-        img.src = `pieces/${set}/${filename}`;
+        img.src = `images/pieces/${set}/${filename}`;
         pieceImages[key] = img;
       }
     });
@@ -542,7 +542,7 @@
           const key =
             (piece.color === "w" ? "w" : "b") + piece.type.toLowerCase();
           const img = document.createElement("img");
-          img.src = `pieces/${pieceSet}/${pieceCodes[key]}`;
+          img.src = `images/pieces/${pieceSet}/${pieceCodes[key]}`;
           img.classList.add("piece-img");
           img.draggable = false;
           img.style.pointerEvents = "none";

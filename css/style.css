@@ -500,18 +500,19 @@
   background: var(--accent);
   color: white;
   border: 1px solid var(--accent-dark);
-  box-shadow: 0 4px 0 var(--accent-dark), 0 4px 12px rgba(59, 130, 246, 0.35);
+  box-shadow: 0 1px 2px rgba(59, 130, 246, 0.28);
 }
 
+/* 🔵 آبی تخت — بدون افکت سه‌بعدی و بدون بنفش؛ هاور فقط کمی تیره‌تر */
 .btn-primary:hover {
-  background: #7f70e0;
+  background: var(--accent-dark);
   transform: translateY(-1px);
-  box-shadow: 0 5px 0 var(--accent-dark), 0 6px 15px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.32);
 }
 
 .btn-primary:active {
-  transform: translateY(3px);
-  box-shadow: 0 1px 0 var(--accent-dark);
+  transform: translateY(0);
+  box-shadow: none;
 }
 
 .btn-hint {
@@ -549,7 +550,7 @@
   grid-template-columns: repeat(8, 1fr) !important;
   width: 100%;
   height: 100%;
-  border-radius: 8px;
+  border-radius: 5px;
   overflow: hidden;
   touch-action: manipulation;
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -566,8 +567,75 @@
   transition: background-color 0.12s;
 }
 
+/* 🆁 مختصات a-h و 1-8 — از v11.21 روی «لایهٔ ثابت» بالای تخته‌اند، نه داخل
+   خانه‌ها: رندر مهره‌ها برچسب‌ها را پاک نمی‌کند (بدون چشمک). فونت با JS
+   هم‌مقیاس با تخته ولی کوچک ست می‌شود (≈۱۱px روی تختهٔ ۵۰۰px)؛ مقدار زیر
+   فقط fallback است. مکان برچسب‌ها همان سبک لیکرس قبلی است. */
+.coord-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  font-size: 11px;
+  line-height: 1;
+}
+.coord-cell {
+  position: absolute;
+  width: 12.5%;
+  height: 12.5%;
+}
+.coord-cell .board-coord {
+  position: absolute;
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  opacity: 0.95;
+}
+.coord-cell .coord-rank { top: 4%; left: 7%; }
+.coord-cell .coord-file { bottom: 4%; right: 7%; }
+.coord-cell .coord-dark-text { color: #143a6e; text-shadow: none; }
+.coord-cell .coord-light-text { color: #ffffff; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); }
+
+/* 📐 گردی تخته‌های اصلی در همهٔ صفحات = دقیقاً ۵ پیکسل */
+#dpBoard, #lessonBoard, #chBoard, #olBoard { border-radius: 5px; }
+
 .square.light { background-color: var(--board-light); }
 .square.dark { background-color: var(--board-dark); }
+
+/* ============================================
+   🖼️ تختهٔ تصویری — body.board-img
+   از این به بعد تخته می‌تواند یک عکس کامل ۸×۸ باشد
+   (images/boards/<id>.png — آدرسش با JS در --board-image می‌آید)
+   و مهره‌ها روی آن می‌نشینند. خانه‌ها شفاف می‌شوند تا عکس دیده شود.
+   ============================================ */
+body.board-img #chessboard,
+body.board-img .chessboard,
+body.board-img #gameBoard,
+body.board-img #variantBoard,
+body.board-img #trapBoard,
+body.board-img #dpBoard,
+body.board-img #lessonBoard,
+body.board-img #chBoard,
+body.board-img :has(> .square) {
+  background-image: var(--board-image, none);
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow: hidden;
+}
+
+body.board-img .square.light,
+body.board-img .square.dark {
+  background-color: transparent !important;
+}
+
+/* تخته‌های chessground (آنالیز، مرور بازی، دیتابیس، آنلاین، انجین) —
+   خانه‌ها با گرادیان خود کتابخانه رنگ می‌شوند؛ کل پس‌زمینه را عکس می‌کنیم */
+body.board-img cg-board {
+  background: var(--board-image, none) 0 0 / 100% 100% no-repeat !important;
+}
 
 /* لایه هایلایت (زیر مهره) */
 .square::before {
@@ -998,7 +1066,7 @@
 .settings-head .head-icon {
   width: 54px;
   height: 54px;
-  border-radius: 16px;
+  border-radius: 6px;
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
   color: #fff;
   display: flex;
@@ -1023,10 +1091,10 @@
   margin-top: 0.2rem;
 }
 
-/* کارت بخش‌ها */
+/* کارت بخش‌ها — گردی کم (حدود ۵px به انتخاب مالک سایت) */
 .settings-card {
   background: #ffffff;
-  border-radius: 18px;
+  border-radius: 8px;
   padding: 1.6rem;
   box-shadow: 0 1px 2px rgba(15, 42, 85, 0.04), 0 10px 30px -12px rgba(15, 42, 85, 0.12);
   margin-bottom: 1.5rem;
@@ -1043,7 +1111,7 @@
 .settings-card .card-icon {
   width: 46px;
   height: 46px;
-  border-radius: 13px;
+  border-radius: 6px;
   background: var(--accent-soft);
   color: var(--accent);
   display: flex;
@@ -1068,19 +1136,27 @@
   margin-top: 0.15rem;
 }
 
-/* --- تم‌های تخته — مربع‌های کوچک، گوشه‌های گرد، ظاهر تمیز --- */
+/* --- کارت‌های «صفحهٔ بازی» — فقط تصویر، کوچک و به‌اندازه، تمیز --- */
 .theme-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
-  gap: 0.65rem;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 0.6rem;
+}
+
+/* 🧼 کارت «صفحهٔ بازی» فشرده‌تر — فاصلهٔ کمتر بین کادر بخش و کارت‌های انتخاب */
+.settings-card:has(> .theme-grid) {
+  padding: 1.1rem 1.1rem 1.2rem;
+}
+.settings-card:has(> .theme-grid) .card-head {
+  margin-bottom: 0.8rem;
 }
 
 .theme-card {
   position: relative;
   background: #ffffff;
   border: 1.5px solid var(--border);
-  border-radius: 18px;
-  padding: 0.5rem 0.5rem 0.55rem;
+  border-radius: 5px; /* 🔑 گردی کم — حدود ۵ پیکسل */
+  padding: 0; /* بدون فاصلهٔ سفید — کادر انتخاب دقیقاً روی لبهٔ خود تصویر */
   cursor: pointer;
   transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
   text-align: center;
@@ -1092,35 +1168,70 @@
   box-shadow: 0 6px 14px -6px rgba(15, 42, 85, 0.14);
 }
 
-.theme-card.active {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.16);
-}
+/* ✅ انتخاب‌شده: بدون هیچ کادر اضافه — فقط نشانِ تیکِ گوشهٔ کارت
+   (درخواست مالک سایت: کادر آبی حذف شد چون دقیقاً بر لبهٔ تصویر منطبق نبود) */
 
-.theme-card .theme-board {
+/* 🖼️ پیش‌نمایش تخته = برش ۲×۲ بالا-چپِ عکس بزرگ؛ گردی هم‌راستا با کادر (۵−۱٫۵) */
+.theme-card .board-thumb {
   display: block;
-  /* 🔑 مربع کوچک‌تر — ۸۲٪ عرض کارت، همیشه مربع کامل */
-  width: 82%;
-  margin-inline: auto;
+  width: 100%;
   aspect-ratio: 1 / 1;
-  border-radius: 16px;
-  background-image: conic-gradient(var(--cl) 0 25%, var(--cd) 0 50%, var(--cl) 0 75%, var(--cd) 0);
-  background-size: 100% 100%;
-  /* 🔑 لبهٔ کاملاً گرد و شارپ — حلقهٔ داخلی ۱px به‌جای border؛ قوس گوشه
-     بدون هیچ پخ‌شدگی یا رنگ اضافه، دقیقاً دایره‌ای می‌ماند */
-  box-shadow:
-    inset 0 0 0 1px rgba(15, 42, 85, 0.09),
-    inset 0 1px 2px rgba(0, 0, 0, 0.06);
+  border-radius: 3.5px;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(15, 42, 85, 0.08);
 }
 
-.theme-card .theme-name {
+.theme-card .board-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   display: block;
-  margin-top: 0.4rem;
-  font-size: 0.7rem;
-  font-weight: 800;
-  color: var(--text-dark);
-  direction: ltr;
 }
+
+/* تا وقتی بندانگشتیِ کش‌شده در localStorage آماده نیست:
+   همان برش ۲×۲ از خود عکس بزرگ با CSS (بدون پرش بصری) */
+.theme-card .board-thumb img[data-zoom] {
+  width: 400%;
+  height: 400%;
+  max-width: none;
+  object-position: 0 0;
+}
+
+/* 📐 اندازهٔ یکنواخت همهٔ تخته‌های اصلی = ۵۰۰×۵۰۰ پیکسل، وسط‌چین.
+   روی نمایشگرهای کوچک‌تر از ۵۶۰px تا عرض صفحه کوچک می‌شود (وگرنه می‌شکست).
+   تخته‌های کوچکِ پیش‌نمایش (مینی‌بورد آنالیز، کارت‌های تنظیمات) مستثنا هستند */
+#chessboard, .chessboard, #gameBoard, #variantBoard, #trapBoard,
+#dpBoard, #lessonBoard, #chBoard, #olBoard, #anBoard,
+.gr-board.cg-wrap, .gd-board {
+  width: min(500px, 100%) !important;
+  height: auto !important;
+  aspect-ratio: 1 / 1 !important;
+  max-width: 500px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+@media (max-width: 560px) {
+  #chessboard, .chessboard, #gameBoard, #variantBoard, #trapBoard,
+  #dpBoard, #lessonBoard, #chBoard, #olBoard, #anBoard,
+  .gr-board.cg-wrap, .gd-board {
+    width: 100% !important;
+    max-width: none !important;
+  }
+}
+
+/* 🧲 در آنالیز، پوستهٔ تخته به نوار ارزیابیِ عمودی می‌چسبد (RTL: نوار سمت
+   راست است) تا بین تخته و نوار سفیدی خالی نیفتد */
+.an-board-wrap {
+  width: min(500px, 100%) !important;
+  margin-right: 0 !important;
+  margin-left: auto !important;
+}
+@media (max-width: 560px) {
+  .an-board-wrap { width: 100% !important; }
+}
+
+/* ➕ افزودن تخته از v11.21 فقط با دستکاری کد در js/board-add.js است —
+   کادر و دکمهٔ مرئی حذف شد؛ CSS ردیف قدیمی هم پاک شد. */
 
 /* --- مجموعه‌های مهره — گرد، بدون رنگ اضافه، تمیز --- */
 #pieceSetsContainer {
@@ -1133,7 +1244,7 @@
   position: relative;
   background: #ffffff;
   border: 1.5px solid var(--border);
-  border-radius: 20px;
+  border-radius: 5px;
   padding: 0.55rem 0.55rem 0.6rem;
   cursor: pointer;
   transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
@@ -1159,7 +1270,7 @@
   /* 🔑 پس‌زمینهٔ خنثی و ساده — بدون رنگ‌های اضافه؛ مهره کمی پایین‌تر،
      مثل ایستاده روی زمین + حلقهٔ داخلی ۱px برای لبهٔ گرد و شارپ */
   aspect-ratio: 2 / 1;
-  border-radius: 15px;
+  border-radius: 4px;
   background: #f6f8fb;
   box-shadow: inset 0 0 0 1px #e8edf3;
   padding-bottom: 7%;
@@ -1176,13 +1287,30 @@
 
 .piece-card:hover .piece-box img { transform: translateY(-3px) scale(1.04); }
 
+/* اسم مجموعه — چیپِ شناور که فقط با هاورِ ماوس ظاهر می‌شود؛
+   با انتخاب/لمس هیچ چیزی نمایش داده نمی‌شود (درخواست v11.24). */
 .piece-card .piece-name {
-  display: block;
-  margin-top: 0.4rem;
-  font-size: 0.72rem;
+  position: absolute;
+  inset-inline: 0.4rem;
+  bottom: 0.5rem;
+  z-index: 2;
+  pointer-events: none;
+  font-size: 0.68rem;
   font-weight: 800;
-  color: var(--text-dark);
+  color: #fff;
   direction: ltr;
+  text-align: center;
+  background: rgba(15, 42, 85, 0.78);
+  border-radius: 99px;
+  padding: 0.2rem 0.55rem;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.16s ease, transform 0.16s ease;
+}
+
+.piece-card:hover .piece-name {
+  opacity: 1;
+  transform: none;
 }
 
 /* نشان انتخاب */
@@ -1536,11 +1664,11 @@
 /* نوار پیشرفت دانلود انجین (تنظیمات + دعوت‌نامه) */
 .engine-prog {
   display: none;
-  height: 8px;
-  background: #e6edf8;
+  height: 6px;
+  background: #e8eef7;
   border-radius: 99px;
   overflow: hidden;
-  margin: 0.55rem 0 0.15rem;
+  margin: 0.6rem 0 0.25rem;
 }
 
 .engine-prog.show { display: block; }
@@ -1553,14 +1681,19 @@
   transition: width 0.2s ease;
 }
 
+/* درصد دانلود — بیرونِ خود نوار، زیر آن */
 .engine-prog-pct {
+  display: none;
+  margin-top: 0.15rem;
   min-height: 1rem;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 800;
   color: var(--accent-dark);
-  text-align: center;
-  direction: rtl;
+  text-align: left;
+  direction: ltr;
 }
+
+.engine-prog-pct.show { display: block; }
 
 /* ---- کارت‌های بخش «دانلود انجین» در تنظیمات ---- */
 #engineList {
@@ -1672,37 +1805,44 @@
 
 .engine-item {
   display: flex;
-  gap: 0.85rem;
-  align-items: stretch;
-  background: linear-gradient(180deg, #ffffff, #fcfdff);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 0.9rem 1rem;
+  gap: 0.9rem;
+  align-items: center;
+  background: #ffffff;
+  border: 1.5px solid #e8eef5;
+  border-radius: 16px;
+  padding: 0.85rem 1rem;
   transition: var(--transition-smooth);
 }
 
-.engine-item:hover { border-color: #b9c8dd; box-shadow: var(--shadow-sm); }
+.engine-item:hover {
+  border-color: #cddcee;
+  box-shadow: 0 8px 18px -12px rgba(15, 42, 85, 0.28);
+  transform: translateY(-1px);
+}
 
 .engine-item.active {
   border-color: var(--accent);
-  background: linear-gradient(180deg, #ffffff, var(--accent-soft));
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14);
+  background: linear-gradient(180deg, #ffffff, #f2f7ff);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
 }
 
 .engine-ico {
-  width: 46px;
-  height: 46px;
+  width: 42px;
+  height: 42px;
   flex-shrink: 0;
   border-radius: 12px;
-  background: var(--accent-soft);
+  background: linear-gradient(135deg, var(--accent-soft), #e3edfd);
   color: var(--accent);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
-.engine-item.done .engine-ico { background: #e7f7ef; color: var(--success-dark); }
+.engine-item.done .engine-ico {
+  background: linear-gradient(135deg, #e7f7ef, #d9f2e6);
+  color: var(--success-dark);
+}
 
 .engine-info { flex: 1; min-width: 0; }
 
@@ -1738,58 +1878,65 @@
 }
 
 .engine-desc {
-  font-size: 0.76rem;
+  font-size: 0.75rem;
   color: var(--text-light);
   font-weight: 600;
-  margin-top: 0.2rem;
+  margin-top: 0.18rem;
 }
 
-.engine-size {
-  font-size: 0.7rem;
-  color: var(--text-light);
-  font-weight: 700;
-  margin-top: 0.15rem;
-}
-
+/* وضعیت هر انجین — چیپ کوچک و خوانا */
 .engine-status {
-  font-size: 0.74rem;
+  margin-top: 0.45rem;
+  font-size: 0.68rem;
   font-weight: 800;
   color: var(--text-light);
-  margin-top: 0.4rem;
-  display: flex;
+  background: #f1f5f9;
+  border: 1px solid #e8eef5;
+  border-radius: 99px;
+  padding: 0.16rem 0.6rem;
+  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+  gap: 0.3rem;
+  width: fit-content;
 }
 
-.engine-status.ok { color: var(--success-dark); }
-
-.engine-active-chip {
-  font-size: 0.64rem;
-  font-weight: 800;
+.engine-status.ok {
   color: var(--success-dark);
   background: #e7f7ef;
+  border-color: #d3ecdf;
+}
+
+/* چیپ «فعال» — کنار نام انجین در همان ردیف */
+.engine-active-chip {
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
   border-radius: 99px;
-  padding: 0.12rem 0.6rem;
+  padding: 0.14rem 0.55rem;
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
+  box-shadow: 0 3px 8px -3px rgba(59, 130, 246, 0.5);
 }
 
 .engine-actions {
   display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  justify-content: center;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  justify-content: flex-end;
+  align-items: center;
   flex-shrink: 0;
+  max-width: 46%;
 }
 
 .engine-btn {
   border: none;
-  border-radius: 12px;
-  padding: 0.42rem 0.55rem;
+  border-radius: 10px;
+  padding: 0.4rem 0.6rem;
   font-family: "Vazir";
-  font-size: 0.76rem;
+  font-size: 0.74rem;
   font-weight: 800;
   cursor: pointer;
   display: inline-flex;
@@ -1815,10 +1962,16 @@
 .engine-btn.primary {
   background: linear-gradient(135deg, var(--accent), var(--accent-dark));
   color: #fff;
-  box-shadow: 0 5px 14px -4px rgba(59, 130, 246, 0.5);
+  box-shadow: 0 3px 10px -4px rgba(59, 130, 246, 0.45);
 }
 
 .engine-btn.primary:hover { transform: translateY(-1px); }
+
+/* روی صفحهٔ باریک — دکمه‌ها زیر اطلاعات می‌آیند */
+@media (max-width: 640px) {
+  .engine-item { flex-wrap: wrap; }
+  .engine-actions { max-width: 100%; width: 100%; justify-content: flex-start; }
+}
 
 .engine-btn.ghost {
   background: #f1f5f9;
@@ -2113,12 +2266,9 @@
 
   .promo-card { padding: 1.5rem 1rem; }
 
-  .settings-card { padding: 1.2rem; border-radius: 15px; }
+  .settings-card { padding: 1.2rem; border-radius: 8px; }
   .settings-head .head-icon { width: 48px; height: 48px; font-size: 1.25rem; }
-  .theme-grid { grid-template-columns: repeat(auto-fill, minmax(98px, 1fr)); gap: 0.5rem; }
-  .theme-card .theme-board { width: 86%; border-radius: 11px; }
   #pieceSetsContainer { grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 0.55rem; }
-  .piece-card .piece-box { border-radius: 13px; }
   .piece-card .piece-box img { width: 44%; height: 84%; }
   .sound-volume { min-width: 200px; }
   .settings-actions .btn { font-size: 0.8rem; padding: 0.55rem 1.2rem; }
@@ -2176,12 +2326,11 @@
   .btn-promo { padding: 0.55rem 1.1rem; font-size: 0.78rem; }
 
   .settings-card { padding: 1rem; }
-  .settings-head .head-icon { width: 44px; height: 44px; font-size: 1.15rem; border-radius: 13px; }
+  .settings-head .head-icon { width: 44px; height: 44px; font-size: 1.15rem; border-radius: 6px; }
   .settings-head h1 { font-size: 1.2rem; }
-  .theme-grid { grid-template-columns: repeat(3, 1fr); gap: 0.4rem; }
-  .theme-card .theme-board { width: 88%; border-radius: 10px; }
+  /* 📱 تخته‌ها ۴ ستون — کوچک و به‌اندازه */
+  .theme-grid { grid-template-columns: repeat(4, 1fr); gap: 0.45rem; }
   #pieceSetsContainer { grid-template-columns: repeat(2, 1fr); gap: 0.45rem; }
-  .piece-card .piece-box { border-radius: 12px; }
   .piece-card .piece-box img { width: 46%; height: 86%; }
   .sound-row { gap: 0.7rem; }
   .settings-actions { gap: 0.5rem; margin-top: 1rem; padding-top: 1rem; }
@@ -2240,4 +2389,37 @@
 
 @media (prefers-reduced-motion: reduce) {
   .drag-ghost { transform: translate(-50%, -50%); }
+}
+
+/* ============================================
+   📱 تنظیمات در موبایل — v11.24
+   چیدمان تمیز و لمس‌پذیر: تخته‌ها ۲ ستون بزرگ،
+   ردیف صدا مرتب، دکمه‌ها هم‌عرض
+   ============================================ */
+@media (max-width: 640px) {
+  /* گرید تخته‌ها: مثل مهره‌ها ۲ ستونِ بزرگ و هم‌تراز — کاشی‌های
+     ۴ستونهٔ کوچکِ قبلی خوانا و لمس‌پذیر نبود */
+  .theme-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.7rem;
+  }
+  .settings-card:has(> .theme-grid) {
+    padding: 1rem 0.9rem 1rem;
+  }
+  .settings-card {
+    padding: 1rem 0.9rem 1.05rem;
+  }
+  .settings-head h1 { font-size: 1.15rem; }
+  .card-title { font-size: 0.98rem; }
+  .card-sub { font-size: 0.76rem; }
+}
+
+@media (max-width: 480px) {
+  /* ردیف صدا: اسلایدر تمام‌عرض و دکمهٔ نمونه هم‌عرض ردیف */
+  .sound-volume { min-width: 100%; }
+  .sound-test { flex: 1 1 100%; justify-content: center; }
+  /* دکمه‌های ذخیره/بازگشت: هم‌عرض و لمس‌پذیر */
+  .settings-actions .btn { flex: 1 1 140px; justify-content: center; }
+  /* ردیف‌های انجین: نفس بیشتر در عرض کم */
+  .engine-row { gap: 0.5rem; }
 }

@@ -40,7 +40,7 @@ const MAX_FAILED_LOGINS = 5;
 const LOCKOUT_MS = 10 * 60 * 1000;
 
 const PASSWORD_RULES = { min: 6, max: 64 };
-const DEFAULT_AVATAR = "images/avatars/1.png"; // 🎯 پروفایل پیش‌فرض برای حساب‌های جدید
+const DEFAULT_AVATAR = "images/avatars/1.jpg"; // 🎯 پروفایل پیش‌فرض برای حساب‌های جدید
 
 let dataSync = null;
 try { dataSync = require("./data-sync"); } catch (e) { dataSync = null; }

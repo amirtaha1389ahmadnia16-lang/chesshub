@@ -293,7 +293,7 @@
     wrap.innerHTML = "";
     for (let i = 1; i <= 8; i++) {
       const img = document.createElement("img");
-      img.src = "images/avatars/" + i + ".png";
+      img.src = "images/avatars/" + i + ".jpg";
       img.alt = "آواتار " + fa(i);
       img.onerror = function () {
         this.onerror = null;

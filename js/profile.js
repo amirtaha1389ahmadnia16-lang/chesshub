@@ -41,7 +41,7 @@ window.ChessHubProfile = (function () {
   const PROFILE_KEY = "chesshub_profile";
   const MIN_LEN = 2;
   const MAX_LEN = 16;
-  const AVATAR_COUNT = 8; // images/avatars/1.png … 8.png
+  const AVATAR_COUNT = 8; // images/avatars/1.jpg … 8.jpg
 
   /* ---------------- ذخیره‌سازی ---------------- */
   function read() {
@@ -92,7 +92,7 @@ window.ChessHubProfile = (function () {
   }
 
   function avatarSrc(i) {
-    return "images/avatars/" + i + ".png";
+    return "images/avatars/" + i + ".jpg";
   }
 
   function avatarFallback(img, label) {
