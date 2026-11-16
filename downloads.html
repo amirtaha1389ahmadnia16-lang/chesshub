@@ -6,10 +6,10 @@
     <meta name="description" content="دانلود فایل‌های PGN بازی‌های استادان بزرگ شطرنج" />
     <title>ChessHub | دانلود PGN</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%E2%99%9B%3C/text%3E%3C/svg%3E" />
-    <link rel="stylesheet" href="css/theme.css?v=11.25" />
+    <link rel="stylesheet" href="css/theme.css?v=11.32" />
     <link rel="stylesheet" href="lib/fontawesome/all.min.css" />
     <link href="fonts/vazir/font-face.css" rel="stylesheet" />
-    <link rel="stylesheet" href="css/style.css?v=11.25" />
+    <link rel="stylesheet" href="css/style.css?v=11.32" />
     <style>
       /* استایل‌های اختصاصی صفحه دانلود (Pro Edition) */
       .search-container {
@@ -147,6 +147,23 @@
         box-shadow: 0 1px 0 var(--accent-dark);
       }
 
+      /* 🔑 v11.32 — دانلود گروهی تک‌به‌تک */
+      .btn-dl-all {
+        background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+        color: #fff; border: none; border-radius: 14px;
+        padding: 0.55rem 1.1rem; font-size: 0.8rem; font-weight: 800;
+        cursor: pointer; font-family: "Vazir";
+        display: inline-flex; align-items: center; gap: 0.45rem;
+        box-shadow: 0 10px 20px -8px rgba(47, 133, 90, 0.6);
+        transition: var(--transition-smooth);
+      }
+      .btn-dl-all:hover { transform: translateY(-2px); filter: brightness(1.06); }
+      .btn-dl-all:active { transform: scale(0.98); }
+      .btn-dl-all.running {
+        background: linear-gradient(135deg, #dd6b20 0%, #c05621 100%);
+        box-shadow: 0 10px 20px -8px rgba(192, 86, 33, 0.6);
+      }
+
       .no-result {
         text-align: center;
         padding: 3rem;
@@ -211,6 +228,9 @@
           />
         </div>
         <div class="download-count" id="resultCount">۳۰ فایل</div>
+        <button class="btn-dl-all" id="dlAllBtn" title="همهٔ فایل‌های همین فهرست، یکی‌یکی پشت سر هم دانلود می‌شوند">
+          <i class="fas fa-layer-group"></i> دانلود گروهی (تک‌به‌تک)
+        </button>
       </div>
 
       <!-- گرید بازیکنان -->
@@ -219,9 +239,9 @@
       <div id="footer-placeholder"></div>
     </div>
 
-    <script src="js/script.js?v=11.25"></script>
-    <script src="js/profile.js?v=11.25"></script>
-    <script src="js/auth.js?v=11.25"></script>
+    <script src="js/script.js?v=11.32"></script>
+    <script src="js/profile.js?v=11.32"></script>
+    <script src="js/auth.js?v=11.32"></script>
     <script>
       (function () {
         "use strict";
@@ -329,6 +349,55 @@
             });
           }
         }
+
+        /* 🔑 v11.32 — دانلود گروهی تک‌به‌تک: همهٔ فایل‌های فهرستِ فعلی
+           (با احترام به فیلتر جستجو) یکی‌یکی و پشت‌سرهم دانلود می‌شوند؛
+           کلیک دوم = توقف، کلیک دوباره = شروع از اول */
+        const dlAllBtn = document.getElementById("dlAllBtn");
+        const dlAllState = { running: false, stop: false };
+        function faNum(n) {
+          return String(n).replace(/[0-9]/g, function (d) { return "۰۱۲۳۴۵۶۷۸۹"[d]; });
+        }
+        function dlAllLabel(icon, text) {
+          dlAllBtn.innerHTML = '<i class="fas ' + icon + '"></i> ' + text;
+        }
+        async function downloadAllFiles() {
+          if (dlAllState.running) { dlAllState.stop = true; return; }
+          const list =
+            currentFilter === ""
+              ? players
+              : players.filter(function (p) {
+                  return p.name.toLowerCase().includes(currentFilter.toLowerCase());
+                });
+          if (!list.length) return;
+          dlAllState.running = true;
+          dlAllState.stop = false;
+          dlAllBtn.classList.add("running");
+          let done = 0;
+          for (let i = 0; i < list.length; i++) {
+            if (dlAllState.stop) break;
+            dlAllLabel("fa-stop", "توقف — " + faNum(i + 1) + " از " + faNum(list.length));
+            const a = document.createElement("a");
+            a.href = "pgn/" + list[i].file;
+            a.download = list[i].file;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            done++;
+            await new Promise(function (r) { setTimeout(r, 650); });
+          }
+          dlAllState.running = false;
+          dlAllBtn.classList.remove("running");
+          if (dlAllState.stop) {
+            dlAllLabel("fa-download", "متوقف شد — " + faNum(done) + " از " + faNum(list.length));
+          } else {
+            dlAllLabel("fa-circle-check", faNum(done) + " فایل دانلود شد ✓");
+          }
+          setTimeout(function () {
+            dlAllLabel("fa-layer-group", "دانلود گروهی (تک‌به‌تک)");
+          }, 4000);
+        }
+        if (dlAllBtn) dlAllBtn.addEventListener("click", downloadAllFiles);
 
         function init() {
           renderPlayers();

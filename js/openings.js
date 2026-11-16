@@ -220,6 +220,24 @@
       if (!data || !Array.isArray(data.categories))
         throw new Error("ساختار فایل داده معتبر نیست");
       openingsData = data;
+      /* 🔑 v11.32 — اورراید ادمین روی دیتابیس پایهٔ گشایش‌ها:
+         پچ‌ها با اندیسِ خامِ فایل اعمال، سپس حذف‌ها از آخر به اول
+         تا اندیس‌ها نلغزند (اندیس خام مرجع پایدار اورراید است) */
+      if (window.AdminOverrides) {
+        const ov = await AdminOverrides.load();
+        const m = ov.openings || {};
+        (data.categories || []).forEach(function (cat, ci) {
+          const arr = cat.openings || [];
+          arr.forEach(function (item, j) {
+            const ov2 = m["c" + ci + "o" + j];
+            if (ov2 && ov2.patch) Object.assign(item, ov2.patch);
+          });
+          for (let j = arr.length - 1; j >= 0; j--) {
+            const ov2 = m["c" + ci + "o" + j];
+            if (ov2 && ov2.deleted) arr.splice(j, 1);
+          }
+        });
+      }
     } catch (err) {
       console.error(err);
       baseLoadFailed = true;
@@ -538,6 +556,7 @@
         const isLight = (i + j) % 2 === 0;
         const sq = document.createElement("div");
         sq.className = `square ${isLight ? "light" : "dark"}`;
+        sq.dataset.square = "abcdefgh"[j] + (8 - i);
         if (piece) {
           const key =
             (piece.color === "w" ? "w" : "b") + piece.type.toLowerCase();
@@ -551,6 +570,8 @@
         container.appendChild(sq);
       }
     }
+    /* 🔧 v11.28 — مختصات، هم‌سان با بقیهٔ صفحه‌ها */
+    if (window.ChessUtils && ChessUtils.attachCoords) ChessUtils.attachCoords(container);
   }
 
   function setupBoard(boardId, moves) {

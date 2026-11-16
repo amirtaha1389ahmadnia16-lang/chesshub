@@ -59,6 +59,7 @@ const ROOT = __dirname;
 
 // 🌍 محتوای عمومی کاربران (دروس/گشایش‌ها/مقالات) — برای «همه‌ی» بازدیدکنندگان سایت
 const COMMUNITY_FILE = path.join(ROOT, "data", "community_content.json");
+const OVERRIDES_FILE = path.join(path.dirname(COMMUNITY_FILE), "admin_overrides.json"); // 🔑 v11.32 — اورراید پیش‌فرض‌ها برای پنل ادمین
 const COMMUNITY_LIMITS = {
   lessons: { max: 300 },
   openings: { max: 300 },
@@ -1144,6 +1145,130 @@ function handleAPI(req, res, pathname, query) {
   }
 
   // 👤 رجیستری نام کاربری — بررسی آزاد بودن نام (زنده، هنگام تایپ)
+  /* ══════════════════════════════════════════════════════════════
+     🔑 v11.32 — پنل سوپر ادمین (حساب AdminChessHub)
+     این حساب فقط «مدیریت محتوا» دارد: دیدن/ویرایش/حذف محتوای
+     کاربران و حتی پیش‌فرض‌های سایت (مقالات/دروس/گشایش‌ها).
+     هیچ مزیت بازی یا دسترسی سیستمی دیگری ندارد.
+     ══════════════════════════════════════════════════════════════ */
+  const ADMIN_NAME = "adminchesshub";
+  function isAdminSession(session) {
+    if (!session) return false;
+    return [session.u, session.n].some(function (x) {
+      return String(x || "").toLowerCase() === ADMIN_NAME;
+    });
+  }
+  function readOverrides() {
+    try {
+      const j = JSON.parse(fs.readFileSync(OVERRIDES_FILE, "utf8"));
+      return j && typeof j === "object" && !Array.isArray(j) ? j : {};
+    } catch (e) {
+      return { articles: {}, lessons: {}, openings: {} };
+    }
+  }
+  function writeOverrides(o) {
+    fs.writeFileSync(OVERRIDES_FILE, JSON.stringify(o, null, 1));
+  }
+  const OVERRIDE_KINDS = ["articles", "lessons", "openings"];
+
+  // 📖 خواندن اورراید — عمومی (فقط پچِ محتوای پیش‌فرض؛ اطلاعات حساس ندارد)
+  if (pathname === "/api/admin/overrides") {
+    return sendJSON(res, 200, { ok: true, overrides: readOverrides() });
+  }
+
+  if (pathname === "/api/admin/action") {
+    if (req.method !== "POST") {
+      return sendJSON(res, 405, { ok: false, error: "متد مجاز نیست" });
+    }
+    const adminSession = auth.verifyToken(auth.tokenFromReq(req));
+    if (!isAdminSession(adminSession)) {
+      return sendJSON(res, 403, {
+        ok: false,
+        error: "پنل سوپر ادمین فقط برای حساب AdminChessHub است",
+        needAdmin: true,
+      });
+    }
+    readJSONBody(req, 300 * 1024)
+      .then(function (body) {
+        const scope = String(body.scope || "");
+        const kind = String(body.kind || "");
+        const action = String(body.action || "");
+        const id = String(body.id || "");
+        const item = body.item && typeof body.item === "object" ? body.item : null;
+        if (OVERRIDE_KINDS.indexOf(kind) < 0) {
+          return sendJSON(res, 400, { ok: false, error: "نوع محتوا نامعتبر است" });
+        }
+        if (["edit", "delete", "restore"].indexOf(action) < 0) {
+          return sendJSON(res, 400, { ok: false, error: "عملیات نامعتبر است" });
+        }
+        if (!id) {
+          return sendJSON(res, 400, { ok: false, error: "شناسهٔ اثر نامعتبر است" });
+        }
+
+        /* ─── محتوای کاربران (community_content.json) ─── */
+        if (scope === "community") {
+          const data = readCommunity();
+          const arr = data[kind];
+          if (!Array.isArray(arr)) {
+            return sendJSON(res, 400, { ok: false, error: "نوع محتوا نامعتبر است" });
+          }
+          const idx = arr.findIndex(function (x) { return String(x.id) === id; });
+          if (action === "delete" || action === "edit") {
+            if (idx < 0) return sendJSON(res, 404, { ok: false, error: "اثر مورد نظر پیدا نشد" });
+          }
+          if (action === "delete") {
+            const removed = arr[idx];
+            data.deleted = data.deleted && typeof data.deleted === "object" ? data.deleted : {};
+            data.deleted[id] = Date.now();
+            arr.splice(idx, 1);
+            writeCommunity(data);
+            log(`🛡️ ادمین محتوای کاربر را حذف کرد (${kind}): «${(removed && (removed.title || removed.name)) || id}»`);
+            return sendJSON(res, 200, { ok: true, deleted: id });
+          }
+          if (action === "edit") {
+            const merged = Object.assign({}, arr[idx], item || {});
+            const clean = cleanCommunityItem(kind, merged);
+            const verr = validateCommunityItem(kind, clean);
+            if (verr) return sendJSON(res, 400, { ok: false, error: verr });
+            // نام نویسنده و تاریخ اصلی حفظ می‌شود — ادمین فقط محتوا را عوض می‌کند
+            arr[idx] = Object.assign({}, arr[idx], clean, { updatedAt: Date.now(), adminEdited: true });
+            writeCommunity(data);
+            log(`🛡️ ادمین محتوای کاربر را ویرایش کرد (${kind}): «${clean.title || clean.name || id}»`);
+            return sendJSON(res, 200, { ok: true, item: arr[idx] });
+          }
+          if (action === "restore") {
+            // بازگرداندن اثر حذف‌شده از تومب‌سنگ ممکن نیست (اصل اثر پاک شده)
+            return sendJSON(res, 400, { ok: false, error: "بازگردانی محتوای حذف‌شدهٔ کاربر پشتیبانی نمی‌شود" });
+          }
+        }
+
+        /* ─── پیش‌فرض‌های سایت (اورراید روی کد/دیتای پایه) ─── */
+        if (scope === "default") {
+          const ov = readOverrides();
+          const bucket = ov[kind] && typeof ov[kind] === "object" ? ov[kind] : {};
+          if (action === "delete") {
+            bucket[id] = { deleted: true, at: Date.now(), by: ADMIN_NAME };
+          } else if (action === "edit") {
+            if (!item) return sendJSON(res, 400, { ok: false, error: "دادهٔ ویرایش خالی است" });
+            const prev = bucket[id] && bucket[id].patch ? bucket[id].patch : {};
+            bucket[id] = { patch: Object.assign({}, prev, item), at: Date.now(), by: ADMIN_NAME };
+          } else if (action === "restore") {
+            delete bucket[id];
+          }
+          ov[kind] = bucket;
+          writeOverrides(ov);
+          log(`🛡️ ادمین پیش‌فرضِ سایت را تغییر داد (${kind}/${action}): ${id}`);
+          return sendJSON(res, 200, { ok: true, overrides: ov });
+        }
+
+        return sendJSON(res, 400, { ok: false, error: "محدودهٔ عملیات نامعتبر است" });
+      })
+      .catch(function (e) {
+        sendJSON(res, 400, { ok: false, error: e.message || "خطا در درخواست" });
+      });
+    return;
+  }
+
   if (pathname === "/api/username/check") {
     const v = validateUsername(query.get("name"));
     if (v.error) {

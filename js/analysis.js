@@ -639,6 +639,19 @@
   /* ---------- راه‌اندازی ---------- */
   async function init() {
     if (typeof Chess === "undefined") return;
+    /* 🔑 v11.33 — «تحلیل در آنالیز»: بازیِ رسیده از مرور بازی/پایگاه
+       بازی‌ها به‌صورت خودکار با PGN کامل باز می‌شود */
+    try {
+      if (new URLSearchParams(location.search).get("autopgn") === "1") {
+        const handed = localStorage.getItem("chesshub_analyze_pgn");
+        if (handed) {
+          localStorage.removeItem("chesshub_analyze_pgn");
+          setTimeout(function () {
+            try { loadPgnText(String(handed || "")); } catch (e) {}
+          }, 450);
+        }
+      }
+    } catch (e) {}
     if (window.ChessUtils && ChessUtils.loadPieces) {
       try { await ChessUtils.loadPieces(); } catch (e) {}
     }

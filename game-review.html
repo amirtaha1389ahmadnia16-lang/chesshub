@@ -1,193 +1,152 @@
-<!doctype html>
-<html lang="fa">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="description" content="مرور حرفه‌ای بازی شطرنج با انجین Stockfish — تحلیل حرکت به حرکت" />
-    <title>ChessHub | مرور بازی</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%E2%99%9B%3C/text%3E%3C/svg%3E" />
-    <link rel="stylesheet" href="css/theme.css?v=11.25" />
-    <link rel="stylesheet" href="lib/fontawesome/all.min.css" />
-    <link href="fonts/vazir/font-face.css" rel="stylesheet" />
-    <link rel="stylesheet" href="css/style.css?v=11.25" />
-    <link rel="stylesheet" href="lib/chessground/chessground.base.css?v=11.25" />
-    <link rel="stylesheet" href="css/gamereview.css?v=11.25" />
-    <script src="lib/chess.min.js"></script>
-  </head>
-  <!-- جهت اسکرول‌بار: html با جهت ltr → اسکرول‌بار سمت راست؛
-       محتوا با body dir=rtl → چیدمان طبیعی فارسی -->
-  <body dir="rtl" class="grev-body">
-    <!-- نوار بالا — عنوان مرور + دکمهٔ بازگشت -->
-    <header class="grev-topbar">
-      <div class="grev-title">
-        <i class="fas fa-magnifying-glass-chart"></i>
-        <div>
-          <b>مرور بازی</b>
-          <span id="grSub"></span>
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>مرور بازی — ChessHub</title>
+  <link rel="stylesheet" href="css/theme.css?v=11.34" />
+  <link rel="stylesheet" href="lib/fontawesome/all.min.css" />
+  <link href="fonts/vazir/font-face.css" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css?v=11.34" />
+  <link rel="stylesheet" href="lib/chessground/chessground.base.css?v=11.34" />
+  <link rel="stylesheet" href="css/gamereview.css?v=11.34" />
+  <style>
+    body { background: #10151f; min-height: 100vh; }
+    .gr-topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.7rem 1.1rem; background: rgba(16, 21, 31, 0.92);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+      position: sticky; top: 0; z-index: 40;
+    }
+    .gr-topbar .brand { color: #f4f7fb; font-weight: 900; font-size: 1.05rem; display: inline-flex; align-items: center; gap: 0.5rem; }
+    .gr-topbar .brand i { color: #e9b84c; }
+    .gr-close { background: rgba(148, 163, 184, 0.14); border: 1px solid rgba(148, 163, 184, 0.35); color: #f4f7fb;
+      padding: 0.42rem 0.85rem; border-radius: 9px; cursor: pointer; font-family: "Vazir"; font-weight: 700; font-size: 0.8rem; }
+    .gr-close:hover { background: rgba(239, 68, 68, 0.18); border-color: rgba(239, 68, 68, 0.6); }
+    .gr-shell { max-width: 1260px; margin: 0 auto; }
+    .gr-main-head { padding: 1.2rem 1.4rem 0.4rem; color: #f4f7fb; }
+    .gr-main-head b { font-size: 1.25rem; }
+    .gr-main-head span { display: block; color: #94a3b8; font-size: 0.82rem; margin-top: 0.25rem; }
+    /* دکمه‌های PGN صفحهٔ مستقل */
+    .gr-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; }
+    .btn-pgn {
+      background: rgba(148, 163, 184, 0.12); border: 1.5px solid rgba(148, 163, 184, 0.3);
+      color: #e2e8f0; padding: 0.5rem 0.9rem; border-radius: 9px; cursor: pointer;
+      font-family: "Vazir"; font-size: 0.8rem; font-weight: 700;
+      display: inline-flex; align-items: center; gap: 0.4rem; transition: all 0.2s;
+    }
+    .btn-pgn:hover { border-color: #63b3ed; color: #63b3ed; }
+    .btn-pgn.soft { opacity: 0.92; }
+    .btn-pgn.analyze {
+      background: linear-gradient(135deg, #38a169, #2f855a); border-color: #276749; color: #fff; font-weight: 800;
+    }
+    .btn-pgn.analyze:hover { background: #276749; color: #fff; }
+    .gr-empty {
+      text-align: center; color: #94a3b8; padding: 3rem 1rem;
+    }
+    .gr-empty .fas { font-size: 2rem; color: #e9b84c; margin-bottom: 0.8rem; display: block; }
+    .gr-empty .gr-btn-row { margin-top: 1.2rem; display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; }
+    .gr-empty a.gr-btn {
+      background: rgba(59, 130, 246, 0.16); border: 1px solid rgba(59, 130, 246, 0.5); color: #93c5fd;
+      padding: 0.55rem 1rem; border-radius: 10px; text-decoration: none; font-family: "Vazir"; font-weight: 700; font-size: 0.85rem;
+    }
+    @media (max-width: 700px) {
+      .gr-main-head { padding: 0.9rem 1rem 0.2rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="gr-topbar">
+    <span class="brand"><i class="fas fa-chess"></i> ChessHub</span>
+    <button class="gr-close" id="grBackBtn" title="بازگشت به صفحهٔ قبل">
+      <i class="fas fa-arrow-right"></i> بازگشت
+    </button>
+  </div>
+
+  <div class="gr-shell">
+    <div class="gr-main-head">
+      <b>مرور بازی</b>
+      <span id="grPageSub">تحلیل حرکت‌به‌حرکت با انجین Stockfish</span>
+    </div>
+
+    <!-- نوار پیشرفت تحلیل -->
+    <div class="gr-progress" id="grProgWrap" style="max-width:1260px;margin:0.6rem auto 0;padding:0 1.4rem">
+      <span class="gr-spin" id="grSpin"><i class="fas fa-spinner fa-pulse"></i></span>
+      <div class="gr-prog-pct" id="grProgText">۵٪</div>
+      <div class="gr-prog-track"><div class="gr-prog-fill" id="grProgFill" style="width:5%"></div></div>
+    </div>
+
+    <!-- حالت خالی: بازی‌ای برای مرور از sessionStorage نیامده -->
+    <div class="gr-empty" id="grEmpty" hidden>
+      <i class="fas fa-chess-board"></i>
+      بازی‌ای برای مرور انتخاب نشده است.
+      <div class="gr-btn-row">
+        <a class="gr-btn" href="games-database.html"><i class="fas fa-database"></i> رفتن به پایگاه بازی‌ها</a>
+      </div>
+    </div>
+
+    <!-- بدنهٔ مرور — دقیقاً همان شناسه‌های اورلی مشترک -->
+    <div class="gr-body" id="grevMain">
+      <div class="gr-board-side">
+        <div class="gr-players">
+          <span id="grPw"></span>
+          <span class="gr-vs">برابر</span>
+          <span id="grPb"></span>
+        </div>
+        <div class="gr-board-wrap">
+          <div id="grBoard" class="chessboard gr-board"></div>
+          <svg class="board-arrows" id="grArrows" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+          <div class="gr-badges" id="grBadges"></div>
+        </div>
+        <div class="eval-bar">
+          <div class="eval-track"><div class="eval-fill" id="grEvalFill"></div><div class="eval-mid"></div></div>
+          <span class="gr-eval-num" id="grEvalNum">0.0</span>
+        </div>
+        <div class="gr-controls">
+          <button class="gr-btn" id="grFirst" title="اول"><i class="fas fa-fast-backward"></i></button>
+          <button class="gr-btn" id="grPrev" title="قبلی"><i class="fas fa-step-backward"></i></button>
+          <button class="gr-btn primary" id="grPlay"><i class="fas fa-play"></i></button>
+          <button class="gr-btn" id="grNext" title="بعدی"><i class="fas fa-step-forward"></i></button>
+          <button class="gr-btn" id="grLast" title="آخر"><i class="fas fa-fast-forward"></i></button>
+          <span class="gr-counter" id="grCounter">۰/۰</span>
         </div>
       </div>
-      <button class="gr-close" id="grBackBtn" title="بازگشت به صفحهٔ قبل">
-        <i class="fas fa-arrow-right"></i> بازگشت
-      </button>
-    </header>
-
-    <main class="grev-page">
-      <!-- کادر تحلیل انجین — فقط درصد + اسپینر کوچک -->
-      <section class="grev-analyze" id="grProgWrap">
-        <span class="gr-spin" id="grSpin"><i class="fas fa-spinner fa-pulse"></i></span>
-        <div class="gr-prog-pct" id="grProgText">۵٪</div>
-        <div class="gr-prog-track"><div class="gr-prog-fill" id="grProgFill" style="width:5%"></div></div>
-        <div class="grev-engine-hint" id="engineHint">
-          <i class="fas fa-circle-info"></i>
-          <span>برای دقت بیشتر، انجین را از <a href="settings.html#engine-section">تنظیمات</a> دانلود کنید</span>
+      <div class="gr-panel">
+        <div class="gr-summary" id="grSummary">
+          <div class="gr-loading"><i class="fas fa-spinner fa-pulse"></i> انجین دارد بازی را تحلیل می‌کند…</div>
         </div>
-      </section>
-
-      <div id="enginePromptMount"></div>
-
-      <!-- پیام خالی: بازی‌ای انتخاب نشده -->
-      <div class="grev-empty" id="grevEmpty" style="display:none">
-        <i class="fas fa-chess-board"></i>
-        <p>هیچ بازی‌ای برای مرور انتخاب نشده است.</p>
-        <a class="gr-btn primary" href="games-database.html"><i class="fas fa-database"></i> رفتن به پایگاه بازی‌ها</a>
-      </div>
-
-      <!-- بدنهٔ مرور -->
-      <div class="gr-body" id="grevMain">
-        <div class="gr-board-side">
-          <div class="gr-players">
-            <span id="grPw"></span>
-            <span class="gr-vs">برابر</span>
-            <span id="grPb"></span>
-          </div>
-          <div class="gr-board-wrap">
-            <div id="grBoard" class="chessboard gr-board"></div>
-            <svg class="board-arrows" id="grArrows" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
-            <div class="gr-badges" id="grBadges"></div>
-          </div>
-          <div class="eval-bar">
-            <div class="eval-track"><div class="eval-fill" id="grEvalFill"></div><div class="eval-mid"></div></div>
-            <span class="gr-eval-num" id="grEvalNum">۰٫۰</span>
-          </div>
-          <div class="gr-controls">
-            <button class="gr-btn" id="grFirst" title="اول"><i class="fas fa-fast-backward"></i></button>
-            <button class="gr-btn" id="grPrev" title="قبلی"><i class="fas fa-step-backward"></i></button>
-            <button class="gr-btn primary" id="grPlay" title="پخش خودکار"><i class="fas fa-play"></i></button>
-            <button class="gr-btn" id="grNext" title="بعدی"><i class="fas fa-step-forward"></i></button>
-            <button class="gr-btn" id="grLast" title="آخر"><i class="fas fa-fast-forward"></i></button>
-            <span class="gr-counter" id="grCounter">۰/۰</span>
-          </div>
-          <div class="gr-kbd-hint"><i class="fas fa-keyboard"></i> فلش چپ/راست = حرکت قبل/بعد &nbsp;•&nbsp; دکمهٔ فاصله = پخش بازی &nbsp;•&nbsp; کلیک‌راست و کشیدن = فلش‌کشی</div>
-        </div>
-
-        <div class="gr-panel">
-          <div class="gr-summary" id="grSummary">
-            <div class="gr-loading"><i class="fas fa-spinner fa-pulse"></i> انجین دارد بازی را تحلیل می‌کند…</div>
-          </div>
-          <div class="gr-graph-wrap"><canvas id="grGraph" height="90"></canvas></div>
-          <div class="gr-moves" id="grMoves"></div>
-          <div class="gr-actions">
-            <button class="btn-pgn" id="grCopyPgn"><i class="fas fa-copy"></i> کپی PGN</button>
-            <button class="btn-pgn soft" id="grDlPgn"><i class="fas fa-download"></i> دانلود PGN</button>
-          </div>
+        <div class="gr-graph-wrap"><canvas id="grGraph" height="90"></canvas></div>
+        <div class="gr-moves" id="grMoves"></div>
+        <div class="gr-actions">
+          <button class="btn-pgn analyze" id="grAnalyzeBtn"><i class="fas fa-chess-knight"></i> تحلیل در آنالیز</button>
+          <button class="btn-pgn" id="grCopyPgn"><i class="fas fa-copy"></i> کپی PGN</button>
+          <button class="btn-pgn soft" id="grDlPgn"><i class="fas fa-download"></i> دانلود PGN</button>
         </div>
       </div>
-    </main>
+    </div>
+  </div>
 
-    <script src="js/script.js?v=11.25"></script>
-    <script src="js/profile.js?v=11.25"></script>
-    <script src="js/auth.js?v=11.25"></script>
-    <script src="js/engine-core.js?v=11.25"></script>
-    <script type="module" src="lib/chessground/loader.js?v=11.25"></script>
-    <script src="js/board-ui.js?v=11.25"></script>
-    <script src="js/gamereview.js?v=11.25"></script>
-    <script>
-      (function () {
-        "use strict";
+  <div class="gr-graph-tip" style="position:fixed;z-index:60;opacity:0;pointer-events:none;transition:opacity .15s"></div>
 
-        // اعمال تم ذخیره‌شده + فالبک مهره‌ها
-        (function applySavedTheme() {
-          try {
-            const settings = JSON.parse(localStorage.getItem("chesshub_settings"));
-            if (settings && settings.theme) {
-              document.body.classList.add("theme-" + settings.theme);
-            }
-          } catch (e) {}
-        })();
-
-        // 🎬 راه‌اندازی مرور — بازی از sessionStorage (پایگاه بازی) می‌آید
-        function boot() {
-          // 🔙 دکمهٔ بازگشت — همیشه فعال، حتی وقتی بازی‌ای انتخاب نشده
-          const backBtn = document.getElementById("grBackBtn");
-          if (backBtn) {
-            backBtn.addEventListener("click", function () {
-              if (window.history && window.history.length > 1) {
-                window.history.back();
-              } else {
-                window.location.href = "games-database.html";
-              }
-            });
+  <script src="lib/chess.min.js"></script>
+  <script src="lib/chessground/loader.js?v=11.34"></script>
+  <script src="js/board-ui.js?v=11.34"></script>
+  <script src="js/script.js?v=11.34"></script>
+  <script src="js/engine-core.js?v=11.34"></script>
+  <script src="js/gamereview.js?v=11.34"></script>
+  <script>
+    // اگر بازی‌ای برای مرور نبود، پیام خالی نشان بده
+    (function () {
+      setTimeout(function () {
+        try {
+          if (!window.GameReview || !window.sessionStorage.getItem("chesshub_review_game")) {
+            var empty = document.getElementById("grEmpty");
+            var main = document.getElementById("grevMain");
+            if (empty && main) { empty.hidden = false; main.style.display = "none"; }
           }
-
-          const empty = document.getElementById("grevEmpty");
-          const main = document.getElementById("grevMain");
-          let payload = null;
-          try {
-            payload = JSON.parse(sessionStorage.getItem("chesshub_review_game") || "null");
-          } catch (e) {}
-
-          if (!payload || !payload.pgn) {
-            if (empty) empty.style.display = "flex";
-            if (main) main.style.display = "none";
-            return;
-          }
-
-          // تبدیل PGN به حرکات UCI
-          let uciMoves = [];
-          try {
-            const g = new Chess();
-            g.load_pgn(payload.pgn);
-            uciMoves = g.history({ verbose: true }).map(function (m) {
-              return m.from + m.to + (m.promotion || "");
-            });
-          } catch (e) {
-            uciMoves = [];
-          }
-
-          const opening = payload.opening || payload.eco || "";
-          window.GameReview.openPage({
-            moves: uciMoves,
-            white: payload.white || "سفید",
-            black: payload.black || "سیاه",
-            title: payload.playerName || "مرور بازی",
-            subtitle:
-              (payload.playerName ? payload.playerName + " — " : "") +
-              (payload.white || "سفید") + " در برابر " + (payload.black || "سیاه") +
-              (opening ? " — " + opening : "") +
-              (payload.date ? " (" + payload.date + ")" : ""),
-            result: payload.result || "*",
-          });
-
-          // 💡 راهنمای فالبک: اگر انجین ذخیره‌شده‌ای در دسترس نبود
-          const hint = document.getElementById("engineHint");
-          function refreshHint() {
-            if (!hint) return;
-            const kind = window.ChessEngine ? ChessEngine.kind() : "none";
-            hint.classList.toggle("show", kind === "local");
-          }
-          if (window.ChessEngine) ChessEngine.onReady(refreshHint);
-          document.addEventListener("engineStoreChanged", function () {
-            setTimeout(refreshHint, 1500);
-          });
-          refreshHint();
-        }
-
-        if (document.readyState === "loading") {
-          document.addEventListener("DOMContentLoaded", boot);
-        } else {
-          boot();
-        }
-      })();
-    </script>
-  </body>
+        } catch (e) {}
+      }, 1600);
+    })();
+  </script>
+</body>
 </html>

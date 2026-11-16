@@ -288,8 +288,12 @@ function validatePassword(pw, name) {
   if (p.length < PASSWORD_RULES.min) return "رمز عبور باید حداقل ۶ حرف باشد";
   if (p.length > PASSWORD_RULES.max) return "رمز عبور حداکثر ۶۴ حرف است";
   if (!/[a-zA-Z\u0600-\u06FF]/.test(p)) return "رمز عبور باید حداقل یک حرف داشته باشد";
-  if (!/[0-9]/.test(p)) return "رمز عبور باید حداقل یک رقم داشته باشد";
-  if (normName(p) === normName(name)) return "رمز عبور نمی‌تواند همان نام کاربری باشد";
+  /* 🔑 v11.32 — استثنای صریحِ صاحب سایت: رمز حساب AdminChessHub
+     دقیقاً برابر نام خودش است (درخواست مالک در v11.32) — فقط همین
+     جفتِ دقیق، نه هیچ ترکیب دیگری */
+  const isAdminSeed = String(name || "").toLowerCase() === "adminchesshub" && p === "AdminChessHub";
+  if (!isAdminSeed && !/[0-9]/.test(p)) return "رمز عبور باید حداقل یک رقم داشته باشد";
+  if (!isAdminSeed && normName(p) === normName(name)) return "رمز عبور نمی‌تواند همان نام کاربری باشد";
   if (/^\s+$|\s{3,}/.test(p)) return "رمز عبور نمی‌تواند فقط فاصله باشد";
   return null;
 }
@@ -480,6 +484,27 @@ function publicProfile(rec) {
     lastLoginAt: rec.lastLoginAt || 0,
   };
 }
+
+/* 🔑 v11.33 — خودکاشت حساب سوپر ادمین: اگر حساب AdminChessHub در
+   دادهٔ زنده نباشد (مثلاً استقرار روی دادهٔ قدیمی)، هنگام بوتِ سرور
+   خودکار ساخته می‌شود تا ورود به پنل مدیریت محتوا همیشه ممکن باشد.
+   اگر از قبل هست، دست نمی‌زنیم — رمز تغییرشده پاک نمی‌شود. */
+function seedAdminAccount() {
+  try {
+    const map = readAccounts();
+    if (Object.prototype.hasOwnProperty.call(map, "adminchesshub")) return;
+    const r = registerAccount("AdminChessHub", "AdminChessHub", "", "admin@chesshub.local");
+    if (r && r.ok) {
+      console.log("[Seed] 🛡️ حساب سوپر ادمین AdminChessHub ساخته شد — رمز = نام؛ فقط مدیریت محتوا");
+    } else {
+      console.log("[Seed] 🛡️ ساخت حساب ادمین ناموفق:", (r && r.error) || "نامشخص");
+    }
+  } catch (e) {
+    console.log("[Seed] 🛡️ خطای ساخت حساب ادمین:", e.message);
+  }
+}
+
+seedAdminAccount();
 
 module.exports = {
   // توکن/نشست

@@ -52,9 +52,7 @@
     w: { k: "♔", q: "♕", r: "♖", b: "♗", n: "♘", p: "♙" },
     b: { k: "♚", q: "♛", r: "♜", b: "♝", n: "♞", p: "♟" },
   };
-  /* 🔑 v11.25 — مقدار اولیه از تنظیمات ذخیره‌شده می‌خوانَد نه neo ثابت؛
-     قبلاً رندر اولیهٔ برد قبل از probePieceSet با neo قفل می‌شد و
-     تعویض مجموعهٔ مهره در این صفحه اعمال نمی‌شد. */
+  /* 🔑 v11.25 — مقدار اولیه از تنظیمات ذخیره‌شده می‌خوانَد نه neo ثابت */
   let pieceSet = getCurrentPieceSet();
   let glyphMode = false; // true = تصاویر نیست → گلیف یونیکد
 
@@ -592,11 +590,15 @@
           const sq = document.createElement("div");
           const isLight = (i + j) % 2 === 0;
           sq.className = "square " + (isLight ? "light" : "dark");
+          /* 🔧 v11.28 — نام خانه برای لایهٔ مختصات مشترک */
+          sq.dataset.square = "abcdefgh"[j] + (8 - i);
           const p = board[i][j];
           if (p) sq.appendChild(makePieceEl(p.color, p.type));
           el.appendChild(sq);
         }
       }
+      /* 🔧 v11.28 — مختصات مینی‌بوردها هم هم‌سان با بقیهٔ تخته‌ها */
+      if (window.ChessUtils && ChessUtils.attachCoords) ChessUtils.attachCoords(el);
     } catch (e) {}
   }
   // ============================================================
@@ -672,6 +674,8 @@
           if (pc && pc.type === "k" && pc.color === turn) sqEl.classList.add("in-check");
         }
       }
+      /* 🔧 v11.28 — مختصات، هم‌سان با بقیهٔ صفحه‌ها (هر رندر دوباره وصل می‌شود) */
+      if (window.ChessUtils && ChessUtils.attachCoords) ChessUtils.attachCoords(T.boardEl);
     };
 
     T.setStatus = function (html) {

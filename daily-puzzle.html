@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="css/theme.css?v=10.9" />
     <link rel="stylesheet" href="lib/fontawesome/all.min.css" />
     <link href="fonts/vazir/font-face.css" rel="stylesheet" />
-    <link rel="stylesheet" href="css/style.css?v=11.25" />
+    <link rel="stylesheet" href="css/style.css?v=11.33" />
     <script src="lib/chess.min.js"></script>
     <style>
       /* ============================================================
@@ -35,8 +35,35 @@
         white-space: nowrap;
       }
 
-      .dp-grid { display: flex; gap: 1.2rem; align-items: flex-start; flex-wrap: wrap; }
-      .dp-main { flex: 1.3; min-width: 300px; max-width: 620px; margin: 0 auto; }
+      /* 🔑 v11.32 — تاریخچه می‌چسبد به سمت چپ، دقیقاً زیر نشانِ
+         «پازل روز …» (اندازه‌گیری زنده: ۲۶px بالا رفتن کارت) و
+         کارت پازل با margin-inline-start:auto کمی رو به مرکز */
+      .dp-grid { display: flex; gap: 1rem; align-items: stretch; flex-wrap: wrap; }
+      .dp-main { flex: 1.3; min-width: 300px; max-width: 680px; margin: 0; }
+      @media (min-width: 861px) {
+        /* 🔑 v11.33 — کارت پازل هم مثل تاریخچه بالا می‌رود و دقیقاً
+           زیر عنوان «پازل روزانه» می‌نشیند (هم‌ارتفاعِ تاریخچه زیر نشان) */
+        .dp-main { margin-inline-start: auto; margin-top: -26px; }
+      }
+      .dp-grid .dp-card { margin-bottom: 0; }
+      .dp-head .head-icon { cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; }
+      .dp-head .head-icon:hover { transform: translateY(-2px); box-shadow: 0 14px 26px rgba(59, 130, 246, 0.38); }
+      .dp-head .head-icon:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+      @media (min-width: 861px) {
+        /* specificity بالاتر از قانون پایهٔ .dp-side */
+        /* 🔑 v11.32 — چسبیده زیر نشان «پازل روز» (۲۶px = فاصلهٔ
+           پایین نشان تا بالای گرید، در ۹۲۰ تا ۱۲۸۰px ثابت است) */
+        .dp-grid .dp-side {
+          flex: 0 0 372px; width: 372px; min-width: 0;
+          margin-top: -26px;
+        }
+      }
+      /* پالس آبی هنگام کلیک روی آیکون تقویم */
+      @keyframes histFlash {
+        0%, 100% { box-shadow: 0 6px 20px rgba(15, 42, 85, 0.08); }
+        40% { box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35), 0 10px 26px rgba(59, 130, 246, 0.22); }
+      }
+      .dp-side.flash .dp-card { animation: histFlash 0.9s ease; }
 
       .dp-card {
         background: #ffffff; border: 1px solid var(--border); border-radius: 22px;
@@ -80,12 +107,15 @@
       }
       #dpBoard .square.dot-capture::after { width: 88%; height: 88%; background: transparent; border: 4px solid rgba(20, 30, 40, 0.3); }
       #dpBoard .square.drag-over { outline: 3px solid rgba(56, 161, 105, 0.95); outline-offset: -3px; z-index: 2; }
+      /* 🔑 v11.27 — چشمک سبز نرم روی مبدأ و مقصد؛ z-index بالای مهره‌ها
+         تا هایلایت روی خانهٔ مهره‌دار هم دیده شود (قبلاً زیر مهره پنهان بود) */
       #dpBoard .square.hint::before {
-        content: ""; position: absolute; inset: 0; z-index: 1;
-        background: radial-gradient(circle, rgba(56, 161, 105, 0.55) 18%, transparent 62%);
-        animation: hintPulse 1.1s ease-in-out infinite;
+        content: ""; position: absolute; inset: 0; z-index: 6;
+        background: rgba(56, 161, 105, 0.55);
+        border-radius: 4px;
+        animation: hintBlinkSoft 0.9s ease-in-out 3;
       }
-      @keyframes hintPulse { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
+      @keyframes hintBlinkSoft { 0%, 100% { opacity: 0.10; } 50% { opacity: 0.85; } }
 
       .dp-progress { display: flex; align-items: center; gap: 0.6rem; margin-top: 0.9rem; }
       .dp-progress .track { flex: 1; height: 10px; background: #eef2f7; border-radius: 99px; overflow: hidden; border: 1px solid var(--border); }
@@ -117,9 +147,23 @@
       }
       .dp-solved.show { display: flex; }
       .dp-solved i { font-size: 1.2rem; color: #38a169; }
+      /* 🔑 v11.28 — «تحلیل موقعیت»: سطر مستقل تمام‌عرض، فقط بعد از حل
+         (analysis.html?fen=…) */
+      .dp-analyze-btn {
+        display: none;
+        width: 100%;
+        align-items: center; justify-content: center; gap: 0.45rem;
+        background: #38a169; color: #fff; border-radius: 10px;
+        padding: 0.68rem 1rem; font-weight: 800; font-size: 0.85rem;
+        text-decoration: none; transition: background 0.15s ease, transform 0.15s ease;
+        margin-top: 0.6rem;
+      }
+      .dp-analyze-btn.show { display: inline-flex; }
+      .dp-analyze-btn:hover { background: #2f855a; }
+      .dp-analyze-btn:active { transform: scale(0.98); }
 
       /* ---------- تقویم تاریخچه ---------- */
-      .dp-side { flex: 1; min-width: 280px; max-width: 420px; }
+      .dp-side { flex: 1; min-width: 280px; max-width: 460px; display: flex; flex-direction: column; }
       .cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.7rem; }
       .cal-head .cal-title { font-size: 0.9rem; font-weight: 900; color: var(--primary-dark); }
       .cal-nav { display: flex; gap: 0.3rem; }
@@ -148,6 +192,12 @@
         position: absolute; top: 2px; inset-inline-end: 3px; font-size: 0.5rem; color: #38a169;
       }
       .cal-day.active { background: var(--accent); border-color: var(--accent-dark); color: #fff; }
+      /* 🔑 v11.28 — روزِ حل‌شده حتی وقتی «انتخاب‌شده/امروز» هم هست سبز می‌ماند
+         (قبلاً کلاس active که بعداً می‌آمد سبز را آبی می‌پوشاند) */
+      .cal-day.active.solved,
+      .cal-day.solved.active {
+        background: #38a169; border-color: #2f855a; color: #fff;
+      }
       .cal-legend { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-top: 0.8rem; }
       .cal-legend span { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.64rem; font-weight: 700; color: var(--text-light); }
       .cal-legend i.sq { width: 11px; height: 11px; border-radius: 4px; display: inline-block; }
@@ -159,17 +209,12 @@
       .cal-stats .st b { display: block; font-size: 1.05rem; font-weight: 900; color: var(--primary-dark); }
       .cal-stats .st span { font-size: 0.62rem; font-weight: 700; color: var(--text-light); }
 
-      .dp-note {
-        background: #fffaf0; border: 1px solid #f6d78a; color: #744210;
-        border-radius: 14px; padding: 0.65rem 0.9rem; font-size: 0.72rem; font-weight: 700;
-        margin-top: 1rem; display: flex; gap: 0.5rem; align-items: flex-start;
-      }
-      .dp-note i { margin-top: 0.15rem; }
 
       @media (max-width: 860px) {
         .dp-grid { flex-direction: column; }
         .dp-main { max-width: 100%; }
-        .dp-side { max-width: 100%; }
+        /* 🔑 v11.30 — در موبایل تاریخچه همان کارتِ زیر پازل می‌ماند */
+        .dp-side { max-width: 100%; position: static; display: flex; animation: none; }
         .dp-card { padding: 1rem; }
         .dp-head .dp-day-badge { margin-inline-start: 0; width: 100%; justify-content: center; }
       }
@@ -180,10 +225,10 @@
       <div id="header-placeholder"></div>
 
       <div class="dp-head">
-        <div class="head-icon"><i class="fas fa-calendar-day"></i></div>
+        <div class="head-icon" id="dpHistToggle" role="button" tabindex="0" title="تاریخچهٔ پازل‌ها" aria-label="تاریخچهٔ پازل‌ها"><i class="fas fa-calendar-day"></i></div>
         <div>
           <h1>پازل روزانه</h1>
-          <p class="head-sub">هر روز یک پازل تازه — پازل روزهای گذشته را هم می‌توانی حل کنی</p>
+          <p class="head-sub">هر روز یک پازل تازه</p>
         </div>
         <span class="dp-day-badge" id="dpDayBadge">…</span>
       </div>
@@ -213,11 +258,16 @@
               <i class="fas fa-circle-check"></i>
               <span id="dpSolvedTxt">آفرین! پازل حل شد 🎉</span>
             </div>
+            <!-- 🔑 v11.28 — دکمهٔ تحلیل: سطر مستقلِ تمام‌عرض زیر بنر حل
+                 (جای بهتر: چشم‌گیرتر و لمس‌پذیرتر، جدا از پیام) -->
+            <a id="dpAnalyzeBtn" class="dp-analyze-btn" href="analysis.html">
+              <i class="fas fa-chart-line"></i> تحلیل موقعیت
+            </a>
           </div>
         </div>
 
         <!-- تاریخچه -->
-        <div class="dp-side">
+        <div class="dp-side" id="dpHistPanel">
           <div class="dp-card">
             <h2><i class="fas fa-clock-rotate-left"></i> تاریخچهٔ پازل‌ها</h2>
             <div class="cal-head">
@@ -240,17 +290,13 @@
               <div class="st"><b id="stTotal">۵۰</b><span>پازل از ۱ مهر</span></div>
             </div>
           </div>
-          <div class="dp-note">
-            <i class="fas fa-circle-info"></i>
-            <span>پازل‌ها از <strong>۱ مهر</strong> شمرده می‌شوند — پازل امروز شمارهٔ «روز از ۱ مهر» است. می‌توانی هر روزِ گذشته را از تقویم انتخاب و حل کنی، ولی قبل از ۱ مهر پازلی نداریم.</span>
-          </div>
         </div>
       </div>
 
       <div id="footer-placeholder"></div>
     </div>
 
-    <script src="js/script.js?v=11.25"></script>
+    <script src="js/script.js?v=11.33"></script>
     <script src="js/profile.js?v=10.9"></script>
     <script src="js/auth.js?v=10.9"></script>
     <script src="js/jalali.js?v=10.9"></script>

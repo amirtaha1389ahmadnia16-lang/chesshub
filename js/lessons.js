@@ -159,6 +159,22 @@
     });
   }
 
+  /* 🔑 v11.32 — اورراید ادمین روی درس‌های پایه: حذف/ویرایش پیش‌فرض‌ها
+     درجا روی همان آرایهٔ ماژول اعمال و گرید دوباره رندر می‌شود */
+  if (window.AdminOverrides && window.lessons) {
+    AdminOverrides.apply("lessons", window.lessons).then(function (list) {
+      const byId = {};
+      list.forEach(function (l) { byId[String(l.id)] = l; });
+      const arr = window.lessons;
+      for (let i = arr.length - 1; i >= 0; i--) {
+        const live = byId[String(arr[i].id)];
+        if (!live) { arr.splice(i, 1); continue; }
+        Object.assign(arr[i], live);
+      }
+      if (typeof renderGrid === "function") renderGrid();
+    });
+  }
+
   function renderGrid() {
     const list = getFiltered();
     grid.innerHTML = "";

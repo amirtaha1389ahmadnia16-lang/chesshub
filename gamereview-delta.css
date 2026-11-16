@@ -1,0 +1,106 @@
+
+/* ═══════════════════════════════════════════════════════════
+   ♛ ChessHub — دلتای مرور بازی v11.34 (انتهای فایل = اولویت)
+   این بخش توسط نصب‌کنندهٔ v11.34 اضافه می‌شود — حذف نکنید.
+   ═══════════════════════════════════════════════════════════ */
+
+/* پهنای اورلی و ستون گزارش — گزارش عملکرد جای نفس‌کشیدن دارد */
+.gr-inner { max-width: 1260px; }
+.gr-body { grid-template-columns: minmax(0, 1fr) 520px; }
+
+/* آواتار بزرگ‌تر در نوار بازیکنان و کارت گزارش */
+.gr-players .gr-avatar-img,
+.gr-avatar-img.sm { width: 44px; height: 44px; }
+.gr-pava { width: 96px; height: 96px; }
+@media (max-width: 700px) {
+  .gr-pava { width: 74px; height: 74px; }
+  .gr-players .gr-avatar-img, .gr-avatar-img.sm { width: 38px; height: 38px; }
+}
+
+/* کارت‌های گزارش: با عرض کافی و شکستن مرتب */
+.gr-pcards { flex-wrap: wrap; }
+.gr-pcard { min-width: 225px; }
+
+/* داوری متنی روان زیر دقت هر بازیکن */
+.gr-verdict {
+  font-size: 0.74rem;
+  font-weight: 700;
+  line-height: 1.75;
+  color: #475569;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px dashed rgba(148, 163, 184, 0.5);
+  border-radius: 10px;
+  padding: 0.45rem 0.6rem;
+  width: 100%;
+}
+
+/* چیپ‌های آمار منظم دوستونه */
+.gr-kinds {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.3rem;
+  width: 100%;
+}
+.gr-kinds button.gr-chip { width: 100%; justify-content: flex-start; }
+
+/* فونت تمیز حرکات SAN (به‌جای monospace) */
+.gr-move .gr-san {
+  font-family: "Segoe UI", "Noto Sans", "DejaVu Sans", Tahoma, sans-serif;
+  direction: ltr;
+  font-weight: 800;
+  font-size: 0.88rem;
+  letter-spacing: 0.2px;
+}
+
+/* فونت تمیز اعداد ارزیابی (نوار + هاور نمودار) — رقم لاتین استاندارد */
+.gr-eval-num {
+  font-family: "Segoe UI", "Noto Sans", "DejaVu Sans", Tahoma, sans-serif;
+  font-weight: 800;
+  font-size: 0.9rem;
+}
+.gr-graph-tip .gt-ev {
+  direction: ltr;
+  font-family: "Segoe UI", "Noto Sans", "DejaVu Sans", Tahoma, sans-serif;
+  font-weight: 800;
+}
+.gr-graph-tip {
+  background: rgba(15, 23, 42, 0.94);
+  color: #f1f5f9;
+  border-radius: 9px;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+}
+.gr-graph-tip.show { opacity: 1; }
+
+/* دکمهٔ «تحلیل در آنالیز» — سبز متمایز */
+.gr-btn.analyze {
+  background: linear-gradient(135deg, #38a169, #2f855a);
+  border-color: #276749;
+  color: #fff;
+  font-weight: 800;
+}
+.gr-btn.analyze:hover { background: #276749; color: #fff; }
+.btn-pgn.analyze {
+  background: linear-gradient(135deg, #38a169, #2f855a);
+  border-color: #276749;
+  color: #fff;
+  font-weight: 800;
+}
+.btn-pgn.analyze:hover { background: #276749; }
+
+/* توست داخلی مرور */
+.gr-toast {
+  position: fixed; bottom: 1.4rem; left: 50%; transform: translateX(-50%) translateY(14px);
+  background: rgba(15, 23, 42, 0.94); color: #f1f5f9; padding: 0.55rem 1.1rem;
+  border-radius: 10px; font-family: "Vazir"; font-size: 0.82rem; font-weight: 700;
+  opacity: 0; transition: all 0.3s; z-index: 1000; box-shadow: 0 10px 26px rgba(0,0,0,.4);
+}
+.gr-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* بدون حرکت قابل‌توجه */
+.gr-nokind { font-size: 0.74rem; color: #94a3b8; padding: 0.4rem 0; }

@@ -6,11 +6,11 @@
     <meta name="description" content="پایگاه بازی‌های استادان بزرگ شطرنج - بیش از ۳۰ استاد بزرگ و هزاران بازی معروف" />
     <title>ChessHub | پایگاه بازی‌ها</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%E2%99%9B%3C/text%3E%3C/svg%3E" />
-    <link rel="stylesheet" href="css/theme.css?v=11.25" />
+    <link rel="stylesheet" href="css/theme.css?v=11.33" />
     <link rel="stylesheet" href="lib/fontawesome/all.min.css" />
     <link href="fonts/vazir/font-face.css" rel="stylesheet" />
-    <link rel="stylesheet" href="css/style.css?v=11.25" />
-    <link rel="stylesheet" href="lib/chessground/chessground.base.css?v=11.25" />
+    <link rel="stylesheet" href="css/style.css?v=11.33" />
+    <link rel="stylesheet" href="lib/chessground/chessground.base.css?v=11.33" />
     <script src="lib/chess.min.js"></script>
     <style>
       /* ============================================================
@@ -121,8 +121,8 @@
         border-color: var(--accent-light, var(--accent));
       }
       .player-card .avatar {
-        width: 78px;
-        height: 78px;
+        width: 104px;
+        height: 104px;
         border-radius: 50%;
         margin: 0 auto 0.8rem;
         overflow: hidden;
@@ -719,6 +719,10 @@
         border-color: var(--success-dark, #276749);
       }
       .playback-controls button.review:hover { background: #38a169; }
+      .playback-controls button.review.analyze {
+        background: linear-gradient(135deg, #3182ce, #2c5282);
+      }
+      .playback-controls button.review.analyze:hover { background: #2c5282; }
       .playback-controls .move-counter {
         font-size: 0.75rem;
         background: #f1f5f9;
@@ -1055,10 +1059,10 @@
       </div>
     </div>
 
-    <script src="js/script.js?v=11.25"></script>
-    <script type="module" src="lib/chessground/loader.js?v=11.25"></script>
-    <script src="js/profile.js?v=11.25"></script>
-    <script src="js/auth.js?v=11.25"></script>
+    <script src="js/script.js?v=11.33"></script>
+    <script type="module" src="lib/chessground/loader.js?v=11.33"></script>
+    <script src="js/profile.js?v=11.33"></script>
+    <script src="js/auth.js?v=11.33"></script>
     <script>
       (function () {
         "use strict";
@@ -1774,6 +1778,7 @@
                 <div class="viewer-kbd-hint"><i class="fas fa-keyboard"></i> فلش چپ/راست = حرکت قبل/بعد &nbsp;•&nbsp; دکمهٔ فاصله = پخش کامل بازی &nbsp;•&nbsp; کلیک‌راست و کشیدن = فلش‌کشی</div>
                 <div class="playback-controls">
                   <button id="reviewBtn" class="review"><i class="fas fa-magnifying-glass-chart"></i> مرور بازی با انجین</button>
+                  <button id="analyzeBtn" class="review analyze"><i class="fas fa-chess-knight"></i> تحلیل بازی</button>
                 </div>
               </div>
               <div class="info-wrapper">
@@ -1815,6 +1820,12 @@
           document.getElementById("lastMoveBtn").addEventListener("click", goToLastMove);
           document.getElementById("copyPgnBtn").addEventListener("click", copyPGN);
           document.getElementById("downloadPgnBtn").addEventListener("click", downloadPGN);
+          /* 🔑 v11.33 — «تحلیل بازی»: PGN کامل بازی به بخش آنالیز می‌رود */
+          document.getElementById("analyzeBtn").addEventListener("click", function () {
+            if (!currentGame || !currentGameMoves.length) return;
+            try { localStorage.setItem("chesshub_analyze_pgn", currentGame.pgn || ""); } catch (e) {}
+            window.open("analysis.html?autopgn=1", "_blank");
+          });
           document.getElementById("reviewBtn").addEventListener("click", function () {
             if (!currentGame || !currentGameMoves.length) return;
             // 🆕 مرور بازی در صفحهٔ اختصاصی مرور باز می‌شود (با دکمهٔ بازگشت)

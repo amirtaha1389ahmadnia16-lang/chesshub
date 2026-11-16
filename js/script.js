@@ -98,7 +98,7 @@ window.chPh = function (w, h, label) {
   let VALID_BOARDS = BOARD_IMAGES.map(function (b) { return b.id; });
   /* 🔑 v11.25 — تا وقتی کاتالوگ‌ها از فایل‌های کانفیگ ساخته نشده‌اند،
      loadSettings «اعتبارسنجی» را انجام نمی‌دهد. قبلاً فراخوانی‌های
-     پیش از بوت (مثل preload مهره‌ها در خط ۸۸۲ یا await خود صفحه‌ها)
+     پیش از بوت (مثل preload مهره‌ها یا await خود صفحه‌ها)
      با کاتالوگِ خالی مواجه می‌شدند → مقدار ذخیره‌شدهٔ کاربر به
      پیش‌فرض برمی‌گشت → کش مهره‌ها با neo قفل می‌شد و در بعضی صفحه‌ها
      تعویض مجموعه/تخته اعمال نمی‌شد. */
@@ -753,14 +753,19 @@ window.chPh = function (w, h, label) {
     /* ---------- 🆕 آواتار آدمکِ تولیدی — برای بازیکنان بی‌عکس ----------
        سفید → آدمکِ سفید روی پس‌زمینهٔ تیره | سیاه → آدمکِ سیاه روی پس‌زمینهٔ روشن */
     bustAvatar(side) {
+      /* 🔑 v11.33 — آدمک = سیلوئت «پیادهٔ شطرنج» با رنگ همان طرف:
+         بازیکن سفید بدون عکس → پیادهٔ سفید روی زمینهٔ تیره؛
+         بازیکن سیاه بدون عکس → پیادهٔ سیاه روی زمینهٔ روشن */
       const bg = side === "b" ? "#e8edf5" : "#22303f";
       const fg = side === "b" ? "#26313d" : "#f4f7fb";
       const svg =
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">' +
         '<rect width="64" height="64" rx="14" fill="' + bg + '"/>' +
-        '<circle cx="32" cy="23.5" r="12.5" fill="' + fg + '"/>' +
-        '<path d="M9 62c0-14.5 10.5-22 23-22s23 7.5 23 22z" fill="' + fg + '"/>' +
-        "</svg>";
+        '<g fill="' + fg + '">' +
+        '<circle cx="32" cy="16.5" r="7.5"/>' +
+        '<path d="M27.2 25.5h9.6l1.7 5.6c3.5 3.3 5.6 8.4 5.6 13.9H19.9c0-5.5 2.1-10.6 5.6-13.9z"/>' +
+        '<rect x="15.5" y="46.5" width="33" height="6.5" rx="3.2"/>' +
+        "</g></svg>";
       return "data:image/svg+xml;charset=utf8," + encodeURIComponent(svg);
     },
 
@@ -869,6 +874,53 @@ window.chPh = function (w, h, label) {
       const firstMoveColor = moves[0].color;
       return firstMoveColor === "w" ? "b" : "w";
     },
+  };
+
+  /* 🔧 v11.28 — لایهٔ مختصات a-h / 1-8 برای تخته‌های سازه‌ایِ صفحات
+     (آخربازی‌ها/گشایش‌ها) — همان استایل مشترک .coord-layer و همان
+     فرمول اندازهٔ فونت board-ui تا مختصات در «همهٔ» بخش‌ها یکسان باشد */
+  ChessUtils.attachCoords = function (boardEl) {
+    try {
+      if (!boardEl || boardEl.querySelector(".coord-layer")) return;
+      if (getComputedStyle(boardEl).position === "static") {
+        boardEl.style.position = "relative";
+      }
+      const layer = document.createElement("div");
+      layer.className = "coord-layer";
+      boardEl.appendChild(layer);
+      function size() {
+        const w = boardEl.clientWidth;
+        if (!w) return;
+        layer.style.fontSize = Math.max(7, Math.round((w / 8) * 0.17)) + "px";
+      }
+      function render() {
+        const sqs = boardEl.querySelectorAll(".square");
+        if (sqs.length !== 64) return;
+        let html = "";
+        for (let i = 0; i < 64; i++) {
+          const row = Math.floor(i / 8), col = i % 8;
+          if (col !== 0 && row !== 7) continue;
+          const sq = sqs[i];
+          const cls = sq.classList.contains("dark") ? "coord-light-text" : "coord-dark-text";
+          const name = (sq.dataset && sq.dataset.square) || "";
+          if (col === 0) {
+            html += '<span class="coord-cell" style="top:' + (row * 12.5) + '%;left:0">' +
+              '<span class="board-coord coord-rank ' + cls + '">' +
+              (name.slice(1) || String(8 - row)) + "</span></span>";
+          }
+          if (row === 7) {
+            html += '<span class="coord-cell" style="top:auto;bottom:0;left:' + (col * 12.5) + '%">' +
+              '<span class="board-coord coord-file ' + cls + '">' +
+              (name[0] || "abcdefgh"[col]) + "</span></span>";
+          }
+        }
+        layer.innerHTML = html;
+        size();
+      }
+      render();
+      const ro = new ResizeObserver(function () { size(); render(); });
+      ro.observe(boardEl);
+    } catch (e) {}
   };
 
   window.ChessUtils = ChessUtils;
@@ -1006,6 +1058,36 @@ window.chPh = function (w, h, label) {
   };
   window.CommunityHub = CommunityHub;
 
+  /* 🔑 v11.32 — لایهٔ اورراید پیش‌فرض‌ها (پنل سوپر ادمین):
+     ویرایش/حذف محتوای پیش‌فرض سایت به‌صورت پچ روی همان داده */
+  window.AdminOverrides = {
+    _p: null,
+    load() {
+      if (this._p) return this._p;
+      this._p = fetch("/api/admin/overrides", { cache: "no-store" })
+        .then(function (r) { return r.ok ? r.json() : { overrides: {} }; })
+        .then(function (j) {
+          const o = j && j.overrides;
+          return o && typeof o === "object" ? o : {};
+        })
+        .catch(function () { return {}; });
+      return this._p;
+    },
+    /* اعمال روی یک آرایه — خروجی آرایهٔ جدید است */
+    apply(kind, arr) {
+      return this.load().then(function (ov) {
+        const m = ov[kind] || {};
+        const out = [];
+        (arr || []).forEach(function (x) {
+          const o = m[String(x.id)];
+          if (o && o.deleted) return;
+          out.push(o && o.patch ? Object.assign({}, x, o.patch) : x);
+        });
+        return out;
+      });
+    },
+  };
+
   /* ============================================
      ۴) بارگذاری هدر و فوتر در همه صفحات
      ============================================ */
@@ -1056,7 +1138,33 @@ window.chPh = function (w, h, label) {
     });
   }
 
-  function initMobileMenu() {
+    /* 🔑 v11.32 — لینک «پنل ادمین» در هدر فقط برای حساب AdminChessHub */
+  function initAdminLink() {
+    function place() {
+      const cur = window.ChessHubAuth && ChessHubAuth.current ? ChessHubAuth.current() : null;
+      const isAdmin = !!cur && String(cur.name || "").toLowerCase() === "adminchesshub";
+      const existing = document.getElementById("adminPanelLink");
+      if (existing) existing.remove();
+      if (!isAdmin) return;
+      const nav = document.querySelector(".nav-links, nav, .header-nav");
+      const bar = nav || document.querySelector("header");
+      if (!bar) return;
+      const a = document.createElement("a");
+      a.id = "adminPanelLink";
+      a.href = "admin.html";
+      a.className = "nav-link admin-link";
+      a.innerHTML = '<i class="fas fa-shield-halved"></i> پنل ادمین';
+      a.style.cssText =
+        "display:inline-flex;align-items:center;gap:0.3rem;color:#fff;background:linear-gradient(135deg,#c05621,#9c4221);" +
+        "border-radius:12px;padding:0.35rem 0.85rem;font-weight:800;font-size:0.8rem;text-decoration:none;" +
+        "box-shadow:0 6px 14px -6px rgba(156,66,33,0.6);margin-inline-start:0.4rem;";
+      bar.appendChild(a);
+    }
+    place();
+    if (window.ChessHubAuth && ChessHubAuth.onChange) ChessHubAuth.onChange(place);
+  }
+
+function initMobileMenu() {
     const menuToggle = document.getElementById("menuToggle");
     const mainNav = document.getElementById("mainNav");
     if (!menuToggle || !mainNav) return;
@@ -2143,6 +2251,7 @@ window.chPh = function (w, h, label) {
     ]);
 
     initMobileMenu();
+    initAdminLink();
     initSettings();
     initSettingsPage();
     initEnginePrompt();

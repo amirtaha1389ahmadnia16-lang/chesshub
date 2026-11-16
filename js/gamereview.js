@@ -40,7 +40,7 @@
     });
   }
 
-  const CACHE_KEY = "chesshub_review_cache_v2";
+  const CACHE_KEY = "chesshub_review_cache_v3";
   const CACHE_MAX = 40;
 
   function cacheAll() {
@@ -76,11 +76,14 @@
     }
     return n;
   }
+  /* 🔑 v11.33 — بودجهٔ تحلیل قوی‌تر: ارزیابیِ پرنویز ریشهٔ برچسب‌های
+     اشتباه بود. عمق و زمان هر موقعیت بالا رفت تا دلتاها پایدار شوند. */
   function analysisBudget(fen) {
     const n = pieceCountOf(fen);
-    if (n <= 6) return { movetime: 260, depth: 20 };
-    if (n <= 16) return { movetime: 180, depth: 16 };
-    return { movetime: 120, depth: 14 };
+    if (n <= 6) return { movetime: 680, depth: 22 };
+    if (n <= 12) return { movetime: 420, depth: 18 };
+    if (n <= 18) return { movetime: 330, depth: 16 };
+    return { movetime: 260, depth: 15 };
   }
 
   function cpOf(score) { return window.ChessEngine ? ChessEngine.cpOf(score) : 0; }
@@ -162,7 +165,27 @@
     }
     return v;
   }
-  // آیا حرکتِ «بهترین/عالی» با قربانی دادن همراه بوده؟ → درخشان 💎
+  /* بزرگ‌ترین ارزش گرفتنِ فوریِ یک رنگ در موقعیت فعلی (برای تشخیص
+     قربانیِ جبران‌شدنی — تبادل عادی نباید درخشان حساب شود) */
+  function bestImmediateCaptureGain(g, color) {
+    let best = 0;
+    try {
+      const ms = g.moves({ verbose: true }) || [];
+      for (let t = 0; t < ms.length; t++) {
+        const mv = ms[t];
+        if (mv.color !== color || !mv.captured) continue;
+        const v = PIECE_VALS[mv.captured] || 0;
+        if (v > best) best = v;
+      }
+    } catch (e) {}
+    return best;
+  }
+
+  /* 🔑 v11.33 — درخشانِ واقعی؛ سه شرطِ سخت:
+     ۱) قربانی خالصِ حداقل ۲ پیاده بعد از بهترین پاسخ حریف؛
+     ۲) بلافاصله جبران‌شدنی نباشد (وگرنه فقط تبادل/گرفتنِ عادی است —
+        همان باگِ «الکی درخشان» قبلی)؛
+     ۳) بعد از پاسخِ حریف، وضعیت ما فاجعه نباشد. */
   function isSacrifice(fens, i, reps) {
     try {
       if (i + 1 >= fens.length) return false;
@@ -173,9 +196,13 @@
       const mv = g.move({ from: reply.slice(0, 2), to: reply.slice(2, 4), promotion: reply[4] || "q" });
       if (!mv) return false;
       const mover = fens[i].split(" ")[1] === "w" ? "w" : "b";
-      const before = materialOf(fens[i], mover);
-      const after = materialOf(g.fen(), mover);
-      return before - after >= 2; // قربانی حداقل ۲ پیاده
+      const invested = materialOf(fens[i], mover) - materialOf(g.fen(), mover);
+      if (invested < 2) return false;
+      const regain = bestImmediateCaptureGain(g, mover);
+      if (regain >= invested - 1) return false;
+      const afterCp = reps[i + 1] && reps[i + 1].cp != null ? -reps[i + 1].cp : null;
+      if (afterCp != null && afterCp < -150) return false;
+      return true;
     } catch (e) {
       return false;
     }
@@ -372,6 +399,7 @@
             '<div class="gr-graph-wrap"><canvas id="grGraph" height="90"></canvas></div>' +
             '<div class="gr-moves" id="grMoves"></div>' +
             '<div class="gr-actions">' +
+              '<button class="gr-btn analyze" id="grAnalyzeBtn"><i class="fas fa-chess-knight"></i> تحلیل در آنالیز</button>' +
               '<button class="gr-btn" id="grCopyPgn"><i class="fas fa-copy"></i> کپی PGN</button>' +
               '<button class="gr-btn" id="grDlPgn"><i class="fas fa-download"></i> دانلود PGN</button>' +
             "</div>" +
@@ -383,22 +411,25 @@
     return ov;
   }
 
+  /* 🔑 v11.33 — اعداد ارزیابی با رقم لاتین و فونت تمیزِ عددی
+     (استاندارد نمودارهای شطرنج؛ خوانا و شیک) */
   function fmtEvalCp(cp, moverIsWhite) {
     // نمایش از دید سفید برای نوار ارزیابی
     const whiteCp = moverIsWhite ? cp : -cp;
-    if (whiteCp >= 9000) return "M" + fa(Math.max(1, Math.ceil((10000 - whiteCp) / 100)));
-    if (whiteCp <= -9000) return "-" + fa(Math.max(1, Math.ceil((10000 + whiteCp) / 100)));
+    if (whiteCp >= 9000) return "M" + Math.max(1, Math.ceil((10000 - whiteCp) / 100));
+    if (whiteCp <= -9000) return "-" + Math.max(1, Math.ceil((10000 + whiteCp) / 100));
     const v = whiteCp / 100;
-    const s = (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(1);
-    return s.replace(/\d/g, function (d) { return FA_DIGITS[+d]; }).replace(".", "٫");
+    return (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(1);
   }
 
   function setEvalBar(cpWhite) {
     const fill = $("grEvalFill");
     const num = $("grEvalNum");
     if (fill) {
+      /* 🔑 v11.33 — درصد شانس برد (منحنی لایچس) به‌جای تقسیم خطیِ
+         سانتی‌پیاده: −۵ پیاده حالا واقعاً سرخِ سنگین نشان می‌دهد */
       let w = 50;
-      if (typeof cpWhite === "number") w = 50 + (clamp(cpWhite, -3000, 3000) / 3000) * 47;
+      if (typeof cpWhite === "number") w = clamp(winPercent(cpWhite), 2, 98);
       fill.style.width = w + "%";
     }
     if (num) num.textContent = typeof cpWhite === "number" ? fmtEvalCp(cpWhite, true) : "۰٫۰";
@@ -454,11 +485,58 @@
         best: r.bestUci || null,
         pv: (r.pv || []).slice(0, 8),
       });
-      const pct = Math.round(((i + 1) / fens.length) * 100);
-      setProgress(pct, true);
+      setProgress(Math.round(((i + 1) / fens.length) * 84), true);
     }
 
-    // نمره‌دهی
+    /* 🔑 v11.33 — نمره‌دهیِ دو مرحله‌ای (قلبِ دقت):
+       مرحلهٔ ۱: قضاوت اولیه → موقعیت‌های «حساس» پیدا می‌شود
+       (هر جا دلتا در مرز تصمیم است یا برچسب سنگین دارد)؛
+       مرحلهٔ ۲: همان موقعیت‌ها با بودجهٔ ۲.۴ برابر و عمقِ +۵ دوباره
+       ارزیابی می‌شوند تا نویزِ لحظهٔ اول برچسب را عوض نکند. */
+    const judge1 = judgeMoves(sans, moves, fens, reps);
+    const flagged = new Set();
+    judge1.forEach(function (m, i) {
+      const b = reps[i].cp;
+      const a = reps[i + 1] && reps[i + 1].cp != null ? -reps[i + 1].cp : null;
+      if (b == null || a == null) return;
+      const delta = b - a;
+      if (delta > 90 || (delta > 12 && delta <= 130)) { flagged.add(i); flagged.add(i + 1); }
+      if (m.kind === "brilliant") { flagged.add(i); flagged.add(i + 1); }
+    });
+    if (!R.closed && myEpoch === R.epoch && flagged.size) {
+      const idxs = Array.from(flagged).filter(function (k) { return k < fens.length; })
+        .sort(function (x, y) { return x - y; });
+      let done = 0;
+      for (let t = 0; t < idxs.length; t++) {
+        if (R.closed || myEpoch !== R.epoch) return;
+        const k = idxs[t];
+        const b2 = analysisBudget(fens[k]);
+        const r2 = await ChessEngine.ask(fens[k], { movetime: b2.movetime * 2.4, depth: b2.depth + 5, skill: 20 });
+        if (R.closed || myEpoch !== R.epoch) return;
+        if (r2 && r2.score != null) {
+          reps[k] = {
+            cp: cpOf(r2.score),
+            best: r2.bestUci || reps[k].best,
+            pv: (r2.pv || []).slice(0, 8),
+          };
+        }
+        done++;
+        setProgress(84 + Math.round((done / idxs.length) * 15), true);
+      }
+    }
+
+    // نمره‌دهی نهایی با ارزیابی‌های تأییدشده
+    const judged = judgeMoves(sans, moves, fens, reps);
+    const data = { reps: reps, judged: judged, t: Date.now() };
+    cachePut(hash, data);
+    onDone(data);
+  }
+
+  /* 🔑 v11.33 — قضاوتِ خالص و قابل‌استفاده‌مجدد + آستانه‌های دقیق‌تر.
+     آستانه‌ها بر اساس دلتای ارزیابیِ (قبل − بعد) از دید حرکت‌زننده:
+     ≤۲۰ عالی | ≤۹۰ خوب | ≤۲۰۰ بی‌دقتی | ≤۴۵۰ اشتباه | فاحش‌تر از آن.
+     سقوطِ کاملِ برتری (از برنده‌بودن به باختن) همیشه فاحش است. */
+  function judgeMoves(sans, moves, fens, reps) {
     const judged = [];
     for (let i = 0; i < sans.length; i++) {
       const before = reps[i].cp;
@@ -481,17 +559,16 @@
           kind = "best";
         } else {
           const delta = before - after; // مثبت = از دست دادن
-          const isWinning = before >= 250;
-          if (delta <= 25) kind = "excellent";
-          else if (delta <= 80) kind = "good";
-          else if (delta <= 180) kind = "inaccuracy";
-          else if (delta <= 400) kind = "mistake";
+          if (delta <= 20) kind = "excellent";
+          else if (delta <= 90) kind = "good";
+          else if (delta <= 200) kind = "inaccuracy";
+          else if (delta <= 450) kind = "mistake";
           else kind = "blunder";
-          if (isWinning && after < 120 && after > -250) kind = delta > 250 ? "blunder" : "mistake";
+          if (before >= 150 && after <= -150) kind = "blunder";
         }
       }
-      // درخشان 💎 = بهترین/عالی + قربانی دادن ماده
-      if ((kind === "best" || kind === "excellent") && isSacrifice(fens, i, reps)) {
+      // درخشان 💎 فقط برای «بهترینِ انجین» با قربانیِ واقعی (شرط‌های سخت در isSacrifice)
+      if (kind === "best" && isSacrifice(fens, i, reps)) {
         kind = "brilliant";
       }
       judged.push({ i: i, san: sans[i], uci: moves[i], kind: kind,
@@ -499,10 +576,7 @@
         bestSan: reps[i].best && reps[i].best !== moves[i] ? (uciToSanObj(fens[i], reps[i].best) || {}).san : null,
         color: sans[i] ? (fens[i].split(" ")[1] === "w" ? "w" : "b") : "w" });
     }
-
-    const data = { reps: reps, judged: judged, t: Date.now() };
-    cachePut(hash, data);
-    onDone(data);
+    return judged;
   }
 
   /* ---------- رندر ---------- */
@@ -520,8 +594,8 @@
         const m = judged[j];
         const K = KINDS[m.kind] || KINDS.good;
         html += '<button class="gr-move ' + K.cls + (R.idx === j + 1 ? " cur" : "") +
-          '" data-i="' + (j + 1) + '"><span class="gr-san">' + m.san + "</span>" +
-          '<span class="gr-kind">' + kindSvg(m.kind) + " " + K.fa + "</span></button>";
+          '" data-i="' + (j + 1) + '"><span class="gr-kind">' + kindSvg(m.kind) + " " + K.fa +
+          "</span>" + '<span class="gr-san">' + m.san + "</span></button>";
       }
       row.innerHTML = html;
       wrap.appendChild(row);
@@ -575,6 +649,27 @@
     const accW = avg(acc.w), accB = avg(acc.b);
     const bestSide = accW === accB ? null : (accW > accB ? "w" : "b");
 
+    /* 🔑 v11.33 — داوریِ متنیِ روان برای هر بازیکن؛ دقیق و جذاب */
+    const verdict = function (side) {
+      const a = side === "w" ? accW : accB;
+      const bl = cnt(side, "blunder"), mis = cnt(side, "mistake"), ina = cnt(side, "inaccuracy");
+      const br = cnt(side, "brilliant");
+      let head;
+      if (a >= 92) head = "درخشان و تقریباً بی‌نقص — کنترل کامل موقعیت";
+      else if (a >= 85) head = "قوی و منسجم با کمترین لغزش";
+      else if (a >= 78) head = "خوب و حساب‌شده؛ فقط چند لغزش کوچک";
+      else if (a >= 70) head = "قابل‌قبول؛ در لحظات حساس دقت کم آمد";
+      else if (a >= 60) head = "پرنوسان — اشتباه‌ها هزینه‌ساز بودند";
+      else head = "نیاز به تمرکز روی اصول — چند اشتباه تعیین‌کننده";
+      const parts = [];
+      if (br) parts.push(fa(br) + " حرکت درخشان");
+      if (bl) parts.push(fa(bl) + " اشتباه فاحش");
+      else if (mis) parts.push(fa(mis) + " اشتباه");
+      else if (ina) parts.push(fa(ina) + " بی‌دقتی");
+      if (!parts.length) parts.push("بدون لغزش قابل‌توجه");
+      return head + " — " + parts.join("، ");
+    };
+
     const card = function (side) {
       const name = side === "w" ? (R.cfg.white || "سفید") : (R.cfg.black || "سیاه");
       const kinds = ["brilliant", "best", "excellent", "good", "inaccuracy", "mistake", "blunder", "book"];
@@ -583,8 +678,7 @@
         const n = cnt(side, k);
         if (!n) return;
         chips += '<button type="button" class="gr-chip ' + KINDS[k].cls + '" data-side="' + side +
-          '" data-kind="' + k + '" title="کلیک: پرش روی حرکت‌های ' + KINDS[k].fa +
-          ' — کلیک دوباره: حرکت بعدی">' + kindSvg(k) + KINDS[k].fa + " " + fa(n) + "</button>";
+          '" data-kind="' + k + '">' + kindSvg(k) + KINDS[k].fa + " " + fa(n) + "</button>";
       });
       return '<div class="gr-pcard ' + (side === "w" ? "pw" : "pb") +
         (bestSide === side ? " winner" : "") + '">' +
@@ -593,14 +687,13 @@
         "</div>" +
         '<div class="gr-pname">' + esc(name) + "</div>" +
         '<div class="gr-pacc"><b>' + fa(side === "w" ? accW : accB) + "</b><small>٪ دقت</small></div>" +
-        (chips ? '<div class="gr-kinds">' + chips + "</div>"
-               : '<div class="gr-nokind">بدون حرکت قابل‌توجه</div>') +
+        '<div class="gr-verdict">' + verdict(side) + "</div>" +
+        (chips ? '<div class="gr-kinds">' + chips + "</div>" : "") +
         "</div>";
     };
 
     box.innerHTML =
       '<div class="gr-sum-title"><i class="fas fa-chart-simple"></i> گزارش عملکرد</div>' +
-      '<div class="gr-chip-hint"><i class="fas fa-hand-pointer"></i> روی هر آمار کلیک کن تا به حرکت‌هایش بپری — کلیک دوباره = حرکت بعدی، در آخر برگشت به اول</div>' +
       '<div class="gr-pcards">' + card("w") +
         '<div class="gr-pvs"><i class="fas fa-bolt"></i><span>در برابر</span></div>' +
       card("b") + "</div>";
@@ -812,10 +905,10 @@
     const to = played.uci.slice(2, 4);
     const f = to.charCodeAt(0) - 97;
     const r = parseInt(to[1], 10) - 1;
-    const left = f * 12.5 + 0.55;  // گوشهٔ چپِ خانه + کمی تورفتگی
+    const right = (7 - f) * 12.5 + 0.55; // 🔑 v11.33 — گوشهٔ راستِ خانه (مخالف قبل)
     const top = (7 - r) * 12.5 + 0.55; // گوشهٔ بالای خانه
     layer.innerHTML =
-      '<div class="gr-badge pop" style="left:' + left + "%;top:" + top + '%">' +
+      '<div class="gr-badge pop" style="right:' + right + "%;top:" + top + '%">' +
       kindSvg(played.kind) + "</div>";
   }
 
@@ -881,7 +974,9 @@
       setEvalBar(null);
     }
 
-    $("grCounter").textContent = fa(idx) + "/" + fa(R.cfg.moves.length);
+    // 🔑 v11.33 — شمارش «حرکت کامل»: جفت سفید+سیاه = یک حرکت
+    $("grCounter").textContent =
+      fa(Math.ceil(idx / 2)) + "/" + fa(Math.ceil(R.cfg.moves.length / 2));
     renderMovesList();
     drawGraph();
   }
@@ -1021,6 +1116,16 @@
       const m = list[p];
       R.chipJump = m.i; // فلش رنگی + برچسب روی حرکت مقصد
       nav(m.i + 1);
+    });
+    /* 🔑 v11.33 — «تحلیل در آنالیز»: کل بازی با PGN کامل به بخش آنالیز
+       می‌رود تا کاربر خودش حرکت‌به‌حرکت عمیق بررسی کند */
+    const anBtn = $("grAnalyzeBtn");
+    if (anBtn) anBtn.addEventListener("click", function () {
+      try { localStorage.setItem("chesshub_analyze_pgn", buildPgn()); } catch (e) {}
+      const url = "analysis.html?autopgn=1";
+      if (R.pageMode) window.location.href = url;
+      else window.open(url, "_blank");
+      toast("بازی به بخش آنالیز منتقل شد");
     });
     $("grCopyPgn").addEventListener("click", function () {
       navigator.clipboard.writeText(buildPgn())

@@ -12,7 +12,7 @@
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%E2%99%9B%3C/text%3E%3C/svg%3E"
     />
-    <link rel="stylesheet" href="css/theme.css?v=11.25" />
+    <link rel="stylesheet" href="css/theme.css?v=11.31" />
     <link
       href="fonts/vazir/font-face.css"
       rel="stylesheet"
@@ -21,7 +21,7 @@
       rel="stylesheet"
       href="lib/fontawesome/all.min.css"
     />
-    <link rel="stylesheet" href="css/style.css?v=11.25" />
+    <link rel="stylesheet" href="css/style.css?v=11.31" />
     <script src="lib/chess.min.js"></script>
   </head>
   <body>
@@ -71,42 +71,32 @@
 
       <!-- گرید اصلی -->
       <section class="main-card-grid">
-        <!-- کارت مسئله روز -->
-        <div class="card daily-puzzle-card">
-          <div class="puzzle-card-head">
-            <h2><i class="fas fa-puzzle-piece"></i> مسئله روز</h2>
-            <span class="puzzle-date" id="puzzleDate"></span>
+        <!-- کارت پازل عجله‌ای — جایگزین کارت مسئلهٔ روز (v11.26):
+             مسئلهٔ روز صفحهٔ اختصاصی خودش را دارد (daily-puzzle.html) و
+             کارتِ ایندکسِ بدون درایور حذف شد تا گرید متعادل بماند -->
+        <div class="card promo-card rush">
+          <div class="promo-icon rush-icon"><i class="fas fa-bolt"></i></div>
+          <div class="promo-title">پازل عجله‌ای</div>
+          <div class="promo-sub">
+            در یک دقیقه چند پازل می‌توانی حل کنی؟ سرعت، دقت و تمرکزت را محک بزن
           </div>
-
-          <div class="puzzle-meta" id="puzzleMeta"></div>
-
-          <p>
-            با مهره‌های <strong id="userColorLabel">—</strong> بازی کن
-          </p>
-
-          <div class="board-container">
-            <div id="chessboard"></div>
-          </div>
-
-          <div class="puzzle-progress">
-            <div class="puzzle-progress-bar">
-              <div class="puzzle-progress-fill"></div>
+          <div class="rush-stats">
+            <div class="rush-stat">
+              <span class="rush-num">+۱۰۰۰</span>
+              <span class="rush-lbl">پازل</span>
             </div>
-            <span class="puzzle-progress-text">حرکت ۰ از ۰</span>
+            <div class="rush-stat">
+              <span class="rush-num">۳</span>
+              <span class="rush-lbl">حالت بازی</span>
+            </div>
+            <div class="rush-stat">
+              <span class="rush-num">🏆</span>
+              <span class="rush-lbl">رکورد شخصی</span>
+            </div>
           </div>
-
-          <div class="button-group">
-            <button id="resetBtn" class="btn">
-              <i class="fas fa-rotate-right"></i> از نو
-            </button>
-            <button id="hintBtn" class="btn btn-hint">
-              <i class="fas fa-lightbulb"></i> راهنمایی
-            </button>
-          </div>
-
-          <div id="message" class="message info">در حال آماده‌سازی پازل روزانه…</div>
-
-          <div id="puzzleSolved" class="puzzle-solved"></div>
+          <a href="puzzle-rush.html" class="btn-promo">
+            <i class="fas fa-play"></i> شروع چالش
+          </a>
         </div>
 
         <!-- کارت امکانات -->
@@ -116,7 +106,7 @@
             <div class="feature">
               <i class="fas fa-puzzle-piece"></i>
               <span>پازل روزانه</span>
-              <a href="index.html">حل کن</a>
+              <a href="daily-puzzle.html">حل کن</a>
             </div>
             <div class="feature">
               <i class="fas fa-bolt"></i>
@@ -179,8 +169,8 @@
       <div id="footer-placeholder"></div>
     </div>
 
-    <script src="js/script.js?v=11.25"></script>
-    <script src="js/profile.js?v=11.25"></script>
-    <script src="js/auth.js?v=11.25"></script>
+    <script src="js/script.js?v=11.31"></script>
+    <script src="js/profile.js?v=11.31"></script>
+    <script src="js/auth.js?v=11.31"></script>
   </body>
 </html>

@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <meta name="description" content="پنل سوپر ادمین ChessHub — مدیریت محتوای کاربران و پیش‌فرض‌های سایت" />
+    <title>ChessHub | پنل سوپر ادمین</title>
+    <link rel="stylesheet" href="css/style.css?v=11.32" />
+    <link rel="icon" href="images/favicon.svg" type="image/svg+xml" />
+    <style>
+      /* ═══════════ پنل سوپر ادمین v11.32 ═══════════ */
+      body { background: #f4f7fc; }
+      .admin-head {
+        display: flex; align-items: center; gap: 0.9rem; margin: 0.6rem 0 1.2rem;
+        flex-wrap: wrap; animation: fadeUp 0.4s ease both;
+      }
+      .admin-head .shield {
+        width: 54px; height: 54px; border-radius: 19px; flex-shrink: 0;
+        background: linear-gradient(135deg, #c05621 0%, #9c4221 100%);
+        color: #fff; display: flex; align-items: center; justify-content: center;
+        font-size: 1.3rem; box-shadow: 0 10px 22px rgba(156, 66, 33, 0.35);
+      }
+      .admin-head h1 { margin: 0; font-size: 1.4rem; font-weight: 900; color: #7b341e; }
+      .admin-head .sub { font-size: 0.8rem; color: var(--text-light); font-weight: 600; margin-top: 0.2rem; }
+      .admin-head .whoami {
+        margin-inline-start: auto; background: #fff; border: 1.5px solid var(--border);
+        border-radius: 14px; padding: 0.5rem 1rem; font-size: 0.78rem; font-weight: 800;
+        color: #7b341e; display: inline-flex; align-items: center; gap: 0.45rem;
+      }
+      .admin-tabs { display: flex; gap: 0.5rem; margin-bottom: 0.9rem; flex-wrap: wrap; }
+      .admin-tabs button {
+        border: 1.5px solid var(--border); background: #fff; color: var(--text-dark);
+        border-radius: 14px; padding: 0.55rem 1.2rem; font-family: "Vazir";
+        font-weight: 800; font-size: 0.85rem; cursor: pointer; transition: var(--transition-smooth);
+        display: inline-flex; align-items: center; gap: 0.4rem;
+      }
+      .admin-tabs button.active { background: var(--accent); border-color: var(--accent-dark); color: #fff; box-shadow: 0 8px 18px -8px rgba(37, 99, 235, 0.55); }
+      .admin-toolbar { display: flex; gap: 0.5rem; margin-bottom: 0.9rem; flex-wrap: wrap; align-items: center; }
+      .admin-toolbar input[type="text"] {
+        flex: 1; min-width: 180px; border: 1.5px solid var(--border); border-radius: 12px;
+        padding: 0.55rem 0.9rem; font-family: "Vazir"; font-size: 0.85rem; background: #fff;
+      }
+      .admin-toolbar .srcf {
+        border: 1.5px solid var(--border); background: #fff; color: var(--text-dark);
+        border-radius: 12px; padding: 0.5rem 0.9rem; font-family: "Vazir"; font-weight: 700;
+        font-size: 0.8rem; cursor: pointer;
+      }
+      .admin-toolbar .srcf.active { background: #2f855a; border-color: #276749; color: #fff; }
+      .admin-list { display: flex; flex-direction: column; gap: 0.55rem; }
+      .adm-item {
+        background: #fff; border: 1.5px solid var(--border); border-radius: 16px;
+        padding: 0.8rem 1rem; display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap;
+        transition: var(--transition-smooth);
+      }
+      .adm-item:hover { border-color: var(--accent); box-shadow: 0 8px 18px -10px rgba(37, 99, 235, 0.25); }
+      .adm-item.deleted { opacity: 0.55; background: #fff5f5; border-color: #feb2b2; }
+      .adm-item .t { flex: 1; min-width: 200px; font-weight: 800; font-size: 0.88rem; color: var(--text-dark); }
+      .adm-item .t small { display: block; font-weight: 600; color: var(--text-light); font-size: 0.72rem; margin-top: 0.2rem; }
+      .badge { border-radius: 999px; padding: 0.22rem 0.7rem; font-size: 0.68rem; font-weight: 800; white-space: nowrap; }
+      .b-user { background: #e6fffa; color: #2c7a7b; border: 1.5px solid #81e6d9; }
+      .b-default { background: #ebf8ff; color: #2b6cb0; border: 1.5px solid #90cdf4; }
+      .b-edited { background: #fffff0; color: #975a16; border: 1.5px solid #f6e05e; }
+      .b-deleted { background: #fff5f5; color: #c53030; border: 1.5px solid #feb2b2; }
+      .adm-item button {
+        border: none; border-radius: 11px; padding: 0.4rem 0.85rem; font-family: "Vazir";
+        font-weight: 800; font-size: 0.75rem; cursor: pointer; display: inline-flex;
+        align-items: center; gap: 0.35rem; transition: var(--transition-smooth);
+      }
+      .adm-edit { background: #ebf8ff; color: #2b6cb0; border: 1.5px solid #90cdf4; }
+      .adm-edit:hover { background: #2b6cb0; color: #fff; }
+      .adm-del { background: #fff5f5; color: #c53030; border: 1.5px solid #feb2b2; }
+      .adm-del:hover { background: #c53030; color: #fff; }
+      .adm-restore { background: #f0fff4; color: #2f855a; border: 1.5px solid #9ae6b4; }
+      .adm-restore:hover { background: #2f855a; color: #fff; }
+      .denied {
+        background: #fff; border: 1.5px solid #feb2b2; border-radius: 20px;
+        padding: 2.2rem 1.5rem; text-align: center; color: #c53030; font-weight: 800;
+      }
+      .denied i { font-size: 2.2rem; margin-bottom: 0.8rem; display: block; }
+      .admin-modal-overlay {
+        position: fixed; inset: 0; background: rgba(10, 15, 25, 0.6); z-index: 3000;
+        display: none; justify-content: center; align-items: center; padding: 1rem;
+        backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+      }
+      .admin-modal-overlay.open { display: flex; }
+      .admin-modal {
+        background: #fff; border-radius: 22px; width: min(680px, 100%);
+        max-height: 90vh; overflow-y: auto; padding: 1.4rem; box-shadow: 0 30px 70px -20px rgba(15, 42, 85, 0.45);
+      }
+      .admin-modal h3 { margin: 0 0 1rem; font-weight: 900; color: var(--primary-dark); display: flex; align-items: center; gap: 0.5rem; }
+      .admin-modal label { display: block; font-size: 0.78rem; font-weight: 800; color: var(--text-light); margin: 0.7rem 0 0.3rem; }
+      .admin-modal input, .admin-modal textarea {
+        width: 100%; border: 1.5px solid var(--border); border-radius: 12px;
+        padding: 0.6rem 0.8rem; font-family: "Vazir"; font-size: 0.85rem;
+        background: #f8fafc; box-sizing: border-box;
+      }
+      .admin-modal textarea { min-height: 90px; resize: vertical; }
+      .admin-modal textarea.html { min-height: 180px; font-size: 0.8rem; direction: ltr; text-align: left; }
+      .admin-modal .row { display: flex; gap: 0.6rem; }
+      .admin-modal .row > div { flex: 1; }
+      .admin-modal .acts { display: flex; gap: 0.6rem; margin-top: 1.2rem; }
+      .admin-modal .acts button {
+        flex: 1; border: none; border-radius: 13px; padding: 0.7rem; font-family: "Vazir";
+        font-weight: 800; font-size: 0.85rem; cursor: pointer;
+      }
+      .m-save { background: linear-gradient(135deg, #38a169, #2f855a); color: #fff; }
+      .m-cancel { background: #f1f5f9; color: var(--text-dark); border: 1.5px solid var(--border) !important; }
+      .settings-toast {
+        position: fixed; bottom: 1.2rem; right: 50%; transform: translateX(50%) translateY(80px);
+        background: #1e293b; color: #fff; padding: 0.7rem 1.4rem; border-radius: 14px;
+        font-size: 0.85rem; font-weight: 700; z-index: 5000; opacity: 0; transition: all 0.3s ease;
+        pointer-events: none; max-width: 90vw;
+      }
+      .settings-toast.show { opacity: 1; transform: translateX(50%) translateY(0); }
+      .adm-empty { text-align: center; color: var(--text-light); font-weight: 700; padding: 1.6rem; background: #fff; border: 1.5px dashed var(--border); border-radius: 16px; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div id="header-placeholder"></div>
+
+      <div class="admin-head">
+        <div class="shield"><i class="fas fa-shield-halved"></i></div>
+        <div>
+          <h1>پنل سوپر ادمین</h1>
+          <p class="sub">مدیریت محتوای کاربران و پیش‌فرض‌های سایت — ویرایش و حذف مقالات، دروس و گشایش‌ها</p>
+        </div>
+        <span class="whoami" id="whoami"><i class="fas fa-user-shield"></i> —</span>
+      </div>
+
+      <div class="denied" id="deniedBox" style="display: none">
+        <i class="fas fa-lock"></i>
+        این پنل فقط برای حساب <b>AdminChessHub</b> است — با آن حساب وارد شو.
+        <div style="margin-top: 1rem"><a href="login.html" style="color: #2b6cb0">رفتن به صفحهٔ ورود</a></div>
+      </div>
+
+      <div id="adminBody" style="display: none">
+        <div class="admin-tabs" id="adminTabs"></div>
+        <div class="admin-toolbar">
+          <input type="text" id="admSearch" placeholder="جستجو در عنوان‌ها…" />
+          <button class="srcf active" data-src="all">همه</button>
+          <button class="srcf" data-src="user">محتوای کاربران</button>
+          <button class="srcf" data-src="default">پیش‌فرض‌های سایت</button>
+        </div>
+        <div class="admin-list" id="adminList"></div>
+      </div>
+
+      <div class="admin-modal-overlay" id="admOverlay">
+        <div class="admin-modal">
+          <h3 id="admModalTitle"><i class="fas fa-pen"></i> ویرایش</h3>
+          <div id="admModalFields"></div>
+          <div class="acts">
+            <button class="m-save" id="admSave"><i class="fas fa-paper-plane"></i> ذخیرهٔ تغییرات</button>
+            <button class="m-cancel" id="admCancel">انصراف</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="footer-placeholder"></div>
+    </div>
+
+    <div class="settings-toast" id="admToast"></div>
+
+    <script src="js/script.js?v=11.32"></script>
+    <script src="js/auth.js?v=11.32"></script>
+    <script src="js/articles-data.js?v=11.32"></script>
+    <script src="js/lessons-data.js?v=11.32"></script>
+    <script>
+      (function () {
+        "use strict";
+        const ADMIN_NAME = "adminchesshub";
+        const KINDS = [
+          { key: "articles", label: "مقالات", icon: "fa-newspaper" },
+          { key: "lessons", label: "دروس", icon: "fa-graduation-cap" },
+          { key: "openings", label: "گشایش‌ها", icon: "fa-chess-knight" },
+        ];
+        let currentKind = "articles";
+        let currentSrc = "all";
+        let query = "";
+        let overrides = {};
+        let community = { lessons: [], openings: [], articles: [] };
+        let defaultOpenings = [];
+        let editing = null; // {scope, kind, id, item}
+
+        const $ = function (id) { return document.getElementById(id); };
+
+        function faNum(n) {
+          return String(n).replace(/[0-9]/g, function (d) { return "۰۱۲۳۴۵۶۷۸۹"[d]; });
+        }
+        function toast(msg) {
+          const t = $("admToast");
+          t.textContent = msg;
+          t.classList.add("show");
+          clearTimeout(t._t);
+          t._t = setTimeout(function () { t.classList.remove("show"); }, 2600);
+        }
+        function escapeHtml(s) {
+          return String(s == null ? "" : s)
+            .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+        }
+        function timeFa(ts) {
+          if (!ts) return "";
+          try {
+            return new Date(ts).toLocaleDateString("fa-IR") + " — " + new Date(ts).toLocaleTimeString("fa-IR", { hour: "2-digit", minute: "2-digit" });
+          } catch (e) { return ""; }
+        }
+        function headers() {
+          const h = { "Content-Type": "application/json" };
+          if (window.ChessHubAuth && ChessHubAuth.token()) h["X-Session-Token"] = ChessHubAuth.token();
+          return h;
+        }
+        function isAdmin() {
+          const cur = window.ChessHubAuth && ChessHubAuth.current ? ChessHubAuth.current() : null;
+          return !!cur && String(cur.name || "").toLowerCase() === ADMIN_NAME;
+        }
+
+        /* ─── بارگذاری همهٔ منابع ─── */
+        async function loadAll() {
+          const ovP = window.AdminOverrides
+            ? AdminOverrides.load().then(function (o) { overrides = o; })
+            : Promise.resolve();
+          const comP = window.CommunityHub
+            ? CommunityHub.fetchAll(true).then(function (c) {
+                community = {
+                  lessons: c.lessons || [],
+                  openings: c.openings || [],
+                  articles: c.articles || [],
+                };
+              })
+            : Promise.resolve();
+          const opP = fetch("data/openings.json", { cache: "no-store" })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+              defaultOpenings = [];
+              (d.categories || []).forEach(function (cat, ci) {
+                (cat.openings || []).forEach(function (o, j) {
+                  defaultOpenings.push({
+                    id: "c" + ci + "o" + j,
+                    name: o.name || "—",
+                    catName: cat.name || "",
+                    movesCount: (o.moves || []).length,
+                    raw: o,
+                  });
+                });
+              });
+            })
+            .catch(function () { defaultOpenings = []; });
+          await Promise.all([ovP, comP, opP]);
+        }
+
+        /* ─── فهرست آیتم‌های هر بخش ─── */
+        function defaultsOf(kind) {
+          if (kind === "articles") return (window.articlesData || []).map(function (a) {
+            return { id: String(a.id), title: a.title, meta: a.cat || "", raw: a };
+          });
+          if (kind === "lessons") return (window.lessons || []).map(function (l) {
+            return { id: String(l.id), title: l.title, meta: l.category || "", raw: l };
+          });
+          return defaultOpenings.map(function (o) {
+            return { id: o.id, title: o.name, meta: o.catName + " — " + faNum(o.movesCount) + " حرکت", raw: o };
+          });
+        }
+        function communityOf(kind) {
+          return (community[kind] || []).map(function (x) {
+            return { id: String(x.id), title: x.title || x.name || "—", meta: x.author || "ناشناس", raw: x };
+          });
+        }
+
+        function render() {
+          const list = $("adminList");
+          const def = defaultsOf(currentKind);
+          const com = communityOf(currentKind);
+          let rows = [];
+          if (currentSrc !== "user") {
+            def.forEach(function (d) {
+              const ov = (overrides[currentKind] || {})[d.id];
+              rows.push({
+                scope: "default", kind: currentKind, id: d.id, title: d.title,
+                meta: "پیش‌فرض سایت — " + d.meta,
+                deleted: !!(ov && ov.deleted),
+                edited: !!(ov && ov.patch),
+              });
+            });
+          }
+          if (currentSrc !== "default") {
+            com.forEach(function (c) {
+              rows.push({
+                scope: "community", kind: currentKind, id: c.id, title: c.title,
+                meta: "کاربر: " + c.meta + (c.raw.createdAt ? " — " + timeFa(c.raw.createdAt) : ""),
+                deleted: false, edited: !!c.raw.adminEdited,
+              });
+            });
+          }
+          if (query) {
+            rows = rows.filter(function (r) { return r.title.toLowerCase().indexOf(query.toLowerCase()) >= 0; });
+          }
+          if (!rows.length) {
+            list.innerHTML = '<div class="adm-empty"><i class="fas fa-inbox"></i> موردی در این بخش نیست</div>';
+            return;
+          }
+          list.innerHTML = "";
+          rows.forEach(function (r) {
+            const div = document.createElement("div");
+            div.className = "adm-item" + (r.deleted ? " deleted" : "");
+            div.innerHTML =
+              '<div class="t">' + escapeHtml(r.title) +
+              (r.deleted ? ' <span class="badge b-deleted">حذف‌شده</span>' : "") +
+              (r.edited && !r.deleted ? ' <span class="badge b-edited">ویرایش‌شده</span>' : "") +
+              "<small>" + escapeHtml(r.meta) + "</small></div>" +
+              '<span class="badge ' + (r.scope === "default" ? "b-default" : "b-user") + '">' +
+              (r.scope === "default" ? "پیش‌فرض" : "کاربر") + "</span>";
+            if (r.scope === "default" && r.deleted) {
+              const rb = document.createElement("button");
+              rb.className = "adm-restore";
+              rb.innerHTML = '<i class="fas fa-rotate-left"></i> بازگردانی';
+              rb.addEventListener("click", function () { act(r.scope, r.kind, r.id, "restore"); });
+              div.appendChild(rb);
+            } else {
+              const eb = document.createElement("button");
+              eb.className = "adm-edit";
+              eb.innerHTML = '<i class="fas fa-pen"></i> ویرایش';
+              eb.addEventListener("click", function () { openEditor(r); });
+              div.appendChild(eb);
+              const db = document.createElement("button");
+              db.className = "adm-del";
+              db.innerHTML = '<i class="fas fa-trash"></i> حذف';
+              db.addEventListener("click", function () {
+                if (confirm("مطمئنی این «" + r.title + "» حذف شود؟ این عمل قابل بازگشت نیست.")) {
+                  act(r.scope, r.kind, r.id, "delete");
+                }
+              });
+              div.appendChild(db);
+            }
+            list.appendChild(div);
+          });
+        }
+
+        async function act(scope, kind, id, action, item) {
+          try {
+            const res = await fetch("/api/admin/action", {
+              method: "POST",
+              headers: headers(),
+              body: JSON.stringify({ scope: scope, kind: kind, id: id, action: action, item: item || null }),
+            });
+            const j = await res.json();
+            if (!j.ok) { toast("❌ " + (j.error || "خطا در عملیات")); return false; }
+            toast(action === "delete" ? "🗑 حذف شد" : action === "restore" ? "↩ بازگردانده شد" : "✅ ذخیره شد");
+            if (window.AdminOverrides) AdminOverrides._p = null;
+            if (window.CommunityHub) CommunityHub._cache = null;
+            await loadAll();
+            render();
+            return true;
+          } catch (e) {
+            toast("❌ خطای ارتباط با سرور");
+            return false;
+          }
+        }
+
+        /* ─── ویرایشگر ─── */
+        const FIELDS = {
+          articles: [
+            { k: "title", label: "عنوان", type: "text" },
+            { k: "cat", label: "دسته", type: "text" },
+            { k: "desc", label: "توضیح کوتاه", type: "area" },
+            { k: "body", label: "متن مقاله (HTML)", type: "html" },
+          ],
+          lessons: [
+            { k: "title", label: "عنوان درس", type: "text" },
+            { k: "category", label: "دسته", type: "text" },
+            { k: "level", label: "سطح", type: "text" },
+            { k: "duration", label: "مدت", type: "text" },
+            { k: "description", label: "توضیحات", type: "area" },
+            { k: "content", label: "محتوای درس (HTML)", type: "html" },
+          ],
+          openings: [
+            { k: "name", label: "نام گشایش", type: "text" },
+            { k: "moves", label: "حرکات اصلی (با فاصله جدا کن — مثل: e4 c5 Nf6)", type: "area" },
+          ],
+        };
+        function openEditor(row) {
+          editing = { scope: row.scope, kind: row.kind, id: row.id };
+          const raw = row.raw || {};
+          const wrap = $("admModalFields");
+          wrap.innerHTML = "";
+          FIELDS[row.kind].forEach(function (f) {
+            const lab = document.createElement("label");
+            lab.textContent = f.label;
+            wrap.appendChild(lab);
+            let el;
+            if (f.type === "text") {
+              el = document.createElement("input");
+              el.type = "text";
+            } else {
+              el = document.createElement("textarea");
+              if (f.type === "html") el.className = "html";
+            }
+            el.dataset.k = f.k;
+            if (f.k === "moves") {
+              const mv = raw.moves || [];
+              el.value = Array.isArray(mv) ? mv.join(" ") : String(mv || "");
+            } else {
+              el.value = raw[f.k] != null ? String(raw[f.k]) : "";
+            }
+            wrap.appendChild(el);
+          });
+          $("admModalTitle").innerHTML =
+            '<i class="fas fa-pen"></i> ویرایش ' +
+            (row.scope === "default" ? "پیش‌فرض سایت" : "محتوای کاربر") +
+            " — " + escapeHtml(row.title.slice(0, 40));
+          $("admOverlay").classList.add("open");
+        }
+        function closeEditor() {
+          $("admOverlay").classList.remove("open");
+          editing = null;
+        }
+        function saveEditor() {
+          if (!editing) return;
+          const item = {};
+          const bad = [...$("admModalFields").querySelectorAll("[data-k]")].some(function (el) {
+            const k = el.dataset.k;
+            if (k === "moves") {
+              const toks = el.value.trim().split(/[\s,،]+/).filter(Boolean);
+              if (!toks.length) { toast("❌ حرکات خالی است"); return true; }
+              item.moves = toks;
+            } else {
+              item[k] = el.value;
+            }
+            return false;
+          });
+          if (bad) return;
+          act(editing.scope, editing.kind, editing.id, "edit", item);
+          closeEditor();
+        }
+
+        /* ─── رابط ─── */
+        function renderTabs() {
+          const wrap = $("adminTabs");
+          wrap.innerHTML = "";
+          KINDS.forEach(function (k) {
+            const b = document.createElement("button");
+            b.className = k.key === currentKind ? "active" : "";
+            b.innerHTML = '<i class="fas ' + k.icon + '"></i> ' + k.label;
+            b.addEventListener("click", function () { currentKind = k.key; renderTabs(); render(); });
+            wrap.appendChild(b);
+          });
+        }
+        function initToolbar() {
+          $("admSearch").addEventListener("input", function (e) {
+            query = e.target.value.trim();
+            render();
+          });
+          [...document.querySelectorAll(".srcf")].forEach(function (b) {
+            b.addEventListener("click", function () {
+              currentSrc = b.dataset.src;
+              [...document.querySelectorAll(".srcf")].forEach(function (x) { x.classList.remove("active"); });
+              b.classList.add("active");
+              render();
+            });
+          });
+        }
+
+        async function boot() {
+          const ok = isAdmin();
+          $("whoami").innerHTML =
+            '<i class="fas fa-user-shield"></i> ' +
+            (ok ? escapeHtml((ChessHubAuth.current() || {}).name) : "دسترسی نداری");
+          if (!ok) {
+            $("deniedBox").style.display = "block";
+            $("adminBody").style.display = "none";
+            return;
+          }
+          $("deniedBox").style.display = "none";
+          $("adminBody").style.display = "block";
+          renderTabs();
+          initToolbar();
+          await loadAll();
+          render();
+        }
+
+        $("admSave").addEventListener("click", saveEditor);
+        $("admCancel").addEventListener("click", closeEditor);
+        $("admOverlay").addEventListener("click", function (e) {
+          if (e.target === $("admOverlay")) closeEditor();
+        });
+        if (window.ChessHubAuth && ChessHubAuth.onChange) {
+          ChessHubAuth.onChange(function () { boot(); });
+        }
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", boot);
+        } else {
+          boot();
+        }
+      })();
+    </script>
+  </body>
+</html>

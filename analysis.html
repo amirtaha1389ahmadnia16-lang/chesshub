@@ -6,12 +6,12 @@
     <meta name="description" content="تخته آنالیز ChessHub — تحلیل زنده با انجین Stockfish، سه خط برتر، درخت واریانت‌ها و کتاب گشایش‌های استادان" />
     <title>ChessHub | آنالیز</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%E2%99%9B%3C/text%3E%3C/svg%3E" />
-    <link rel="stylesheet" href="css/theme.css?v=11.25" />
+    <link rel="stylesheet" href="css/theme.css?v=11.31" />
     <link rel="stylesheet" href="lib/fontawesome/all.min.css" />
     <link href="fonts/vazir/font-face.css" rel="stylesheet" />
-    <link rel="stylesheet" href="css/style.css?v=11.25" />
-    <link rel="stylesheet" href="lib/chessground/chessground.base.css?v=11.25" />
-    <link rel="stylesheet" href="css/analysis.css?v=11.25" />
+    <link rel="stylesheet" href="css/style.css?v=11.31" />
+    <link rel="stylesheet" href="lib/chessground/chessground.base.css?v=11.31" />
+    <link rel="stylesheet" href="css/analysis.css?v=11.31" />
     <script src="lib/chess.min.js"></script>
   </head>
   <body>
@@ -153,11 +153,11 @@
 
     <div class="settings-toast" id="settingsToast"></div>
 
-    <script src="js/script.js?v=11.25"></script>
-    <script src="js/profile.js?v=11.25"></script>
-    <script src="js/auth.js?v=11.25"></script>
-    <script src="js/engine-core.js?v=11.25"></script>
-    <script type="module" src="lib/chessground/loader.js?v=11.25"></script>
+    <script src="js/script.js?v=11.31"></script>
+    <script src="js/profile.js?v=11.31"></script>
+    <script src="js/auth.js?v=11.31"></script>
+    <script src="js/engine-core.js?v=11.31"></script>
+    <script type="module" src="lib/chessground/loader.js?v=11.31"></script>
     <script>
       (function () {
         "use strict";
@@ -235,6 +235,41 @@
             return (s && s.pieceSet) || "neo";
           } catch (e) { return "neo"; }
         }
+
+        /* 🔧 v11.28 — مهرهٔ آنالیز برای «هر» مجموعه‌ای کار کند.
+           قبلاً فقط ۹ ستِ نگاشت‌شده در analysis.css مهره داشتند و
+           ست سفارشی/دیگر → مهرهٔ نامرئی بدون هیچ خطایی در کنسول.
+           حالا CSS همان ست به‌صورت پویا تزریق می‌شود و اگر فایل‌های
+           مهره در دسترس نبود، به‌صورت خودکار neo برمی‌گردیم. */
+        function injectPieceSetCss(set) {
+          const names = { k: "king", q: "queen", r: "rook", b: "bishop", n: "knight", p: "pawn" };
+          let css = "";
+          Object.keys(names).forEach(function (k) {
+            ["white", "black"].forEach(function (c) {
+              css += '.an-board.set-' + set + ' piece.' + c + '.' + names[k] +
+                '{background-image:url("images/pieces/' + set + '/' + c[0] + k + '.png")}';
+            });
+          });
+          let st = document.getElementById("anPieceSetCss");
+          if (!st) {
+            st = document.createElement("style");
+            st.id = "anPieceSetCss";
+            document.head.appendChild(st);
+          }
+          st.textContent = css;
+        }
+        function applyAnalysisSetClass(set) {
+          document.querySelectorAll(".an-board").forEach(function (el) {
+            el.className = el.className.replace(/set-[a-z0-9_-]+/i, "set-" + set);
+          });
+        }
+        (function resolveAnalysisPieceSet() {
+          const want = pieceSetId();
+          const probe = new Image();
+          probe.onload = function () { injectPieceSetCss(want); applyAnalysisSetClass(want); };
+          probe.onerror = function () { injectPieceSetCss("neo"); applyAnalysisSetClass("neo"); };
+          probe.src = "images/pieces/" + want + "/wp.png";
+        })();
 
         /* ---------- ابزار شطرنج ---------- */
         function legalDests(fen) {
@@ -1312,6 +1347,21 @@
               renderTree();
 
               bindEvents();
+
+              /* 🔗 v11.27 — پشتیبانی از ?fen= در آدرس: دکمهٔ «تحلیل موقعیت»
+                 پازل روزانه با همین پارامتر موقعیت را می‌فرستد */
+              (function () {
+                try {
+                  const qf = new URLSearchParams(location.search).get("fen");
+                  if (!qf) return;
+                  const g = new Chess();
+                  let ok = false;
+                  try { ok = g.load(qf); } catch (e) { ok = false; }
+                  if (!ok) return;
+                  $("fenInput").value = qf;
+                  $("loadFenBtn").click();
+                } catch (e) {}
+              })();
 
               // انجین
               window.ChessEngine.init();

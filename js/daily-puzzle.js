@@ -89,6 +89,8 @@
     step = 0;
     hintUsed = false;
     $("dpSolved").classList.remove("show");
+    const anHide = $("dpAnalyzeBtn");
+    if (anHide) anHide.classList.remove("show");
     setMessage("در حال آماده‌سازی پازل…", "info");
     updateProgress();
     $("dpMeta").innerHTML = '<span class="chip"><i class="fas fa-spinner fa-pulse"></i> بارگذاری…</span>';
@@ -105,6 +107,11 @@
       });
   }
   function setupPuzzle(j) {
+    /* 🔑 v11.28 — «از نو» هم بنر حل و دکمهٔ تحلیل را می‌بندد */
+    const sv = $("dpSolved");
+    if (sv) sv.classList.remove("show");
+    const anR = $("dpAnalyzeBtn");
+    if (anR) anR.classList.remove("show");
     const g = new Chess();
     if (!g.load(puzzle.fen)) {
       setMessage("پوزیشن پازل نامعتبر است", "err");
@@ -184,6 +191,14 @@
           $("dpSolved").classList.add("show");
           setMessage("عالی بود!", "ok");
           renderStats();
+          /* 🔑 v11.27 — مربعِ امروز همان لحظه سبز می‌شود و دکمهٔ
+             «تحلیل موقعیت» با FEN نهایی پازل فعال می‌شود */
+          renderCalendar();
+          const ab = $("dpAnalyzeBtn");
+          if (ab) {
+            ab.href = "analysis.html?fen=" + encodeURIComponent(game.fen());
+            ab.classList.add("show");
+          }
         }
         return true;
       },
@@ -232,6 +247,12 @@
       cell.title = fa(Jalali.format(j)) + (before ? " — قبل از ۱ مهر" : "");
       cell.addEventListener("click", function () {
         loadDay(j);
+        /* 🔑 v11.28/29 — موبایل: اسکرول خودکار به کارت پازل؛
+           لپ‌تاپ: پاپ‌آپ تاریخچه بعد از انتخاب بسته می‌شود */
+        if (window.matchMedia("(max-width: 860px)").matches) {
+          const mainCard = document.querySelector(".dp-main");
+          if (mainCard) mainCard.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
       });
       grid.appendChild(cell);
     }
@@ -251,12 +272,20 @@
     const want = solMoves[step];
     if (!want) return;
     hintUsed = true;
+    /* 🔑 v11.27 — مبدأ «و» مقصد حرکت درست با چشمک سبز نرم (۳ بار)
+       مشخص می‌شوند؛ قبلاً فقط مبدأ روشن می‌شد و هایلایت زیر مهره
+       پنهان بود و عملاً دیده نمی‌شد */
     const from = want.slice(0, 2);
-    // هایلایت خانهٔ مبدأ حرکت درست
-    const sqEl = document.querySelector('#dpBoard .square[data-square="' + from + '"]');
-    if (sqEl) sqEl.classList.add("hint");
-    setTimeout(function () { if (sqEl) sqEl.classList.remove("hint"); }, 2200);
-    setMessage("خانهٔ روشن‌شده مبدأ حرکت درست است", "info");
+    const to = want.slice(2, 4);
+    const els = [];
+    [from, to].forEach(function (sqName) {
+      const sqEl = document.querySelector('#dpBoard .square[data-square="' + sqName + '"]');
+      if (sqEl) { sqEl.classList.add("hint"); els.push(sqEl); }
+    });
+    setTimeout(function () {
+      els.forEach(function (el) { el.classList.remove("hint"); });
+    }, 2700);
+    setMessage("مبدأ و مقصد حرکت درست با چشمک سبز مشخص شدند", "info");
   }
 
   /* ---------- راه‌اندازی ---------- */
@@ -282,6 +311,25 @@
       setupPuzzle(Jalali.parseKey(currentKey) || t);
     });
     $("dpHintBtn").addEventListener("click", showHint);
+
+    /* 🔑 v11.30 — تاریخچه همیشه سمت راست دیده می‌شود؛ کلیک روی آیکون
+       تقویم: موبایل → اسکرول به کارت تاریخچه، دسکتاپ → پالس آبی
+       روی همان کارت برای جلب توجه */
+    const histPanel = $("dpHistPanel");
+    const histToggle = $("dpHistToggle");
+    if (histPanel && histToggle) {
+      histToggle.addEventListener("click", function (e) {
+        e.stopPropagation();
+        histPanel.scrollIntoView({ behavior: "smooth", block: "center" });
+        histPanel.classList.remove("flash");
+        void histPanel.offsetWidth;
+        histPanel.classList.add("flash");
+        setTimeout(function () { histPanel.classList.remove("flash"); }, 1000);
+      });
+      histToggle.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); histToggle.click(); }
+      });
+    }
     $("calPrev").addEventListener("click", function () {
       calJ.jm--;
       if (calJ.jm < 1) { calJ.jm = 12; calJ.jy--; }

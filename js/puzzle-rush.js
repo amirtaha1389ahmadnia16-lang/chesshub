@@ -311,6 +311,8 @@
         squareEls[sq] = d;
       });
     });
+    /* 🔑 v11.29 — مختصات a-h/1-8 هم‌سان با پازل روزانه و بقیهٔ بخش‌ها */
+    if (window.ChessUtils && ChessUtils.attachCoords) ChessUtils.attachCoords(boardEl);
     updateGlyphSize();
   }
 
