@@ -424,14 +424,14 @@
   background: var(--accent);
   color: white;
   border-color: var(--accent-dark);
-  box-shadow: 0 3px 0 var(--accent-dark);
+  box-shadow: 0 3px 10px -6px rgba(37, 99, 235, 0.5);
 }
 .btn-sm.primary:hover {
   background: #4299e1;
 }
 .btn-sm.primary:active {
-  transform: translateY(2px);
-  box-shadow: 0 1px 0 var(--accent-dark);
+  transform: scale(0.98);
+  box-shadow: 0 3px 10px -6px rgba(37, 99, 235, 0.5);
 }
 .btn-sm:hover:not(.primary) {
   background: #e2e8f0;

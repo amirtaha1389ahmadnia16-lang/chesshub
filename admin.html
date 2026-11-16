@@ -6,7 +6,7 @@
     <meta name="robots" content="noindex" />
     <meta name="description" content="پنل سوپر ادمین ChessHub — مدیریت محتوای کاربران و پیش‌فرض‌های سایت" />
     <title>ChessHub | پنل سوپر ادمین</title>
-    <link rel="stylesheet" href="css/style.css?v=11.32" />
+    <link rel="stylesheet" href="css/style.css?v=11.36" />
     <link rel="icon" href="images/favicon.svg" type="image/svg+xml" />
     <style>
       /* ═══════════ پنل سوپر ادمین v11.32 ═══════════ */
@@ -115,7 +115,8 @@
       .settings-toast.show { opacity: 1; transform: translateX(50%) translateY(0); }
       .adm-empty { text-align: center; color: var(--text-light); font-weight: 700; padding: 1.6rem; background: #fff; border: 1.5px dashed var(--border); border-radius: 16px; }
     </style>
-  </head>
+    <link rel="stylesheet" href="css/admin-v1134.css?v=11.36" />
+</head>
   <body>
     <div class="container">
       <div id="header-placeholder"></div>
@@ -132,7 +133,11 @@
       <div class="denied" id="deniedBox" style="display: none">
         <i class="fas fa-lock"></i>
         این پنل فقط برای حساب <b>AdminChessHub</b> است — با آن حساب وارد شو.
-        <div style="margin-top: 1rem"><a href="login.html" style="color: #2b6cb0">رفتن به صفحهٔ ورود</a></div>
+        <div style="margin-top: 1rem"><a href="login.html" style="color: #2b6cb0">رفتن به صفحهٔ ورود</a>
+        <div style="margin-top: 0.9rem; font-weight: 600; font-size: 0.8rem; color: #718096">
+          رمز را فراموش کرده‌ای؟ روی سرور اجرا کن:
+          <code dir="ltr" style="background:#edf2f7;border-radius:6px;padding:0.15rem 0.5rem">node reset-admin-password.js "رمز_جدید"</code>
+        </div></div>
       </div>
 
       <div id="adminBody" style="display: none">
@@ -162,10 +167,10 @@
 
     <div class="settings-toast" id="admToast"></div>
 
-    <script src="js/script.js?v=11.32"></script>
-    <script src="js/auth.js?v=11.32"></script>
-    <script src="js/articles-data.js?v=11.32"></script>
-    <script src="js/lessons-data.js?v=11.32"></script>
+    <script src="js/script.js?v=11.36"></script>
+    <script src="js/auth.js?v=11.36"></script>
+    <script src="js/articles-data.js?v=11.36"></script>
+    <script src="js/lessons-data.js?v=11.36"></script>
     <script>
       (function () {
         "use strict";

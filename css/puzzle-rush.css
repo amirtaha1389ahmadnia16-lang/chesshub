@@ -53,9 +53,7 @@
   background: var(--accent);
   color: white;
   border-color: var(--accent-dark);
-  box-shadow:
-    0 4px 0 var(--accent-dark),
-    0 4px 12px rgba(49, 130, 206, 0.3);
+  box-shadow: 0 4px 12px -6px rgba(37, 99, 235, 0.5);
 }
 
 .mode-btn.active i {
@@ -225,23 +223,19 @@
   background: var(--accent);
   color: white;
   border: 1px solid var(--accent-dark);
-  box-shadow:
-    0 4px 0 var(--accent-dark),
-    0 4px 12px rgba(49, 130, 206, 0.3);
+  box-shadow: 0 4px 12px -6px rgba(37, 99, 235, 0.5);
 }
 
 .btn-primary:hover {
   background: #4299e1;
   border-color: var(--accent-dark);
   transform: translateY(-1px);
-  box-shadow:
-    0 5px 0 var(--accent-dark),
-    0 6px 15px rgba(49, 130, 206, 0.4);
+  box-shadow: 0 6px 15px rgba(49, 130, 206, 0.4);
 }
 
 .btn-primary:active {
-  transform: translateY(3px);
-  box-shadow: 0 1px 0 var(--accent-dark);
+  transform: scale(0.98);
+  box-shadow: 0 3px 10px -6px rgba(37, 99, 235, 0.5);
 }
 
 /* ----- پیام‌های سیستم ----- */

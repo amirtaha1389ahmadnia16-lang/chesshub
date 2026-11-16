@@ -407,14 +407,14 @@
   cursor: pointer;
   transition: var(--transition-smooth);
   font-family: "Vazir";
-  box-shadow: 0 3px 0 var(--accent-dark);
+  box-shadow: 0 3px 10px -6px rgba(37, 99, 235, 0.5);
 }
 .lesson-footer .btn-view:hover {
   background: #4299e1;
 }
 .lesson-footer .btn-view:active {
-  transform: translateY(2px);
-  box-shadow: 0 1px 0 var(--accent-dark);
+  transform: scale(0.98);
+  box-shadow: 0 3px 10px -6px rgba(37, 99, 235, 0.5);
 }
 
 .no-result {
@@ -559,7 +559,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  box-shadow: 0 3px 0 var(--accent-dark);
+  box-shadow: 0 3px 10px -6px rgba(37, 99, 235, 0.5);
   margin-bottom: 1.5rem;
   transition: var(--transition-smooth);
 }
@@ -567,8 +567,8 @@
   background: #4299e1;
 }
 .lesson-viewer .viewer-edit-btn:active {
-  transform: translateY(2px);
-  box-shadow: 0 1px 0 var(--accent-dark);
+  transform: scale(0.98);
+  box-shadow: 0 3px 10px -6px rgba(37, 99, 235, 0.5);
 }
 
 /* ردیف دکمه‌های مدیریت درس (ویرایش/حذف) — فقط برای نویسنده‌ی همان درس */
@@ -586,7 +586,7 @@
   background: #e53e3e;
   color: #ffffff;
   border: 1px solid #c53030;
-  box-shadow: 0 3px 0 #c53030;
+  box-shadow: 0 3px 10px -6px rgba(197, 48, 48, 0.5);
   padding: 0.5rem 1.2rem;
   border-radius: var(--radius-sm);
   font-family: "Vazir";
@@ -602,8 +602,8 @@
   background: #c53030;
 }
 .lesson-viewer .viewer-del-btn:active {
-  transform: translateY(2px);
-  box-shadow: 0 1px 0 #c53030;
+  transform: scale(0.98);
+  box-shadow: 0 3px 10px -6px rgba(197, 48, 48, 0.5);
 }
 
 .lesson-viewer h3 {
@@ -713,14 +713,14 @@
   display: block;
   width: fit-content;
   font-family: "Vazir";
-  box-shadow: 0 3px 0 #c53030;
+  box-shadow: 0 3px 10px -6px rgba(197, 48, 48, 0.5);
 }
 .lesson-viewer .close-modal-btn:hover {
   background: #fc8181;
 }
 .lesson-viewer .close-modal-btn:active {
-  transform: translateY(2px);
-  box-shadow: 0 1px 0 #c53030;
+  transform: scale(0.98);
+  box-shadow: 0 3px 10px -6px rgba(197, 48, 48, 0.5);
 }
 
 /* ============================================

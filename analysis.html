@@ -6,12 +6,13 @@
     <meta name="description" content="تخته آنالیز ChessHub — تحلیل زنده با انجین Stockfish، سه خط برتر، درخت واریانت‌ها و کتاب گشایش‌های استادان" />
     <title>ChessHub | آنالیز</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%E2%99%9B%3C/text%3E%3C/svg%3E" />
-    <link rel="stylesheet" href="css/theme.css?v=11.31" />
+    <link rel="stylesheet" href="css/theme.css?v=11.36" />
     <link rel="stylesheet" href="lib/fontawesome/all.min.css" />
     <link href="fonts/vazir/font-face.css" rel="stylesheet" />
-    <link rel="stylesheet" href="css/style.css?v=11.31" />
-    <link rel="stylesheet" href="lib/chessground/chessground.base.css?v=11.31" />
-    <link rel="stylesheet" href="css/analysis.css?v=11.31" />
+    <link rel="stylesheet" href="css/style.css?v=11.36" />
+    <link rel="stylesheet" href="css/gamereview.css?v=11.36" />
+    <link rel="stylesheet" href="lib/chessground/chessground.base.css?v=11.36" />
+    <link rel="stylesheet" href="css/analysis.css?v=11.36" />
     <script src="lib/chess.min.js"></script>
   </head>
   <body>
@@ -153,11 +154,12 @@
 
     <div class="settings-toast" id="settingsToast"></div>
 
-    <script src="js/script.js?v=11.31"></script>
-    <script src="js/profile.js?v=11.31"></script>
-    <script src="js/auth.js?v=11.31"></script>
-    <script src="js/engine-core.js?v=11.31"></script>
-    <script type="module" src="lib/chessground/loader.js?v=11.31"></script>
+    <script src="js/script.js?v=11.36"></script>
+    <script src="js/profile.js?v=11.36"></script>
+    <script src="js/auth.js?v=11.36"></script>
+    <script src="js/engine-core.js?v=11.36"></script>
+    <script type="module" src="lib/chessground/loader.js?v=11.36"></script>
+    <script src="js/gamereview.js?v=11.36"></script>
     <script>
       (function () {
         "use strict";
@@ -1191,21 +1193,27 @@
             else { analysisEpoch++; stopAnalysis(); engineStatus("تحلیل زنده خاموش است"); }
           });
           $("reviewBtn").addEventListener("click", function () {
+            /* 🔑 v11.36 — مرور بازی داخل خودِ آنالیز (اورلی روشن) باز
+               می‌شود — بدون پرش به صفحهٔ مستقل */
             const pgn = buildPgn(true);
             if (countMoves(root) < 1) { toast("اول چند حرکت بازی کن یا PGN بارگذاری کن"); return; }
+            if (!window.GameReview) { toast("ماژول مرور بازی لود نشده — صفحه را رفرش کن"); return; }
             try {
-              sessionStorage.setItem("chesshub_review_game", JSON.stringify({
-                pgn: pgn,
+              const g = new Chess();
+              if (!g.load_pgn(pgn, { sloppy: true })) throw new Error("pgn");
+              const hist = g.history({ verbose: true });
+              if (!hist.length) throw new Error("empty");
+              GameReview.open({
+                moves: hist.map(function (m) { return m.from + m.to + (m.promotion || ""); }),
+                title: (gameMeta ? gameMeta.white : "سفید") + " در برابر " + (gameMeta ? gameMeta.black : "سیاه"),
+                subtitle: gameMeta && gameMeta.opening ? "گشایش: " + gameMeta.opening : "آنالیز ChessHub",
                 white: gameMeta ? gameMeta.white : "سفید",
                 black: gameMeta ? gameMeta.black : "سیاه",
-                date: gameMeta ? gameMeta.date : "",
-                eco: "",
-                opening: gameMeta ? gameMeta.opening : "",
                 result: gameOverResult(curNode().fen) || (gameMeta ? gameMeta.result : "*"),
-                playerName: gameMeta && gameMeta.event ? gameMeta.event : "آنالیز ChessHub",
-              }));
-            } catch (e) {}
-            window.location.href = "game-review.html";
+              });
+            } catch (e) {
+              toast("مرور بازی شروع نشد — PGN خوانده نشد");
+            }
           });
           $("anDlPgn").addEventListener("click", downloadPgn);
           $("anCopyPgn").addEventListener("click", function () {
@@ -1347,6 +1355,28 @@
               renderTree();
 
               bindEvents();
+
+              /* 🔑 v11.34 — گیرندهٔ «تحلیل در آنالیز»: بعد از آماده‌شدن کامل
+                 اپ (درخت + تخته)، PGN رسیده از مرور بازی/پایگاه لود می‌شود */
+              (function () {
+                try {
+                  if (new URLSearchParams(location.search).get("autopgn") === "1") {
+                    const handed = localStorage.getItem("chesshub_analyze_pgn");
+                    if (handed) {
+                      setTimeout(function () {
+                        try {
+                          const txt = String(handed || "");
+                          const safe = /\[Event\s/.test(txt)
+                            ? txt
+                            : '[Event "ChessHub"]\n[White "سفید"]\n[Black "سیاه"]\n[Result "*"]\n\n' + txt;
+                          loadPgnText(safe);
+                          localStorage.removeItem("chesshub_analyze_pgn");
+                        } catch (e) {}
+                      }, 250);
+                    }
+                  }
+                } catch (e) {}
+              })();
 
               /* 🔗 v11.27 — پشتیبانی از ?fen= در آدرس: دکمهٔ «تحلیل موقعیت»
                  پازل روزانه با همین پارامتر موقعیت را می‌فرستد */

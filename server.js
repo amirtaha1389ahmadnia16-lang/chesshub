@@ -501,12 +501,24 @@ function repairConflictedJSONText(text) {
   return union(a, b);
 }
 
+/* 🔑 v11.35 — سطل بازیافت: آیتم‌های حذف‌شده با کل محتوایشان در
+   data.trash[kind] نگه داشته می‌شوند تا «بازگردانی» واقعی ممکن باشد؛
+   «حذف دائمی» آنها را برای همیشه از فایل پاک می‌کند. */
+function normTrash(t) {
+  return Array.isArray(t) ? t : [];
+}
+function trashOf(data, kind) {
+  data.trash = data.trash && typeof data.trash === "object" && !Array.isArray(data.trash) ? data.trash : {};
+  if (!Array.isArray(data.trash[kind])) data.trash[kind] = [];
+  return data.trash[kind];
+}
+
 function readCommunity() {
   let raw = null;
   try {
     raw = fs.readFileSync(COMMUNITY_FILE, "utf8");
   } catch (e) {
-    return { lessons: [], openings: [], articles: [], deleted: {} };
+    return { lessons: [], openings: [], articles: [], deleted: {}, trash: {} };
   }
   try {
     const j = JSON.parse(raw);
@@ -515,6 +527,7 @@ function readCommunity() {
       openings: Array.isArray(j.openings) ? j.openings : [],
       articles: Array.isArray(j.articles) ? j.articles : [],
       deleted: j.deleted && typeof j.deleted === "object" && !Array.isArray(j.deleted) ? j.deleted : {},
+      trash: j.trash && typeof j.trash === "object" && !Array.isArray(j.trash) ? j.trash : {},
     };
   } catch (e) {
     // 🔧 ترمیم خودکار — فایل نشانگر تداخل گیت دارد یا خراب است
@@ -525,6 +538,7 @@ function readCommunity() {
         openings: Array.isArray(repaired.openings) ? repaired.openings : [],
         articles: Array.isArray(repaired.articles) ? repaired.articles : [],
         deleted: repaired.deleted && typeof repaired.deleted === "object" && !Array.isArray(repaired.deleted) ? repaired.deleted : {},
+        trash: repaired.trash && typeof repaired.trash === "object" && !Array.isArray(repaired.trash) ? repaired.trash : {},
       };
       try {
         fs.writeFileSync(COMMUNITY_FILE + ".tmp", JSON.stringify(fixed));
@@ -535,7 +549,7 @@ function readCommunity() {
       } catch (e2) {}
       return fixed;
     }
-    return { lessons: [], openings: [], articles: [], deleted: {} };
+    return { lessons: [], openings: [], articles: [], deleted: {}, trash: {} };
   }
 }
 
@@ -975,6 +989,49 @@ function handleAPI(req, res, pathname, query) {
     return sendJSON(res, 200, { ok: true, puzzle: list[index], meta: { index, total: list.length } });
   }
 
+  /* 🔑 v11.35 — پازل هوشمند: انتخابِ قطعیِ (deterministic) یک پازل از
+     استخرِ «موضوع‌های ضعیفِ کاربر» — حاصل روان‌شناسی خطاهای او در
+     پازل‌های قبل. چون seed شامل تاریخ است، کل روز همان یک پازل می‌ماند؛
+     و چون seed شامل دستگاهِ کاربر است، برای هر کاربر شخصی‌سازی می‌شود.
+     پارامترها: index (پایهٔ روز)، themes (ضعف‌ها با ویرگول)،
+     seed، maxRating (اختیاری — پازل‌های خیلی سخت کنار می‌روند). */
+  if (pathname === "/api/puzzle/smart") {
+    const list = loadPuzzles();
+    if (!list.length) {
+      return sendJSON(res, 503, { ok: false, error: "پازلی یافت نشد", detail: puzzleCache.error });
+    }
+    let index = parseInt(query.get("index"), 10);
+    if (!Number.isFinite(index)) index = 0;
+    index = ((index % list.length) + list.length) % list.length;
+    const rawThemes = String(query.get("themes") || "")
+      .split(",")
+      .map((t) => t.trim().toLowerCase())
+      .filter(Boolean)
+      .slice(0, 6);
+    const seed = String(query.get("seed") || "chesshub");
+    const maxRating = parseInt(query.get("maxRating"), 10);
+    let pool = list;
+    if (rawThemes.length) {
+      const matched = list.filter((p) =>
+        (p.themes || []).some((th) => rawThemes.indexOf(String(th).toLowerCase()) >= 0)
+      );
+      if (matched.length >= 5) pool = matched; // استخرِ خیلی کوچک → کل کتابخانه
+    }
+    if (Number.isFinite(maxRating) && maxRating > 400) {
+      const band = pool.filter((p) => !p.rating || p.rating <= maxRating + 150);
+      if (band.length >= 5) pool = band;
+    }
+    let h = 5381;
+    const key = seed + "|" + rawThemes.join(",") + "|" + index;
+    for (let i = 0; i < key.length; i++) h = ((h << 5) + h + key.charCodeAt(i)) | 0;
+    const pick = pool[Math.abs(h) % pool.length];
+    return sendJSON(res, 200, {
+      ok: true,
+      puzzle: pick,
+      meta: { index: list.indexOf(pick), total: list.length, adaptive: true, poolSize: pool.length },
+    });
+  }
+
   if (pathname === "/api/puzzles") {
     const list = loadPuzzles();
     return sendJSON(res, 200, {
@@ -1176,6 +1233,30 @@ function handleAPI(req, res, pathname, query) {
     return sendJSON(res, 200, { ok: true, overrides: readOverrides() });
   }
 
+  /* 🔑 v11.35 — فهرست سطل بازیافت برای پنل ادمین */
+  if (pathname === "/api/admin/trash") {
+    const adminSession = auth.verifyToken(auth.tokenFromReq(req));
+    if (!isAdminSession(adminSession)) {
+      return sendJSON(res, 403, { ok: false, error: "پنل سوپر ادمین فقط برای حساب AdminChessHub است", needAdmin: true });
+    }
+    const data = readCommunity();
+    const out = {};
+    ["lessons", "openings", "articles"].forEach(function (k) {
+      out[k] = trashOf(data, k).map(function (x) {
+        const it = x.item || {};
+        return {
+          id: it.id || "",
+          title: it.title || it.name || "—",
+          author: it.author || "",
+          kind: k,
+          deletedAt: x.deletedAt || 0,
+          by: x.by || "",
+        };
+      });
+    });
+    return sendJSON(res, 200, { ok: true, trash: out });
+  }
+
   if (pathname === "/api/admin/action") {
     if (req.method !== "POST") {
       return sendJSON(res, 405, { ok: false, error: "متد مجاز نیست" });
@@ -1198,7 +1279,7 @@ function handleAPI(req, res, pathname, query) {
         if (OVERRIDE_KINDS.indexOf(kind) < 0) {
           return sendJSON(res, 400, { ok: false, error: "نوع محتوا نامعتبر است" });
         }
-        if (["edit", "delete", "restore"].indexOf(action) < 0) {
+        if (["edit", "delete", "restore", "purge"].indexOf(action) < 0) {
           return sendJSON(res, 400, { ok: false, error: "عملیات نامعتبر است" });
         }
         if (!id) {
@@ -1213,17 +1294,44 @@ function handleAPI(req, res, pathname, query) {
             return sendJSON(res, 400, { ok: false, error: "نوع محتوا نامعتبر است" });
           }
           const idx = arr.findIndex(function (x) { return String(x.id) === id; });
-          if (action === "delete" || action === "edit") {
-            if (idx < 0) return sendJSON(res, 404, { ok: false, error: "اثر مورد نظر پیدا نشد" });
+          if ((action === "delete" || action === "edit") && idx < 0) {
+            return sendJSON(res, 404, { ok: false, error: "اثر مورد نظر پیدا نشد" });
           }
           if (action === "delete") {
-            const removed = arr[idx];
-            data.deleted = data.deleted && typeof data.deleted === "object" ? data.deleted : {};
+            /* 🔑 v11.35 — حذف نرم: کل اثر با محتوایش به سطل بازیافت
+               می‌رود و بعداً قابل بازگردانی است. */
+            const removed = arr.splice(idx, 1)[0];
+            trashOf(data, kind).push({ item: removed, deletedAt: Date.now(), by: ADMIN_NAME });
             data.deleted[id] = Date.now();
-            arr.splice(idx, 1);
             writeCommunity(data);
-            log(`🛡️ ادمین محتوای کاربر را حذف کرد (${kind}): «${(removed && (removed.title || removed.name)) || id}»`);
-            return sendJSON(res, 200, { ok: true, deleted: id });
+            log(`🛡️ ادمین محتوای کاربر را به سطل بازیافت برد (${kind}): «${(removed && (removed.title || removed.name)) || id}»`);
+            return sendJSON(res, 200, { ok: true, deleted: id, trashed: true });
+          }
+          if (action === "restore") {
+            /* 🔑 v11.35 — بازگردانی واقعی از سطل بازیافت */
+            const tr = trashOf(data, kind);
+            const ti = tr.findIndex(function (x) { return x && x.item && String(x.item.id) === id; });
+            if (ti < 0) return sendJSON(res, 404, { ok: false, error: "این اثر در سطل بازیافت نیست" });
+            const rec = tr.splice(ti, 1)[0];
+            arr.push(rec.item);
+            delete data.deleted[id];
+            writeCommunity(data);
+            log(`🛡️ ادمین محتوای حذف‌شده را بازگرداند (${kind}): «${(rec.item && (rec.item.title || rec.item.name)) || id}»`);
+            return sendJSON(res, 200, { ok: true, restored: id, item: rec.item });
+          }
+          if (action === "purge") {
+            /* 🔑 v11.35 — حذف دائمی: اثر واقعاً از کدها و دیتا پاک می‌شود */
+            const tr = trashOf(data, kind);
+            const ti = tr.findIndex(function (x) { return x && x.item && String(x.item.id) === id; });
+            let label = id;
+            if (ti >= 0) {
+              label = (tr[ti].item && (tr[ti].item.title || tr[ti].item.name)) || id;
+              tr.splice(ti, 1);
+            }
+            delete data.deleted[id];
+            writeCommunity(data);
+            log(`🛡️ ادمین محتوا را برای همیشه پاک کرد (${kind}): «${label}»`);
+            return sendJSON(res, 200, { ok: true, purged: id });
           }
           if (action === "edit") {
             const merged = Object.assign({}, arr[idx], item || {});
@@ -1235,10 +1343,6 @@ function handleAPI(req, res, pathname, query) {
             writeCommunity(data);
             log(`🛡️ ادمین محتوای کاربر را ویرایش کرد (${kind}): «${clean.title || clean.name || id}»`);
             return sendJSON(res, 200, { ok: true, item: arr[idx] });
-          }
-          if (action === "restore") {
-            // بازگرداندن اثر حذف‌شده از تومب‌سنگ ممکن نیست (اصل اثر پاک شده)
-            return sendJSON(res, 400, { ok: false, error: "بازگردانی محتوای حذف‌شدهٔ کاربر پشتیبانی نمی‌شود" });
           }
         }
 

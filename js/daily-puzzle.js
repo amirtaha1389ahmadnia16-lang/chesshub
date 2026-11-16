@@ -31,6 +31,82 @@
 
   const HISTORY_KEY = "chesshub_daily_history";
 
+  /* ═══════════ 🔑 v11.35 — موتور روان‌شناختی پازل (پشت صحنه) ═══════════
+     خطاهای کاربر روی هر «موضوع پازل» (تاکتیک لایچس) ثبت می‌شود؛ نرخ خطا
+     با وزنِ تازگی محاسبه و موضوع‌های ضعیف پیدا می‌شوند. پازلِ «امروز» از
+     استخرِ همان موضوع‌های ضعیف انتخاب می‌شود — قطعی و ثابت در طول روز،
+     شخصی برای هر دستگاه. کاربر هیچ چیزی نمی‌بیند؛ فقط پازل حل می‌کند. */
+  const SKILL_KEY = "chesshub_puzzle_skill";
+  function skill() {
+    try {
+      const s = JSON.parse(localStorage.getItem(SKILL_KEY));
+      if (s && s.themes && s.total) return s;
+    } catch (e) {}
+    return { themes: {}, total: { seen: 0, wrong: 0, solved: 0, hint: 0 } };
+  }
+  function saveSkill(s) {
+    try { localStorage.setItem(SKILL_KEY, JSON.stringify(s)); } catch (e) {}
+  }
+  function deviceId() {
+    let id = null;
+    try { id = localStorage.getItem("chesshub_device_id"); } catch (e) {}
+    if (!id) {
+      id = "d" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+      try { localStorage.setItem("chesshub_device_id", id); } catch (e) {}
+    }
+    return id;
+  }
+  function recordSkill(kind) {
+    if (!puzzle || !puzzle.themes || !puzzle.themes.length) return;
+    const s = skill();
+    const bump = function (o, k) { o[k] = (o[k] || 0) + 1; };
+    bump(s.total, kind);
+    s.total.lastAt = Date.now();
+    puzzle.themes.slice(0, 4).forEach(function (th) {
+      const t = s.themes[th] = s.themes[th] || { seen: 0, wrong: 0, solved: 0, hint: 0 };
+      bump(t, kind);
+      t.lastAt = Date.now();
+    });
+    saveSkill(s);
+  }
+  let lastSeenStamp = "";
+  function recordSeenOnce() {
+    const stamp = currentKey + ":" + (puzzle && puzzle.puzzleId || "");
+    if (stamp === lastSeenStamp) return;
+    lastSeenStamp = stamp;
+    recordSkill("seen");
+    if (puzzle && puzzle.rating) rememberRating(puzzle.rating);
+  }
+  function weakThemes() {
+    const s = skill();
+    if ((s.total.seen || 0) < 3) return []; // دادهٔ کافی نیست → انتخاب عادی
+    const now = Date.now();
+    const scored = Object.keys(s.themes).map(function (th) {
+      const t = s.themes[th];
+      const seen = t.seen || 0;
+      if (seen < 2) return null;
+      const wrongRate = (t.wrong || 0) / seen;
+      const fresh = Math.exp(-(((now - (t.lastAt || now)) / 864e5)) * 0.35); // وزن تازگی
+      return { th: th, score: wrongRate * seen * fresh * (1 + (t.hint || 0) * 0.15) };
+    }).filter(Boolean).sort(function (a, b) { return b.score - a.score; });
+    return scored.slice(0, 3).filter(function (x) { return x.score > 0.15; }).map(function (x) { return x.th; });
+  }
+  function rememberRating(r) {
+    try {
+      const h = JSON.parse(localStorage.getItem("chesshub_daily_seen_ratings") || "[]");
+      if (r) { h.push(Number(r) || 0); if (h.length > 20) h.shift(); }
+      localStorage.setItem("chesshub_daily_seen_ratings", JSON.stringify(h));
+    } catch (e) {}
+  }
+  function maxRatingFor() {
+    try {
+      const h = JSON.parse(localStorage.getItem("chesshub_daily_seen_ratings") || "[]");
+      if (!h.length) return null;
+      const avg = h.reduce(function (a, b) { return a + b; }, 0) / h.length;
+      return Math.round(avg * 1.15);
+    } catch (e) { return null; }
+  }
+
   function todayJ() {
     const now = new Date();
     return Jalali.toJalaali(now.getFullYear(), now.getMonth() + 1, now.getDate());
@@ -94,7 +170,21 @@
     setMessage("در حال آماده‌سازی پازل…", "info");
     updateProgress();
     $("dpMeta").innerHTML = '<span class="chip"><i class="fas fa-spinner fa-pulse"></i> بارگذاری…</span>';
-    fetch("api/puzzle?index=" + idx)
+    /* 🔑 v11.35 — پازلِ «امروز» اگر پروفایل ضعف داشته باشد از استخرِ
+       موضوع‌های ضعیف انتخاب می‌شود؛ روزهای گذشتهٔ تقویم همیشه با پازل
+       اصلی همان روز می‌آیند تا تاریخچه‌ی همه یکسان بماند. */
+    const isToday = currentKey === Jalali.key(todayJ());
+    const weak = isToday ? weakThemes() : [];
+    let url = "api/puzzle?index=" + idx;
+    if (weak.length) {
+      const seed = deviceId() + "|" + currentKey;
+      url = "api/puzzle/smart?index=" + idx +
+        "&themes=" + encodeURIComponent(weak.join(",")) +
+        "&seed=" + encodeURIComponent(seed);
+      const mr = maxRatingFor();
+      if (mr) url += "&maxRating=" + mr;
+    }
+    fetch(url)
       .then(function (r) { if (!r.ok) throw new Error("http " + r.status); return r.json(); })
       .then(function (data) {
         if (!data.ok || !data.puzzle) throw new Error(data.error || "پازلی یافت نشد");
@@ -130,6 +220,7 @@
       chips.push('<span class="chip"><i class="fas fa-tags"></i> ' + puzzle.themes.slice(0, 3).join("، ") + "</span>");
     }
     $("dpMeta").innerHTML = chips.join("");
+    recordSeenOnce(); // 🔑 v11.35 — ثبت «دیده‌شدن» برای پروفایل ضعف‌ها
 
     // حرکت اول حریف خودکار اجرا می‌شود
     if (solMoves.length) {
@@ -168,6 +259,7 @@
         let m = tryMove(promo || "q");
         if (!m && promo) m = tryMove("q");
         if (!m) {
+          recordSkill("wrong"); // 🔑 v11.35 — ثبت خطا روی موضوع‌های این پازل
           setMessage("حرکت درست نیست — دوباره امتحان کن", "err");
           return false;
         }
@@ -187,6 +279,7 @@
         updateProgress();
         if (step >= solMoves.length) {
           solved = true;
+          recordSkill(hintUsed ? "hint" : "solved"); // 🔑 v11.35 — ثبت موفقیت
           markSolved(currentKey);
           $("dpSolved").classList.add("show");
           setMessage("عالی بود!", "ok");
